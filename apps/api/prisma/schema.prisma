@@ -104,8 +104,14 @@ model VendorProfile {
   businessName       String
   slug               String                   @unique
   description        String?
+  contactPhone       String?
+  website            String?
   baseLocation       String?
+  serviceAreas       String[]                 @default([])
   verificationStatus VendorVerificationStatus @default(DRAFT)
+  submittedAt        DateTime?
+  reviewedAt         DateTime?
+  rejectionReason    String?
   user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories         VendorCategory[]
   packages           ServicePackage[]
