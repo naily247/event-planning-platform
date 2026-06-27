@@ -5,9 +5,13 @@ import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
   getVendorOnboardingProfileHandler,
+  updateVendorCategoriesHandler,
   updateVendorOnboardingProfileHandler,
 } from './vendor.controller.js';
-import { updateVendorProfileSchema } from './vendor.schemas.js';
+import {
+  updateVendorCategoriesSchema,
+  updateVendorProfileSchema,
+} from './vendor.schemas.js';
 
 export const vendorRouter = Router();
 
@@ -34,4 +38,12 @@ vendorRouter.patch(
   authorize(UserRole.VENDOR),
   validate(updateVendorProfileSchema),
   updateVendorOnboardingProfileHandler,
+);
+
+vendorRouter.put(
+  '/me/onboarding/categories',
+  requireAuth,
+  authorize(UserRole.VENDOR),
+  validate(updateVendorCategoriesSchema),
+  updateVendorCategoriesHandler,
 );
