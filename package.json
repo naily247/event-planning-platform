@@ -1,0 +1,23 @@
+{
+  "name": "event-platform-foundation",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @event-platform/api\" \"npm run dev -w @event-platform/web\"",
+    "build": "npm run build -w @event-platform/shared && npm run build -w @event-platform/api && npm run build -w @event-platform/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.5.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

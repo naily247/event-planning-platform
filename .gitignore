@@ -1,0 +1,21 @@
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.log
+
+apps/api/prisma/dev.db
+
+apps/web/vite.config.js
+apps/web/vite.config.d.ts
+
+# Local-only reference files
+docs/
+.github/workflows/ci.yml
