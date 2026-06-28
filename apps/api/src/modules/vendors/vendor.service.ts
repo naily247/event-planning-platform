@@ -266,3 +266,64 @@ export const updateVendorCategories = async (
     completion: calculateProfileCompletion(updatedVendor),
   };
 };
+
+export const submitVendorOnboardingProfile = async (
+  userId: string,
+) => {
+  const vendor = await prisma.vendorProfile.findUnique({
+    where: { userId },
+    select: vendorProfileSelect,
+  });
+
+  if (!vendor) {
+    throw new AppError(
+      404,
+      'Vendor profile not found',
+      'VENDOR_PROFILE_NOT_FOUND',
+    );
+  }
+
+  if (
+    vendor.verificationStatus !== VendorVerificationStatus.DRAFT
+  ) {
+    throw new AppError(
+      409,
+      'Only a draft vendor profile can be submitted for review',
+      'VENDOR_PROFILE_NOT_SUBMITTABLE',
+    );
+  }
+
+  const completion = calculateProfileCompletion(vendor);
+
+  if (completion.percentage !== 100) {
+    const incompleteFields = Object.entries(completion.fields)
+      .filter(([, completed]) => !completed)
+      .map(([field]) => field);
+
+    throw new AppError(
+      400,
+      'Complete all required onboarding fields before submitting',
+      'VENDOR_PROFILE_INCOMPLETE',
+      {
+        completion,
+        incompleteFields,
+      },
+    );
+  }
+
+  const submittedVendor = await prisma.vendorProfile.update({
+    where: { userId },
+    data: {
+      verificationStatus: VendorVerificationStatus.PENDING,
+      submittedAt: new Date(),
+      reviewedAt: null,
+      rejectionReason: null,
+    },
+    select: vendorProfileSelect,
+  });
+
+  return {
+    profile: formatVendorProfile(submittedVendor),
+    completion: calculateProfileCompletion(submittedVendor),
+  };
+};

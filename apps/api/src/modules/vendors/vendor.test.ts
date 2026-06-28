@@ -55,6 +55,31 @@ const getCategoryBySlug = async (slug: string) => {
   return category;
 };
 
+const completeVendorOnboarding = async (
+  accessToken: string,
+) => {
+  const photography = await getCategoryBySlug('photography');
+
+  await request(app)
+    .patch('/api/v1/vendors/me/onboarding')
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send({
+      description:
+        'We provide photography and event coordination services for weddings and private celebrations.',
+      contactPhone: '+94771234567',
+      website: 'https://goldenhourevents.lk',
+      baseLocation: 'Colombo',
+      serviceAreas: ['Colombo', 'Gampaha', 'Kandy'],
+    });
+
+  await request(app)
+    .put('/api/v1/vendors/me/onboarding/categories')
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send({
+      categoryIds: [photography.id],
+    });
+};
+
 beforeEach(async () => {
   await clearTestUsers();
 });
@@ -454,6 +479,193 @@ describe('Vendor onboarding API', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .send({
           categoryIds: [photography.id],
+        });
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_PROFILE_LOCKED',
+      );
+    });
+  });
+
+  describe('POST /api/v1/vendors/me/onboarding/submit', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).post(
+        '/api/v1/vendors/me/onboarding/submit',
+      );
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated customers', async () => {
+      const registrationResponse = await request(app)
+        .post('/api/v1/auth/register/customer')
+        .send(customerPayload);
+
+      const accessToken =
+        registrationResponse.body.data.accessToken;
+
+      const response = await request(app)
+        .post('/api/v1/vendors/me/onboarding/submit')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects an incomplete vendor profile', async () => {
+      const registrationResponse = await registerTestVendor();
+
+      const accessToken =
+        registrationResponse.body.data.accessToken;
+
+      const response = await request(app)
+        .post('/api/v1/vendors/me/onboarding/submit')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_PROFILE_INCOMPLETE',
+      );
+
+      expect(
+        response.body.error.details.incompleteFields,
+      ).toEqual([
+        'description',
+        'contactPhone',
+        'baseLocation',
+        'serviceAreas',
+        'categories',
+      ]);
+
+      expect(
+        response.body.error.details.completion,
+      ).toMatchObject({
+        percentage: 17,
+        completedFields: 1,
+        totalFields: 6,
+      });
+    });
+
+    it('submits a complete vendor profile for review', async () => {
+      const registrationResponse = await registerTestVendor();
+
+      const accessToken =
+        registrationResponse.body.data.accessToken;
+
+      await completeVendorOnboarding(accessToken);
+
+      const response = await request(app)
+        .post('/api/v1/vendors/me/onboarding/submit')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.profile).toMatchObject({
+        businessName: 'Golden Hour Events',
+        verificationStatus: 'PENDING',
+        reviewedAt: null,
+        rejectionReason: null,
+      });
+
+      expect(
+        response.body.data.profile.submittedAt,
+      ).toEqual(expect.any(String));
+
+      expect(response.body.data.completion).toMatchObject({
+        percentage: 100,
+        completedFields: 6,
+        totalFields: 6,
+      });
+
+      const storedVendor =
+        await prisma.vendorProfile.findUnique({
+          where: {
+            userId: registrationResponse.body.data.user.id,
+          },
+        });
+
+      expect(storedVendor?.verificationStatus).toBe(
+        VendorVerificationStatus.PENDING,
+      );
+
+      expect(storedVendor?.submittedAt).toBeInstanceOf(Date);
+    });
+
+    it('rejects submitting the same profile twice', async () => {
+      const registrationResponse = await registerTestVendor();
+
+      const accessToken =
+        registrationResponse.body.data.accessToken;
+
+      await completeVendorOnboarding(accessToken);
+
+      await request(app)
+        .post('/api/v1/vendors/me/onboarding/submit')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      const response = await request(app)
+        .post('/api/v1/vendors/me/onboarding/submit')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_PROFILE_NOT_SUBMITTABLE',
+      );
+    });
+
+    it('locks profile editing after submission', async () => {
+      const registrationResponse = await registerTestVendor();
+
+      const accessToken =
+        registrationResponse.body.data.accessToken;
+
+      await completeVendorOnboarding(accessToken);
+
+      await request(app)
+        .post('/api/v1/vendors/me/onboarding/submit')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      const response = await request(app)
+        .patch('/api/v1/vendors/me/onboarding')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          baseLocation: 'Kandy',
+        });
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_PROFILE_LOCKED',
+      );
+    });
+
+    it('locks category editing after submission', async () => {
+      const registrationResponse = await registerTestVendor();
+
+      const accessToken =
+        registrationResponse.body.data.accessToken;
+
+      await completeVendorOnboarding(accessToken);
+
+      await request(app)
+        .post('/api/v1/vendors/me/onboarding/submit')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      const catering = await getCategoryBySlug('catering');
+
+      const response = await request(app)
+        .put('/api/v1/vendors/me/onboarding/categories')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          categoryIds: [catering.id],
         });
 
       expect(response.status).toBe(409);

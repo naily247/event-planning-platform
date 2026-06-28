@@ -8,6 +8,7 @@ import {
   getVendorOnboardingProfile,
   updateVendorCategories,
   updateVendorOnboardingProfile,
+  submitVendorOnboardingProfile,
 } from './vendor.service.js';
 
 export const getVendorOnboardingProfileHandler: RequestHandler =
@@ -40,6 +41,18 @@ export const updateVendorCategoriesHandler: RequestHandler =
     const result = await updateVendorCategories(
       req.auth!.userId,
       req.body as UpdateVendorCategoriesInput,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  });
+
+  export const submitVendorOnboardingProfileHandler: RequestHandler =
+  asyncHandler(async (req, res) => {
+    const result = await submitVendorOnboardingProfile(
+      req.auth!.userId,
     );
 
     res.status(200).json({

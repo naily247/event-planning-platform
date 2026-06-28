@@ -7,6 +7,7 @@ import {
   getVendorOnboardingProfileHandler,
   updateVendorCategoriesHandler,
   updateVendorOnboardingProfileHandler,
+  submitVendorOnboardingProfileHandler,
 } from './vendor.controller.js';
 import {
   updateVendorCategoriesSchema,
@@ -24,6 +25,7 @@ vendorRouter.get('/', (_req, res) =>
     },
   }),
 );
+
 
 vendorRouter.get(
   '/me/onboarding',
@@ -46,4 +48,11 @@ vendorRouter.put(
   authorize(UserRole.VENDOR),
   validate(updateVendorCategoriesSchema),
   updateVendorCategoriesHandler,
+);
+
+vendorRouter.post(
+  '/me/onboarding/submit',
+  requireAuth,
+  authorize(UserRole.VENDOR),
+  submitVendorOnboardingProfileHandler,
 );
