@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { AccountStatus, UserRole, VendorVerificationStatus } from '@prisma/client';
+import { AccountStatus, Prisma, UserRole, VendorVerificationStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -34,6 +34,7 @@ const createDiscoveryVendor = async ({
   serviceAreas,
   verificationStatus,
   categorySlug,
+  packages = [],
 }: {
   email: string;
   businessName: string;
@@ -43,6 +44,12 @@ const createDiscoveryVendor = async ({
   serviceAreas: string[];
   verificationStatus: VendorVerificationStatus;
   categorySlug: string;
+  packages?: Array<{
+    title: string;
+    description: string;
+    basePrice: string;
+    isActive: boolean;
+  }>;
 }) => {
   const category = await prisma.serviceCategory.findUnique({
     where: {
@@ -81,6 +88,15 @@ const createDiscoveryVendor = async ({
               categoryId: category.id,
             },
           },
+          packages: {
+            create: packages.map((servicePackage) => ({
+              categoryId: category.id,
+              title: servicePackage.title,
+              description: servicePackage.description,
+              basePrice: new Prisma.Decimal(servicePackage.basePrice),
+              isActive: servicePackage.isActive,
+            })),
+          },
         },
       },
     },
@@ -102,6 +118,20 @@ beforeEach(async () => {
     serviceAreas: ['Colombo', 'Kandy'],
     verificationStatus: VendorVerificationStatus.APPROVED,
     categorySlug: 'photography',
+    packages: [
+      {
+        title: 'Classic Wedding Photography',
+        description: 'Complete wedding photography coverage with edited digital photographs.',
+        basePrice: '85000.00',
+        isActive: true,
+      },
+      {
+        title: 'Private Draft Photography Package',
+        description: 'This inactive package must not appear on the public vendor page.',
+        basePrice: '45000.00',
+        isActive: false,
+      },
+    ],
   });
 
   await createDiscoveryVendor({
@@ -113,6 +143,15 @@ beforeEach(async () => {
     serviceAreas: ['Kandy', 'Matale'],
     verificationStatus: VendorVerificationStatus.APPROVED,
     categorySlug: 'catering',
+    packages: [
+      {
+        title: 'Premium Wedding Buffet',
+        description:
+          'Premium wedding buffet service with a customizable menu and professional staff.',
+        basePrice: '150000.00',
+        isActive: true,
+      },
+    ],
   });
 
   await createDiscoveryVendor({
@@ -124,6 +163,14 @@ beforeEach(async () => {
     serviceAreas: ['Colombo'],
     verificationStatus: VendorVerificationStatus.PENDING,
     categorySlug: 'photography',
+    packages: [
+      {
+        title: 'Pending Vendor Photography Package',
+        description: 'This package belongs to a pending vendor and must remain hidden.',
+        basePrice: '65000.00',
+        isActive: true,
+      },
+    ],
   });
 
   await createDiscoveryVendor({
@@ -169,6 +216,17 @@ describe('Public vendor discovery API', () => {
         hasNextPage: false,
         hasPreviousPage: false,
       });
+    });
+
+    it('does not include packages in vendor list responses', async () => {
+      const response = await request(app).get('/api/v1/vendors');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(2);
+
+      for (const vendor of response.body.data) {
+        expect(vendor).not.toHaveProperty('packages');
+      }
     });
 
     it('filters vendors by search text', async () => {
@@ -253,6 +311,47 @@ describe('Public vendor discovery API', () => {
       expect(response.body.data).not.toHaveProperty('rejectionReason');
       expect(response.body.data).not.toHaveProperty('submittedAt');
       expect(response.body.data).not.toHaveProperty('reviewedAt');
+    });
+
+    it('includes only active service packages', async () => {
+      const response = await request(app).get('/api/v1/vendors/golden-lens-photography');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.packages).toHaveLength(1);
+
+      expect(response.body.data.packages[0]).toMatchObject({
+        title: 'Classic Wedding Photography',
+        description: 'Complete wedding photography coverage with edited digital photographs.',
+        basePrice: '85000.00',
+        category: {
+          name: 'Photography',
+          slug: 'photography',
+        },
+      });
+
+      const packageTitles = response.body.data.packages.map(
+        (servicePackage: { title: string }) => servicePackage.title,
+      );
+
+      expect(packageTitles).not.toContain('Private Draft Photography Package');
+    });
+
+    it('returns an empty package list when an approved vendor has no active packages', async () => {
+      await prisma.servicePackage.updateMany({
+        where: {
+          vendor: {
+            slug: 'royal-feast-catering',
+          },
+        },
+        data: {
+          isActive: false,
+        },
+      });
+
+      const response = await request(app).get('/api/v1/vendors/royal-feast-catering');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.packages).toEqual([]);
     });
 
     it('hides pending vendors', async () => {

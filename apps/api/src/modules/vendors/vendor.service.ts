@@ -328,6 +328,33 @@ const publicVendorSelect = {
   updatedAt: true,
 } as const;
 
+const publicVendorDetailSelect = {
+  ...publicVendorSelect,
+  packages: {
+    where: {
+      isActive: true,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      basePrice: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  },
+} as const;
+
 const getPublicVendorOrderBy = (
   sort: GetPublicVendorsQuery['sort'],
 ): Prisma.VendorProfileOrderByWithRelationInput => {
@@ -438,12 +465,18 @@ export const getPublicVendorBySlug = async (slug: string) => {
       slug,
       verificationStatus: VendorVerificationStatus.APPROVED,
     },
-    select: publicVendorSelect,
+    select: publicVendorDetailSelect,
   });
 
   if (!vendor) {
     throw new AppError(404, 'Vendor not found', 'PUBLIC_VENDOR_NOT_FOUND');
   }
 
-  return formatVendorProfile(vendor);
+  return {
+    ...formatVendorProfile(vendor),
+    packages: vendor.packages.map((servicePackage) => ({
+      ...servicePackage,
+      basePrice: servicePackage.basePrice?.toFixed(2) ?? null,
+    })),
+  };
 };
