@@ -147,6 +147,8 @@ model ServicePackage {
   description       String?
   basePrice         Decimal?           @db.Decimal(12, 2)
   isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   vendor            VendorProfile      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   category          ServiceCategory    @relation(fields: [categoryId], references: [id])
   quotationRequests QuotationRequest[]
