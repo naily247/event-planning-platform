@@ -8,24 +8,19 @@ import {
   updateVendorCategoriesHandler,
   updateVendorOnboardingProfileHandler,
   submitVendorOnboardingProfileHandler,
+  getPublicVendorBySlugHandler,
+  getPublicVendorsHandler,
 } from './vendor.controller.js';
 import {
   updateVendorCategoriesSchema,
   updateVendorProfileSchema,
+  getPublicVendorBySlugSchema,
+  getPublicVendorsSchema,
 } from './vendor.schemas.js';
 
 export const vendorRouter = Router();
 
-vendorRouter.get('/', (_req, res) =>
-  res.json({
-    success: true,
-    data: [],
-    meta: {
-      note: 'Public vendor discovery foundation.',
-    },
-  }),
-);
-
+vendorRouter.get('/', validate(getPublicVendorsSchema), getPublicVendorsHandler);
 
 vendorRouter.get(
   '/me/onboarding',
@@ -56,3 +51,5 @@ vendorRouter.post(
   authorize(UserRole.VENDOR),
   submitVendorOnboardingProfileHandler,
 );
+
+vendorRouter.get('/:slug', validate(getPublicVendorBySlugSchema), getPublicVendorBySlugHandler);

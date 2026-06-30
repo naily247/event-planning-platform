@@ -1,9 +1,10 @@
-import { VendorVerificationStatus } from '@prisma/client';
+import { VendorVerificationStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   UpdateVendorCategoriesInput,
   UpdateVendorProfileInput,
+  GetPublicVendorsQuery,
 } from './vendor.schemas.js';
 
 const vendorProfileSelect = {
@@ -57,9 +58,7 @@ type VendorProfileDetails = {
 const calculateProfileCompletion = (vendor: VendorProfileDetails) => {
   const fields = {
     businessName: vendor.businessName.trim().length >= 2,
-    description: Boolean(
-      vendor.description && vendor.description.trim().length >= 20,
-    ),
+    description: Boolean(vendor.description && vendor.description.trim().length >= 20),
     contactPhone: Boolean(vendor.contactPhone),
     baseLocation: Boolean(vendor.baseLocation),
     serviceAreas: vendor.serviceAreas.length > 0,
@@ -94,9 +93,7 @@ const formatVendorProfile = <
   categories: vendor.categories.map(({ category }) => category),
 });
 
-const ensureVendorProfileCanBeEdited = (
-  verificationStatus: VendorVerificationStatus,
-) => {
+const ensureVendorProfileCanBeEdited = (verificationStatus: VendorVerificationStatus) => {
   if (
     verificationStatus === VendorVerificationStatus.PENDING ||
     verificationStatus === VendorVerificationStatus.APPROVED
@@ -116,11 +113,7 @@ export const getVendorOnboardingProfile = async (userId: string) => {
   });
 
   if (!vendor) {
-    throw new AppError(
-      404,
-      'Vendor profile not found',
-      'VENDOR_PROFILE_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor profile not found', 'VENDOR_PROFILE_NOT_FOUND');
   }
 
   return {
@@ -142,18 +135,13 @@ export const updateVendorOnboardingProfile = async (
   });
 
   if (!existingVendor) {
-    throw new AppError(
-      404,
-      'Vendor profile not found',
-      'VENDOR_PROFILE_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor profile not found', 'VENDOR_PROFILE_NOT_FOUND');
   }
 
   ensureVendorProfileCanBeEdited(existingVendor.verificationStatus);
 
   const returningFromRejection =
-    existingVendor.verificationStatus ===
-    VendorVerificationStatus.REJECTED;
+    existingVendor.verificationStatus === VendorVerificationStatus.REJECTED;
 
   const vendor = await prisma.vendorProfile.update({
     where: { userId },
@@ -190,11 +178,7 @@ export const updateVendorCategories = async (
   });
 
   if (!vendor) {
-    throw new AppError(
-      404,
-      'Vendor profile not found',
-      'VENDOR_PROFILE_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor profile not found', 'VENDOR_PROFILE_NOT_FOUND');
   }
 
   ensureVendorProfileCanBeEdited(vendor.verificationStatus);
@@ -218,8 +202,7 @@ export const updateVendorCategories = async (
     );
   }
 
-  const returningFromRejection =
-    vendor.verificationStatus === VendorVerificationStatus.REJECTED;
+  const returningFromRejection = vendor.verificationStatus === VendorVerificationStatus.REJECTED;
 
   await prisma.$transaction([
     prisma.vendorCategory.deleteMany({
@@ -254,11 +237,7 @@ export const updateVendorCategories = async (
   });
 
   if (!updatedVendor) {
-    throw new AppError(
-      404,
-      'Vendor profile not found',
-      'VENDOR_PROFILE_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor profile not found', 'VENDOR_PROFILE_NOT_FOUND');
   }
 
   return {
@@ -267,25 +246,17 @@ export const updateVendorCategories = async (
   };
 };
 
-export const submitVendorOnboardingProfile = async (
-  userId: string,
-) => {
+export const submitVendorOnboardingProfile = async (userId: string) => {
   const vendor = await prisma.vendorProfile.findUnique({
     where: { userId },
     select: vendorProfileSelect,
   });
 
   if (!vendor) {
-    throw new AppError(
-      404,
-      'Vendor profile not found',
-      'VENDOR_PROFILE_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor profile not found', 'VENDOR_PROFILE_NOT_FOUND');
   }
 
-  if (
-    vendor.verificationStatus !== VendorVerificationStatus.DRAFT
-  ) {
+  if (vendor.verificationStatus !== VendorVerificationStatus.DRAFT) {
     throw new AppError(
       409,
       'Only a draft vendor profile can be submitted for review',
@@ -326,4 +297,153 @@ export const submitVendorOnboardingProfile = async (
     profile: formatVendorProfile(submittedVendor),
     completion: calculateProfileCompletion(submittedVendor),
   };
+};
+
+const publicVendorSelect = {
+  id: true,
+  businessName: true,
+  slug: true,
+  description: true,
+  contactPhone: true,
+  website: true,
+  baseLocation: true,
+  serviceAreas: true,
+  categories: {
+    select: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: {
+      category: {
+        name: 'asc',
+      },
+    },
+  },
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+const getPublicVendorOrderBy = (
+  sort: GetPublicVendorsQuery['sort'],
+): Prisma.VendorProfileOrderByWithRelationInput => {
+  switch (sort) {
+    case 'oldest':
+      return {
+        createdAt: 'asc',
+      };
+
+    case 'name_asc':
+      return {
+        businessName: 'asc',
+      };
+
+    case 'name_desc':
+      return {
+        businessName: 'desc',
+      };
+
+    case 'newest':
+    default:
+      return {
+        createdAt: 'desc',
+      };
+  }
+};
+
+export const getPublicVendors = async (query: GetPublicVendorsQuery) => {
+  const { search, category, location, serviceArea, page, limit, sort } = query;
+
+  const where: Prisma.VendorProfileWhereInput = {
+    verificationStatus: VendorVerificationStatus.APPROVED,
+
+    ...(search && {
+      OR: [
+        {
+          businessName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ],
+    }),
+
+    ...(category && {
+      categories: {
+        some: {
+          category: {
+            slug: category,
+          },
+        },
+      },
+    }),
+
+    ...(location && {
+      baseLocation: {
+        contains: location,
+        mode: 'insensitive',
+      },
+    }),
+
+    ...(serviceArea && {
+      serviceAreas: {
+        has: serviceArea,
+      },
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [vendors, total] = await prisma.$transaction([
+    prisma.vendorProfile.findMany({
+      where,
+      select: publicVendorSelect,
+      orderBy: getPublicVendorOrderBy(sort),
+      skip,
+      take: limit,
+    }),
+    prisma.vendorProfile.count({
+      where,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    vendors: vendors.map(formatVendorProfile),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export const getPublicVendorBySlug = async (slug: string) => {
+  const vendor = await prisma.vendorProfile.findFirst({
+    where: {
+      slug,
+      verificationStatus: VendorVerificationStatus.APPROVED,
+    },
+    select: publicVendorSelect,
+  });
+
+  if (!vendor) {
+    throw new AppError(404, 'Vendor not found', 'PUBLIC_VENDOR_NOT_FOUND');
+  }
+
+  return formatVendorProfile(vendor);
 };
