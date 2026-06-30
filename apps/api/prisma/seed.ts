@@ -1,8 +1,20 @@
 /// <reference types="node" />
 
-import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import 'dotenv/config';
+import { z } from 'zod';
+import { AccountStatus, PrismaClient, UserRole } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+const seedEnvSchema = z.object({
+  ADMIN_SEED_EMAIL: z.string().email(),
+  ADMIN_SEED_PASSWORD: z.string().min(12),
+});
+
+const seedEnv = seedEnvSchema.parse(process.env);
+
+const PASSWORD_SALT_ROUNDS = 12;
 
 const serviceCategories = [
   {
@@ -47,7 +59,7 @@ const serviceCategories = [
   },
 ];
 
-const seed = async () => {
+const seedServiceCategories = async () => {
   for (const category of serviceCategories) {
     await prisma.serviceCategory.upsert({
       where: {
@@ -60,14 +72,45 @@ const seed = async () => {
     });
   }
 
-  console.log(
-    `${serviceCategories.length} service categories seeded successfully.`,
-  );
+  console.log(`${serviceCategories.length} service categories seeded successfully.`);
+};
+
+const seedAdminAccount = async () => {
+  const passwordHash = await bcrypt.hash(seedEnv.ADMIN_SEED_PASSWORD, PASSWORD_SALT_ROUNDS);
+
+  await prisma.user.upsert({
+    where: {
+      email: seedEnv.ADMIN_SEED_EMAIL,
+    },
+    update: {
+      passwordHash,
+      firstName: 'Platform',
+      lastName: 'Admin',
+      role: UserRole.ADMIN,
+      status: AccountStatus.ACTIVE,
+    },
+    create: {
+      email: seedEnv.ADMIN_SEED_EMAIL,
+      passwordHash,
+      firstName: 'Platform',
+      lastName: 'Admin',
+      role: UserRole.ADMIN,
+      status: AccountStatus.ACTIVE,
+    },
+  });
+
+  console.log('Development admin account seeded successfully.');
+  console.log(`Admin email: ${seedEnv.ADMIN_SEED_EMAIL}`);
+};
+
+const seed = async () => {
+  await seedServiceCategories();
+  await seedAdminAccount();
 };
 
 seed()
   .catch((error) => {
-    console.error('Failed to seed service categories:', error);
+    console.error('Failed to seed application data:', error);
     process.exitCode = 1;
   })
   .finally(async () => {
