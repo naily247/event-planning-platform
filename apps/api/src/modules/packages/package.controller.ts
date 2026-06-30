@@ -2,6 +2,8 @@ import type { RequestHandler } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import type {
   CreateServicePackageInput,
+  GetPublicPackageByIdParams,
+  GetPublicPackagesQuery,
   GetVendorPackagesQuery,
   ServicePackageParams,
   UpdateServicePackageInput,
@@ -10,11 +12,36 @@ import type {
 import {
   createServicePackage,
   deleteServicePackage,
+  getPublicServicePackageById,
+  getPublicServicePackages,
   getVendorServicePackageById,
   getVendorServicePackages,
   updateServicePackage,
   updateServicePackageStatus,
 } from './package.service.js';
+
+export const getPublicServicePackagesHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const result = await getPublicServicePackages(req.query as unknown as GetPublicPackagesQuery);
+
+  res.status(200).json({
+    success: true,
+    data: result.packages,
+    meta: {
+      pagination: result.pagination,
+    },
+  });
+});
+
+export const getPublicServicePackageByIdHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { packageId } = req.params as GetPublicPackageByIdParams;
+
+  const servicePackage = await getPublicServicePackageById(packageId);
+
+  res.status(200).json({
+    success: true,
+    data: servicePackage,
+  });
+});
 
 export const createServicePackageHandler: RequestHandler = asyncHandler(async (req, res) => {
   const servicePackage = await createServicePackage(

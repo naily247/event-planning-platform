@@ -334,7 +334,7 @@ describe('Vendor service package API', () => {
       );
 
       const response = await request(app)
-        .get(`/api/v1/packages/${createResponse.body.data.id}`)
+        .get(`/api/v1/packages/${createResponse.body.data.id}/manage`)
         .set('Authorization', `Bearer ${secondRegistration.body.data.accessToken}`);
 
       expect(response.status).toBe(404);

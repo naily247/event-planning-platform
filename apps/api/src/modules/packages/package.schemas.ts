@@ -12,6 +12,53 @@ const basePriceSchema = z.coerce
     message: 'Base price can contain no more than two decimal places',
   });
 
+export const publicPackageSortOptions = [
+  'newest',
+  'oldest',
+  'price_asc',
+  'price_desc',
+  'title_asc',
+  'title_desc',
+] as const;
+
+export const getPublicPackagesSchema = z
+  .object({
+    query: z.object({
+      search: z.string().trim().min(1).max(120).optional(),
+
+      category: z.string().trim().min(1).max(120).optional(),
+
+      location: z.string().trim().min(1).max(120).optional(),
+
+      serviceArea: z.string().trim().min(1).max(80).optional(),
+
+      minPrice: basePriceSchema.optional(),
+      maxPrice: basePriceSchema.optional(),
+
+      page: z.coerce.number().int().min(1).default(1),
+
+      limit: z.coerce.number().int().min(1).max(50).default(12),
+
+      sort: z.enum(publicPackageSortOptions).default('newest'),
+    }),
+  })
+  .refine(
+    ({ query }) =>
+      query.minPrice === undefined ||
+      query.maxPrice === undefined ||
+      query.minPrice <= query.maxPrice,
+    {
+      message: 'Minimum price cannot be greater than maximum price',
+      path: ['query', 'minPrice'],
+    },
+  );
+
+export const getPublicPackageByIdSchema = z.object({
+  params: z.object({
+    packageId: packageIdSchema,
+  }),
+});
+
 export const createServicePackageSchema = z.object({
   body: z.object({
     categoryId: categoryIdSchema,
@@ -65,6 +112,10 @@ export const updateServicePackageStatusSchema = z.object({
 });
 
 export const deleteServicePackageSchema = getServicePackageSchema;
+
+export type GetPublicPackagesQuery = z.infer<typeof getPublicPackagesSchema>['query'];
+
+export type GetPublicPackageByIdParams = z.infer<typeof getPublicPackageByIdSchema>['params'];
 
 export type CreateServicePackageInput = z.infer<typeof createServicePackageSchema>['body'];
 

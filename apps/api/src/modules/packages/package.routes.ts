@@ -6,6 +6,8 @@ import { validate } from '../../middleware/validate.js';
 import {
   createServicePackageHandler,
   deleteServicePackageHandler,
+  getPublicServicePackageByIdHandler,
+  getPublicServicePackagesHandler,
   getVendorServicePackageByIdHandler,
   getVendorServicePackagesHandler,
   updateServicePackageHandler,
@@ -14,6 +16,8 @@ import {
 import {
   createServicePackageSchema,
   deleteServicePackageSchema,
+  getPublicPackageByIdSchema,
+  getPublicPackagesSchema,
   getServicePackageSchema,
   getVendorPackagesSchema,
   updateServicePackageSchema,
@@ -22,32 +26,54 @@ import {
 
 export const packageRouter = Router();
 
-packageRouter.use(requireAuth, authorize(UserRole.VENDOR));
+const vendorOnly = [requireAuth, authorize(UserRole.VENDOR)] as const;
 
-packageRouter.post('/', validate(createServicePackageSchema), createServicePackageHandler);
-
-packageRouter.get('/me', validate(getVendorPackagesSchema), getVendorServicePackagesHandler);
+packageRouter.get('/', validate(getPublicPackagesSchema), getPublicServicePackagesHandler);
 
 packageRouter.get(
-  '/:packageId',
-  validate(getServicePackageSchema),
-  getVendorServicePackageByIdHandler,
+  '/me',
+  ...vendorOnly,
+  validate(getVendorPackagesSchema),
+  getVendorServicePackagesHandler,
 );
 
-packageRouter.patch(
-  '/:packageId',
-  validate(updateServicePackageSchema),
-  updateServicePackageHandler,
+packageRouter.post(
+  '/',
+  ...vendorOnly,
+  validate(createServicePackageSchema),
+  createServicePackageHandler,
 );
 
 packageRouter.patch(
   '/:packageId/status',
+  ...vendorOnly,
   validate(updateServicePackageStatusSchema),
   updateServicePackageStatusHandler,
 );
 
+packageRouter.patch(
+  '/:packageId',
+  ...vendorOnly,
+  validate(updateServicePackageSchema),
+  updateServicePackageHandler,
+);
+
 packageRouter.delete(
   '/:packageId',
+  ...vendorOnly,
   validate(deleteServicePackageSchema),
   deleteServicePackageHandler,
+);
+
+packageRouter.get(
+  '/:packageId',
+  validate(getPublicPackageByIdSchema),
+  getPublicServicePackageByIdHandler,
+);
+
+packageRouter.get(
+  '/:packageId/manage',
+  ...vendorOnly,
+  validate(getServicePackageSchema),
+  getVendorServicePackageByIdHandler,
 );
