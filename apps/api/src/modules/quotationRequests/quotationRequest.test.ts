@@ -1,4 +1,4 @@
-import { VendorVerificationStatus } from '@prisma/client';
+import { QuotationRequestStatus, VendorVerificationStatus } from '@prisma/client';
 import request from 'supertest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -413,6 +413,209 @@ describe('Customer quotation request API', () => {
           packageId: 'invalid-package-id',
           requirements: 'Short',
         });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('GET /api/v1/quotation-requests', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app).get('/api/v1/quotation-requests');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated vendors', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests')
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('returns only quotation requests belonging to the authenticated customer', async () => {
+      const firstCustomer = await registerCustomer(customerPayload);
+      const secondCustomer = await registerCustomer(secondCustomerPayload);
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const firstEventId = await createPlanningEvent(firstCustomer.body.data.accessToken);
+
+      const secondEventId = await createPlanningEvent(secondCustomer.body.data.accessToken);
+
+      await createQuotationRequest(firstCustomer.body.data.accessToken, firstEventId, packageId);
+
+      await createQuotationRequest(secondCustomer.body.data.accessToken, secondEventId, packageId);
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests')
+        .set('Authorization', `Bearer ${firstCustomer.body.data.accessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].event.id).toBe(firstEventId);
+
+      expect(response.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('filters customer quotation requests by status and event', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const firstEventId = await createPlanningEvent(customerAccessToken);
+      const secondEventId = await createPlanningEvent(customerAccessToken);
+
+      const firstRequest = await createQuotationRequest(
+        customerAccessToken,
+        firstEventId,
+        packageId,
+      );
+
+      await createQuotationRequest(customerAccessToken, secondEventId, packageId);
+
+      await prisma.quotationRequest.update({
+        where: {
+          id: firstRequest.body.data.id,
+        },
+        data: {
+          status: QuotationRequestStatus.VIEWED,
+        },
+      });
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests?status=VIEWED&eventId=${firstEventId}`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].id).toBe(firstRequest.body.data.id);
+      expect(response.body.data[0].status).toBe('VIEWED');
+      expect(response.body.data[0].event.id).toBe(firstEventId);
+    });
+
+    it('supports pagination and oldest-first sorting', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const firstEventId = await createPlanningEvent(customerAccessToken);
+      const secondEventId = await createPlanningEvent(customerAccessToken);
+
+      const firstRequest = await createQuotationRequest(
+        customerAccessToken,
+        firstEventId,
+        packageId,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const secondRequest = await createQuotationRequest(
+        customerAccessToken,
+        secondEventId,
+        packageId,
+      );
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests?page=1&limit=1&sort=oldest')
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].id).toBe(firstRequest.body.data.id);
+      expect(response.body.data[0].id).not.toBe(secondRequest.body.data.id);
+
+      expect(response.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 1,
+        total: 2,
+        totalPages: 2,
+        hasNextPage: true,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('rejects invalid list query parameters', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests?page=0&limit=100&sort=invalid&status=INVALID')
+        .set('Authorization', `Bearer ${customerRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('GET /api/v1/quotation-requests/:quotationRequestId', () => {
+    it('returns an owned quotation request', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { packageId } = await prepareApprovedVendorPackage();
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/${createdRequest.body.data.id}`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe(createdRequest.body.data.id);
+      expect(response.body.data.event.id).toBe(eventId);
+      expect(response.body.data.package.id).toBe(packageId);
+    });
+
+    it('hides a quotation request belonging to another customer', async () => {
+      const firstCustomer = await registerCustomer(customerPayload);
+      const secondCustomer = await registerCustomer(secondCustomerPayload);
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(firstCustomer.body.data.accessToken);
+
+      const createdRequest = await createQuotationRequest(
+        firstCustomer.body.data.accessToken,
+        eventId,
+        packageId,
+      );
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/${createdRequest.body.data.id}`)
+        .set('Authorization', `Bearer ${secondCustomer.body.data.accessToken}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_REQUEST_NOT_FOUND');
+    });
+
+    it('rejects an invalid quotation request ID', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/invalid-id')
+        .set('Authorization', `Bearer ${customerRegistration.body.data.accessToken}`);
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);

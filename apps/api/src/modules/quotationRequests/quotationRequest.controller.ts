@@ -1,7 +1,15 @@
 import type { RequestHandler } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
-import type { CreateQuotationRequestInput } from './quotationRequest.schemas.js';
-import { createCustomerQuotationRequest } from './quotationRequest.service.js';
+import type {
+  CreateQuotationRequestInput,
+  CustomerQuotationRequestParams,
+  GetCustomerQuotationRequestsQuery,
+} from './quotationRequest.schemas.js';
+import {
+  createCustomerQuotationRequest,
+  getCustomerQuotationRequestById,
+  getCustomerQuotationRequests,
+} from './quotationRequest.service.js';
 
 export const createCustomerQuotationRequestHandler: RequestHandler = asyncHandler(
   async (req, res) => {
@@ -11,6 +19,39 @@ export const createCustomerQuotationRequestHandler: RequestHandler = asyncHandle
     );
 
     res.status(201).json({
+      success: true,
+      data: quotationRequest,
+    });
+  },
+);
+
+export const getCustomerQuotationRequestsHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const result = await getCustomerQuotationRequests(
+      req.auth!.userId,
+      req.query as unknown as GetCustomerQuotationRequestsQuery,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.quotationRequests,
+      meta: {
+        pagination: result.pagination,
+      },
+    });
+  },
+);
+
+export const getCustomerQuotationRequestByIdHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { quotationRequestId } = req.params as CustomerQuotationRequestParams;
+
+    const quotationRequest = await getCustomerQuotationRequestById(
+      req.auth!.userId,
+      quotationRequestId,
+    );
+
+    res.status(200).json({
       success: true,
       data: quotationRequest,
     });

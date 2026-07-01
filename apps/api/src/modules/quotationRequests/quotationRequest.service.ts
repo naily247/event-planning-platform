@@ -6,7 +6,10 @@ import {
 } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
-import type { CreateQuotationRequestInput } from './quotationRequest.schemas.js';
+import type {
+  CreateQuotationRequestInput,
+  GetCustomerQuotationRequestsQuery,
+} from './quotationRequest.schemas.js';
 
 const quotationRequestSelect = {
   id: true,
@@ -76,6 +79,97 @@ const activeQuotationRequestStatuses: QuotationRequestStatus[] = [
   QuotationRequestStatus.CLARIFICATION_REQUESTED,
   QuotationRequestStatus.QUOTED,
 ];
+
+const getCustomerQuotationRequestOrderBy = (
+  sort: GetCustomerQuotationRequestsQuery['sort'],
+): Prisma.QuotationRequestOrderByWithRelationInput => {
+  switch (sort) {
+    case 'oldest':
+      return {
+        createdAt: 'asc',
+      };
+
+    case 'newest':
+    default:
+      return {
+        createdAt: 'desc',
+      };
+  }
+};
+
+export const getCustomerQuotationRequests = async (
+  customerId: string,
+  query: GetCustomerQuotationRequestsQuery,
+) => {
+  const { status, eventId, page, limit, sort } = query;
+
+  const where: Prisma.QuotationRequestWhereInput = {
+    event: {
+      ownerId: customerId,
+    },
+
+    ...(status && {
+      status,
+    }),
+
+    ...(eventId && {
+      eventId,
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [quotationRequests, total] = await prisma.$transaction([
+    prisma.quotationRequest.findMany({
+      where,
+      select: quotationRequestSelect,
+      orderBy: getCustomerQuotationRequestOrderBy(sort),
+      skip,
+      take: limit,
+    }),
+
+    prisma.quotationRequest.count({
+      where,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    quotationRequests: quotationRequests.map(formatQuotationRequest),
+
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export const getCustomerQuotationRequestById = async (
+  customerId: string,
+  quotationRequestId: string,
+) => {
+  const quotationRequest = await prisma.quotationRequest.findFirst({
+    where: {
+      id: quotationRequestId,
+
+      event: {
+        ownerId: customerId,
+      },
+    },
+    select: quotationRequestSelect,
+  });
+
+  if (!quotationRequest) {
+    throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
+  }
+
+  return formatQuotationRequest(quotationRequest);
+};
 
 export const createCustomerQuotationRequest = async (
   customerId: string,
