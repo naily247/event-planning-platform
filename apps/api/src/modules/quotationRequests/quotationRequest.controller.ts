@@ -9,15 +9,20 @@ import type {
   GetVendorQuotationRequestsQuery,
   MarkVendorQuotationRequestViewedParams,
   VendorQuotationRequestParams,
+  GetVendorQuotationDraftParams,
+  UpdateVendorQuotationDraftInput,
+  UpdateVendorQuotationDraftParams,
 } from './quotationRequest.schemas.js';
 import {
   createCustomerQuotationRequest,
   createVendorQuotationDraft,
   getCustomerQuotationRequestById,
   getCustomerQuotationRequests,
+  getVendorQuotationDraft,
   getVendorQuotationRequestById,
   getVendorQuotationRequests,
   markVendorQuotationRequestViewed,
+  updateVendorQuotationDraft,
 } from './quotationRequest.service.js';
 
 export const createCustomerQuotationRequestHandler: RequestHandler = asyncHandler(
@@ -124,6 +129,32 @@ export const createVendorQuotationDraftHandler: RequestHandler = asyncHandler(as
   );
 
   res.status(201).json({
+    success: true,
+    data: quotation,
+  });
+});
+
+export const getVendorQuotationDraftHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { quotationRequestId } = req.params as GetVendorQuotationDraftParams;
+
+  const quotation = await getVendorQuotationDraft(req.auth!.userId, quotationRequestId);
+
+  res.status(200).json({
+    success: true,
+    data: quotation,
+  });
+});
+
+export const updateVendorQuotationDraftHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { quotationRequestId } = req.params as UpdateVendorQuotationDraftParams;
+
+  const quotation = await updateVendorQuotationDraft(
+    req.auth!.userId,
+    quotationRequestId,
+    req.body as UpdateVendorQuotationDraftInput,
+  );
+
+  res.status(200).json({
     success: true,
     data: quotation,
   });

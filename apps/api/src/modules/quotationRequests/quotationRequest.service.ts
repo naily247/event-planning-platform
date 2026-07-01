@@ -9,9 +9,10 @@ import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   CreateQuotationRequestInput,
+  CreateVendorQuotationDraftInput,
   GetCustomerQuotationRequestsQuery,
   GetVendorQuotationRequestsQuery,
-  CreateVendorQuotationDraftInput,
+  UpdateVendorQuotationDraftInput,
 } from './quotationRequest.schemas.js';
 
 const quotationRequestSelect = {
@@ -449,6 +450,154 @@ export const createVendorQuotationDraft = async (
   });
 
   return formatQuotation(quotation);
+};
+
+export const getVendorQuotationDraft = async (vendorUserId: string, quotationRequestId: string) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const quotation = await prisma.quotation.findFirst({
+    where: {
+      quotationRequestId,
+      status: QuotationStatus.DRAFT,
+
+      quotationRequest: {
+        vendorId,
+      },
+    },
+    select: quotationSelect,
+  });
+
+  if (!quotation) {
+    throw new AppError(404, 'Quotation draft not found', 'QUOTATION_DRAFT_NOT_FOUND');
+  }
+
+  return formatQuotation(quotation);
+};
+
+export const updateVendorQuotationDraft = async (
+  vendorUserId: string,
+  quotationRequestId: string,
+  input: UpdateVendorQuotationDraftInput,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const quotation = await prisma.quotation.findFirst({
+    where: {
+      quotationRequestId,
+
+      quotationRequest: {
+        vendorId,
+      },
+    },
+    select: {
+      id: true,
+      status: true,
+      proposedPrice: true,
+      depositAmount: true,
+
+      quotationRequest: {
+        select: {
+          responseDueAt: true,
+
+          event: {
+            select: {
+              eventDate: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!quotation) {
+    throw new AppError(404, 'Quotation draft not found', 'QUOTATION_DRAFT_NOT_FOUND');
+  }
+
+  if (quotation.status !== QuotationStatus.DRAFT) {
+    throw new AppError(
+      409,
+      'Only draft quotations can be updated',
+      'QUOTATION_DRAFT_CANNOT_BE_UPDATED',
+    );
+  }
+
+  if (
+    quotation.quotationRequest.responseDueAt &&
+    quotation.quotationRequest.responseDueAt.getTime() <= Date.now()
+  ) {
+    throw new AppError(
+      409,
+      'The quotation response deadline has passed',
+      'QUOTATION_RESPONSE_DEADLINE_PASSED',
+    );
+  }
+
+  const proposedPrice =
+    input.proposedPrice === undefined
+      ? quotation.proposedPrice
+      : new Prisma.Decimal(input.proposedPrice);
+
+  const depositAmount =
+    input.depositAmount === undefined
+      ? quotation.depositAmount
+      : input.depositAmount === null
+        ? null
+        : new Prisma.Decimal(input.depositAmount);
+
+  if (depositAmount && depositAmount.greaterThan(proposedPrice)) {
+    throw new AppError(
+      400,
+      'Deposit amount cannot exceed the proposed price',
+      'INVALID_QUOTATION_DEPOSIT',
+    );
+  }
+
+  if (
+    input.expiresAt !== undefined &&
+    input.expiresAt !== null &&
+    new Date(input.expiresAt).getTime() >= quotation.quotationRequest.event.eventDate.getTime()
+  ) {
+    throw new AppError(
+      400,
+      'Quotation expiry must be before the event date',
+      'INVALID_QUOTATION_EXPIRY',
+    );
+  }
+
+  const updatedQuotation = await prisma.quotation.update({
+    where: {
+      id: quotation.id,
+    },
+    data: {
+      ...(input.proposedPrice !== undefined && {
+        proposedPrice: new Prisma.Decimal(input.proposedPrice),
+      }),
+
+      ...(input.depositAmount !== undefined && {
+        depositAmount:
+          input.depositAmount === null ? null : new Prisma.Decimal(input.depositAmount),
+      }),
+
+      ...(input.inclusions !== undefined && {
+        inclusions: input.inclusions,
+      }),
+
+      ...(input.exclusions !== undefined && {
+        exclusions: input.exclusions,
+      }),
+
+      ...(input.terms !== undefined && {
+        terms: input.terms,
+      }),
+
+      ...(input.expiresAt !== undefined && {
+        expiresAt: input.expiresAt === null ? null : new Date(input.expiresAt),
+      }),
+    },
+    select: quotationSelect,
+  });
+
+  return formatQuotation(updatedQuotation);
 };
 
 export const createCustomerQuotationRequest = async (

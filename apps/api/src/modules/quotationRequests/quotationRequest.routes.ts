@@ -11,6 +11,8 @@ import {
   getVendorQuotationRequestByIdHandler,
   getVendorQuotationRequestsHandler,
   markVendorQuotationRequestViewedHandler,
+  getVendorQuotationDraftHandler,
+  updateVendorQuotationDraftHandler,
 } from './quotationRequest.controller.js';
 import {
   createQuotationRequestSchema,
@@ -20,6 +22,8 @@ import {
   getVendorQuotationRequestSchema,
   getVendorQuotationRequestsSchema,
   markVendorQuotationRequestViewedSchema,
+  getVendorQuotationDraftSchema,
+  updateVendorQuotationDraftSchema,
 } from './quotationRequest.schemas.js';
 
 export const quotationRequestRouter = Router();
@@ -74,4 +78,18 @@ quotationRequestRouter.post(
   ...vendorOnly,
   validate(createVendorQuotationDraftSchema),
   createVendorQuotationDraftHandler,
+);
+
+quotationRequestRouter.get(
+  '/vendor/incoming/:quotationRequestId/quotations/draft',
+  ...vendorOnly,
+  validate(getVendorQuotationDraftSchema),
+  getVendorQuotationDraftHandler,
+);
+
+quotationRequestRouter.patch(
+  '/vendor/incoming/:quotationRequestId/quotations/draft',
+  ...vendorOnly,
+  validate(updateVendorQuotationDraftSchema),
+  updateVendorQuotationDraftHandler,
 );

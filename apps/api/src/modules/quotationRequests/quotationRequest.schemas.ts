@@ -20,6 +20,27 @@ const quotationExpiresAtSchema = z
   .refine((value) => new Date(value).getTime() > Date.now(), {
     message: 'Quotation expiry must be in the future',
   });
+const vendorQuotationFieldsSchema = z.object({
+  proposedPrice: z.coerce
+    .number()
+    .positive('Proposed price must be greater than zero')
+    .max(9999999999.99, 'Proposed price is too large'),
+
+  depositAmount: z.coerce
+    .number()
+    .min(0, 'Deposit amount cannot be negative')
+    .max(9999999999.99, 'Deposit amount is too large')
+    .nullable()
+    .optional(),
+
+  inclusions: z.string().trim().min(10).max(5000),
+
+  exclusions: z.string().trim().min(1).max(5000).nullable().optional(),
+
+  terms: z.string().trim().min(1).max(5000).nullable().optional(),
+
+  expiresAt: quotationExpiresAtSchema.nullable().optional(),
+});
 
 export const quotationRequestSortOptions = ['newest', 'oldest'] as const;
 
@@ -84,30 +105,40 @@ export const createVendorQuotationDraftSchema = z.object({
     quotationRequestId: cuidSchema('Quotation request ID'),
   }),
 
-  body: z
-    .object({
-      proposedPrice: z.coerce
-        .number()
-        .positive('Proposed price must be greater than zero')
-        .max(9999999999.99, 'Proposed price is too large'),
+  body: vendorQuotationFieldsSchema.superRefine((data, context) => {
+    if (
+      data.depositAmount !== undefined &&
+      data.depositAmount !== null &&
+      data.depositAmount > data.proposedPrice
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['depositAmount'],
+        message: 'Deposit amount cannot exceed the proposed price',
+      });
+    }
+  }),
+});
 
-      depositAmount: z.coerce
-        .number()
-        .min(0, 'Deposit amount cannot be negative')
-        .max(9999999999.99, 'Deposit amount is too large')
-        .nullable()
-        .optional(),
+export const getVendorQuotationDraftSchema = z.object({
+  params: z.object({
+    quotationRequestId: cuidSchema('Quotation request ID'),
+  }),
+});
 
-      inclusions: z.string().trim().min(10).max(5000),
+export const updateVendorQuotationDraftSchema = z.object({
+  params: z.object({
+    quotationRequestId: cuidSchema('Quotation request ID'),
+  }),
 
-      exclusions: z.string().trim().min(1).max(5000).nullable().optional(),
-
-      terms: z.string().trim().min(1).max(5000).nullable().optional(),
-
-      expiresAt: quotationExpiresAtSchema.nullable().optional(),
+  body: vendorQuotationFieldsSchema
+    .partial()
+    .refine((data) => Object.keys(data).length > 0, {
+      message: 'At least one quotation field must be provided',
     })
     .superRefine((data, context) => {
       if (
+        data.proposedPrice !== undefined &&
         data.depositAmount !== undefined &&
         data.depositAmount !== null &&
         data.depositAmount > data.proposedPrice
@@ -121,7 +152,9 @@ export const createVendorQuotationDraftSchema = z.object({
     }),
 });
 
-export type CreateQuotationRequestInput = z.infer<typeof createQuotationRequestSchema>['body'];
+export type CreateQuotationRequestInput = z.infer<
+typeof createQuotationRequestSchema
+>['body'];
 
 export type GetCustomerQuotationRequestsQuery = z.infer<
   typeof getCustomerQuotationRequestsSchema
@@ -149,4 +182,16 @@ export type CreateVendorQuotationDraftParams = z.infer<
 
 export type CreateVendorQuotationDraftInput = z.infer<
   typeof createVendorQuotationDraftSchema
+>['body'];
+
+export type GetVendorQuotationDraftParams = z.infer<
+typeof getVendorQuotationDraftSchema
+>['params'];
+
+export type UpdateVendorQuotationDraftParams = z.infer<
+  typeof updateVendorQuotationDraftSchema
+>['params'];
+
+export type UpdateVendorQuotationDraftInput = z.infer<
+  typeof updateVendorQuotationDraftSchema
 >['body'];
