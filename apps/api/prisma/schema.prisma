@@ -224,6 +224,8 @@ model Booking {
   serviceStart        DateTime
   serviceEnd          DateTime?
   status              BookingStatus @default(AWAITING_VENDOR_CONFIRMATION)
+  vendorResponseNote  String?
+  vendorRespondedAt   DateTime?
   event               Event         @relation(fields: [eventId], references: [id])
   vendor              VendorProfile @relation(fields: [vendorId], references: [id])
   acceptedQuotation   Quotation     @relation(fields: [acceptedQuotationId], references: [id])
@@ -232,6 +234,7 @@ model Booking {
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 
+  @@index([vendorId, status, createdAt])
   @@index([vendorId, serviceStart, serviceEnd])
 }
 

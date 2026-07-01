@@ -1,4 +1,5 @@
 import {
+  BookingStatus,
   EventStatus,
   QuotationRequestStatus,
   QuotationStatus,
@@ -13,6 +14,7 @@ const app = createApp();
 const customerEmail = 'booking-customer@example.com';
 const secondCustomerEmail = 'booking-second-customer@example.com';
 const vendorEmail = 'booking-vendor@example.com';
+const secondVendorEmail = 'booking-second-vendor@example.com';
 
 const customerPayload = {
   email: customerEmail,
@@ -44,7 +46,15 @@ const vendorPayload = {
   businessName: 'Booking Photography Studio',
 };
 
-const testEmails = [customerEmail, secondCustomerEmail, vendorEmail];
+const secondVendorPayload = {
+  email: secondVendorEmail,
+  password: 'Vendor@2026',
+  firstName: 'Arun',
+  lastName: 'Silva',
+  businessName: 'Second Booking Studio',
+};
+
+const testEmails = [customerEmail, secondCustomerEmail, vendorEmail, secondVendorEmail];
 
 const clearTestData = async () => {
   await prisma.booking.deleteMany({
@@ -140,14 +150,14 @@ const clearTestData = async () => {
   });
 };
 
-const registerCustomer = async (
-  payload: typeof customerPayload | typeof secondCustomerPayload,
-) => {
+const registerCustomer = async (payload: typeof customerPayload | typeof secondCustomerPayload) => {
   return request(app).post('/api/v1/auth/register/customer').send(payload);
 };
 
-const registerVendor = async () => {
-  return request(app).post('/api/v1/auth/register/vendor').send(vendorPayload);
+const registerVendor = async (
+  payload: typeof vendorPayload | typeof secondVendorPayload = vendorPayload,
+) => {
+  return request(app).post('/api/v1/auth/register/vendor').send(payload);
 };
 
 const getPhotographyCategory = async () => {
@@ -168,11 +178,12 @@ const prepareAcceptedQuotation = async () => {
   const customerRegistration = await registerCustomer(customerPayload);
   const vendorRegistration = await registerVendor();
 
-  const customerAccessToken =
-    customerRegistration.body.data.accessToken as string;
+  const customerAccessToken = customerRegistration.body.data.accessToken as string;
 
   const vendorAccessToken = vendorRegistration.body.data.accessToken as string;
+
   const customerUserId = customerRegistration.body.data.user.id as string;
+
   const vendorUserId = vendorRegistration.body.data.user.id as string;
 
   const category = await getPhotographyCategory();
@@ -181,6 +192,7 @@ const prepareAcceptedQuotation = async () => {
     where: {
       userId: vendorUserId,
     },
+
     select: {
       id: true,
     },
@@ -201,6 +213,7 @@ const prepareAcceptedQuotation = async () => {
     where: {
       id: vendor.id,
     },
+
     data: {
       verificationStatus: VendorVerificationStatus.APPROVED,
       reviewedAt: new Date(),
@@ -212,8 +225,7 @@ const prepareAcceptedQuotation = async () => {
       vendorId: vendor.id,
       categoryId: category.id,
       title: 'Booking Wedding Photography Package',
-      description:
-        'Professional full-day wedding photography with edited digital photographs.',
+      description: 'Professional full-day wedding photography with edited digital photographs.',
       basePrice: 150000,
       isActive: true,
     },
@@ -229,8 +241,7 @@ const prepareAcceptedQuotation = async () => {
       guestCount: 250,
       plannedBudget: 2500000,
       theme: 'Classic Garden',
-      requirements:
-        'Outdoor ceremony with photography, catering, decoration, and live music.',
+      requirements: 'Outdoor ceremony with photography, catering, decoration, and live music.',
       status: EventStatus.PLANNING,
     },
   });
@@ -240,8 +251,7 @@ const prepareAcceptedQuotation = async () => {
       eventId: event.id,
       vendorId: vendor.id,
       packageId: servicePackage.id,
-      requirements:
-        'Full-day wedding photography with ceremony and reception coverage.',
+      requirements: 'Full-day wedding photography with ceremony and reception coverage.',
       status: QuotationRequestStatus.ACCEPTED,
     },
   });
@@ -253,8 +263,7 @@ const prepareAcceptedQuotation = async () => {
       status: QuotationStatus.ACCEPTED,
       proposedPrice: 175000,
       depositAmount: 50000,
-      inclusions:
-        'Full-day photography, edited digital photographs, and online gallery.',
+      inclusions: 'Full-day photography, edited digital photographs, and online gallery.',
       exclusions: 'Printed wedding albums are not included.',
       terms: 'A deposit is required to reserve the event date.',
       expiresAt: new Date('2030-07-20T09:00:00.000Z'),
@@ -265,10 +274,29 @@ const prepareAcceptedQuotation = async () => {
     customerAccessToken,
     vendorAccessToken,
     customerUserId,
+    vendorUserId,
     vendorId: vendor.id,
     eventId: event.id,
     quotationRequestId: quotationRequest.id,
     quotationId: quotation.id,
+  };
+};
+
+const prepareBooking = async () => {
+  const preparedData = await prepareAcceptedQuotation();
+
+  const bookingResponse = await createBookingRequest(
+    preparedData.customerAccessToken,
+    preparedData.quotationId,
+  );
+
+  if (bookingResponse.status !== 201) {
+    throw new Error('Booking must be created successfully for the test');
+  }
+
+  return {
+    ...preparedData,
+    bookingId: bookingResponse.body.data.id as string,
   };
 };
 
@@ -286,6 +314,40 @@ const createBookingRequest = (
       serviceEnd: '2030-08-20T18:00:00.000Z',
       ...overrides,
     });
+};
+
+const getVendorBookingsRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/bookings/vendor/incoming${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const getVendorBookingByIdRequest = (accessToken: string, bookingId: string) => {
+  return request(app)
+    .get(`/api/v1/bookings/vendor/incoming/${bookingId}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const confirmVendorBookingRequest = (
+  accessToken: string,
+  bookingId: string,
+  body: Record<string, unknown> = {},
+) => {
+  return request(app)
+    .patch(`/api/v1/bookings/vendor/incoming/${bookingId}/confirm`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send(body);
+};
+
+const rejectVendorBookingRequest = (
+  accessToken: string,
+  bookingId: string,
+  body: Record<string, unknown> = {},
+) => {
+  return request(app)
+    .patch(`/api/v1/bookings/vendor/incoming/${bookingId}/reject`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send(body);
 };
 
 beforeEach(async () => {
@@ -340,6 +402,8 @@ describe('Customer booking creation API', () => {
         serviceStart: '2030-08-20T08:00:00.000Z',
         serviceEnd: '2030-08-20T18:00:00.000Z',
         status: 'AWAITING_VENDOR_CONFIRMATION',
+        vendorResponseNote: null,
+        vendorRespondedAt: null,
 
         event: {
           id: preparedData.eventId,
@@ -347,6 +411,12 @@ describe('Customer booking creation API', () => {
           eventType: 'Wedding',
           location: 'Colombo',
           status: 'PLANNING',
+
+          owner: {
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            email: customerEmail,
+          },
         },
 
         vendor: {
@@ -378,15 +448,13 @@ describe('Customer booking creation API', () => {
       expect(savedBooking?.eventId).toBe(preparedData.eventId);
       expect(savedBooking?.vendorId).toBe(preparedData.vendorId);
       expect(savedBooking?.agreedCost.toFixed(2)).toBe('175000.00');
-      expect(savedBooking?.status).toBe('AWAITING_VENDOR_CONFIRMATION');
+      expect(savedBooking?.status).toBe(BookingStatus.AWAITING_VENDOR_CONFIRMATION);
     });
 
     it('does not allow another customer to book the quotation', async () => {
       const preparedData = await prepareAcceptedQuotation();
 
-      const secondCustomerRegistration = await registerCustomer(
-        secondCustomerPayload,
-      );
+      const secondCustomerRegistration = await registerCustomer(secondCustomerPayload);
 
       const response = await createBookingRequest(
         secondCustomerRegistration.body.data.accessToken,
@@ -395,9 +463,7 @@ describe('Customer booking creation API', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'ACCEPTED_QUOTATION_NOT_FOUND',
-      );
+      expect(response.body.error.code).toBe('ACCEPTED_QUOTATION_NOT_FOUND');
     });
 
     it('rejects a quotation that has not been accepted', async () => {
@@ -407,6 +473,7 @@ describe('Customer booking creation API', () => {
         where: {
           id: preparedData.quotationId,
         },
+
         data: {
           status: QuotationStatus.SENT,
         },
@@ -416,6 +483,7 @@ describe('Customer booking creation API', () => {
         where: {
           id: preparedData.quotationRequestId,
         },
+
         data: {
           status: QuotationRequestStatus.QUOTED,
         },
@@ -448,9 +516,7 @@ describe('Customer booking creation API', () => {
 
       expect(secondResponse.status).toBe(409);
       expect(secondResponse.body.success).toBe(false);
-      expect(secondResponse.body.error.code).toBe(
-        'BOOKING_ALREADY_EXISTS',
-      );
+      expect(secondResponse.body.error.code).toBe('BOOKING_ALREADY_EXISTS');
     });
 
     it('rejects a service start outside the event date', async () => {
@@ -467,9 +533,7 @@ describe('Customer booking creation API', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'SERVICE_DATE_DOES_NOT_MATCH_EVENT',
-      );
+      expect(response.body.error.code).toBe('SERVICE_DATE_DOES_NOT_MATCH_EVENT');
     });
 
     it('rejects booking creation when the vendor is no longer approved', async () => {
@@ -479,6 +543,7 @@ describe('Customer booking creation API', () => {
         where: {
           id: preparedData.vendorId,
         },
+
         data: {
           verificationStatus: VendorVerificationStatus.REJECTED,
           rejectionReason: 'Vendor verification was revoked for testing.',
@@ -492,9 +557,7 @@ describe('Customer booking creation API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'VENDOR_NOT_AVAILABLE_FOR_BOOKING',
-      );
+      expect(response.body.error.code).toBe('VENDOR_NOT_AVAILABLE_FOR_BOOKING');
     });
 
     it('rejects a service end before the service start', async () => {
@@ -520,6 +583,492 @@ describe('Customer booking creation API', () => {
       const response = await createBookingRequest(
         customerRegistration.body.data.accessToken,
         'invalid-id',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+});
+
+describe('Vendor booking retrieval API', () => {
+  describe('GET /api/v1/bookings/vendor/incoming', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app).get('/api/v1/bookings/vendor/incoming');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated customers', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await getVendorBookingsRequest(customerRegistration.body.data.accessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('returns only bookings assigned to the authenticated vendor', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
+
+      const response = await getVendorBookingsRequest(
+        secondVendorRegistration.body.data.accessToken,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toEqual([]);
+
+      const ownerResponse = await getVendorBookingsRequest(preparedBooking.vendorAccessToken);
+
+      expect(ownerResponse.status).toBe(200);
+      expect(ownerResponse.body.success).toBe(true);
+      expect(ownerResponse.body.data).toHaveLength(1);
+
+      expect(ownerResponse.body.data[0]).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'AWAITING_VENDOR_CONFIRMATION',
+        agreedCost: '175000.00',
+
+        event: {
+          id: preparedBooking.eventId,
+          name: 'Maya and Arjun Wedding',
+
+          owner: {
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            email: customerEmail,
+          },
+        },
+      });
+
+      expect(ownerResponse.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('filters vendor bookings by status', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.CONFIRMED,
+          vendorRespondedAt: new Date(),
+        },
+      });
+
+      const confirmedResponse = await getVendorBookingsRequest(
+        preparedBooking.vendorAccessToken,
+        '?status=CONFIRMED',
+      );
+
+      expect(confirmedResponse.status).toBe(200);
+      expect(confirmedResponse.body.data).toHaveLength(1);
+      expect(confirmedResponse.body.data[0].status).toBe('CONFIRMED');
+
+      const waitingResponse = await getVendorBookingsRequest(
+        preparedBooking.vendorAccessToken,
+        '?status=AWAITING_VENDOR_CONFIRMATION',
+      );
+
+      expect(waitingResponse.status).toBe(200);
+      expect(waitingResponse.body.data).toHaveLength(0);
+    });
+
+    it('supports vendor booking pagination', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await getVendorBookingsRequest(
+        preparedBooking.vendorAccessToken,
+        '?page=1&limit=1&sort=oldest',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+
+      expect(response.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 1,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('rejects invalid list query parameters', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await getVendorBookingsRequest(
+        vendorRegistration.body.data.accessToken,
+        '?page=0&limit=100&sort=invalid&status=INVALID',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('GET /api/v1/bookings/vendor/incoming/:bookingId', () => {
+    it('returns an owned vendor booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await getVendorBookingByIdRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        agreedCost: '175000.00',
+        status: 'AWAITING_VENDOR_CONFIRMATION',
+
+        event: {
+          id: preparedBooking.eventId,
+          name: 'Maya and Arjun Wedding',
+          location: 'Colombo',
+
+          owner: {
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            email: customerEmail,
+          },
+        },
+
+        acceptedQuotation: {
+          id: preparedBooking.quotationId,
+          proposedPrice: '175000.00',
+          depositAmount: '50000.00',
+        },
+      });
+    });
+
+    it('does not allow another vendor to access the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
+
+      const response = await getVendorBookingByIdRequest(
+        secondVendorRegistration.body.data.accessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VENDOR_BOOKING_NOT_FOUND');
+    });
+
+    it('rejects an invalid booking ID', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await getVendorBookingByIdRequest(
+        vendorRegistration.body.data.accessToken,
+        'invalid-id',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+});
+
+describe('Vendor booking response API', () => {
+  describe('PATCH /api/v1/bookings/vendor/incoming/:bookingId/confirm', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app)
+        .patch('/api/v1/bookings/vendor/incoming/clx0000000000000000000000/confirm')
+        .send({});
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated customers', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await confirmVendorBookingRequest(
+        customerRegistration.body.data.accessToken,
+        'clx0000000000000000000000',
+      );
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('allows the assigned vendor to confirm a booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const note = 'The requested event date is available and the booking is confirmed.';
+
+      const response = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          note,
+        },
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CONFIRMED',
+        vendorResponseNote: note,
+      });
+
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.CONFIRMED);
+      expect(savedBooking?.vendorResponseNote).toBe(note);
+      expect(savedBooking?.vendorRespondedAt).not.toBeNull();
+    });
+
+    it('allows confirmation without a note', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.status).toBe('CONFIRMED');
+      expect(response.body.data.vendorResponseNote).toBeNull();
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
+    });
+
+    it('does not allow another vendor to confirm the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
+
+      const response = await confirmVendorBookingRequest(
+        secondVendorRegistration.body.data.accessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VENDOR_BOOKING_NOT_FOUND');
+    });
+
+    it('rejects repeated confirmation', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const firstResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(firstResponse.status).toBe(200);
+
+      const secondResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(secondResponse.status).toBe(409);
+      expect(secondResponse.body.success).toBe(false);
+      expect(secondResponse.body.error.code).toBe('BOOKING_ALREADY_RESPONDED');
+    });
+
+    it('rejects a confirmation note that is too short', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          note: 'No',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects an invalid booking ID', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await confirmVendorBookingRequest(
+        vendorRegistration.body.data.accessToken,
+        'invalid-id',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('PATCH /api/v1/bookings/vendor/incoming/:bookingId/reject', () => {
+    it('allows the assigned vendor to reject a booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const reason = 'The requested event date is no longer available for this service.';
+
+      const response = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'REJECTED',
+        vendorResponseNote: reason,
+      });
+
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.REJECTED);
+      expect(savedBooking?.vendorResponseNote).toBe(reason);
+      expect(savedBooking?.vendorRespondedAt).not.toBeNull();
+    });
+
+    it('does not allow another vendor to reject the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
+
+      const response = await rejectVendorBookingRequest(
+        secondVendorRegistration.body.data.accessToken,
+        preparedBooking.bookingId,
+        {
+          reason: 'The requested event date is unavailable for our business.',
+        },
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VENDOR_BOOKING_NOT_FOUND');
+    });
+
+    it('rejects a missing rejection reason', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects a rejection reason that is too short', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason: 'Busy',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('does not allow rejection after confirmation', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const rejectionResponse = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason: 'The requested event date is no longer available for this service.',
+        },
+      );
+
+      expect(rejectionResponse.status).toBe(409);
+      expect(rejectionResponse.body.success).toBe(false);
+      expect(rejectionResponse.body.error.code).toBe('BOOKING_ALREADY_RESPONDED');
+    });
+
+    it('does not allow confirmation after rejection', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const rejectionResponse = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason: 'The requested event date is no longer available for this service.',
+        },
+      );
+
+      expect(rejectionResponse.status).toBe(200);
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(409);
+      expect(confirmationResponse.body.success).toBe(false);
+      expect(confirmationResponse.body.error.code).toBe('BOOKING_ALREADY_RESPONDED');
+    });
+
+    it('rejects an invalid booking ID', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await rejectVendorBookingRequest(
+        vendorRegistration.body.data.accessToken,
+        'invalid-id',
+        {
+          reason: 'The requested event date is unavailable for our business.',
+        },
       );
 
       expect(response.status).toBe(400);

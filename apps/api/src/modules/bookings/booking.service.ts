@@ -8,7 +8,12 @@ import {
 } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
-import type { CreateCustomerBookingInput } from './booking.schemas.js';
+import type {
+  ConfirmVendorBookingInput,
+  CreateCustomerBookingInput,
+  GetVendorBookingsQuery,
+  RejectVendorBookingInput,
+} from './booking.schemas.js';
 
 const bookingSelect = {
   id: true,
@@ -16,6 +21,8 @@ const bookingSelect = {
   serviceStart: true,
   serviceEnd: true,
   status: true,
+  vendorResponseNote: true,
+  vendorRespondedAt: true,
 
   event: {
     select: {
@@ -25,6 +32,21 @@ const bookingSelect = {
       eventDate: true,
       location: true,
       status: true,
+
+      owner: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+
+          customer: {
+            select: {
+              phone: true,
+            },
+          },
+        },
+      },
     },
   },
 
@@ -91,12 +113,25 @@ const formatBooking = (booking: SelectedBooking) => ({
 
   agreedCost: booking.agreedCost.toFixed(2),
 
+  event: {
+    ...booking.event,
+
+    owner: {
+      id: booking.event.owner.id,
+      firstName: booking.event.owner.firstName,
+      lastName: booking.event.owner.lastName,
+      email: booking.event.owner.email,
+      phone: booking.event.owner.customer?.phone ?? null,
+    },
+  },
+
   acceptedQuotation: {
     ...booking.acceptedQuotation,
 
     proposedPrice: booking.acceptedQuotation.proposedPrice.toFixed(2),
 
-    depositAmount: booking.acceptedQuotation.depositAmount?.toFixed(2) ?? null,
+    depositAmount:
+      booking.acceptedQuotation.depositAmount?.toFixed(2) ?? null,
 
     quotationRequest: {
       ...booking.acceptedQuotation.quotationRequest,
@@ -106,7 +141,9 @@ const formatBooking = (booking: SelectedBooking) => ({
             ...booking.acceptedQuotation.quotationRequest.package,
 
             basePrice:
-              booking.acceptedQuotation.quotationRequest.package.basePrice?.toFixed(2) ?? null,
+              booking.acceptedQuotation.quotationRequest.package.basePrice?.toFixed(
+                2,
+              ) ?? null,
           }
         : null,
     },
@@ -117,6 +154,268 @@ const isSameUtcCalendarDate = (firstDate: Date, secondDate: Date) =>
   firstDate.getUTCFullYear() === secondDate.getUTCFullYear() &&
   firstDate.getUTCMonth() === secondDate.getUTCMonth() &&
   firstDate.getUTCDate() === secondDate.getUTCDate();
+
+const getVendorBookingOrderBy = (
+  sort: GetVendorBookingsQuery['sort'],
+): Prisma.BookingOrderByWithRelationInput => {
+  switch (sort) {
+    case 'oldest':
+      return {
+        createdAt: 'asc',
+      };
+
+    case 'service_soonest':
+      return {
+        serviceStart: 'asc',
+      };
+
+    case 'service_latest':
+      return {
+        serviceStart: 'desc',
+      };
+
+    case 'newest':
+    default:
+      return {
+        createdAt: 'desc',
+      };
+  }
+};
+
+const getVendorProfileId = async (vendorUserId: string) => {
+  const vendor = await prisma.vendorProfile.findUnique({
+    where: {
+      userId: vendorUserId,
+    },
+
+    select: {
+      id: true,
+    },
+  });
+
+  if (!vendor) {
+    throw new AppError(
+      404,
+      'Vendor profile not found',
+      'VENDOR_PROFILE_NOT_FOUND',
+    );
+  }
+
+  return vendor.id;
+};
+
+const getOwnedVendorBooking = async (
+  vendorId: string,
+  bookingId: string,
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      vendorId,
+    },
+
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found',
+      'VENDOR_BOOKING_NOT_FOUND',
+    );
+  }
+
+  return booking;
+};
+
+const ensureBookingAwaitsVendorResponse = (status: BookingStatus) => {
+  if (status !== BookingStatus.AWAITING_VENDOR_CONFIRMATION) {
+    throw new AppError(
+      409,
+      'This booking has already received a vendor response',
+      'BOOKING_ALREADY_RESPONDED',
+    );
+  }
+};
+
+const getUpdatedBooking = async (
+  vendorId: string,
+  bookingId: string,
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      vendorId,
+    },
+
+    select: bookingSelect,
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found',
+      'VENDOR_BOOKING_NOT_FOUND',
+    );
+  }
+
+  return formatBooking(booking);
+};
+
+export const getVendorBookings = async (
+  vendorUserId: string,
+  query: GetVendorBookingsQuery,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const { status, page, limit, sort } = query;
+
+  const where: Prisma.BookingWhereInput = {
+    vendorId,
+
+    ...(status && {
+      status,
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [bookings, total] = await prisma.$transaction([
+    prisma.booking.findMany({
+      where,
+      select: bookingSelect,
+      orderBy: getVendorBookingOrderBy(sort),
+      skip,
+      take: limit,
+    }),
+
+    prisma.booking.count({
+      where,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    bookings: bookings.map(formatBooking),
+
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export const getVendorBookingById = async (
+  vendorUserId: string,
+  bookingId: string,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      vendorId,
+    },
+
+    select: bookingSelect,
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found',
+      'VENDOR_BOOKING_NOT_FOUND',
+    );
+  }
+
+  return formatBooking(booking);
+};
+
+export const confirmVendorBooking = async (
+  vendorUserId: string,
+  bookingId: string,
+  input: ConfirmVendorBookingInput,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const existingBooking = await getOwnedVendorBooking(
+    vendorId,
+    bookingId,
+  );
+
+  ensureBookingAwaitsVendorResponse(existingBooking.status);
+
+  const updateResult = await prisma.booking.updateMany({
+    where: {
+      id: bookingId,
+      vendorId,
+      status: BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+    },
+
+    data: {
+      status: BookingStatus.CONFIRMED,
+      vendorResponseNote: input.note ?? null,
+      vendorRespondedAt: new Date(),
+    },
+  });
+
+  if (updateResult.count === 0) {
+    throw new AppError(
+      409,
+      'This booking has already received a vendor response',
+      'BOOKING_ALREADY_RESPONDED',
+    );
+  }
+
+  return getUpdatedBooking(vendorId, bookingId);
+};
+
+export const rejectVendorBooking = async (
+  vendorUserId: string,
+  bookingId: string,
+  input: RejectVendorBookingInput,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const existingBooking = await getOwnedVendorBooking(
+    vendorId,
+    bookingId,
+  );
+
+  ensureBookingAwaitsVendorResponse(existingBooking.status);
+
+  const updateResult = await prisma.booking.updateMany({
+    where: {
+      id: bookingId,
+      vendorId,
+      status: BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+    },
+
+    data: {
+      status: BookingStatus.REJECTED,
+      vendorResponseNote: input.reason,
+      vendorRespondedAt: new Date(),
+    },
+  });
+
+  if (updateResult.count === 0) {
+    throw new AppError(
+      409,
+      'This booking has already received a vendor response',
+      'BOOKING_ALREADY_RESPONDED',
+    );
+  }
+
+  return getUpdatedBooking(vendorId, bookingId);
+};
 
 export const createCustomerBooking = async (
   customerId: string,
@@ -171,7 +470,11 @@ export const createCustomerBooking = async (
   });
 
   if (!quotation) {
-    throw new AppError(404, 'Accepted quotation not found', 'ACCEPTED_QUOTATION_NOT_FOUND');
+    throw new AppError(
+      404,
+      'Accepted quotation not found',
+      'ACCEPTED_QUOTATION_NOT_FOUND',
+    );
   }
 
   if (
@@ -185,7 +488,10 @@ export const createCustomerBooking = async (
     );
   }
 
-  if (quotation.expiresAt && quotation.expiresAt.getTime() <= Date.now()) {
+  if (
+    quotation.expiresAt &&
+    quotation.expiresAt.getTime() <= Date.now()
+  ) {
     throw new AppError(
       409,
       'The accepted quotation has expired',
@@ -224,6 +530,7 @@ export const createCustomerBooking = async (
   }
 
   const serviceStart = new Date(input.serviceStart);
+
   const serviceEnd =
     input.serviceEnd === undefined || input.serviceEnd === null
       ? null
