@@ -133,6 +133,7 @@ const activeQuotationRequestStatuses: QuotationRequestStatus[] = [
   QuotationRequestStatus.VIEWED,
   QuotationRequestStatus.CLARIFICATION_REQUESTED,
   QuotationRequestStatus.QUOTED,
+  QuotationRequestStatus.ACCEPTED,
 ];
 
 const getQuotationRequestOrderBy = (
@@ -272,6 +273,132 @@ export const getCustomerQuotations = async (customerId: string, quotationRequest
   }
 
   return quotationRequest.quotations.map(formatQuotation);
+};
+
+export const acceptCustomerQuotation = async (
+  customerId: string,
+  quotationRequestId: string,
+  quotationId: string,
+) => {
+  const quotationRequest = await prisma.quotationRequest.findFirst({
+    where: {
+      id: quotationRequestId,
+
+      event: {
+        ownerId: customerId,
+      },
+    },
+    select: {
+      id: true,
+      status: true,
+
+      quotations: {
+        where: {
+          id: quotationId,
+        },
+        select: quotationSelect,
+        take: 1,
+      },
+    },
+  });
+
+  if (!quotationRequest) {
+    throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
+  }
+
+  const quotation = quotationRequest.quotations[0];
+
+  if (!quotation) {
+    throw new AppError(404, 'Quotation not found', 'QUOTATION_NOT_FOUND');
+  }
+
+  if (quotationRequest.status !== QuotationRequestStatus.QUOTED) {
+    throw new AppError(
+      409,
+      'The quotation request cannot accept a quotation',
+      'QUOTATION_REQUEST_CANNOT_BE_ACCEPTED',
+    );
+  }
+
+  if (quotation.status !== QuotationStatus.SENT) {
+    throw new AppError(
+      409,
+      'Only a sent quotation can be accepted',
+      'QUOTATION_CANNOT_BE_ACCEPTED',
+    );
+  }
+
+  if (quotation.expiresAt && quotation.expiresAt.getTime() <= Date.now()) {
+    throw new AppError(409, 'The quotation has expired', 'QUOTATION_EXPIRED');
+  }
+
+  const acceptedQuotation = await prisma.$transaction(async (transaction) => {
+    const quotationUpdate = await transaction.quotation.updateMany({
+      where: {
+        id: quotation.id,
+        quotationRequestId: quotationRequest.id,
+        status: QuotationStatus.SENT,
+      },
+      data: {
+        status: QuotationStatus.ACCEPTED,
+      },
+    });
+
+    if (quotationUpdate.count !== 1) {
+      throw new AppError(
+        409,
+        'The quotation can no longer be accepted',
+        'QUOTATION_CANNOT_BE_ACCEPTED',
+      );
+    }
+
+    const quotationRequestUpdate = await transaction.quotationRequest.updateMany({
+      where: {
+        id: quotationRequest.id,
+        status: QuotationRequestStatus.QUOTED,
+      },
+      data: {
+        status: QuotationRequestStatus.ACCEPTED,
+      },
+    });
+
+    if (quotationRequestUpdate.count !== 1) {
+      throw new AppError(
+        409,
+        'The quotation request can no longer accept a quotation',
+        'QUOTATION_REQUEST_CANNOT_BE_ACCEPTED',
+      );
+    }
+
+    await transaction.quotation.updateMany({
+      where: {
+        quotationRequestId: quotationRequest.id,
+        id: {
+          not: quotation.id,
+        },
+        status: {
+          in: [
+            QuotationStatus.SENT,
+            QuotationStatus.VIEWED,
+            QuotationStatus.CLARIFICATION_REQUESTED,
+            QuotationStatus.REVISED,
+          ],
+        },
+      },
+      data: {
+        status: QuotationStatus.REJECTED,
+      },
+    });
+
+    return transaction.quotation.findUniqueOrThrow({
+      where: {
+        id: quotation.id,
+      },
+      select: quotationSelect,
+    });
+  });
+
+  return formatQuotation(acceptedQuotation);
 };
 
 export const getVendorQuotationRequests = async (

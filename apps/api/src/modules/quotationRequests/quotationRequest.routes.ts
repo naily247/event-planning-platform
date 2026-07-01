@@ -4,30 +4,32 @@ import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
+  acceptCustomerQuotationHandler,
   createCustomerQuotationRequestHandler,
   createVendorQuotationDraftHandler,
   getCustomerQuotationRequestByIdHandler,
   getCustomerQuotationRequestsHandler,
   getCustomerQuotationsHandler,
+  getVendorQuotationDraftHandler,
   getVendorQuotationRequestByIdHandler,
   getVendorQuotationRequestsHandler,
   markVendorQuotationRequestViewedHandler,
-  getVendorQuotationDraftHandler,
-  updateVendorQuotationDraftHandler,
   sendVendorQuotationDraftHandler,
+  updateVendorQuotationDraftHandler,
 } from './quotationRequest.controller.js';
 import {
+  acceptCustomerQuotationSchema,
   createQuotationRequestSchema,
   createVendorQuotationDraftSchema,
   getCustomerQuotationRequestSchema,
   getCustomerQuotationRequestsSchema,
+  getCustomerQuotationSchema,
+  getVendorQuotationDraftSchema,
   getVendorQuotationRequestSchema,
   getVendorQuotationRequestsSchema,
   markVendorQuotationRequestViewedSchema,
-  getVendorQuotationDraftSchema,
-  updateVendorQuotationDraftSchema,
   sendVendorQuotationDraftSchema,
-  getCustomerQuotationSchema,
+  updateVendorQuotationDraftSchema,
 } from './quotationRequest.schemas.js';
 
 export const quotationRequestRouter = Router();
@@ -54,27 +56,6 @@ quotationRequestRouter.patch(
   ...vendorOnly,
   validate(markVendorQuotationRequestViewedSchema),
   markVendorQuotationRequestViewedHandler,
-);
-
-quotationRequestRouter.get(
-  '/',
-  ...customerOnly,
-  validate(getCustomerQuotationRequestsSchema),
-  getCustomerQuotationRequestsHandler,
-);
-
-quotationRequestRouter.post(
-  '/',
-  ...customerOnly,
-  validate(createQuotationRequestSchema),
-  createCustomerQuotationRequestHandler,
-);
-
-quotationRequestRouter.get(
-  '/:quotationRequestId',
-  ...customerOnly,
-  validate(getCustomerQuotationRequestSchema),
-  getCustomerQuotationRequestByIdHandler,
 );
 
 quotationRequestRouter.post(
@@ -106,10 +87,10 @@ quotationRequestRouter.post(
 );
 
 quotationRequestRouter.get(
-  '/:quotationRequestId',
+  '/',
   ...customerOnly,
-  validate(getCustomerQuotationRequestSchema),
-  getCustomerQuotationRequestByIdHandler,
+  validate(getCustomerQuotationRequestsSchema),
+  getCustomerQuotationRequestsHandler,
 );
 
 quotationRequestRouter.post(
@@ -124,6 +105,13 @@ quotationRequestRouter.get(
   ...customerOnly,
   validate(getCustomerQuotationSchema),
   getCustomerQuotationsHandler,
+);
+
+quotationRequestRouter.post(
+  '/:quotationRequestId/quotations/:quotationId/accept',
+  ...customerOnly,
+  validate(acceptCustomerQuotationSchema),
+  acceptCustomerQuotationHandler,
 );
 
 quotationRequestRouter.get(

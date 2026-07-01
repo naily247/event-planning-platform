@@ -40,6 +40,7 @@ enum QuotationRequestStatus {
   VIEWED
   CLARIFICATION_REQUESTED
   QUOTED
+  ACCEPTED
   DECLINED
   CLOSED
 }

@@ -2040,4 +2040,195 @@ describe('Vendor quotation request API', () => {
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
     });
   });
+  describe('POST /api/v1/quotation-requests/:quotationRequestId/quotations/:quotationId/accept', () => {
+    const prepareSentQuotation = async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const quotationRequestResponse = await createQuotationRequest(
+        customerAccessToken,
+        eventId,
+        packageId,
+      );
+
+      const quotationRequestId = quotationRequestResponse.body.data.id;
+
+      const draftResponse = await createVendorQuotationDraft(vendorAccessToken, quotationRequestId);
+
+      expect(draftResponse.status).toBe(201);
+
+      const quotationId = draftResponse.body.data.id;
+
+      const sendResponse = await request(app)
+        .post(
+          `/api/v1/quotation-requests/vendor/incoming/${quotationRequestId}/quotations/draft/send`,
+        )
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(sendResponse.status).toBe(200);
+
+      return {
+        customerAccessToken,
+        vendorAccessToken,
+        quotationRequestId,
+        quotationId,
+      };
+    };
+
+    it('rejects requests without authentication', async () => {
+      const response = await request(app).post(
+        '/api/v1/quotation-requests/clx0000000000000000000000/quotations/clx0000000000000000000001/accept',
+      );
+
+      expect(response.status).toBe(401);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated vendors', async () => {
+      const vendorRegistration = await registerVendor(vendorPayload);
+
+      const response = await request(app)
+        .post(
+          '/api/v1/quotation-requests/clx0000000000000000000000/quotations/clx0000000000000000000001/accept',
+        )
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('accepts a sent quotation and marks the quotation request as accepted', async () => {
+      const { customerAccessToken, quotationRequestId, quotationId } = await prepareSentQuotation();
+
+      const response = await request(app)
+        .post(`/api/v1/quotation-requests/${quotationRequestId}/quotations/${quotationId}/accept`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe(quotationId);
+      expect(response.body.data.status).toBe('ACCEPTED');
+
+      const savedQuotation = await prisma.quotation.findUnique({
+        where: {
+          id: quotationId,
+        },
+      });
+
+      expect(savedQuotation?.status).toBe('ACCEPTED');
+
+      const savedQuotationRequest = await prisma.quotationRequest.findUnique({
+        where: {
+          id: quotationRequestId,
+        },
+      });
+
+      expect(savedQuotationRequest?.status).toBe('ACCEPTED');
+    });
+
+    it('rejects accepting the same quotation twice', async () => {
+      const { customerAccessToken, quotationRequestId, quotationId } = await prepareSentQuotation();
+
+      const firstResponse = await request(app)
+        .post(`/api/v1/quotation-requests/${quotationRequestId}/quotations/${quotationId}/accept`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(firstResponse.status).toBe(200);
+
+      const secondResponse = await request(app)
+        .post(`/api/v1/quotation-requests/${quotationRequestId}/quotations/${quotationId}/accept`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(secondResponse.status).toBe(409);
+      expect(secondResponse.body.error.code).toBe('QUOTATION_REQUEST_CANNOT_BE_ACCEPTED');
+    });
+
+    it('rejects accepting an expired quotation', async () => {
+      const { customerAccessToken, quotationRequestId, quotationId } = await prepareSentQuotation();
+
+      await prisma.quotation.update({
+        where: {
+          id: quotationId,
+        },
+        data: {
+          expiresAt: new Date(Date.now() - 60_000),
+        },
+      });
+
+      const response = await request(app)
+        .post(`/api/v1/quotation-requests/${quotationRequestId}/quotations/${quotationId}/accept`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(409);
+      expect(response.body.error.code).toBe('QUOTATION_EXPIRED');
+    });
+
+    it('hides another customer quotation request', async () => {
+      const { quotationRequestId, quotationId } = await prepareSentQuotation();
+
+      const secondCustomerRegistration = await registerCustomer(secondCustomerPayload);
+
+      const response = await request(app)
+        .post(`/api/v1/quotation-requests/${quotationRequestId}/quotations/${quotationId}/accept`)
+        .set('Authorization', `Bearer ${secondCustomerRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('QUOTATION_REQUEST_NOT_FOUND');
+    });
+
+    it('rejects a quotation that does not belong to the quotation request', async () => {
+      const firstQuotation = await prepareSentQuotation();
+
+      const secondCustomerRegistration = await registerCustomer(secondCustomerPayload);
+
+      const secondCustomerAccessToken = secondCustomerRegistration.body.data.accessToken;
+
+      const secondEventId = await createPlanningEvent(secondCustomerAccessToken);
+
+      const secondQuotationRequest = await prisma.quotationRequest.create({
+        data: {
+          eventId: secondEventId,
+          vendorId: (
+            await prisma.quotationRequest.findUniqueOrThrow({
+              where: {
+                id: firstQuotation.quotationRequestId,
+              },
+              select: {
+                vendorId: true,
+              },
+            })
+          ).vendorId,
+          requirements: 'We need a separate photography quotation for another event.',
+          status: QuotationRequestStatus.QUOTED,
+        },
+      });
+
+      const secondQuotation = await prisma.quotation.create({
+        data: {
+          quotationRequestId: secondQuotationRequest.id,
+          version: 1,
+          status: 'SENT',
+          proposedPrice: 190000,
+          depositAmount: 50000,
+          inclusions: 'Full-day photography, edited photographs, portraits, and an album.',
+          exclusions: 'Travel outside Colombo.',
+          terms: 'Balance must be paid before the event.',
+          expiresAt: new Date('2030-07-25T09:00:00.000Z'),
+        },
+      });
+
+      const response = await request(app)
+        .post(
+          `/api/v1/quotation-requests/${firstQuotation.quotationRequestId}/quotations/${secondQuotation.id}/accept`,
+        )
+        .set('Authorization', `Bearer ${firstQuotation.customerAccessToken}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('QUOTATION_NOT_FOUND');
+    });
+  });
 });

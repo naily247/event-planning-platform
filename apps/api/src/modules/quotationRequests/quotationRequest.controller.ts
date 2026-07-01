@@ -14,6 +14,7 @@ import type {
   UpdateVendorQuotationDraftParams,
   SendVendorQuotationDraftParams,
   GetCustomerQuotationParams,
+  AcceptCustomerQuotationParams,
 } from './quotationRequest.schemas.js';
 import {
   createCustomerQuotationRequest,
@@ -27,6 +28,7 @@ import {
   updateVendorQuotationDraft,
   sendVendorQuotationDraft,
   getCustomerQuotations,
+  acceptCustomerQuotation,
 } from './quotationRequest.service.js';
 
 export const createCustomerQuotationRequestHandler: RequestHandler = asyncHandler(
@@ -117,6 +119,21 @@ export const getVendorQuotationRequestByIdHandler: RequestHandler = asyncHandler
     });
   },
 );
+
+export const acceptCustomerQuotationHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { quotationRequestId, quotationId } = req.params as AcceptCustomerQuotationParams;
+
+  const quotation = await acceptCustomerQuotation(
+    req.auth!.userId,
+    quotationRequestId,
+    quotationId,
+  );
+
+  res.status(200).json({
+    success: true,
+    data: quotation,
+  });
+});
 
 export const markVendorQuotationRequestViewedHandler: RequestHandler = asyncHandler(
   async (req, res) => {
