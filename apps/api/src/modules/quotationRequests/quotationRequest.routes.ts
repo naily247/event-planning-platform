@@ -8,6 +8,7 @@ import {
   createVendorQuotationDraftHandler,
   getCustomerQuotationRequestByIdHandler,
   getCustomerQuotationRequestsHandler,
+  getCustomerQuotationsHandler,
   getVendorQuotationRequestByIdHandler,
   getVendorQuotationRequestsHandler,
   markVendorQuotationRequestViewedHandler,
@@ -26,6 +27,7 @@ import {
   getVendorQuotationDraftSchema,
   updateVendorQuotationDraftSchema,
   sendVendorQuotationDraftSchema,
+  getCustomerQuotationSchema,
 } from './quotationRequest.schemas.js';
 
 export const quotationRequestRouter = Router();
@@ -101,4 +103,32 @@ quotationRequestRouter.post(
   ...vendorOnly,
   validate(sendVendorQuotationDraftSchema),
   sendVendorQuotationDraftHandler,
+);
+
+quotationRequestRouter.get(
+  '/:quotationRequestId',
+  ...customerOnly,
+  validate(getCustomerQuotationRequestSchema),
+  getCustomerQuotationRequestByIdHandler,
+);
+
+quotationRequestRouter.post(
+  '/',
+  ...customerOnly,
+  validate(createQuotationRequestSchema),
+  createCustomerQuotationRequestHandler,
+);
+
+quotationRequestRouter.get(
+  '/:quotationRequestId/quotations',
+  ...customerOnly,
+  validate(getCustomerQuotationSchema),
+  getCustomerQuotationsHandler,
+);
+
+quotationRequestRouter.get(
+  '/:quotationRequestId',
+  ...customerOnly,
+  validate(getCustomerQuotationRequestSchema),
+  getCustomerQuotationRequestByIdHandler,
 );

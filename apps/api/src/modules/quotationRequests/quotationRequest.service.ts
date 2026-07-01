@@ -243,6 +243,37 @@ export const getCustomerQuotationRequestById = async (
   return formatQuotationRequest(quotationRequest);
 };
 
+export const getCustomerQuotations = async (customerId: string, quotationRequestId: string) => {
+  const quotationRequest = await prisma.quotationRequest.findFirst({
+    where: {
+      id: quotationRequestId,
+
+      event: {
+        ownerId: customerId,
+      },
+    },
+    select: {
+      quotations: {
+        where: {
+          status: {
+            not: QuotationStatus.DRAFT,
+          },
+        },
+        select: quotationSelect,
+        orderBy: {
+          version: 'desc',
+        },
+      },
+    },
+  });
+
+  if (!quotationRequest) {
+    throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
+  }
+
+  return quotationRequest.quotations.map(formatQuotation);
+};
+
 export const getVendorQuotationRequests = async (
   vendorUserId: string,
   query: GetVendorQuotationRequestsQuery,

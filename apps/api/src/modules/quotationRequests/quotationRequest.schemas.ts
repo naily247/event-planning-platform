@@ -158,8 +158,15 @@ export const sendVendorQuotationDraftSchema = z.object({
   }),
 });
 
+export const getCustomerQuotationSchema = z.object({
+  params: z.object({
+    quotationRequestId: cuidSchema('Quotation request ID'),
+  }),
+});
+
 export type CreateQuotationRequestInput = z.infer<
-  typeof createQuotationRequestSchema>['body'];
+  typeof createQuotationRequestSchema
+>['body'];
 
 export type GetCustomerQuotationRequestsQuery = z.infer<
   typeof getCustomerQuotationRequestsSchema
@@ -190,7 +197,8 @@ export type CreateVendorQuotationDraftInput = z.infer<
 >['body'];
 
 export type GetVendorQuotationDraftParams = z.infer<
-  typeof getVendorQuotationDraftSchema>['params'];
+  typeof getVendorQuotationDraftSchema
+>['params'];
 
 export type UpdateVendorQuotationDraftParams = z.infer<
   typeof updateVendorQuotationDraftSchema
@@ -202,4 +210,8 @@ export type UpdateVendorQuotationDraftInput = z.infer<
 
 export type SendVendorQuotationDraftParams = z.infer<
   typeof sendVendorQuotationDraftSchema
+>['params'];
+
+export type GetCustomerQuotationParams = z.infer<
+  typeof getCustomerQuotationSchema
 >['params'];

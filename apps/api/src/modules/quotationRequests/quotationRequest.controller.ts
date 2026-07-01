@@ -13,6 +13,7 @@ import type {
   UpdateVendorQuotationDraftInput,
   UpdateVendorQuotationDraftParams,
   SendVendorQuotationDraftParams,
+  GetCustomerQuotationParams,
 } from './quotationRequest.schemas.js';
 import {
   createCustomerQuotationRequest,
@@ -25,6 +26,7 @@ import {
   markVendorQuotationRequestViewed,
   updateVendorQuotationDraft,
   sendVendorQuotationDraft,
+  getCustomerQuotations,
 } from './quotationRequest.service.js';
 
 export const createCustomerQuotationRequestHandler: RequestHandler = asyncHandler(
@@ -73,6 +75,17 @@ export const getCustomerQuotationRequestByIdHandler: RequestHandler = asyncHandl
     });
   },
 );
+
+export const getCustomerQuotationsHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { quotationRequestId } = req.params as GetCustomerQuotationParams;
+
+  const quotations = await getCustomerQuotations(req.auth!.userId, quotationRequestId);
+
+  res.status(200).json({
+    success: true,
+    data: quotations,
+  });
+});
 
 export const getVendorQuotationRequestsHandler: RequestHandler = asyncHandler(async (req, res) => {
   const result = await getVendorQuotationRequests(

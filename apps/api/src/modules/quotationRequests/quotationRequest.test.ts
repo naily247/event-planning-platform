@@ -664,6 +664,164 @@ describe('Customer quotation request API', () => {
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
     });
   });
+  describe('GET /api/v1/quotation-requests/:quotationRequestId/quotations', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app).get(
+        '/api/v1/quotation-requests/clx0000000000000000000000/quotations',
+      );
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated vendors', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/clx0000000000000000000000/quotations')
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('returns sent quotations for an owned quotation request', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const createdDraft = await createVendorQuotationDraft(
+        vendorAccessToken,
+        createdRequest.body.data.id,
+        {
+          proposedPrice: 250000,
+          depositAmount: 50000,
+        },
+      );
+
+      const sendResponse = await request(app)
+        .post(
+          `/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}/quotations/draft/send`,
+        )
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(sendResponse.status).toBe(200);
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/${createdRequest.body.data.id}/quotations`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(1);
+
+      expect(response.body.data[0]).toMatchObject({
+        id: createdDraft.body.data.id,
+        quotationRequestId: createdRequest.body.data.id,
+        version: 1,
+        status: 'SENT',
+        proposedPrice: '250000.00',
+        depositAmount: '50000.00',
+        inclusions:
+          'Full-day photography, edited digital photographs, couple portraits, and one printed album.',
+        exclusions: 'Travel outside Colombo and additional printed albums.',
+        terms: 'The remaining balance must be paid seven days before the event.',
+        expiresAt: '2030-07-25T09:00:00.000Z',
+      });
+
+      expect(response.body.data[0].createdAt).toEqual(expect.any(String));
+    });
+
+    it('does not expose an unsent quotation draft', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      await createVendorQuotationDraft(vendorAccessToken, createdRequest.body.data.id);
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/${createdRequest.body.data.id}/quotations`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toEqual([]);
+    });
+
+    it('returns an empty array when no quotation exists', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/${createdRequest.body.data.id}/quotations`)
+        .set('Authorization', `Bearer ${customerAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toEqual([]);
+    });
+
+    it('hides quotations belonging to another customer quotation request', async () => {
+      const firstCustomer = await registerCustomer(customerPayload);
+      const secondCustomer = await registerCustomer(secondCustomerPayload);
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(firstCustomer.body.data.accessToken);
+
+      const createdRequest = await createQuotationRequest(
+        firstCustomer.body.data.accessToken,
+        eventId,
+        packageId,
+      );
+
+      await createVendorQuotationDraft(vendorAccessToken, createdRequest.body.data.id);
+
+      await request(app)
+        .post(
+          `/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}/quotations/draft/send`,
+        )
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/${createdRequest.body.data.id}/quotations`)
+        .set('Authorization', `Bearer ${secondCustomer.body.data.accessToken}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_REQUEST_NOT_FOUND');
+    });
+
+    it('rejects an invalid quotation request ID', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/invalid-id/quotations')
+        .set('Authorization', `Bearer ${customerRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
 });
 
 describe('Vendor quotation request API', () => {
