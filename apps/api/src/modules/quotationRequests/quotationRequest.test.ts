@@ -8,6 +8,7 @@ const app = createApp();
 const customerEmail = 'quotation-customer@example.com';
 const secondCustomerEmail = 'quotation-second-customer@example.com';
 const vendorEmail = 'quotation-vendor@example.com';
+const secondVendorEmail = 'quotation-second-vendor@example.com';
 
 const customerPayload = {
   email: customerEmail,
@@ -39,7 +40,15 @@ const vendorPayload = {
   businessName: 'Quotation Photography Studio',
 };
 
-const testEmails = [customerEmail, secondCustomerEmail, vendorEmail];
+const secondVendorPayload = {
+  email: secondVendorEmail,
+  password: 'Vendor@2026',
+  firstName: 'Nimal',
+  lastName: 'Fernando',
+  businessName: 'Second Quotation Studio',
+};
+
+const testEmails = [customerEmail, secondCustomerEmail, vendorEmail, secondVendorEmail];
 
 const clearTestData = async () => {
   await prisma.quotationRequest.deleteMany({
@@ -57,7 +66,9 @@ const clearTestData = async () => {
         {
           vendor: {
             user: {
-              email: vendorEmail,
+              email: {
+                in: testEmails,
+              },
             },
           },
         },
@@ -79,7 +90,9 @@ const clearTestData = async () => {
     where: {
       vendor: {
         user: {
-          email: vendorEmail,
+          email: {
+            in: testEmails,
+          },
         },
       },
     },
@@ -89,7 +102,9 @@ const clearTestData = async () => {
     where: {
       vendor: {
         user: {
-          email: vendorEmail,
+          email: {
+            in: testEmails,
+          },
         },
       },
     },
@@ -108,8 +123,10 @@ const registerCustomer = async (payload: typeof customerPayload | typeof secondC
   return request(app).post('/api/v1/auth/register/customer').send(payload);
 };
 
-const registerVendor = async () => {
-  return request(app).post('/api/v1/auth/register/vendor').send(vendorPayload);
+const registerVendor = async (
+  payload: typeof vendorPayload | typeof secondVendorPayload = vendorPayload,
+) => {
+  return request(app).post('/api/v1/auth/register/vendor').send(payload);
 };
 
 const getPhotographyCategory = async () => {
@@ -273,6 +290,7 @@ describe('Customer quotation request API', () => {
       const customerAccessToken = customerRegistration.body.data.accessToken;
 
       const { packageId, vendorId } = await prepareApprovedVendorPackage();
+
       const eventId = await createPlanningEvent(customerAccessToken);
 
       const response = await createQuotationRequest(customerAccessToken, eventId, packageId);
@@ -451,7 +469,11 @@ describe('Customer quotation request API', () => {
 
       const secondEventId = await createPlanningEvent(secondCustomer.body.data.accessToken);
 
-      await createQuotationRequest(firstCustomer.body.data.accessToken, firstEventId, packageId);
+      const firstRequest = await createQuotationRequest(
+        firstCustomer.body.data.accessToken,
+        firstEventId,
+        packageId,
+      );
 
       await createQuotationRequest(secondCustomer.body.data.accessToken, secondEventId, packageId);
 
@@ -462,6 +484,7 @@ describe('Customer quotation request API', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].id).toBe(firstRequest.body.data.id);
       expect(response.body.data[0].event.id).toBe(firstEventId);
 
       expect(response.body.meta.pagination).toMatchObject({
@@ -620,6 +643,308 @@ describe('Customer quotation request API', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+});
+
+describe('Vendor quotation request API', () => {
+  describe('GET /api/v1/quotation-requests/vendor/incoming', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app).get('/api/v1/quotation-requests/vendor/incoming');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated customers', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/vendor/incoming')
+        .set('Authorization', `Bearer ${customerRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('returns quotation requests belonging to the authenticated vendor', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId, vendorId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/vendor/incoming')
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(1);
+
+      expect(response.body.data[0]).toMatchObject({
+        id: createdRequest.body.data.id,
+        status: 'SENT',
+        event: {
+          id: eventId,
+          name: 'Maya and Arjun Wedding',
+          owner: {
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            email: customerEmail,
+            phone: expect.any(String),
+          },
+        },
+        vendor: {
+          id: vendorId,
+          businessName: 'Quotation Photography Studio',
+        },
+        package: {
+          id: packageId,
+          title: 'Wedding Photography Package',
+          basePrice: '150000.00',
+        },
+      });
+
+      expect(response.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('filters vendor quotation requests by status', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const firstEventId = await createPlanningEvent(customerAccessToken);
+      const secondEventId = await createPlanningEvent(customerAccessToken);
+
+      const firstRequest = await createQuotationRequest(
+        customerAccessToken,
+        firstEventId,
+        packageId,
+      );
+
+      await createQuotationRequest(customerAccessToken, secondEventId, packageId);
+
+      await prisma.quotationRequest.update({
+        where: {
+          id: firstRequest.body.data.id,
+        },
+        data: {
+          status: QuotationRequestStatus.VIEWED,
+        },
+      });
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/vendor/incoming?status=VIEWED')
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].id).toBe(firstRequest.body.data.id);
+      expect(response.body.data[0].status).toBe('VIEWED');
+    });
+
+    it('supports pagination and oldest-first sorting', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const firstEventId = await createPlanningEvent(customerAccessToken);
+      const secondEventId = await createPlanningEvent(customerAccessToken);
+
+      const firstRequest = await createQuotationRequest(
+        customerAccessToken,
+        firstEventId,
+        packageId,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const secondRequest = await createQuotationRequest(
+        customerAccessToken,
+        secondEventId,
+        packageId,
+      );
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/vendor/incoming?page=1&limit=1&sort=oldest')
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].id).toBe(firstRequest.body.data.id);
+      expect(response.body.data[0].id).not.toBe(secondRequest.body.data.id);
+
+      expect(response.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 1,
+        total: 2,
+        totalPages: 2,
+        hasNextPage: true,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('rejects invalid vendor list query parameters', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await request(app)
+        .get(
+          '/api/v1/quotation-requests/vendor/incoming?page=0&limit=100&sort=invalid&status=INVALID',
+        )
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('GET /api/v1/quotation-requests/vendor/incoming/:quotationRequestId', () => {
+    it('returns a quotation request belonging to the authenticated vendor', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}`)
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe(createdRequest.body.data.id);
+      expect(response.body.data.event.id).toBe(eventId);
+      expect(response.body.data.event.owner.email).toBe(customerEmail);
+      expect(response.body.data.package.id).toBe(packageId);
+    });
+
+    it('hides a quotation request belonging to another vendor', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await request(app)
+        .get(`/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}`)
+        .set('Authorization', `Bearer ${secondVendorRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_REQUEST_NOT_FOUND');
+    });
+
+    it('rejects an invalid quotation request ID', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await request(app)
+        .get('/api/v1/quotation-requests/vendor/incoming/invalid-id')
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('PATCH /api/v1/quotation-requests/vendor/incoming/:quotationRequestId/viewed', () => {
+    it('marks a sent quotation request as viewed', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await request(app)
+        .patch(`/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}/viewed`)
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe(createdRequest.body.data.id);
+      expect(response.body.data.status).toBe('VIEWED');
+
+      const savedRequest = await prisma.quotationRequest.findUnique({
+        where: {
+          id: createdRequest.body.data.id,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      expect(savedRequest?.status).toBe(QuotationRequestStatus.VIEWED);
+    });
+
+    it('rejects marking an already viewed quotation request again', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      await request(app)
+        .patch(`/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}/viewed`)
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      const response = await request(app)
+        .patch(`/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}/viewed`)
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_REQUEST_CANNOT_BE_MARKED_VIEWED');
+    });
+
+    it('hides another vendor quotation request', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await request(app)
+        .patch(`/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}/viewed`)
+        .set('Authorization', `Bearer ${secondVendorRegistration.body.data.accessToken}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_REQUEST_NOT_FOUND');
     });
   });
 });

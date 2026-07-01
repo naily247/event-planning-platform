@@ -9,6 +9,7 @@ import { AppError } from '../../utils/AppError.js';
 import type {
   CreateQuotationRequestInput,
   GetCustomerQuotationRequestsQuery,
+  GetVendorQuotationRequestsQuery,
 } from './quotationRequest.schemas.js';
 
 const quotationRequestSelect = {
@@ -25,6 +26,21 @@ const quotationRequestSelect = {
       eventDate: true,
       location: true,
       status: true,
+
+      owner: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+
+          customer: {
+            select: {
+              phone: true,
+            },
+          },
+        },
+      },
     },
   },
 
@@ -65,6 +81,18 @@ type SelectedQuotationRequest = Prisma.QuotationRequestGetPayload<{
 const formatQuotationRequest = (quotationRequest: SelectedQuotationRequest) => ({
   ...quotationRequest,
 
+  event: {
+    ...quotationRequest.event,
+
+    owner: {
+      id: quotationRequest.event.owner.id,
+      firstName: quotationRequest.event.owner.firstName,
+      lastName: quotationRequest.event.owner.lastName,
+      email: quotationRequest.event.owner.email,
+      phone: quotationRequest.event.owner.customer?.phone ?? null,
+    },
+  },
+
   package: quotationRequest.package
     ? {
         ...quotationRequest.package,
@@ -80,8 +108,8 @@ const activeQuotationRequestStatuses: QuotationRequestStatus[] = [
   QuotationRequestStatus.QUOTED,
 ];
 
-const getCustomerQuotationRequestOrderBy = (
-  sort: GetCustomerQuotationRequestsQuery['sort'],
+const getQuotationRequestOrderBy = (
+  sort: GetCustomerQuotationRequestsQuery['sort'] | GetVendorQuotationRequestsQuery['sort'],
 ): Prisma.QuotationRequestOrderByWithRelationInput => {
   switch (sort) {
     case 'oldest':
@@ -95,6 +123,23 @@ const getCustomerQuotationRequestOrderBy = (
         createdAt: 'desc',
       };
   }
+};
+
+const getVendorProfileId = async (vendorUserId: string) => {
+  const vendor = await prisma.vendorProfile.findUnique({
+    where: {
+      userId: vendorUserId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!vendor) {
+    throw new AppError(404, 'Vendor profile not found', 'VENDOR_PROFILE_NOT_FOUND');
+  }
+
+  return vendor.id;
 };
 
 export const getCustomerQuotationRequests = async (
@@ -123,7 +168,7 @@ export const getCustomerQuotationRequests = async (
     prisma.quotationRequest.findMany({
       where,
       select: quotationRequestSelect,
-      orderBy: getCustomerQuotationRequestOrderBy(sort),
+      orderBy: getQuotationRequestOrderBy(sort),
       skip,
       take: limit,
     }),
@@ -169,6 +214,116 @@ export const getCustomerQuotationRequestById = async (
   }
 
   return formatQuotationRequest(quotationRequest);
+};
+
+export const getVendorQuotationRequests = async (
+  vendorUserId: string,
+  query: GetVendorQuotationRequestsQuery,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+  const { status, page, limit, sort } = query;
+
+  const where: Prisma.QuotationRequestWhereInput = {
+    vendorId,
+
+    ...(status && {
+      status,
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [quotationRequests, total] = await prisma.$transaction([
+    prisma.quotationRequest.findMany({
+      where,
+      select: quotationRequestSelect,
+      orderBy: getQuotationRequestOrderBy(sort),
+      skip,
+      take: limit,
+    }),
+
+    prisma.quotationRequest.count({
+      where,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    quotationRequests: quotationRequests.map(formatQuotationRequest),
+
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export const getVendorQuotationRequestById = async (
+  vendorUserId: string,
+  quotationRequestId: string,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const quotationRequest = await prisma.quotationRequest.findFirst({
+    where: {
+      id: quotationRequestId,
+      vendorId,
+    },
+    select: quotationRequestSelect,
+  });
+
+  if (!quotationRequest) {
+    throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
+  }
+
+  return formatQuotationRequest(quotationRequest);
+};
+
+export const markVendorQuotationRequestViewed = async (
+  vendorUserId: string,
+  quotationRequestId: string,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const quotationRequest = await prisma.quotationRequest.findFirst({
+    where: {
+      id: quotationRequestId,
+      vendorId,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (!quotationRequest) {
+    throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
+  }
+
+  if (quotationRequest.status !== QuotationRequestStatus.SENT) {
+    throw new AppError(
+      409,
+      'Only sent quotation requests can be marked as viewed',
+      'QUOTATION_REQUEST_CANNOT_BE_MARKED_VIEWED',
+    );
+  }
+
+  const updatedQuotationRequest = await prisma.quotationRequest.update({
+    where: {
+      id: quotationRequest.id,
+    },
+    data: {
+      status: QuotationRequestStatus.VIEWED,
+    },
+    select: quotationRequestSelect,
+  });
+
+  return formatQuotationRequest(updatedQuotationRequest);
 };
 
 export const createCustomerQuotationRequest = async (

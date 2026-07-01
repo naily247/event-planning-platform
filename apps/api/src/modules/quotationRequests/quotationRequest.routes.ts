@@ -7,16 +7,44 @@ import {
   createCustomerQuotationRequestHandler,
   getCustomerQuotationRequestByIdHandler,
   getCustomerQuotationRequestsHandler,
+  getVendorQuotationRequestByIdHandler,
+  getVendorQuotationRequestsHandler,
+  markVendorQuotationRequestViewedHandler,
 } from './quotationRequest.controller.js';
 import {
   createQuotationRequestSchema,
   getCustomerQuotationRequestSchema,
   getCustomerQuotationRequestsSchema,
+  getVendorQuotationRequestSchema,
+  getVendorQuotationRequestsSchema,
+  markVendorQuotationRequestViewedSchema,
 } from './quotationRequest.schemas.js';
 
 export const quotationRequestRouter = Router();
 
 const customerOnly = [requireAuth, authorize(UserRole.CUSTOMER)] as const;
+const vendorOnly = [requireAuth, authorize(UserRole.VENDOR)] as const;
+
+quotationRequestRouter.get(
+  '/vendor/incoming',
+  ...vendorOnly,
+  validate(getVendorQuotationRequestsSchema),
+  getVendorQuotationRequestsHandler,
+);
+
+quotationRequestRouter.get(
+  '/vendor/incoming/:quotationRequestId',
+  ...vendorOnly,
+  validate(getVendorQuotationRequestSchema),
+  getVendorQuotationRequestByIdHandler,
+);
+
+quotationRequestRouter.patch(
+  '/vendor/incoming/:quotationRequestId/viewed',
+  ...vendorOnly,
+  validate(markVendorQuotationRequestViewedSchema),
+  markVendorQuotationRequestViewedHandler,
+);
 
 quotationRequestRouter.get(
   '/',

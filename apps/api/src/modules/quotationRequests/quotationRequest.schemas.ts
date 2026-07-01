@@ -46,6 +46,30 @@ export const getCustomerQuotationRequestSchema = z.object({
   }),
 });
 
+export const getVendorQuotationRequestsSchema = z.object({
+  query: z.object({
+    status: z.nativeEnum(QuotationRequestStatus).optional(),
+
+    page: z.coerce.number().int().min(1).default(1),
+
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+
+    sort: z.enum(quotationRequestSortOptions).default('newest'),
+  }),
+});
+
+export const getVendorQuotationRequestSchema = z.object({
+  params: z.object({
+    quotationRequestId: cuidSchema('Quotation request ID'),
+  }),
+});
+
+export const markVendorQuotationRequestViewedSchema = z.object({
+  params: z.object({
+    quotationRequestId: cuidSchema('Quotation request ID'),
+  }),
+});
+
 export type CreateQuotationRequestInput = z.infer<typeof createQuotationRequestSchema>['body'];
 
 export type GetCustomerQuotationRequestsQuery = z.infer<
@@ -54,4 +78,16 @@ export type GetCustomerQuotationRequestsQuery = z.infer<
 
 export type CustomerQuotationRequestParams = z.infer<
   typeof getCustomerQuotationRequestSchema
+>['params'];
+
+export type GetVendorQuotationRequestsQuery = z.infer<
+  typeof getVendorQuotationRequestsSchema
+>['query'];
+
+export type VendorQuotationRequestParams = z.infer<
+  typeof getVendorQuotationRequestSchema
+>['params'];
+
+export type MarkVendorQuotationRequestViewedParams = z.infer<
+  typeof markVendorQuotationRequestViewedSchema
 >['params'];
