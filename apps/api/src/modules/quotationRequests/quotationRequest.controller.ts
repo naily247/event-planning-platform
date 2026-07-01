@@ -2,6 +2,8 @@ import type { RequestHandler } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import type {
   CreateQuotationRequestInput,
+  CreateVendorQuotationDraftInput,
+  CreateVendorQuotationDraftParams,
   CustomerQuotationRequestParams,
   GetCustomerQuotationRequestsQuery,
   GetVendorQuotationRequestsQuery,
@@ -10,6 +12,7 @@ import type {
 } from './quotationRequest.schemas.js';
 import {
   createCustomerQuotationRequest,
+  createVendorQuotationDraft,
   getCustomerQuotationRequestById,
   getCustomerQuotationRequests,
   getVendorQuotationRequestById,
@@ -110,3 +113,18 @@ export const markVendorQuotationRequestViewedHandler: RequestHandler = asyncHand
     });
   },
 );
+
+export const createVendorQuotationDraftHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { quotationRequestId } = req.params as CreateVendorQuotationDraftParams;
+
+  const quotation = await createVendorQuotationDraft(
+    req.auth!.userId,
+    quotationRequestId,
+    req.body as CreateVendorQuotationDraftInput,
+  );
+
+  res.status(201).json({
+    success: true,
+    data: quotation,
+  });
+});

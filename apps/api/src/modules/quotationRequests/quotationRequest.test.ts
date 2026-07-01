@@ -1,4 +1,4 @@
-import { QuotationRequestStatus, VendorVerificationStatus } from '@prisma/client';
+import { QuotationRequestStatus, QuotationStatus, VendorVerificationStatus } from '@prisma/client';
 import request from 'supertest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -245,6 +245,26 @@ const createQuotationRequest = (
     });
 };
 
+const createVendorQuotationDraft = (
+  vendorAccessToken: string,
+  quotationRequestId: string,
+  overrides: Record<string, unknown> = {},
+) => {
+  return request(app)
+    .post(`/api/v1/quotation-requests/vendor/incoming/${quotationRequestId}/quotations`)
+    .set('Authorization', `Bearer ${vendorAccessToken}`)
+    .send({
+      proposedPrice: 175000,
+      depositAmount: 50000,
+      inclusions:
+        'Full-day photography, edited digital photographs, couple portraits, and one printed album.',
+      exclusions: 'Travel outside Colombo and additional printed albums.',
+      terms: 'The remaining balance must be paid seven days before the event.',
+      expiresAt: '2030-07-25T09:00:00.000Z',
+      ...overrides,
+    });
+};
+
 beforeEach(async () => {
   await clearTestData();
 });
@@ -466,7 +486,6 @@ describe('Customer quotation request API', () => {
       const { packageId } = await prepareApprovedVendorPackage();
 
       const firstEventId = await createPlanningEvent(firstCustomer.body.data.accessToken);
-
       const secondEventId = await createPlanningEvent(secondCustomer.body.data.accessToken);
 
       const firstRequest = await createQuotationRequest(
@@ -945,6 +964,268 @@ describe('Vendor quotation request API', () => {
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
       expect(response.body.error.code).toBe('QUOTATION_REQUEST_NOT_FOUND');
+    });
+  });
+
+  describe('POST /api/v1/quotation-requests/vendor/incoming/:quotationRequestId/quotations', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app)
+        .post('/api/v1/quotation-requests/vendor/incoming/clx0000000000000000000000/quotations')
+        .send({
+          proposedPrice: 175000,
+          inclusions: 'Professional full-day wedding photography coverage.',
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated customers', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await request(app)
+        .post('/api/v1/quotation-requests/vendor/incoming/clx0000000000000000000000/quotations')
+        .set('Authorization', `Bearer ${customerRegistration.body.data.accessToken}`)
+        .send({
+          proposedPrice: 175000,
+          inclusions: 'Professional full-day wedding photography coverage.',
+        });
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('creates the first quotation draft for a sent quotation request', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await createVendorQuotationDraft(
+        vendorAccessToken,
+        createdRequest.body.data.id,
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        quotationRequestId: createdRequest.body.data.id,
+        version: 1,
+        status: 'DRAFT',
+        proposedPrice: '175000.00',
+        depositAmount: '50000.00',
+        inclusions:
+          'Full-day photography, edited digital photographs, couple portraits, and one printed album.',
+        exclusions: 'Travel outside Colombo and additional printed albums.',
+        terms: 'The remaining balance must be paid seven days before the event.',
+        expiresAt: '2030-07-25T09:00:00.000Z',
+      });
+
+      expect(response.body.data.id).toEqual(expect.any(String));
+      expect(response.body.data.createdAt).toEqual(expect.any(String));
+
+      const savedQuotation = await prisma.quotation.findUnique({
+        where: {
+          quotationRequestId_version: {
+            quotationRequestId: createdRequest.body.data.id,
+            version: 1,
+          },
+        },
+      });
+
+      expect(savedQuotation).not.toBeNull();
+      expect(savedQuotation?.status).toBe(QuotationStatus.DRAFT);
+      expect(savedQuotation?.proposedPrice.toFixed(2)).toBe('175000.00');
+      expect(savedQuotation?.depositAmount?.toFixed(2)).toBe('50000.00');
+
+      const savedRequest = await prisma.quotationRequest.findUnique({
+        where: {
+          id: createdRequest.body.data.id,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      expect(savedRequest?.status).toBe(QuotationRequestStatus.SENT);
+    });
+
+    it('creates a quotation draft for a viewed quotation request', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      await request(app)
+        .patch(`/api/v1/quotation-requests/vendor/incoming/${createdRequest.body.data.id}/viewed`)
+        .set('Authorization', `Bearer ${vendorAccessToken}`);
+
+      const response = await createVendorQuotationDraft(
+        vendorAccessToken,
+        createdRequest.body.data.id,
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.status).toBe('DRAFT');
+      expect(response.body.data.version).toBe(1);
+    });
+
+    it('rejects invalid quotation draft input', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await request(app)
+        .post('/api/v1/quotation-requests/vendor/incoming/clx0000000000000000000000/quotations')
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`)
+        .send({
+          proposedPrice: 0,
+          depositAmount: -100,
+          inclusions: 'Short',
+          expiresAt: 'invalid-date',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects a deposit greater than the proposed price', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await request(app)
+        .post('/api/v1/quotation-requests/vendor/incoming/clx0000000000000000000000/quotations')
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`)
+        .send({
+          proposedPrice: 100000,
+          depositAmount: 120000,
+          inclusions: 'Professional full-day wedding photography and edited photographs.',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects a quotation expiry after the event date', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await createVendorQuotationDraft(
+        vendorAccessToken,
+        createdRequest.body.data.id,
+        {
+          expiresAt: '2030-09-01T09:00:00.000Z',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('INVALID_QUOTATION_EXPIRY');
+    });
+
+    it('rejects a quotation draft after the response deadline', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId, {
+        responseDueAt: null,
+      });
+
+      await prisma.quotationRequest.update({
+        where: {
+          id: createdRequest.body.data.id,
+        },
+        data: {
+          responseDueAt: new Date('2020-01-01T09:00:00.000Z'),
+        },
+      });
+
+      const response = await createVendorQuotationDraft(
+        vendorAccessToken,
+        createdRequest.body.data.id,
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_RESPONSE_DEADLINE_PASSED');
+    });
+
+    it('prevents creating another quotation for the same quotation request', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      await createVendorQuotationDraft(vendorAccessToken, createdRequest.body.data.id);
+
+      const response = await createVendorQuotationDraft(
+        vendorAccessToken,
+        createdRequest.body.data.id,
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_ALREADY_EXISTS');
+    });
+
+    it('hides a quotation request belonging to another vendor', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+      const customerAccessToken = customerRegistration.body.data.accessToken;
+
+      const { packageId } = await prepareApprovedVendorPackage();
+
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
+
+      const eventId = await createPlanningEvent(customerAccessToken);
+
+      const createdRequest = await createQuotationRequest(customerAccessToken, eventId, packageId);
+
+      const response = await createVendorQuotationDraft(
+        secondVendorRegistration.body.data.accessToken,
+        createdRequest.body.data.id,
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('QUOTATION_REQUEST_NOT_FOUND');
+    });
+
+    it('rejects an invalid quotation request ID', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await createVendorQuotationDraft(
+        vendorRegistration.body.data.accessToken,
+        'invalid-id',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
     });
   });
 });

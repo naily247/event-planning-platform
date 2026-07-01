@@ -3,6 +3,7 @@ import {
   Prisma,
   QuotationRequestStatus,
   VendorVerificationStatus,
+  QuotationStatus,
 } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
@@ -10,6 +11,7 @@ import type {
   CreateQuotationRequestInput,
   GetCustomerQuotationRequestsQuery,
   GetVendorQuotationRequestsQuery,
+  CreateVendorQuotationDraftInput,
 } from './quotationRequest.schemas.js';
 
 const quotationRequestSelect = {
@@ -99,6 +101,30 @@ const formatQuotationRequest = (quotationRequest: SelectedQuotationRequest) => (
         basePrice: quotationRequest.package.basePrice?.toFixed(2) ?? null,
       }
     : null,
+});
+
+const quotationSelect = {
+  id: true,
+  quotationRequestId: true,
+  version: true,
+  status: true,
+  proposedPrice: true,
+  depositAmount: true,
+  inclusions: true,
+  exclusions: true,
+  terms: true,
+  expiresAt: true,
+  createdAt: true,
+} as const;
+
+type SelectedQuotation = Prisma.QuotationGetPayload<{
+  select: typeof quotationSelect;
+}>;
+
+const formatQuotation = (quotation: SelectedQuotation) => ({
+  ...quotation,
+  proposedPrice: quotation.proposedPrice.toFixed(2),
+  depositAmount: quotation.depositAmount?.toFixed(2) ?? null,
 });
 
 const activeQuotationRequestStatuses: QuotationRequestStatus[] = [
@@ -324,6 +350,105 @@ export const markVendorQuotationRequestViewed = async (
   });
 
   return formatQuotationRequest(updatedQuotationRequest);
+};
+
+export const createVendorQuotationDraft = async (
+  vendorUserId: string,
+  quotationRequestId: string,
+  input: CreateVendorQuotationDraftInput,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const quotationRequest = await prisma.quotationRequest.findFirst({
+    where: {
+      id: quotationRequestId,
+      vendorId,
+    },
+    select: {
+      id: true,
+      status: true,
+      responseDueAt: true,
+
+      event: {
+        select: {
+          eventDate: true,
+        },
+      },
+
+      quotations: {
+        select: {
+          id: true,
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (!quotationRequest) {
+    throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
+  }
+
+  if (
+    quotationRequest.status !== QuotationRequestStatus.SENT &&
+    quotationRequest.status !== QuotationRequestStatus.VIEWED
+  ) {
+    throw new AppError(
+      409,
+      'A quotation draft cannot be created for this quotation request',
+      'QUOTATION_DRAFT_CANNOT_BE_CREATED',
+    );
+  }
+
+  if (quotationRequest.responseDueAt && quotationRequest.responseDueAt.getTime() <= Date.now()) {
+    throw new AppError(
+      409,
+      'The quotation response deadline has passed',
+      'QUOTATION_RESPONSE_DEADLINE_PASSED',
+    );
+  }
+
+  if (quotationRequest.quotations.length > 0) {
+    throw new AppError(
+      409,
+      'A quotation already exists for this quotation request',
+      'QUOTATION_ALREADY_EXISTS',
+    );
+  }
+
+  if (
+    input.expiresAt !== undefined &&
+    input.expiresAt !== null &&
+    new Date(input.expiresAt).getTime() >= quotationRequest.event.eventDate.getTime()
+  ) {
+    throw new AppError(
+      400,
+      'Quotation expiry must be before the event date',
+      'INVALID_QUOTATION_EXPIRY',
+    );
+  }
+
+  const quotation = await prisma.quotation.create({
+    data: {
+      quotationRequestId: quotationRequest.id,
+      version: 1,
+      status: QuotationStatus.DRAFT,
+      proposedPrice: new Prisma.Decimal(input.proposedPrice),
+      depositAmount:
+        input.depositAmount === undefined || input.depositAmount === null
+          ? null
+          : new Prisma.Decimal(input.depositAmount),
+      inclusions: input.inclusions,
+      exclusions: input.exclusions ?? null,
+      terms: input.terms ?? null,
+      expiresAt:
+        input.expiresAt === undefined || input.expiresAt === null
+          ? null
+          : new Date(input.expiresAt),
+    },
+    select: quotationSelect,
+  });
+
+  return formatQuotation(quotation);
 };
 
 export const createCustomerQuotationRequest = async (

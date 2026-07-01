@@ -5,6 +5,7 @@ import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
   createCustomerQuotationRequestHandler,
+  createVendorQuotationDraftHandler,
   getCustomerQuotationRequestByIdHandler,
   getCustomerQuotationRequestsHandler,
   getVendorQuotationRequestByIdHandler,
@@ -13,6 +14,7 @@ import {
 } from './quotationRequest.controller.js';
 import {
   createQuotationRequestSchema,
+  createVendorQuotationDraftSchema,
   getCustomerQuotationRequestSchema,
   getCustomerQuotationRequestsSchema,
   getVendorQuotationRequestSchema,
@@ -65,4 +67,11 @@ quotationRequestRouter.get(
   ...customerOnly,
   validate(getCustomerQuotationRequestSchema),
   getCustomerQuotationRequestByIdHandler,
+);
+
+quotationRequestRouter.post(
+  '/vendor/incoming/:quotationRequestId/quotations',
+  ...vendorOnly,
+  validate(createVendorQuotationDraftSchema),
+  createVendorQuotationDraftHandler,
 );

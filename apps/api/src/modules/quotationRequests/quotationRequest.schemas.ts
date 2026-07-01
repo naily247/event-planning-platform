@@ -12,6 +12,15 @@ const responseDueAtSchema = z
     message: 'Response deadline must be in the future',
   });
 
+const quotationExpiresAtSchema = z
+  .string()
+  .datetime({
+    message: 'Quotation expiry must be a valid ISO 8601 date and time',
+  })
+  .refine((value) => new Date(value).getTime() > Date.now(), {
+    message: 'Quotation expiry must be in the future',
+  });
+
 export const quotationRequestSortOptions = ['newest', 'oldest'] as const;
 
 export const createQuotationRequestSchema = z.object({
@@ -70,6 +79,48 @@ export const markVendorQuotationRequestViewedSchema = z.object({
   }),
 });
 
+export const createVendorQuotationDraftSchema = z.object({
+  params: z.object({
+    quotationRequestId: cuidSchema('Quotation request ID'),
+  }),
+
+  body: z
+    .object({
+      proposedPrice: z.coerce
+        .number()
+        .positive('Proposed price must be greater than zero')
+        .max(9999999999.99, 'Proposed price is too large'),
+
+      depositAmount: z.coerce
+        .number()
+        .min(0, 'Deposit amount cannot be negative')
+        .max(9999999999.99, 'Deposit amount is too large')
+        .nullable()
+        .optional(),
+
+      inclusions: z.string().trim().min(10).max(5000),
+
+      exclusions: z.string().trim().min(1).max(5000).nullable().optional(),
+
+      terms: z.string().trim().min(1).max(5000).nullable().optional(),
+
+      expiresAt: quotationExpiresAtSchema.nullable().optional(),
+    })
+    .superRefine((data, context) => {
+      if (
+        data.depositAmount !== undefined &&
+        data.depositAmount !== null &&
+        data.depositAmount > data.proposedPrice
+      ) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['depositAmount'],
+          message: 'Deposit amount cannot exceed the proposed price',
+        });
+      }
+    }),
+});
+
 export type CreateQuotationRequestInput = z.infer<typeof createQuotationRequestSchema>['body'];
 
 export type GetCustomerQuotationRequestsQuery = z.infer<
@@ -91,3 +142,11 @@ export type VendorQuotationRequestParams = z.infer<
 export type MarkVendorQuotationRequestViewedParams = z.infer<
   typeof markVendorQuotationRequestViewedSchema
 >['params'];
+
+export type CreateVendorQuotationDraftParams = z.infer<
+  typeof createVendorQuotationDraftSchema
+>['params'];
+
+export type CreateVendorQuotationDraftInput = z.infer<
+  typeof createVendorQuotationDraftSchema
+>['body'];
