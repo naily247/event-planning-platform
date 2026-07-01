@@ -600,6 +600,94 @@ export const updateVendorQuotationDraft = async (
   return formatQuotation(updatedQuotation);
 };
 
+export const sendVendorQuotationDraft = async (
+  vendorUserId: string,
+  quotationRequestId: string,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const quotationRequest = await prisma.quotationRequest.findFirst({
+    where: {
+      id: quotationRequestId,
+      vendorId,
+    },
+    select: {
+      id: true,
+      status: true,
+      responseDueAt: true,
+
+      quotations: {
+        select: quotationSelect,
+        orderBy: {
+          version: 'desc',
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (!quotationRequest) {
+    throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
+  }
+
+  const quotation = quotationRequest.quotations[0];
+
+  if (!quotation) {
+    throw new AppError(404, 'Quotation draft not found', 'QUOTATION_DRAFT_NOT_FOUND');
+  }
+
+  if (quotation.status !== QuotationStatus.DRAFT) {
+    throw new AppError(409, 'Only draft quotations can be sent', 'QUOTATION_DRAFT_CANNOT_BE_SENT');
+  }
+
+  if (
+    quotationRequest.status !== QuotationRequestStatus.SENT &&
+    quotationRequest.status !== QuotationRequestStatus.VIEWED
+  ) {
+    throw new AppError(
+      409,
+      'The quotation request cannot receive a quotation',
+      'QUOTATION_REQUEST_CANNOT_BE_QUOTED',
+    );
+  }
+
+  if (quotationRequest.responseDueAt && quotationRequest.responseDueAt.getTime() <= Date.now()) {
+    throw new AppError(
+      409,
+      'The quotation response deadline has passed',
+      'QUOTATION_RESPONSE_DEADLINE_PASSED',
+    );
+  }
+
+  if (quotation.expiresAt && quotation.expiresAt.getTime() <= Date.now()) {
+    throw new AppError(409, 'The quotation draft has already expired', 'QUOTATION_DRAFT_EXPIRED');
+  }
+
+  const sentQuotation = await prisma.$transaction(async (transaction) => {
+    const updatedQuotation = await transaction.quotation.update({
+      where: {
+        id: quotation.id,
+      },
+      data: {
+        status: QuotationStatus.SENT,
+      },
+      select: quotationSelect,
+    });
+
+    await transaction.quotationRequest.update({
+      where: {
+        id: quotationRequest.id,
+      },
+      data: {
+        status: QuotationRequestStatus.QUOTED,
+      },
+    });
+
+    return updatedQuotation;
+  });
+
+  return formatQuotation(sentQuotation);
+};
 export const createCustomerQuotationRequest = async (
   customerId: string,
   input: CreateQuotationRequestInput,

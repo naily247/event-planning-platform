@@ -12,6 +12,7 @@ import type {
   GetVendorQuotationDraftParams,
   UpdateVendorQuotationDraftInput,
   UpdateVendorQuotationDraftParams,
+  SendVendorQuotationDraftParams,
 } from './quotationRequest.schemas.js';
 import {
   createCustomerQuotationRequest,
@@ -23,6 +24,7 @@ import {
   getVendorQuotationRequests,
   markVendorQuotationRequestViewed,
   updateVendorQuotationDraft,
+  sendVendorQuotationDraft,
 } from './quotationRequest.service.js';
 
 export const createCustomerQuotationRequestHandler: RequestHandler = asyncHandler(
@@ -153,6 +155,17 @@ export const updateVendorQuotationDraftHandler: RequestHandler = asyncHandler(as
     quotationRequestId,
     req.body as UpdateVendorQuotationDraftInput,
   );
+
+  res.status(200).json({
+    success: true,
+    data: quotation,
+  });
+});
+
+export const sendVendorQuotationDraftHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { quotationRequestId } = req.params as SendVendorQuotationDraftParams;
+
+  const quotation = await sendVendorQuotationDraft(req.auth!.userId, quotationRequestId);
 
   res.status(200).json({
     success: true,
