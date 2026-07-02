@@ -11,6 +11,7 @@ import { AppError } from '../../utils/AppError.js';
 import type {
   ConfirmVendorBookingInput,
   CreateCustomerBookingInput,
+  GetCustomerBookingsQuery,
   GetVendorBookingsQuery,
   RejectVendorBookingInput,
 } from './booking.schemas.js';
@@ -155,8 +156,10 @@ const isSameUtcCalendarDate = (firstDate: Date, secondDate: Date) =>
   firstDate.getUTCMonth() === secondDate.getUTCMonth() &&
   firstDate.getUTCDate() === secondDate.getUTCDate();
 
-const getVendorBookingOrderBy = (
-  sort: GetVendorBookingsQuery['sort'],
+const getBookingOrderBy = (
+  sort:
+    | GetCustomerBookingsQuery['sort']
+    | GetVendorBookingsQuery['sort'],
 ): Prisma.BookingOrderByWithRelationInput => {
   switch (sort) {
     case 'oldest':
@@ -265,6 +268,81 @@ const getUpdatedBooking = async (
   return formatBooking(booking);
 };
 
+export const getCustomerBookings = async (
+  customerId: string,
+  query: GetCustomerBookingsQuery,
+) => {
+  const { status, page, limit, sort } = query;
+
+  const where: Prisma.BookingWhereInput = {
+    event: {
+      ownerId: customerId,
+    },
+
+    ...(status && {
+      status,
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [bookings, total] = await prisma.$transaction([
+    prisma.booking.findMany({
+      where,
+      select: bookingSelect,
+      orderBy: getBookingOrderBy(sort),
+      skip,
+      take: limit,
+    }),
+
+    prisma.booking.count({
+      where,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    bookings: bookings.map(formatBooking),
+
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export const getCustomerBookingById = async (
+  customerId: string,
+  bookingId: string,
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+
+      event: {
+        ownerId: customerId,
+      },
+    },
+
+    select: bookingSelect,
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found',
+      'CUSTOMER_BOOKING_NOT_FOUND',
+    );
+  }
+
+  return formatBooking(booking);
+};
+
 export const getVendorBookings = async (
   vendorUserId: string,
   query: GetVendorBookingsQuery,
@@ -287,7 +365,7 @@ export const getVendorBookings = async (
     prisma.booking.findMany({
       where,
       select: bookingSelect,
-      orderBy: getVendorBookingOrderBy(sort),
+      orderBy: getBookingOrderBy(sort),
       skip,
       take: limit,
     }),

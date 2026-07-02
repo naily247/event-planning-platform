@@ -3,6 +3,8 @@ import { asyncHandler } from '../../utils/asyncHandler.js';
 import type {
   ConfirmVendorBookingInput,
   CreateCustomerBookingInput,
+  CustomerBookingParams,
+  GetCustomerBookingsQuery,
   GetVendorBookingsQuery,
   RejectVendorBookingInput,
   VendorBookingParams,
@@ -10,6 +12,8 @@ import type {
 import {
   confirmVendorBooking,
   createCustomerBooking,
+  getCustomerBookingById,
+  getCustomerBookings,
   getVendorBookingById,
   getVendorBookings,
   rejectVendorBooking,
@@ -23,6 +27,39 @@ export const createCustomerBookingHandler: RequestHandler = asyncHandler(
     );
 
     res.status(201).json({
+      success: true,
+      data: booking,
+    });
+  },
+);
+
+export const getCustomerBookingsHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const result = await getCustomerBookings(
+      req.auth!.userId,
+      req.query as unknown as GetCustomerBookingsQuery,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.bookings,
+      meta: {
+        pagination: result.pagination,
+      },
+    });
+  },
+);
+
+export const getCustomerBookingByIdHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { bookingId } = req.params as CustomerBookingParams;
+
+    const booking = await getCustomerBookingById(
+      req.auth!.userId,
+      bookingId,
+    );
+
+    res.status(200).json({
       success: true,
       data: booking,
     });

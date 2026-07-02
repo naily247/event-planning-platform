@@ -6,6 +6,8 @@ import { validate } from '../../middleware/validate.js';
 import {
   confirmVendorBookingHandler,
   createCustomerBookingHandler,
+  getCustomerBookingByIdHandler,
+  getCustomerBookingsHandler,
   getVendorBookingByIdHandler,
   getVendorBookingsHandler,
   rejectVendorBookingHandler,
@@ -13,6 +15,8 @@ import {
 import {
   confirmVendorBookingSchema,
   createCustomerBookingSchema,
+  getCustomerBookingSchema,
+  getCustomerBookingsSchema,
   getVendorBookingSchema,
   getVendorBookingsSchema,
   rejectVendorBookingSchema,
@@ -29,6 +33,20 @@ const vendorOnly = [
   requireAuth,
   authorize(UserRole.VENDOR),
 ] as const;
+
+bookingRouter.get(
+  '/customer',
+  ...customerOnly,
+  validate(getCustomerBookingsSchema),
+  getCustomerBookingsHandler,
+);
+
+bookingRouter.get(
+  '/customer/:bookingId',
+  ...customerOnly,
+  validate(getCustomerBookingSchema),
+  getCustomerBookingByIdHandler,
+);
 
 bookingRouter.get(
   '/vendor/incoming',

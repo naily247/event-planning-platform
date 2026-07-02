@@ -31,6 +31,16 @@ export const bookingSortOptions = [
   'service_latest',
 ] as const;
 
+const bookingListQuerySchema = z.object({
+  status: z.nativeEnum(BookingStatus).optional(),
+
+  page: z.coerce.number().int().min(1).default(1),
+
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+
+  sort: z.enum(bookingSortOptions).default('newest'),
+});
+
 export const createCustomerBookingSchema = z.object({
   body: z
     .object({
@@ -55,16 +65,18 @@ export const createCustomerBookingSchema = z.object({
     }),
 });
 
-export const getVendorBookingsSchema = z.object({
-  query: z.object({
-    status: z.nativeEnum(BookingStatus).optional(),
+export const getCustomerBookingsSchema = z.object({
+  query: bookingListQuerySchema,
+});
 
-    page: z.coerce.number().int().min(1).default(1),
-
-    limit: z.coerce.number().int().min(1).max(50).default(20),
-
-    sort: z.enum(bookingSortOptions).default('newest'),
+export const getCustomerBookingSchema = z.object({
+  params: z.object({
+    bookingId: bookingIdSchema,
   }),
+});
+
+export const getVendorBookingsSchema = z.object({
+  query: bookingListQuerySchema,
 });
 
 export const getVendorBookingSchema = z.object({
@@ -97,12 +109,30 @@ export const rejectVendorBookingSchema = z.object({
   }),
 });
 
-export type CreateCustomerBookingInput = z.infer<typeof createCustomerBookingSchema>['body'];
+export type CreateCustomerBookingInput = z.infer<
+  typeof createCustomerBookingSchema
+>['body'];
 
-export type GetVendorBookingsQuery = z.infer<typeof getVendorBookingsSchema>['query'];
+export type GetCustomerBookingsQuery = z.infer<
+  typeof getCustomerBookingsSchema
+>['query'];
 
-export type VendorBookingParams = z.infer<typeof getVendorBookingSchema>['params'];
+export type CustomerBookingParams = z.infer<
+  typeof getCustomerBookingSchema
+>['params'];
 
-export type ConfirmVendorBookingInput = z.infer<typeof confirmVendorBookingSchema>['body'];
+export type GetVendorBookingsQuery = z.infer<
+  typeof getVendorBookingsSchema
+>['query'];
 
-export type RejectVendorBookingInput = z.infer<typeof rejectVendorBookingSchema>['body'];
+export type VendorBookingParams = z.infer<
+  typeof getVendorBookingSchema
+>['params'];
+
+export type ConfirmVendorBookingInput = z.infer<
+  typeof confirmVendorBookingSchema
+>['body'];
+
+export type RejectVendorBookingInput = z.infer<
+  typeof rejectVendorBookingSchema
+>['body'];
