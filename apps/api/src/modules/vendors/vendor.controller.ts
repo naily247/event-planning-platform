@@ -5,6 +5,8 @@ import type {
   UpdateVendorProfileInput,
   GetPublicVendorBySlugParams,
   GetPublicVendorsQuery,
+  GetPublicVendorReviewsParams,
+  GetPublicVendorReviewsQuery,
 } from './vendor.schemas.js';
 import {
   getVendorOnboardingProfile,
@@ -13,8 +15,8 @@ import {
   submitVendorOnboardingProfile,
   getPublicVendorBySlug,
   getPublicVendors,
+  getPublicVendorReviews,
 } from './vendor.service.js';
-
 export const getPublicVendorsHandler: RequestHandler = asyncHandler(async (req, res) => {
   const result = await getPublicVendors(req.query as unknown as GetPublicVendorsQuery);
 
@@ -35,6 +37,24 @@ export const getPublicVendorBySlugHandler: RequestHandler = asyncHandler(async (
   res.status(200).json({
     success: true,
     data: vendor,
+  });
+});
+
+export const getPublicVendorReviewsHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { slug } = req.params as GetPublicVendorReviewsParams;
+
+  const result = await getPublicVendorReviews(
+    slug,
+    req.query as unknown as GetPublicVendorReviewsQuery,
+  );
+
+  res.status(200).json({
+    success: true,
+    data: result.reviews,
+    meta: {
+      summary: result.summary,
+      pagination: result.pagination,
+    },
   });
 });
 

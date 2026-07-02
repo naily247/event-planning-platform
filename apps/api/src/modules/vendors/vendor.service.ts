@@ -1,10 +1,11 @@
-import { VendorVerificationStatus, Prisma } from '@prisma/client';
+import { VendorVerificationStatus, Prisma, BookingStatus } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   UpdateVendorCategoriesInput,
   UpdateVendorProfileInput,
   GetPublicVendorsQuery,
+  GetPublicVendorReviewsQuery,
 } from './vendor.schemas.js';
 
 const vendorProfileSelect = {
@@ -382,6 +383,33 @@ const getPublicVendorOrderBy = (
   }
 };
 
+const getPublicVendorReviewOrderBy = (
+  sort: GetPublicVendorReviewsQuery['sort'],
+): Prisma.ReviewOrderByWithRelationInput => {
+  switch (sort) {
+    case 'oldest':
+      return {
+        createdAt: 'asc',
+      };
+
+    case 'rating_highest':
+      return {
+        overallRating: 'desc',
+      };
+
+    case 'rating_lowest':
+      return {
+        overallRating: 'asc',
+      };
+
+    case 'newest':
+    default:
+      return {
+        createdAt: 'desc',
+      };
+  }
+};
+
 export const getPublicVendors = async (query: GetPublicVendorsQuery) => {
   const { search, category, location, serviceArea, page, limit, sort } = query;
 
@@ -478,5 +506,160 @@ export const getPublicVendorBySlug = async (slug: string) => {
       ...servicePackage,
       basePrice: servicePackage.basePrice?.toFixed(2) ?? null,
     })),
+  };
+};
+
+export const getPublicVendorReviews = async (
+  slug: string,
+  query: GetPublicVendorReviewsQuery,
+) => {
+  const { page, limit, sort } = query;
+
+  const vendor = await prisma.vendorProfile.findFirst({
+    where: {
+      slug,
+      verificationStatus: VendorVerificationStatus.APPROVED,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!vendor) {
+    throw new AppError(
+      404,
+      'Vendor not found',
+      'PUBLIC_VENDOR_NOT_FOUND',
+    );
+  }
+
+  const where: Prisma.ReviewWhereInput = {
+    vendorId: vendor.id,
+
+    booking: {
+      status: BookingStatus.COMPLETED,
+    },
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [reviews, aggregate, ratingGroups] = await prisma.$transaction([
+    prisma.review.findMany({
+      where,
+
+      select: {
+        id: true,
+        overallRating: true,
+        serviceRating: true,
+        communicationRating: true,
+        comment: true,
+
+        customer: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+
+        package: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        createdAt: true,
+        updatedAt: true,
+      },
+
+      orderBy: getPublicVendorReviewOrderBy(sort),
+      skip,
+      take: limit,
+    }),
+
+    prisma.review.aggregate({
+      where,
+
+      _count: {
+        _all: true,
+      },
+
+      _avg: {
+        overallRating: true,
+        serviceRating: true,
+        communicationRating: true,
+      },
+    }),
+
+    prisma.review.findMany({
+      where,
+      select: {
+        overallRating: true,
+      },
+    }),
+  ]);
+
+  const total = aggregate._count._all;
+  const totalPages = Math.ceil(total / limit);
+
+  const ratingBreakdown: Record<1 | 2 | 3 | 4 | 5, number> = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+  };
+
+  for (const review of ratingGroups) {
+    const rating = review.overallRating as 1 | 2 | 3 | 4 | 5;
+    ratingBreakdown[rating] += 1;
+  }
+
+  const formatAverage = (value: number | null) =>
+    value === null ? null : Number(value.toFixed(2));
+
+  return {
+    reviews: reviews.map((review) => ({
+      id: review.id,
+      overallRating: review.overallRating,
+      serviceRating: review.serviceRating,
+      communicationRating: review.communicationRating,
+      comment: review.comment,
+
+      customer: {
+        firstName: review.customer.firstName,
+        lastNameInitial: review.customer.lastName
+          ? `${review.customer.lastName.charAt(0).toUpperCase()}.`
+          : null,
+      },
+
+      package: review.package,
+
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+    })),
+
+    summary: {
+      totalReviews: total,
+      averageOverallRating: formatAverage(
+        aggregate._avg.overallRating,
+      ),
+      averageServiceRating: formatAverage(
+        aggregate._avg.serviceRating,
+      ),
+      averageCommunicationRating: formatAverage(
+        aggregate._avg.communicationRating,
+      ),
+      ratingBreakdown,
+    },
+
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
   };
 };

@@ -10,12 +10,14 @@ import {
   submitVendorOnboardingProfileHandler,
   getPublicVendorBySlugHandler,
   getPublicVendorsHandler,
+  getPublicVendorReviewsHandler,
 } from './vendor.controller.js';
 import {
   updateVendorCategoriesSchema,
   updateVendorProfileSchema,
   getPublicVendorBySlugSchema,
   getPublicVendorsSchema,
+  getPublicVendorReviewsSchema,
 } from './vendor.schemas.js';
 
 export const vendorRouter = Router();
@@ -52,4 +54,14 @@ vendorRouter.post(
   submitVendorOnboardingProfileHandler,
 );
 
-vendorRouter.get('/:slug', validate(getPublicVendorBySlugSchema), getPublicVendorBySlugHandler);
+vendorRouter.get(
+  '/:slug', 
+  validate(getPublicVendorBySlugSchema), 
+  getPublicVendorBySlugHandler
+);
+
+vendorRouter.get(
+  '/:slug/reviews',
+  validate(getPublicVendorReviewsSchema),
+  getPublicVendorReviewsHandler,
+);

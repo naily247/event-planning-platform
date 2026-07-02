@@ -10,6 +10,13 @@ const contactPhoneSchema = z
 
 export const publicVendorSortOptions = ['newest', 'oldest', 'name_asc', 'name_desc'] as const;
 
+export const publicVendorReviewSortOptions = [
+  'newest',
+  'oldest',
+  'rating_highest',
+  'rating_lowest',
+] as const;
+
 export const getPublicVendorsSchema = z.object({
   query: z.object({
     search: z.string().trim().min(1).max(120).optional(),
@@ -25,6 +32,17 @@ export const getPublicVendorsSchema = z.object({
 export const getPublicVendorBySlugSchema = z.object({
   params: z.object({
     slug: z.string().trim().min(1, 'Vendor slug is required').max(160),
+  }),
+});
+
+export const getPublicVendorReviewsSchema = z.object({
+  params: z.object({
+    slug: z.string().trim().min(1, 'Vendor slug is required').max(160),
+  }),
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(10),
+    sort: z.enum(publicVendorReviewSortOptions).default('newest'),
   }),
 });
 
@@ -58,6 +76,10 @@ export const updateVendorCategoriesSchema = z.object({
 export type GetPublicVendorsQuery = z.infer<typeof getPublicVendorsSchema>['query'];
 
 export type GetPublicVendorBySlugParams = z.infer<typeof getPublicVendorBySlugSchema>['params'];
+
+export type GetPublicVendorReviewsParams = z.infer<typeof getPublicVendorReviewsSchema>['params'];
+
+export type GetPublicVendorReviewsQuery = z.infer<typeof getPublicVendorReviewsSchema>['query'];
 
 export type UpdateVendorProfileInput = z.infer<typeof updateVendorProfileSchema>['body'];
 

@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { AccountStatus, Prisma, UserRole, VendorVerificationStatus } from '@prisma/client';
+import { AccountStatus, Prisma, UserRole, VendorVerificationStatus, BookingStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -11,15 +11,128 @@ const testEmails = [
   'discovery-approved-two@example.com',
   'discovery-pending@example.com',
   'discovery-draft@example.com',
+  'discovery-review-customer@example.com',
 ] as const;
 
 const passwordHashPromise = bcrypt.hash('Vendor@2026', 12);
 
 const clearDiscoveryVendors = async () => {
+  const emails = [...testEmails];
+
+  await prisma.review.deleteMany({
+    where: {
+      OR: [
+        {
+          customer: {
+            email: {
+              in: emails,
+            },
+          },
+        },
+        {
+          vendor: {
+            user: {
+              email: {
+                in: emails,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await prisma.booking.deleteMany({
+    where: {
+      OR: [
+        {
+          event: {
+            owner: {
+              email: {
+                in: emails,
+              },
+            },
+          },
+        },
+        {
+          vendor: {
+            user: {
+              email: {
+                in: emails,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await prisma.quotation.deleteMany({
+    where: {
+      quotationRequest: {
+        OR: [
+          {
+            event: {
+              owner: {
+                email: {
+                  in: emails,
+                },
+              },
+            },
+          },
+          {
+            vendor: {
+              user: {
+                email: {
+                  in: emails,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.quotationRequest.deleteMany({
+    where: {
+      OR: [
+        {
+          event: {
+            owner: {
+              email: {
+                in: emails,
+              },
+            },
+          },
+        },
+        {
+          vendor: {
+            user: {
+              email: {
+                in: emails,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await prisma.event.deleteMany({
+    where: {
+      owner: {
+        email: {
+          in: emails,
+        },
+      },
+    },
+  });
+
   await prisma.user.deleteMany({
     where: {
       email: {
-        in: [...testEmails],
+        in: emails,
       },
     },
   });
@@ -102,6 +215,123 @@ const createDiscoveryVendor = async ({
     },
     include: {
       vendor: true,
+    },
+  });
+};
+
+const createPublicVendorReview = async ({
+  vendorSlug,
+  overallRating,
+  serviceRating,
+  communicationRating,
+  comment,
+  createdAt,
+}: {
+  vendorSlug: string;
+  overallRating: number;
+  serviceRating?: number;
+  communicationRating?: number;
+  comment?: string;
+  createdAt: Date;
+}) => {
+  const vendor = await prisma.vendorProfile.findUnique({
+    where: {
+      slug: vendorSlug,
+    },
+    include: {
+      packages: {
+        where: {
+          isActive: true,
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (!vendor) {
+    throw new Error(`Vendor "${vendorSlug}" was not found`);
+  }
+
+  const servicePackage = vendor.packages[0];
+
+  if (!servicePackage) {
+    throw new Error(`Vendor "${vendorSlug}" has no active package`);
+  }
+
+  const passwordHash = await passwordHashPromise;
+
+  const customer = await prisma.user.upsert({
+    where: {
+      email: testEmails[4],
+    },
+    update: {},
+    create: {
+      email: testEmails[4],
+      passwordHash,
+      firstName: 'Maya',
+      lastName: 'Fernando',
+      role: UserRole.CUSTOMER,
+      status: AccountStatus.ACTIVE,
+      customer: {
+        create: {
+          phone: '+94771234567',
+        },
+      },
+    },
+  });
+
+  const event = await prisma.event.create({
+    data: {
+      ownerId: customer.id,
+      name: `Reviewed Event ${createdAt.getTime()}`,
+      eventType: 'Wedding',
+      eventDate: new Date('2027-01-15T09:00:00.000Z'),
+      location: 'Colombo',
+    },
+  });
+
+  const quotationRequest = await prisma.quotationRequest.create({
+    data: {
+      eventId: event.id,
+      vendorId: vendor.id,
+      packageId: servicePackage.id,
+      requirements: 'Provide professional event services for the customer event.',
+    },
+  });
+
+  const quotation = await prisma.quotation.create({
+    data: {
+      quotationRequestId: quotationRequest.id,
+      version: 1,
+      proposedPrice: new Prisma.Decimal('100000.00'),
+      inclusions: 'Complete event service package.',
+    },
+  });
+
+  const booking = await prisma.booking.create({
+    data: {
+      eventId: event.id,
+      vendorId: vendor.id,
+      acceptedQuotationId: quotation.id,
+      agreedCost: new Prisma.Decimal('100000.00'),
+      serviceStart: new Date('2027-01-15T09:00:00.000Z'),
+      serviceEnd: new Date('2027-01-15T18:00:00.000Z'),
+      status: BookingStatus.COMPLETED,
+      vendorCompletedAt: new Date('2027-01-15T18:30:00.000Z'),
+    },
+  });
+
+  return prisma.review.create({
+    data: {
+      bookingId: booking.id,
+      customerId: customer.id,
+      vendorId: vendor.id,
+      packageId: servicePackage.id,
+      overallRating,
+      serviceRating,
+      communicationRating,
+      comment,
+      createdAt,
     },
   });
 };
@@ -368,6 +598,296 @@ describe('Public vendor discovery API', () => {
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
       expect(response.body.error.code).toBe('PUBLIC_VENDOR_NOT_FOUND');
+    });
+  });
+
+  describe('GET /api/v1/vendors/:slug/reviews', () => {
+    it('returns public reviews with rating summary and safe customer details', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        serviceRating: 5,
+        communicationRating: 4,
+        comment: 'Excellent photography service and very professional communication.',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 3,
+        serviceRating: 4,
+        communicationRating: 3,
+        comment: 'Good service overall, but the delivery could have been faster.',
+        createdAt: new Date('2027-02-12T10:00:00.000Z'),
+      });
+
+      const response = await request(app).get(
+        '/api/v1/vendors/golden-lens-photography/reviews',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(2);
+
+      expect(response.body.data[0]).toMatchObject({
+        overallRating: 3,
+        serviceRating: 4,
+        communicationRating: 3,
+        comment: 'Good service overall, but the delivery could have been faster.',
+        customer: {
+          firstName: 'Maya',
+          lastNameInitial: 'F.',
+        },
+        package: {
+          title: 'Classic Wedding Photography',
+        },
+      });
+
+      expect(response.body.data[1]).toMatchObject({
+        overallRating: 5,
+        serviceRating: 5,
+        communicationRating: 4,
+        comment: 'Excellent photography service and very professional communication.',
+      });
+
+      expect(response.body.meta.summary).toEqual({
+        totalReviews: 2,
+        averageOverallRating: 4,
+        averageServiceRating: 4.5,
+        averageCommunicationRating: 3.5,
+        ratingBreakdown: {
+          1: 0,
+          2: 0,
+          3: 1,
+          4: 0,
+          5: 1,
+        },
+      });
+
+      expect(response.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 10,
+        total: 2,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+
+      for (const review of response.body.data) {
+        expect(review).not.toHaveProperty('bookingId');
+        expect(review).not.toHaveProperty('customerId');
+        expect(review.customer).not.toHaveProperty('email');
+        expect(review.customer).not.toHaveProperty('lastName');
+        expect(review.customer).not.toHaveProperty('phone');
+      }
+    });
+
+    it('hides reviews for a pending vendor', async () => {
+      const response = await request(app).get(
+        '/api/v1/vendors/pending-event-studio/reviews',
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({
+        success: false,
+        error: {
+          code: 'PUBLIC_VENDOR_NOT_FOUND',
+          message: 'Vendor not found',
+        },
+      });
+    });
+
+    it('returns 404 for reviews of an unknown vendor slug', async () => {
+      const response = await request(app).get(
+        '/api/v1/vendors/vendor-that-does-not-exist/reviews',
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({
+        success: false,
+        error: {
+          code: 'PUBLIC_VENDOR_NOT_FOUND',
+          message: 'Vendor not found',
+        },
+      });
+    });
+
+    it('returns an empty review list with a zeroed summary', async () => {
+      const response = await request(app).get(
+        '/api/v1/vendors/royal-feast-catering/reviews',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toEqual([]);
+
+      expect(response.body.meta.summary).toEqual({
+        totalReviews: 0,
+        averageOverallRating: null,
+        averageServiceRating: null,
+        averageCommunicationRating: null,
+        ratingBreakdown: {
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+        },
+      });
+
+      expect(response.body.meta.pagination).toMatchObject({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('rejects invalid review query parameters', async () => {
+      const response = await request(app).get(
+        '/api/v1/vendors/golden-lens-photography/reviews?page=0&limit=100&sort=invalid',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBeDefined();
+    });
+
+    it('supports review pagination', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        comment: 'First review',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 4,
+        comment: 'Second review',
+        createdAt: new Date('2027-02-11T10:00:00.000Z'),
+      });
+
+      const response = await request(app).get(
+        '/api/v1/vendors/golden-lens-photography/reviews?page=2&limit=1',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0]).toMatchObject({
+        overallRating: 5,
+        comment: 'First review',
+      });
+
+      expect(response.body.meta.pagination).toEqual({
+        page: 2,
+        limit: 1,
+        total: 2,
+        totalPages: 2,
+        hasNextPage: false,
+        hasPreviousPage: true,
+      });
+    });
+
+    it('sorts reviews from oldest to newest', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 2,
+        comment: 'Older review',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        comment: 'Newer review',
+        createdAt: new Date('2027-02-12T10:00:00.000Z'),
+      });
+
+      const response = await request(app).get(
+        '/api/v1/vendors/golden-lens-photography/reviews?sort=oldest',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(2);
+
+      expect(response.body.data[0]).toMatchObject({
+        overallRating: 2,
+        comment: 'Older review',
+      });
+
+      expect(response.body.data[1]).toMatchObject({
+        overallRating: 5,
+        comment: 'Newer review',
+      });
+    });
+
+    it('sorts reviews from highest to lowest rating', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 2,
+        comment: 'Lower-rated review',
+        createdAt: new Date('2027-02-12T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        comment: 'Higher-rated review',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      const response = await request(app).get(
+        '/api/v1/vendors/golden-lens-photography/reviews?sort=rating_highest',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(2);
+
+      expect(response.body.data[0]).toMatchObject({
+        overallRating: 5,
+        comment: 'Higher-rated review',
+      });
+
+      expect(response.body.data[1]).toMatchObject({
+        overallRating: 2,
+        comment: 'Lower-rated review',
+      });
+    });
+
+    it('sorts reviews from lowest to highest rating', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        comment: 'Higher-rated review',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 2,
+        comment: 'Lower-rated review',
+        createdAt: new Date('2027-02-12T10:00:00.000Z'),
+      });
+
+      const response = await request(app).get(
+        '/api/v1/vendors/golden-lens-photography/reviews?sort=rating_lowest',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(2);
+
+      expect(response.body.data[0]).toMatchObject({
+        overallRating: 2,
+        comment: 'Lower-rated review',
+      });
+
+      expect(response.body.data[1]).toMatchObject({
+        overallRating: 5,
+        comment: 'Higher-rated review',
+      });
     });
   });
 });
