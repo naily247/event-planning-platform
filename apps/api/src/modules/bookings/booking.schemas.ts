@@ -24,6 +24,15 @@ const serviceEndSchema = z
 
 const vendorResponseNoteSchema = z.string().trim().min(3).max(2000);
 
+const customerCancellationReasonSchema = z
+  .string()
+  .trim()
+  .min(
+    10,
+    'Cancellation reason must contain at least 10 characters',
+  )
+  .max(2000);
+
 export const bookingSortOptions = [
   'newest',
   'oldest',
@@ -54,7 +63,8 @@ export const createCustomerBookingSchema = z.object({
       if (
         data.serviceEnd !== undefined &&
         data.serviceEnd !== null &&
-        new Date(data.serviceEnd).getTime() <= new Date(data.serviceStart).getTime()
+        new Date(data.serviceEnd).getTime() <=
+          new Date(data.serviceStart).getTime()
       ) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
@@ -72,6 +82,16 @@ export const getCustomerBookingsSchema = z.object({
 export const getCustomerBookingSchema = z.object({
   params: z.object({
     bookingId: bookingIdSchema,
+  }),
+});
+
+export const cancelCustomerBookingSchema = z.object({
+  params: z.object({
+    bookingId: bookingIdSchema,
+  }),
+
+  body: z.object({
+    reason: customerCancellationReasonSchema,
   }),
 });
 
@@ -104,7 +124,10 @@ export const rejectVendorBookingSchema = z.object({
     reason: z
       .string()
       .trim()
-      .min(10, 'Rejection reason must contain at least 10 characters')
+      .min(
+        10,
+        'Rejection reason must contain at least 10 characters',
+      )
       .max(2000),
   }),
 });
@@ -120,6 +143,10 @@ export type GetCustomerBookingsQuery = z.infer<
 export type CustomerBookingParams = z.infer<
   typeof getCustomerBookingSchema
 >['params'];
+
+export type CancelCustomerBookingInput = z.infer<
+  typeof cancelCustomerBookingSchema
+>['body'];
 
 export type GetVendorBookingsQuery = z.infer<
   typeof getVendorBookingsSchema

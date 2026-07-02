@@ -216,23 +216,25 @@ model Quotation {
 }
 
 model Booking {
-  id                  String        @id @default(cuid())
-  eventId             String
-  vendorId            String
-  acceptedQuotationId String        @unique
-  agreedCost          Decimal       @db.Decimal(12, 2)
-  serviceStart        DateTime
-  serviceEnd          DateTime?
-  status              BookingStatus @default(AWAITING_VENDOR_CONFIRMATION)
-  vendorResponseNote  String?
-  vendorRespondedAt   DateTime?
-  event               Event         @relation(fields: [eventId], references: [id])
-  vendor              VendorProfile @relation(fields: [vendorId], references: [id])
-  acceptedQuotation   Quotation     @relation(fields: [acceptedQuotationId], references: [id])
-  payments            Payment[]
-  review              Review?
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  id                         String        @id @default(cuid())
+  eventId                    String
+  vendorId                   String
+  acceptedQuotationId        String        @unique
+  agreedCost                 Decimal       @db.Decimal(12, 2)
+  serviceStart               DateTime
+  serviceEnd                 DateTime?
+  status                     BookingStatus @default(AWAITING_VENDOR_CONFIRMATION)
+  vendorResponseNote         String?
+  vendorRespondedAt          DateTime?
+  customerCancellationReason String?
+  customerCancelledAt        DateTime?
+  event                      Event         @relation(fields: [eventId], references: [id])
+  vendor                     VendorProfile @relation(fields: [vendorId], references: [id])
+  acceptedQuotation          Quotation     @relation(fields: [acceptedQuotationId], references: [id])
+  payments                   Payment[]
+  review                     Review?
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
 
   @@index([vendorId, status, createdAt])
   @@index([vendorId, serviceStart, serviceEnd])

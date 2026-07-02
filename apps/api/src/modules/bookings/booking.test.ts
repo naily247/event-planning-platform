@@ -331,6 +331,17 @@ const getCustomerBookingByIdRequest = (
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const cancelCustomerBookingRequest = (
+  accessToken: string,
+  bookingId: string,
+  body: Record<string, unknown> = {},
+) => {
+  return request(app)
+    .patch(`/api/v1/bookings/customer/${bookingId}/cancel`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send(body);
+};
+
 const getVendorBookingsRequest = (accessToken: string, query = '') => {
   return request(app)
     .get(`/api/v1/bookings/vendor/incoming${query}`)
@@ -959,6 +970,311 @@ describe('Customer booking retrieval API', () => {
       const response = await getCustomerBookingByIdRequest(
         customerRegistration.body.data.accessToken,
         'invalid-id',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+});
+
+describe('Customer booking cancellation API', () => {
+  describe('PATCH /api/v1/bookings/customer/:bookingId/cancel', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app)
+        .patch(
+          '/api/v1/bookings/customer/clx0000000000000000000000/cancel',
+        )
+        .send({
+          reason: 'The event has been cancelled by the customer.',
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated vendors', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await cancelCustomerBookingRequest(
+        vendorRegistration.body.data.accessToken,
+        'clx0000000000000000000000',
+        {
+          reason: 'The event has been cancelled by the customer.',
+        },
+      );
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('allows the customer to cancel a booking awaiting vendor confirmation', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const reason =
+        'The event plans have changed and this booking is no longer required.';
+
+      const response = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        customerCancellationReason: reason,
+        vendorResponseNote: null,
+        vendorRespondedAt: null,
+      });
+
+      expect(response.body.data.customerCancelledAt).toEqual(
+        expect.any(String),
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.CANCELLED);
+      expect(savedBooking?.customerCancellationReason).toBe(reason);
+      expect(savedBooking?.customerCancelledAt).not.toBeNull();
+    });
+
+    it('allows the customer to cancel a confirmed booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          note: 'The requested date is available and the booking is confirmed.',
+        },
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const reason =
+        'The event date has changed and the confirmed booking must be cancelled.';
+
+      const response = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        customerCancellationReason: reason,
+        vendorResponseNote:
+          'The requested date is available and the booking is confirmed.',
+      });
+
+      expect(response.body.data.vendorRespondedAt).toEqual(
+        expect.any(String),
+      );
+
+      expect(response.body.data.customerCancelledAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('shows the customer cancellation to the assigned vendor', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const reason =
+        'The customer has postponed the event and no longer needs this booking.';
+
+      const cancellationResponse = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(cancellationResponse.status).toBe(200);
+
+      const vendorResponse = await getVendorBookingByIdRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(vendorResponse.status).toBe(200);
+      expect(vendorResponse.body.success).toBe(true);
+
+      expect(vendorResponse.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        customerCancellationReason: reason,
+      });
+
+      expect(vendorResponse.body.data.customerCancelledAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('does not allow another customer to cancel the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const secondCustomerRegistration = await registerCustomer(
+        secondCustomerPayload,
+      );
+
+      const response = await cancelCustomerBookingRequest(
+        secondCustomerRegistration.body.data.accessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The event plans have changed and this booking is no longer required.',
+        },
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'CUSTOMER_BOOKING_NOT_FOUND',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(
+        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+      );
+
+      expect(savedBooking?.customerCancellationReason).toBeNull();
+      expect(savedBooking?.customerCancelledAt).toBeNull();
+    });
+
+    it('rejects repeated customer cancellation', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const firstResponse = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The event plans have changed and this booking is no longer required.',
+        },
+      );
+
+      expect(firstResponse.status).toBe(200);
+
+      const secondResponse = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The customer is trying to cancel the same booking for a second time.',
+        },
+      );
+
+      expect(secondResponse.status).toBe(409);
+      expect(secondResponse.body.success).toBe(false);
+      expect(secondResponse.body.error.code).toBe(
+        'BOOKING_ALREADY_CANCELLED',
+      );
+    });
+
+    it('does not allow the customer to cancel a rejected booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const rejectionResponse = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The requested event date is no longer available for our service.',
+        },
+      );
+
+      expect(rejectionResponse.status).toBe(200);
+
+      const response = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The customer would also like to cancel the rejected booking.',
+        },
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_CANNOT_BE_CANCELLED',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.REJECTED);
+      expect(savedBooking?.customerCancellationReason).toBeNull();
+      expect(savedBooking?.customerCancelledAt).toBeNull();
+    });
+
+    it('rejects a missing cancellation reason', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects a cancellation reason that is too short', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason: 'Changed',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects an invalid booking ID', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await cancelCustomerBookingRequest(
+        customerRegistration.body.data.accessToken,
+        'invalid-id',
+        {
+          reason:
+            'The event plans have changed and the booking must be cancelled.',
+        },
       );
 
       expect(response.status).toBe(400);

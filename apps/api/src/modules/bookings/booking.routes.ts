@@ -4,6 +4,7 @@ import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
+  cancelCustomerBookingHandler,
   confirmVendorBookingHandler,
   createCustomerBookingHandler,
   getCustomerBookingByIdHandler,
@@ -13,6 +14,7 @@ import {
   rejectVendorBookingHandler,
 } from './booking.controller.js';
 import {
+  cancelCustomerBookingSchema,
   confirmVendorBookingSchema,
   createCustomerBookingSchema,
   getCustomerBookingSchema,
@@ -46,6 +48,13 @@ bookingRouter.get(
   ...customerOnly,
   validate(getCustomerBookingSchema),
   getCustomerBookingByIdHandler,
+);
+
+bookingRouter.patch(
+  '/customer/:bookingId/cancel',
+  ...customerOnly,
+  validate(cancelCustomerBookingSchema),
+  cancelCustomerBookingHandler,
 );
 
 bookingRouter.get(

@@ -9,6 +9,7 @@ import {
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
+  CancelCustomerBookingInput,
   ConfirmVendorBookingInput,
   CreateCustomerBookingInput,
   GetCustomerBookingsQuery,
@@ -24,6 +25,8 @@ const bookingSelect = {
   status: true,
   vendorResponseNote: true,
   vendorRespondedAt: true,
+  customerCancellationReason: true,
+  customerCancelledAt: true,
 
   event: {
     select: {
@@ -109,6 +112,11 @@ type SelectedBooking = Prisma.BookingGetPayload<{
   select: typeof bookingSelect;
 }>;
 
+const customerCancellableStatuses: BookingStatus[] = [
+  BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+  BookingStatus.CONFIRMED,
+];
+
 const formatBooking = (booking: SelectedBooking) => ({
   ...booking,
 
@@ -151,7 +159,10 @@ const formatBooking = (booking: SelectedBooking) => ({
   },
 });
 
-const isSameUtcCalendarDate = (firstDate: Date, secondDate: Date) =>
+const isSameUtcCalendarDate = (
+  firstDate: Date,
+  secondDate: Date,
+) =>
   firstDate.getUTCFullYear() === secondDate.getUTCFullYear() &&
   firstDate.getUTCMonth() === secondDate.getUTCMonth() &&
   firstDate.getUTCDate() === secondDate.getUTCDate();
@@ -207,6 +218,36 @@ const getVendorProfileId = async (vendorUserId: string) => {
   return vendor.id;
 };
 
+const getOwnedCustomerBooking = async (
+  customerId: string,
+  bookingId: string,
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+
+      event: {
+        ownerId: customerId,
+      },
+    },
+
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found',
+      'CUSTOMER_BOOKING_NOT_FOUND',
+    );
+  }
+
+  return booking;
+};
+
 const getOwnedVendorBooking = async (
   vendorId: string,
   bookingId: string,
@@ -234,7 +275,29 @@ const getOwnedVendorBooking = async (
   return booking;
 };
 
-const ensureBookingAwaitsVendorResponse = (status: BookingStatus) => {
+const ensureBookingCanBeCancelledByCustomer = (
+  status: BookingStatus,
+) => {
+  if (status === BookingStatus.CANCELLED) {
+    throw new AppError(
+      409,
+      'This booking has already been cancelled',
+      'BOOKING_ALREADY_CANCELLED',
+    );
+  }
+
+  if (!customerCancellableStatuses.includes(status)) {
+    throw new AppError(
+      409,
+      'This booking cannot be cancelled in its current status',
+      'BOOKING_CANNOT_BE_CANCELLED',
+    );
+  }
+};
+
+const ensureBookingAwaitsVendorResponse = (
+  status: BookingStatus,
+) => {
   if (status !== BookingStatus.AWAITING_VENDOR_CONFIRMATION) {
     throw new AppError(
       409,
@@ -244,7 +307,34 @@ const ensureBookingAwaitsVendorResponse = (status: BookingStatus) => {
   }
 };
 
-const getUpdatedBooking = async (
+const getUpdatedCustomerBooking = async (
+  customerId: string,
+  bookingId: string,
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+
+      event: {
+        ownerId: customerId,
+      },
+    },
+
+    select: bookingSelect,
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found',
+      'CUSTOMER_BOOKING_NOT_FOUND',
+    );
+  }
+
+  return formatBooking(booking);
+};
+
+const getUpdatedVendorBooking = async (
   vendorId: string,
   bookingId: string,
 ) => {
@@ -320,27 +410,52 @@ export const getCustomerBookingById = async (
   customerId: string,
   bookingId: string,
 ) => {
-  const booking = await prisma.booking.findFirst({
+  return getUpdatedCustomerBooking(customerId, bookingId);
+};
+
+export const cancelCustomerBooking = async (
+  customerId: string,
+  bookingId: string,
+  input: CancelCustomerBookingInput,
+) => {
+  const existingBooking = await getOwnedCustomerBooking(
+    customerId,
+    bookingId,
+  );
+
+  ensureBookingCanBeCancelledByCustomer(existingBooking.status);
+
+  const cancellationTime = new Date();
+
+  const updateResult = await prisma.booking.updateMany({
     where: {
       id: bookingId,
 
       event: {
         ownerId: customerId,
       },
+
+      status: {
+        in: customerCancellableStatuses,
+      },
     },
 
-    select: bookingSelect,
+    data: {
+      status: BookingStatus.CANCELLED,
+      customerCancellationReason: input.reason,
+      customerCancelledAt: cancellationTime,
+    },
   });
 
-  if (!booking) {
+  if (updateResult.count === 0) {
     throw new AppError(
-      404,
-      'Booking not found',
-      'CUSTOMER_BOOKING_NOT_FOUND',
+      409,
+      'This booking cannot be cancelled in its current status',
+      'BOOKING_CANNOT_BE_CANCELLED',
     );
   }
 
-  return formatBooking(booking);
+  return getUpdatedCustomerBooking(customerId, bookingId);
 };
 
 export const getVendorBookings = async (
@@ -453,7 +568,7 @@ export const confirmVendorBooking = async (
     );
   }
 
-  return getUpdatedBooking(vendorId, bookingId);
+  return getUpdatedVendorBooking(vendorId, bookingId);
 };
 
 export const rejectVendorBooking = async (
@@ -492,7 +607,7 @@ export const rejectVendorBooking = async (
     );
   }
 
-  return getUpdatedBooking(vendorId, bookingId);
+  return getUpdatedVendorBooking(vendorId, bookingId);
 };
 
 export const createCustomerBooking = async (
@@ -557,7 +672,8 @@ export const createCustomerBooking = async (
 
   if (
     quotation.status !== QuotationStatus.ACCEPTED ||
-    quotation.quotationRequest.status !== QuotationRequestStatus.ACCEPTED
+    quotation.quotationRequest.status !==
+      QuotationRequestStatus.ACCEPTED
   ) {
     throw new AppError(
       409,
@@ -597,7 +713,8 @@ export const createCustomerBooking = async (
   }
 
   if (
-    quotation.quotationRequest.event.status !== EventStatus.PLANNING &&
+    quotation.quotationRequest.event.status !==
+      EventStatus.PLANNING &&
     quotation.quotationRequest.event.status !== EventStatus.ACTIVE
   ) {
     throw new AppError(
