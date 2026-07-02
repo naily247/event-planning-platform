@@ -230,6 +230,7 @@ model Booking {
   customerCancelledAt        DateTime?
   vendorCancellationReason   String?
   vendorCancelledAt          DateTime?
+  vendorCompletedAt          DateTime?
   event                      Event         @relation(fields: [eventId], references: [id])
   vendor                     VendorProfile @relation(fields: [vendorId], references: [id])
   acceptedQuotation          Quotation     @relation(fields: [acceptedQuotationId], references: [id])

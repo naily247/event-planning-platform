@@ -30,6 +30,7 @@ const bookingSelect = {
   customerCancelledAt: true,
   vendorCancellationReason: true,
   vendorCancelledAt: true,
+  vendorCompletedAt: true,
 
   event: {
     select: {
@@ -314,6 +315,26 @@ const ensureBookingCanBeCancelledByVendor = (
       409,
       'This booking cannot be cancelled by the vendor in its current status',
       'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
+    );
+  }
+};
+
+const ensureBookingCanBeCompletedByVendor = (
+  status: BookingStatus,
+): void => {
+  if (status === BookingStatus.COMPLETED) {
+    throw new AppError(
+      409,
+      'This booking has already been completed.',
+      'BOOKING_ALREADY_COMPLETED',
+    );
+  }
+
+  if (status !== BookingStatus.CONFIRMED) {
+    throw new AppError(
+      409,
+      'Only a confirmed booking can be completed by the vendor.',
+      'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
     );
   }
 };
@@ -672,6 +693,80 @@ export const cancelVendorBooking = async (
   }
 
   return getUpdatedVendorBooking(vendorId, bookingId);
+};
+
+export const completeVendorBooking = async (
+  vendorUserId: string,
+  bookingId: string,
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      vendor: {
+        userId: vendorUserId,
+      },
+    },
+    select: {
+      status: true,
+    },
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found.',
+      'VENDOR_BOOKING_NOT_FOUND',
+    );
+  }
+
+  ensureBookingCanBeCompletedByVendor(booking.status);
+
+  const completedAt = new Date();
+
+  const result = await prisma.booking.updateMany({
+    where: {
+      id: bookingId,
+      vendor: {
+        userId: vendorUserId,
+      },
+      status: BookingStatus.CONFIRMED,
+    },
+    data: {
+      status: BookingStatus.COMPLETED,
+      vendorCompletedAt: completedAt,
+    },
+  });
+
+  if (result.count === 0) {
+    const currentBooking = await prisma.booking.findFirst({
+      where: {
+        id: bookingId,
+        vendor: {
+          userId: vendorUserId,
+        },
+      },
+      select: {
+        status: true,
+      },
+    });
+
+    if (!currentBooking) {
+      throw new AppError(
+        404,
+        'Booking not found.',
+        'VENDOR_BOOKING_NOT_FOUND',
+      );
+    }
+
+    ensureBookingCanBeCompletedByVendor(currentBooking.status);
+  }
+
+  return prisma.booking.findUniqueOrThrow({
+    where: {
+      id: bookingId,
+    },
+    select: bookingSelect,
+  });
 };
 
 export const createCustomerBooking = async (

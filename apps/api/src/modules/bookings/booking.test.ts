@@ -387,6 +387,15 @@ const cancelVendorBookingRequest = (
     .send(body);
 };
 
+const completeVendorBookingRequest = (
+  accessToken: string,
+  bookingId: string,
+) => {
+  return request(app)
+    .patch(`/api/v1/bookings/vendor/incoming/${bookingId}/complete`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
 beforeEach(async () => {
   await clearTestData();
 });
@@ -2289,6 +2298,367 @@ describe('Vendor booking cancellation API', () => {
           reason:
             'An unavoidable equipment issue means we cannot provide the service.',
         },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+});
+
+describe('Vendor booking completion API', () => {
+  describe('PATCH /api/v1/bookings/vendor/incoming/:bookingId/complete', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app).patch(
+        '/api/v1/bookings/vendor/incoming/clx0000000000000000000000/complete',
+      );
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated customers', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await completeVendorBookingRequest(
+        customerRegistration.body.data.accessToken,
+        'clx0000000000000000000000',
+      );
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('allows the assigned vendor to complete a confirmed booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          note:
+            'The requested event date is available and the booking is confirmed.',
+        },
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const response = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'COMPLETED',
+        vendorResponseNote:
+          'The requested event date is available and the booking is confirmed.',
+        vendorCancellationReason: null,
+        vendorCancelledAt: null,
+        customerCancellationReason: null,
+        customerCancelledAt: null,
+      });
+
+      expect(response.body.data.vendorRespondedAt).toEqual(
+        expect.any(String),
+      );
+
+      expect(response.body.data.vendorCompletedAt).toEqual(
+        expect.any(String),
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.COMPLETED);
+      expect(savedBooking?.vendorCompletedAt).not.toBeNull();
+      expect(savedBooking?.vendorCancellationReason).toBeNull();
+      expect(savedBooking?.vendorCancelledAt).toBeNull();
+    });
+
+    it('shows the completed booking in customer booking details and lists', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const completionResponse = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(completionResponse.status).toBe(200);
+
+      const detailResponse = await getCustomerBookingByIdRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(detailResponse.status).toBe(200);
+
+      expect(detailResponse.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'COMPLETED',
+      });
+
+      expect(detailResponse.body.data.vendorCompletedAt).toEqual(
+        expect.any(String),
+      );
+
+      const listResponse = await getCustomerBookingsRequest(
+        preparedBooking.customerAccessToken,
+      );
+
+      expect(listResponse.status).toBe(200);
+      expect(listResponse.body.data).toHaveLength(1);
+
+      expect(listResponse.body.data[0]).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'COMPLETED',
+      });
+
+      expect(listResponse.body.data[0].vendorCompletedAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('shows the completed booking in vendor booking details and lists', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const completionResponse = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(completionResponse.status).toBe(200);
+
+      const detailResponse = await getVendorBookingByIdRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(detailResponse.status).toBe(200);
+
+      expect(detailResponse.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'COMPLETED',
+      });
+
+      expect(detailResponse.body.data.vendorCompletedAt).toEqual(
+        expect.any(String),
+      );
+
+      const listResponse = await getVendorBookingsRequest(
+        preparedBooking.vendorAccessToken,
+      );
+
+      expect(listResponse.status).toBe(200);
+      expect(listResponse.body.data).toHaveLength(1);
+
+      expect(listResponse.body.data[0]).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'COMPLETED',
+      });
+
+      expect(listResponse.body.data[0].vendorCompletedAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('does not allow another vendor to complete the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const secondVendorRegistration = await registerVendor(
+        secondVendorPayload,
+      );
+
+      const response = await completeVendorBookingRequest(
+        secondVendorRegistration.body.data.accessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_BOOKING_NOT_FOUND',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.CONFIRMED);
+      expect(savedBooking?.vendorCompletedAt).toBeNull();
+    });
+
+    it('rejects completion while awaiting vendor confirmation', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(
+        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+      );
+
+      expect(savedBooking?.vendorCompletedAt).toBeNull();
+    });
+
+    it('rejects completion of a rejected booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const rejectionResponse = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The requested event date is no longer available for our service.',
+        },
+      );
+
+      expect(rejectionResponse.status).toBe(200);
+
+      const response = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.REJECTED);
+      expect(savedBooking?.vendorCompletedAt).toBeNull();
+    });
+
+    it('rejects completion of a cancelled booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const cancellationResponse = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'An unavoidable equipment issue means we cannot provide the service.',
+        },
+      );
+
+      expect(cancellationResponse.status).toBe(200);
+
+      const response = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.CANCELLED);
+      expect(savedBooking?.vendorCompletedAt).toBeNull();
+    });
+
+    it('rejects repeated vendor completion', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const firstResponse = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(firstResponse.status).toBe(200);
+
+      const secondResponse = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(secondResponse.status).toBe(409);
+      expect(secondResponse.body.success).toBe(false);
+      expect(secondResponse.body.error.code).toBe(
+        'BOOKING_ALREADY_COMPLETED',
+      );
+    });
+
+    it('rejects an invalid booking ID', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await completeVendorBookingRequest(
+        vendorRegistration.body.data.accessToken,
+        'invalid-id',
       );
 
       expect(response.status).toBe(400);

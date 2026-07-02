@@ -13,6 +13,7 @@ import {
   getVendorBookingByIdHandler,
   getVendorBookingsHandler,
   rejectVendorBookingHandler,
+  completeVendorBookingHandler,
 } from './booking.controller.js';
 import {
   cancelCustomerBookingSchema,
@@ -24,6 +25,7 @@ import {
   getVendorBookingSchema,
   getVendorBookingsSchema,
   rejectVendorBookingSchema,
+  completeVendorBookingSchema,
 } from './booking.schemas.js';
 
 export const bookingRouter = Router();
@@ -99,4 +101,11 @@ bookingRouter.patch(
   ...vendorOnly,
   validate(cancelVendorBookingSchema),
   cancelVendorBookingHandler,
+);
+
+bookingRouter.patch(
+  '/vendor/incoming/:bookingId/complete',
+  ...vendorOnly,
+  validate(completeVendorBookingSchema),
+  completeVendorBookingHandler,
 );

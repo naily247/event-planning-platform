@@ -21,6 +21,7 @@ import {
   getVendorBookingById,
   getVendorBookings,
   rejectVendorBooking,
+  completeVendorBooking,
 } from './booking.service.js';
 
 export const createCustomerBookingHandler: RequestHandler = asyncHandler(
@@ -162,6 +163,22 @@ export const cancelVendorBookingHandler: RequestHandler = asyncHandler(
       req.auth!.userId,
       bookingId,
       req.body as CancelVendorBookingInput,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: booking,
+    });
+  },
+);
+
+export const completeVendorBookingHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { bookingId } = req.params as VendorBookingParams;
+
+    const booking = await completeVendorBooking(
+      req.auth!.userId,
+      bookingId,
     );
 
     res.status(200).json({

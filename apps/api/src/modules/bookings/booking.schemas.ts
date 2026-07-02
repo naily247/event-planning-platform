@@ -151,6 +151,12 @@ export const cancelVendorBookingSchema = z.object({
   }),
 });
 
+export const completeVendorBookingSchema = z.object({
+  params: z.object({
+    bookingId: bookingIdSchema,
+  }),
+});
+
 export type CreateCustomerBookingInput = z.infer<
   typeof createCustomerBookingSchema
 >['body'];
