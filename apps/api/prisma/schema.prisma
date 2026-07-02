@@ -90,6 +90,7 @@ model User {
   createdEvents Event[]          @relation("EventOwner")
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  customerReviews Review[]
 }
 
 model CustomerProfile {
@@ -153,6 +154,7 @@ model ServicePackage {
   vendor            VendorProfile      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   category          ServiceCategory    @relation(fields: [categoryId], references: [id])
   quotationRequests QuotationRequest[]
+  reviews           Review[]
 
   @@index([vendorId, isActive])
 }
@@ -259,16 +261,23 @@ model Payment {
 }
 
 model Review {
-  id                  String        @id @default(cuid())
-  bookingId           String        @unique
+  id                  String          @id @default(cuid())
+  bookingId           String          @unique
+  customerId          String
   vendorId            String
+  packageId           String?
   overallRating       Int
   serviceRating       Int?
   communicationRating Int?
   comment             String?
-  booking             Booking       @relation(fields: [bookingId], references: [id])
-  vendor              VendorProfile @relation(fields: [vendorId], references: [id])
-  createdAt           DateTime      @default(now())
+  booking             Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customer            User            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vendor              VendorProfile   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  package             ServicePackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
 
+  @@index([customerId, createdAt])
   @@index([vendorId, overallRating])
+  @@index([packageId, overallRating])
 }

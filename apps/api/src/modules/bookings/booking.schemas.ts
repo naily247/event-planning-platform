@@ -42,6 +42,18 @@ const vendorCancellationReasonSchema = z
   )
   .max(2000);
 
+const reviewRatingSchema = z
+  .number()
+  .int('Rating must be a whole number')
+  .min(1, 'Rating must be at least 1')
+  .max(5, 'Rating must not exceed 5');
+
+const reviewCommentSchema = z
+  .string()
+  .trim()
+  .min(3, 'Review comment must contain at least 3 characters')
+  .max(2000, 'Review comment must not exceed 2000 characters');
+
 export const bookingSortOptions = [
   'newest',
   'oldest',
@@ -157,6 +169,24 @@ export const completeVendorBookingSchema = z.object({
   }),
 });
 
+export const createCustomerBookingReviewSchema = z.object({
+  params: z.object({
+    bookingId: bookingIdSchema,
+  }),
+
+  body: z.object({
+    overallRating: reviewRatingSchema,
+
+    serviceRating: reviewRatingSchema.nullable().optional(),
+
+    communicationRating: reviewRatingSchema
+      .nullable()
+      .optional(),
+
+    comment: reviewCommentSchema.nullable().optional(),
+  }),
+});
+
 export type CreateCustomerBookingInput = z.infer<
   typeof createCustomerBookingSchema
 >['body'];
@@ -191,4 +221,8 @@ export type RejectVendorBookingInput = z.infer<
 
 export type CancelVendorBookingInput = z.infer<
   typeof cancelVendorBookingSchema
+>['body'];
+
+export type CreateCustomerBookingReviewInput = z.infer<
+  typeof createCustomerBookingReviewSchema
 >['body'];

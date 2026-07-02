@@ -14,6 +14,7 @@ import {
   getVendorBookingsHandler,
   rejectVendorBookingHandler,
   completeVendorBookingHandler,
+  createCustomerBookingReviewHandler,
 } from './booking.controller.js';
 import {
   cancelCustomerBookingSchema,
@@ -26,6 +27,7 @@ import {
   getVendorBookingsSchema,
   rejectVendorBookingSchema,
   completeVendorBookingSchema,
+  createCustomerBookingReviewSchema,
 } from './booking.schemas.js';
 
 export const bookingRouter = Router();
@@ -108,4 +110,11 @@ bookingRouter.patch(
   ...vendorOnly,
   validate(completeVendorBookingSchema),
   completeVendorBookingHandler,
+);
+
+bookingRouter.post(
+  '/customer/:bookingId/review',
+  ...customerOnly,
+  validate(createCustomerBookingReviewSchema),
+  createCustomerBookingReviewHandler,
 );

@@ -16,6 +16,7 @@ import type {
   GetCustomerBookingsQuery,
   GetVendorBookingsQuery,
   RejectVendorBookingInput,
+  CreateCustomerBookingReviewInput,
 } from './booking.schemas.js';
 
 const bookingSelect = {
@@ -105,6 +106,44 @@ const bookingSelect = {
           },
         },
       },
+    },
+  },
+
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+const reviewSelect = {
+  id: true,
+  bookingId: true,
+  customerId: true,
+  vendorId: true,
+  packageId: true,
+  overallRating: true,
+  serviceRating: true,
+  communicationRating: true,
+  comment: true,
+
+  customer: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+    },
+  },
+
+  vendor: {
+    select: {
+      id: true,
+      businessName: true,
+      slug: true,
+    },
+  },
+
+  package: {
+    select: {
+      id: true,
+      title: true,
     },
   },
 
@@ -767,6 +806,100 @@ export const completeVendorBooking = async (
     },
     select: bookingSelect,
   });
+};
+
+export const createCustomerBookingReview = async (
+  customerId: string,
+  bookingId: string,
+  input: CreateCustomerBookingReviewInput,
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+
+      event: {
+        ownerId: customerId,
+      },
+    },
+
+    select: {
+      id: true,
+      status: true,
+      vendorId: true,
+
+      review: {
+        select: {
+          id: true,
+        },
+      },
+
+      acceptedQuotation: {
+        select: {
+          quotationRequest: {
+            select: {
+              packageId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!booking) {
+    throw new AppError(
+      404,
+      'Booking not found',
+      'CUSTOMER_BOOKING_NOT_FOUND',
+    );
+  }
+
+  if (booking.status !== BookingStatus.COMPLETED) {
+    throw new AppError(
+      409,
+      'Only a completed booking can be reviewed',
+      'BOOKING_NOT_COMPLETED',
+    );
+  }
+
+  if (booking.review) {
+    throw new AppError(
+      409,
+      'A review already exists for this booking',
+      'BOOKING_REVIEW_ALREADY_EXISTS',
+    );
+  }
+
+  try {
+    return await prisma.review.create({
+      data: {
+        bookingId: booking.id,
+        customerId,
+        vendorId: booking.vendorId,
+        packageId:
+          booking.acceptedQuotation.quotationRequest.packageId,
+        overallRating: input.overallRating,
+        serviceRating: input.serviceRating ?? null,
+        communicationRating:
+          input.communicationRating ?? null,
+        comment: input.comment ?? null,
+      },
+
+      select: reviewSelect,
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      throw new AppError(
+        409,
+        'A review already exists for this booking',
+        'BOOKING_REVIEW_ALREADY_EXISTS',
+      );
+    }
+
+    throw error;
+  }
 };
 
 export const createCustomerBooking = async (

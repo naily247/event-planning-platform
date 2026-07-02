@@ -276,6 +276,7 @@ const prepareAcceptedQuotation = async () => {
     customerUserId,
     vendorUserId,
     vendorId: vendor.id,
+    packageId: servicePackage.id,
     eventId: event.id,
     quotationRequestId: quotationRequest.id,
     quotationId: quotation.id,
@@ -394,6 +395,17 @@ const completeVendorBookingRequest = (
   return request(app)
     .patch(`/api/v1/bookings/vendor/incoming/${bookingId}/complete`)
     .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const createCustomerBookingReviewRequest = (
+  accessToken: string,
+  bookingId: string,
+  body: Record<string, unknown> = {},
+) => {
+  return request(app)
+    .post(`/api/v1/bookings/customer/${bookingId}/review`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send(body);
 };
 
 beforeEach(async () => {
@@ -2659,6 +2671,426 @@ describe('Vendor booking completion API', () => {
       const response = await completeVendorBookingRequest(
         vendorRegistration.body.data.accessToken,
         'invalid-id',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+});
+
+describe('Customer booking review API', () => {
+  describe('POST /api/v1/bookings/customer/:bookingId/review', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app)
+        .post(
+          '/api/v1/bookings/customer/clx0000000000000000000000/review',
+        )
+        .send({
+          overallRating: 5,
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated vendors', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await createCustomerBookingReviewRequest(
+        vendorRegistration.body.data.accessToken,
+        'clx0000000000000000000000',
+        {
+          overallRating: 5,
+        },
+      );
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('allows the customer to review a completed booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const completionResponse = await completeVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(completionResponse.status).toBe(200);
+
+      const response = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 5,
+          serviceRating: 5,
+          communicationRating: 4,
+          comment:
+            'The photography service was professional, friendly, and delivered exactly as promised.',
+        },
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        customerId: preparedBooking.customerUserId,
+        vendorId: preparedBooking.vendorId,
+        packageId: preparedBooking.packageId,
+        overallRating: 5,
+        serviceRating: 5,
+        communicationRating: 4,
+        comment:
+          'The photography service was professional, friendly, and delivered exactly as promised.',
+
+        customer: {
+          id: preparedBooking.customerUserId,
+          firstName: 'Maya',
+          lastName: 'Fernando',
+        },
+
+        vendor: {
+          id: preparedBooking.vendorId,
+          businessName: 'Booking Photography Studio',
+        },
+
+        package: {
+          id: preparedBooking.packageId,
+          title: 'Booking Wedding Photography Package',
+        },
+      });
+
+      expect(response.body.data.id).toEqual(expect.any(String));
+      expect(response.body.data.vendor.slug).toEqual(expect.any(String));
+      expect(response.body.data.createdAt).toEqual(expect.any(String));
+      expect(response.body.data.updatedAt).toEqual(expect.any(String));
+
+      const savedReview = await prisma.review.findUnique({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedReview).not.toBeNull();
+      expect(savedReview?.customerId).toBe(
+        preparedBooking.customerUserId,
+      );
+      expect(savedReview?.vendorId).toBe(preparedBooking.vendorId);
+      expect(savedReview?.packageId).toBe(preparedBooking.packageId);
+      expect(savedReview?.overallRating).toBe(5);
+      expect(savedReview?.serviceRating).toBe(5);
+      expect(savedReview?.communicationRating).toBe(4);
+    });
+
+    it('allows a review with only the required overall rating', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+          vendorCompletedAt: new Date(),
+        },
+      });
+
+      const response = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 4,
+        },
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        overallRating: 4,
+        serviceRating: null,
+        communicationRating: null,
+        comment: null,
+      });
+
+      const savedReview = await prisma.review.findUnique({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedReview?.overallRating).toBe(4);
+      expect(savedReview?.serviceRating).toBeNull();
+      expect(savedReview?.communicationRating).toBeNull();
+      expect(savedReview?.comment).toBeNull();
+    });
+
+    it('trims the review comment before saving it', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+          vendorCompletedAt: new Date(),
+        },
+      });
+
+      const comment =
+        'The vendor communicated clearly and delivered an excellent service.';
+
+      const response = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 5,
+          comment: `   ${comment}   `,
+        },
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.data.comment).toBe(comment);
+
+      const savedReview = await prisma.review.findUnique({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedReview?.comment).toBe(comment);
+    });
+
+    it('does not allow another customer to review the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+          vendorCompletedAt: new Date(),
+        },
+      });
+
+      const secondCustomerRegistration = await registerCustomer(
+        secondCustomerPayload,
+      );
+
+      const response = await createCustomerBookingReviewRequest(
+        secondCustomerRegistration.body.data.accessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 5,
+        },
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'CUSTOMER_BOOKING_NOT_FOUND',
+      );
+
+      const savedReview = await prisma.review.findUnique({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedReview).toBeNull();
+    });
+
+    it('rejects a review before the booking is completed', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 5,
+        },
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_NOT_COMPLETED',
+      );
+
+      const savedReview = await prisma.review.findUnique({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedReview).toBeNull();
+    });
+
+    it('rejects a duplicate review for the same booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+          vendorCompletedAt: new Date(),
+        },
+      });
+
+      const firstResponse = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 5,
+          comment:
+            'The vendor provided a professional and reliable service.',
+        },
+      );
+
+      expect(firstResponse.status).toBe(201);
+
+      const secondResponse = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 4,
+          comment:
+            'The customer is attempting to review the same booking again.',
+        },
+      );
+
+      expect(secondResponse.status).toBe(409);
+      expect(secondResponse.body.success).toBe(false);
+      expect(secondResponse.body.error.code).toBe(
+        'BOOKING_REVIEW_ALREADY_EXISTS',
+      );
+
+      const savedReviews = await prisma.review.count({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedReviews).toBe(1);
+    });
+
+    it('rejects invalid rating values', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+          vendorCompletedAt: new Date(),
+        },
+      });
+
+      const response = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 6,
+          serviceRating: 0,
+          communicationRating: 4.5,
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects a missing overall rating', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+          vendorCompletedAt: new Date(),
+        },
+      });
+
+      const response = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          comment:
+            'The service was completed, but the required rating was omitted.',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects a review comment that is too short', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+          vendorCompletedAt: new Date(),
+        },
+      });
+
+      const response = await createCustomerBookingReviewRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          overallRating: 4,
+          comment: 'Ok',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects an invalid booking ID', async () => {
+      const customerRegistration = await registerCustomer(
+        customerPayload,
+      );
+
+      const response = await createCustomerBookingReviewRequest(
+        customerRegistration.body.data.accessToken,
+        'invalid-id',
+        {
+          overallRating: 5,
+        },
       );
 
       expect(response.status).toBe(400);

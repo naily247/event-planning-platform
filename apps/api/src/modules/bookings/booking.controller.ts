@@ -10,6 +10,7 @@ import type {
   GetVendorBookingsQuery,
   RejectVendorBookingInput,
   VendorBookingParams,
+  CreateCustomerBookingReviewInput,
 } from './booking.schemas.js';
 import {
   cancelCustomerBooking,
@@ -22,6 +23,7 @@ import {
   getVendorBookings,
   rejectVendorBooking,
   completeVendorBooking,
+  createCustomerBookingReview,
 } from './booking.service.js';
 
 export const createCustomerBookingHandler: RequestHandler = asyncHandler(
@@ -87,6 +89,22 @@ export const cancelCustomerBookingHandler: RequestHandler = asyncHandler(
     });
   },
 );
+
+export const createCustomerBookingReviewHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { bookingId } = req.params as CustomerBookingParams;
+
+    const review = await createCustomerBookingReview(
+      req.auth!.userId,
+      bookingId,
+      req.body as CreateCustomerBookingReviewInput,
+    );
+
+    res.status(201).json({
+      success: true,
+      data: review,
+    });
+  });
 
 export const getVendorBookingsHandler: RequestHandler = asyncHandler(
   async (req, res) => {
