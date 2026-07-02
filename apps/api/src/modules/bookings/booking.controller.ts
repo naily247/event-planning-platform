@@ -2,6 +2,7 @@ import type { RequestHandler } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import type {
   CancelCustomerBookingInput,
+  CancelVendorBookingInput,
   ConfirmVendorBookingInput,
   CreateCustomerBookingInput,
   CustomerBookingParams,
@@ -12,6 +13,7 @@ import type {
 } from './booking.schemas.js';
 import {
   cancelCustomerBooking,
+  cancelVendorBooking,
   confirmVendorBooking,
   createCustomerBooking,
   getCustomerBookingById,
@@ -143,6 +145,23 @@ export const rejectVendorBookingHandler: RequestHandler = asyncHandler(
       req.auth!.userId,
       bookingId,
       req.body as RejectVendorBookingInput,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: booking,
+    });
+  },
+);
+
+export const cancelVendorBookingHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { bookingId } = req.params as VendorBookingParams;
+
+    const booking = await cancelVendorBooking(
+      req.auth!.userId,
+      bookingId,
+      req.body as CancelVendorBookingInput,
     );
 
     res.status(200).json({

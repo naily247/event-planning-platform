@@ -376,6 +376,17 @@ const rejectVendorBookingRequest = (
     .send(body);
 };
 
+const cancelVendorBookingRequest = (
+  accessToken: string,
+  bookingId: string,
+  body: Record<string, unknown> = {},
+) => {
+  return request(app)
+    .patch(`/api/v1/bookings/vendor/incoming/${bookingId}/cancel`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send(body);
+};
+
 beforeEach(async () => {
   await clearTestData();
 });
@@ -1760,6 +1771,523 @@ describe('Vendor booking response API', () => {
         'invalid-id',
         {
           reason: 'The requested event date is unavailable for our business.',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+});
+
+describe('Vendor booking cancellation API', () => {
+  describe('PATCH /api/v1/bookings/vendor/incoming/:bookingId/cancel', () => {
+    it('rejects requests without authentication', async () => {
+      const response = await request(app)
+        .patch(
+          '/api/v1/bookings/vendor/incoming/clx0000000000000000000000/cancel',
+        )
+        .send({
+          reason:
+            'An unavoidable equipment issue means we cannot provide the service.',
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated customers', async () => {
+      const customerRegistration = await registerCustomer(customerPayload);
+
+      const response = await cancelVendorBookingRequest(
+        customerRegistration.body.data.accessToken,
+        'clx0000000000000000000000',
+        {
+          reason:
+            'An unavoidable equipment issue means we cannot provide the service.',
+        },
+      );
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('allows the assigned vendor to cancel a confirmed booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          note:
+            'The requested date is available and the booking is confirmed.',
+        },
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const reason =
+        'An unavoidable equipment issue means we cannot provide the service.';
+
+      const response = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        vendorCancellationReason: reason,
+        customerCancellationReason: null,
+        customerCancelledAt: null,
+        vendorResponseNote:
+          'The requested date is available and the booking is confirmed.',
+      });
+
+      expect(response.body.data.vendorCancelledAt).toEqual(
+        expect.any(String),
+      );
+
+      expect(response.body.data.vendorRespondedAt).toEqual(
+        expect.any(String),
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.CANCELLED);
+      expect(savedBooking?.vendorCancellationReason).toBe(reason);
+      expect(savedBooking?.vendorCancelledAt).not.toBeNull();
+      expect(savedBooking?.customerCancellationReason).toBeNull();
+      expect(savedBooking?.customerCancelledAt).toBeNull();
+    });
+
+    it('trims the vendor cancellation reason before saving it', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const reason =
+        'An unavoidable staffing emergency means we cannot provide the service.';
+
+      const response = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason: `   ${reason}   `,
+        },
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.vendorCancellationReason).toBe(reason);
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.vendorCancellationReason).toBe(reason);
+    });
+
+    it('shows the vendor cancellation in customer booking details', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const reason =
+        'A critical equipment failure means the vendor cannot provide the service.';
+
+      const cancellationResponse = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(cancellationResponse.status).toBe(200);
+
+      const customerResponse = await getCustomerBookingByIdRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(customerResponse.status).toBe(200);
+      expect(customerResponse.body.success).toBe(true);
+
+      expect(customerResponse.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        vendorCancellationReason: reason,
+      });
+
+      expect(customerResponse.body.data.vendorCancelledAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('shows the vendor cancellation in customer booking lists', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const reason =
+        'An unexpected operational issue means the service cannot be delivered.';
+
+      const cancellationResponse = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(cancellationResponse.status).toBe(200);
+
+      const customerResponse = await getCustomerBookingsRequest(
+        preparedBooking.customerAccessToken,
+      );
+
+      expect(customerResponse.status).toBe(200);
+      expect(customerResponse.body.data).toHaveLength(1);
+
+      expect(customerResponse.body.data[0]).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        vendorCancellationReason: reason,
+      });
+
+      expect(customerResponse.body.data[0].vendorCancelledAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('shows the vendor cancellation in vendor booking lists and details', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const reason =
+        'An unavoidable operational emergency means the booking must be cancelled.';
+
+      const cancellationResponse = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason,
+        },
+      );
+
+      expect(cancellationResponse.status).toBe(200);
+
+      const listResponse = await getVendorBookingsRequest(
+        preparedBooking.vendorAccessToken,
+      );
+
+      expect(listResponse.status).toBe(200);
+      expect(listResponse.body.data).toHaveLength(1);
+
+      expect(listResponse.body.data[0]).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        vendorCancellationReason: reason,
+      });
+
+      expect(listResponse.body.data[0].vendorCancelledAt).toEqual(
+        expect.any(String),
+      );
+
+      const detailResponse = await getVendorBookingByIdRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(detailResponse.status).toBe(200);
+
+      expect(detailResponse.body.data).toMatchObject({
+        id: preparedBooking.bookingId,
+        status: 'CANCELLED',
+        vendorCancellationReason: reason,
+      });
+
+      expect(detailResponse.body.data.vendorCancelledAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('does not allow another vendor to cancel the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const secondVendorRegistration = await registerVendor(
+        secondVendorPayload,
+      );
+
+      const response = await cancelVendorBookingRequest(
+        secondVendorRegistration.body.data.accessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The second vendor is attempting to cancel a booking they do not own.',
+        },
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_BOOKING_NOT_FOUND',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.CONFIRMED);
+      expect(savedBooking?.vendorCancellationReason).toBeNull();
+      expect(savedBooking?.vendorCancelledAt).toBeNull();
+    });
+
+    it('rejects vendor cancellation while awaiting confirmation', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const response = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The vendor cannot cancel while the booking is awaiting confirmation.',
+        },
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(
+        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+      );
+
+      expect(savedBooking?.vendorCancellationReason).toBeNull();
+      expect(savedBooking?.vendorCancelledAt).toBeNull();
+    });
+
+    it('rejects repeated vendor cancellation', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const firstResponse = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'An unavoidable equipment issue means we cannot provide the service.',
+        },
+      );
+
+      expect(firstResponse.status).toBe(200);
+
+      const secondResponse = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The vendor is attempting to cancel the same booking for a second time.',
+        },
+      );
+
+      expect(secondResponse.status).toBe(409);
+      expect(secondResponse.body.success).toBe(false);
+      expect(secondResponse.body.error.code).toBe(
+        'BOOKING_ALREADY_CANCELLED',
+      );
+    });
+
+    it('does not allow the vendor to cancel a rejected booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const rejectionResponse = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The requested event date is no longer available for our service.',
+        },
+      );
+
+      expect(rejectionResponse.status).toBe(200);
+
+      const response = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The vendor is attempting to cancel a booking that was already rejected.',
+        },
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.REJECTED);
+      expect(savedBooking?.vendorCancellationReason).toBeNull();
+      expect(savedBooking?.vendorCancelledAt).toBeNull();
+    });
+
+    it('does not allow the vendor to cancel a completed booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.booking.update({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+
+        data: {
+          status: BookingStatus.COMPLETED,
+        },
+      });
+
+      const response = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The vendor is attempting to cancel a booking that is already completed.',
+        },
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(BookingStatus.COMPLETED);
+      expect(savedBooking?.vendorCancellationReason).toBeNull();
+      expect(savedBooking?.vendorCancelledAt).toBeNull();
+    });
+
+    it('rejects a missing vendor cancellation reason', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const response = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects a vendor cancellation reason that is too short', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const response = await cancelVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason: 'Broken',
+        },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects an invalid booking ID', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await cancelVendorBookingRequest(
+        vendorRegistration.body.data.accessToken,
+        'invalid-id',
+        {
+          reason:
+            'An unavoidable equipment issue means we cannot provide the service.',
         },
       );
 

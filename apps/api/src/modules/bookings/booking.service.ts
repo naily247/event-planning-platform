@@ -10,6 +10,7 @@ import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   CancelCustomerBookingInput,
+  CancelVendorBookingInput,
   ConfirmVendorBookingInput,
   CreateCustomerBookingInput,
   GetCustomerBookingsQuery,
@@ -27,6 +28,8 @@ const bookingSelect = {
   vendorRespondedAt: true,
   customerCancellationReason: true,
   customerCancelledAt: true,
+  vendorCancellationReason: true,
+  vendorCancelledAt: true,
 
   event: {
     select: {
@@ -291,6 +294,26 @@ const ensureBookingCanBeCancelledByCustomer = (
       409,
       'This booking cannot be cancelled in its current status',
       'BOOKING_CANNOT_BE_CANCELLED',
+    );
+  }
+};
+
+const ensureBookingCanBeCancelledByVendor = (
+  status: BookingStatus,
+) => {
+  if (status === BookingStatus.CANCELLED) {
+    throw new AppError(
+      409,
+      'This booking has already been cancelled',
+      'BOOKING_ALREADY_CANCELLED',
+    );
+  }
+
+  if (status !== BookingStatus.CONFIRMED) {
+    throw new AppError(
+      409,
+      'This booking cannot be cancelled by the vendor in its current status',
+      'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
     );
   }
 };
@@ -604,6 +627,47 @@ export const rejectVendorBooking = async (
       409,
       'This booking has already received a vendor response',
       'BOOKING_ALREADY_RESPONDED',
+    );
+  }
+
+  return getUpdatedVendorBooking(vendorId, bookingId);
+};
+
+export const cancelVendorBooking = async (
+  vendorUserId: string,
+  bookingId: string,
+  input: CancelVendorBookingInput,
+) => {
+  const vendorId = await getVendorProfileId(vendorUserId);
+
+  const existingBooking = await getOwnedVendorBooking(
+    vendorId,
+    bookingId,
+  );
+
+  ensureBookingCanBeCancelledByVendor(existingBooking.status);
+
+  const cancellationTime = new Date();
+
+  const updateResult = await prisma.booking.updateMany({
+    where: {
+      id: bookingId,
+      vendorId,
+      status: BookingStatus.CONFIRMED,
+    },
+
+    data: {
+      status: BookingStatus.CANCELLED,
+      vendorCancellationReason: input.reason,
+      vendorCancelledAt: cancellationTime,
+    },
+  });
+
+  if (updateResult.count === 0) {
+    throw new AppError(
+      409,
+      'This booking cannot be cancelled by the vendor in its current status',
+      'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
     );
   }
 

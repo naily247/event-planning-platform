@@ -5,6 +5,7 @@ import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
   cancelCustomerBookingHandler,
+  cancelVendorBookingHandler,
   confirmVendorBookingHandler,
   createCustomerBookingHandler,
   getCustomerBookingByIdHandler,
@@ -15,6 +16,7 @@ import {
 } from './booking.controller.js';
 import {
   cancelCustomerBookingSchema,
+  cancelVendorBookingSchema,
   confirmVendorBookingSchema,
   createCustomerBookingSchema,
   getCustomerBookingSchema,
@@ -90,4 +92,11 @@ bookingRouter.post(
   ...customerOnly,
   validate(createCustomerBookingSchema),
   createCustomerBookingHandler,
+);
+
+bookingRouter.patch(
+  '/vendor/incoming/:bookingId/cancel',
+  ...vendorOnly,
+  validate(cancelVendorBookingSchema),
+  cancelVendorBookingHandler,
 );

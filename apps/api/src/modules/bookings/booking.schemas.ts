@@ -33,6 +33,15 @@ const customerCancellationReasonSchema = z
   )
   .max(2000);
 
+const vendorCancellationReasonSchema = z
+  .string()
+  .trim()
+  .min(
+    10,
+    'Cancellation reason must contain at least 10 characters',
+  )
+  .max(2000);
+
 export const bookingSortOptions = [
   'newest',
   'oldest',
@@ -132,6 +141,16 @@ export const rejectVendorBookingSchema = z.object({
   }),
 });
 
+export const cancelVendorBookingSchema = z.object({
+  params: z.object({
+    bookingId: bookingIdSchema,
+  }),
+
+  body: z.object({
+    reason: vendorCancellationReasonSchema,
+  }),
+});
+
 export type CreateCustomerBookingInput = z.infer<
   typeof createCustomerBookingSchema
 >['body'];
@@ -162,4 +181,8 @@ export type ConfirmVendorBookingInput = z.infer<
 
 export type RejectVendorBookingInput = z.infer<
   typeof rejectVendorBookingSchema
+>['body'];
+
+export type CancelVendorBookingInput = z.infer<
+  typeof cancelVendorBookingSchema
 >['body'];
