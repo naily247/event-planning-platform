@@ -459,6 +459,49 @@ describe('Public vendor discovery API', () => {
       }
     });
 
+    it('includes average rating and review count in vendor list responses', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        serviceRating: 4,
+        communicationRating: 5,
+        comment: 'Excellent photography service.',
+        createdAt: new Date('2027-02-01T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 3,
+        serviceRating: 3,
+        communicationRating: 4,
+        comment: 'Good service overall.',
+        createdAt: new Date('2027-02-02T10:00:00.000Z'),
+      });
+
+      const response = await request(app).get('/api/v1/vendors');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(2);
+
+      const photographyVendor = response.body.data.find(
+        (vendor: { slug: string }) => vendor.slug === 'golden-lens-photography',
+      );
+
+      const cateringVendor = response.body.data.find(
+        (vendor: { slug: string }) => vendor.slug === 'royal-feast-catering',
+      );
+
+      expect(photographyVendor).toMatchObject({
+        averageRating: 4,
+        reviewCount: 2,
+      });
+
+      expect(cateringVendor).toMatchObject({
+        averageRating: null,
+        reviewCount: 0,
+      });
+    });
+
     it('filters vendors by search text', async () => {
       const response = await request(app).get('/api/v1/vendors?search=golden');
 
@@ -582,6 +625,68 @@ describe('Public vendor discovery API', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.data.packages).toEqual([]);
+    });
+
+    it('includes a rating summary for a vendor with reviews', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        serviceRating: 5,
+        communicationRating: 4,
+        comment: 'Excellent photography service.',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 3,
+        serviceRating: 4,
+        communicationRating: 3,
+        comment: 'Good service overall.',
+        createdAt: new Date('2027-02-12T10:00:00.000Z'),
+      });
+
+      const response = await request(app).get(
+        '/api/v1/vendors/golden-lens-photography',
+      );
+
+      expect(response.status).toBe(200);
+
+      expect(response.body.data.ratingSummary).toEqual({
+        overallAverage: 4,
+        serviceAverage: 4.5,
+        communicationAverage: 3.5,
+        reviewCount: 2,
+        breakdown: {
+          1: 0,
+          2: 0,
+          3: 1,
+          4: 0,
+          5: 1,
+        },
+      });
+    });
+
+    it('includes an empty rating summary for a vendor without reviews', async () => {
+      const response = await request(app).get(
+        '/api/v1/vendors/royal-feast-catering',
+      );
+
+      expect(response.status).toBe(200);
+
+      expect(response.body.data.ratingSummary).toEqual({
+        overallAverage: null,
+        serviceAverage: null,
+        communicationAverage: null,
+        reviewCount: 0,
+        breakdown: {
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+        },
+      });
     });
 
     it('hides pending vendors', async () => {

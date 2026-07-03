@@ -410,6 +410,123 @@ const getPublicVendorReviewOrderBy = (
   }
 };
 
+type PublicVendorRatingSummary = {
+  totalReviews: number;
+  averageOverallRating: number | null;
+  averageServiceRating: number | null;
+  averageCommunicationRating: number | null;
+  ratingBreakdown: Record<1 | 2 | 3 | 4 | 5, number>;
+};
+
+const createEmptyRatingBreakdown = (): PublicVendorRatingSummary['ratingBreakdown'] => ({
+  1: 0,
+  2: 0,
+  3: 0,
+  4: 0,
+  5: 0,
+});
+
+const formatAverage = (value: number | null) =>
+  value === null ? null : Number(value.toFixed(2));
+
+const getPublicVendorRatingSummaries = async (
+  vendorIds: string[],
+): Promise<Map<string, PublicVendorRatingSummary>> => {
+  const summaries = new Map<string, PublicVendorRatingSummary>();
+
+  for (const vendorId of vendorIds) {
+    summaries.set(vendorId, {
+      totalReviews: 0,
+      averageOverallRating: null,
+      averageServiceRating: null,
+      averageCommunicationRating: null,
+      ratingBreakdown: createEmptyRatingBreakdown(),
+    });
+  }
+
+  if (vendorIds.length === 0) {
+    return summaries;
+  }
+
+  const reviews = await prisma.review.findMany({
+    where: {
+      vendorId: {
+        in: vendorIds,
+      },
+      booking: {
+        status: BookingStatus.COMPLETED,
+      },
+    },
+    select: {
+      vendorId: true,
+      overallRating: true,
+      serviceRating: true,
+      communicationRating: true,
+    },
+  });
+
+  const totals = new Map<
+    string,
+    {
+      count: number;
+      overall: number;
+      service: number;
+      serviceCount: number;
+      communication: number;
+      communicationCount: number;
+      ratingBreakdown: PublicVendorRatingSummary['ratingBreakdown'];
+    }
+  >();
+
+  for (const review of reviews) {
+    const current = totals.get(review.vendorId) ?? {
+      count: 0,
+      overall: 0,
+      service: 0,
+      serviceCount: 0,
+      communication: 0,
+      communicationCount: 0,
+      ratingBreakdown: createEmptyRatingBreakdown(),
+    };
+
+    current.count += 1;
+    current.overall += review.overallRating;
+
+    if (review.serviceRating !== null) {
+      current.service += review.serviceRating;
+      current.serviceCount += 1;
+    }
+
+    if (review.communicationRating !== null) {
+      current.communication += review.communicationRating;
+      current.communicationCount += 1;
+    }
+    const rating = review.overallRating as 1 | 2 | 3 | 4 | 5;
+    current.ratingBreakdown[rating] += 1;
+
+    totals.set(review.vendorId, current);
+  }
+
+  for (const [vendorId, total] of totals) {
+    summaries.set(vendorId, {
+      totalReviews: total.count,
+      averageOverallRating: formatAverage(total.overall / total.count),
+      averageServiceRating:
+        total.serviceCount === 0
+          ? null
+          : formatAverage(total.service / total.serviceCount),
+
+      averageCommunicationRating:
+        total.communicationCount === 0
+        ? null
+        : formatAverage(total.communication / total.communicationCount),
+      ratingBreakdown: total.ratingBreakdown,
+    });
+  }
+
+  return summaries;
+};
+
 export const getPublicVendors = async (query: GetPublicVendorsQuery) => {
   const { search, category, location, serviceArea, page, limit, sort } = query;
 
@@ -472,10 +589,23 @@ export const getPublicVendors = async (query: GetPublicVendorsQuery) => {
     }),
   ]);
 
+      const ratingSummaries = await getPublicVendorRatingSummaries(
+    vendors.map((vendor) => vendor.id),
+  );
+
   const totalPages = Math.ceil(total / limit);
 
   return {
-    vendors: vendors.map(formatVendorProfile),
+    vendors: vendors.map((vendor) => {
+      const ratingSummary = ratingSummaries.get(vendor.id);
+
+      return {
+        ...formatVendorProfile(vendor),
+        averageRating: ratingSummary?.averageOverallRating ?? null,
+        reviewCount: ratingSummary?.totalReviews ?? 0,
+      };
+    }),
+
     pagination: {
       page,
       limit,
@@ -486,6 +616,7 @@ export const getPublicVendors = async (query: GetPublicVendorsQuery) => {
     },
   };
 };
+
 
 export const getPublicVendorBySlug = async (slug: string) => {
   const vendor = await prisma.vendorProfile.findFirst({
@@ -500,12 +631,31 @@ export const getPublicVendorBySlug = async (slug: string) => {
     throw new AppError(404, 'Vendor not found', 'PUBLIC_VENDOR_NOT_FOUND');
   }
 
+  const ratingSummaries = await getPublicVendorRatingSummaries([vendor.id]);
+
+  const ratingSummary = ratingSummaries.get(vendor.id) ?? {
+    totalReviews: 0,
+    averageOverallRating: null,
+    averageServiceRating: null,
+    averageCommunicationRating: null,
+    ratingBreakdown: createEmptyRatingBreakdown(),
+  };
+
   return {
     ...formatVendorProfile(vendor),
+
     packages: vendor.packages.map((servicePackage) => ({
       ...servicePackage,
       basePrice: servicePackage.basePrice?.toFixed(2) ?? null,
     })),
+
+    ratingSummary: {
+      overallAverage: ratingSummary.averageOverallRating,
+      serviceAverage: ratingSummary.averageServiceRating,
+      communicationAverage: ratingSummary.averageCommunicationRating,
+      reviewCount: ratingSummary.totalReviews,
+      breakdown: ratingSummary.ratingBreakdown,
+    },
   };
 };
 
