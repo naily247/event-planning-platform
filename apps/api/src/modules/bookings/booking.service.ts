@@ -158,6 +158,14 @@ type SelectedBooking = Prisma.BookingGetPayload<{
 const customerCancellableStatuses: BookingStatus[] = [
   BookingStatus.AWAITING_VENDOR_CONFIRMATION,
   BookingStatus.CONFIRMED,
+  BookingStatus.DEPOSIT_PENDING,
+  BookingStatus.ACTIVE,
+];
+
+const vendorCancellableStatuses: BookingStatus[] = [
+  BookingStatus.CONFIRMED,
+  BookingStatus.DEPOSIT_PENDING,
+  BookingStatus.ACTIVE,
 ];
 
 const formatBooking = (booking: SelectedBooking) => ({
@@ -419,6 +427,12 @@ const getOwnedVendorBooking = async (
       status: true,
       serviceStart: true,
       serviceEnd: true,
+
+      acceptedQuotation: {
+        select: {
+          depositAmount: true,
+        },
+      },
     },
   });
 
@@ -464,7 +478,7 @@ const ensureBookingCanBeCancelledByVendor = (
     );
   }
 
-  if (status !== BookingStatus.CONFIRMED) {
+  if (!vendorCancellableStatuses.includes(status)) {
     throw new AppError(
       409,
       'This booking cannot be cancelled by the vendor in its current status',
@@ -484,10 +498,10 @@ const ensureBookingCanBeCompletedByVendor = (
     );
   }
 
-  if (status !== BookingStatus.CONFIRMED) {
+  if (status !== BookingStatus.ACTIVE) {
     throw new AppError(
       409,
-      'Only a confirmed booking can be completed by the vendor.',
+      'Only an active booking can be completed by the vendor.',
       'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
     );
   }
@@ -751,6 +765,14 @@ export const confirmVendorBooking = async (
     excludedBookingId: existingBooking.id,
   });
 
+  const depositAmount = 
+    existingBooking.acceptedQuotation.depositAmount;
+
+  const confirmedStatus = 
+    depositAmount !== null && depositAmount.greaterThan(0)
+      ? BookingStatus.DEPOSIT_PENDING
+      : BookingStatus.ACTIVE;  
+
   const updateResult = await prisma.booking.updateMany({
     where: {
       id: bookingId,
@@ -759,7 +781,7 @@ export const confirmVendorBooking = async (
     },
 
     data: {
-      status: BookingStatus.CONFIRMED,
+      status: confirmedStatus,
       vendorResponseNote: input.note ?? null,
       vendorRespondedAt: new Date(),
     },
@@ -835,7 +857,10 @@ export const cancelVendorBooking = async (
     where: {
       id: bookingId,
       vendorId,
-      status: BookingStatus.CONFIRMED,
+      
+      status: {
+        in: vendorCancellableStatuses,
+      }
     },
 
     data: {
@@ -890,7 +915,7 @@ export const completeVendorBooking = async (
       vendor: {
         userId: vendorUserId,
       },
-      status: BookingStatus.CONFIRMED,
+      status: BookingStatus.ACTIVE,
     },
     data: {
       status: BookingStatus.COMPLETED,
