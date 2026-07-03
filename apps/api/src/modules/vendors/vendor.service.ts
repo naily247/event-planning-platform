@@ -6,6 +6,9 @@ import type {
   UpdateVendorProfileInput,
   GetPublicVendorsQuery,
   GetPublicVendorReviewsQuery,
+  GetPublicVendorAvailabilityQuery,
+  GetVendorAvailabilityQuery,
+  CreateVendorAvailabilityBlockInput,
 } from './vendor.schemas.js';
 
 const vendorProfileSelect = {
@@ -812,4 +815,341 @@ export const getPublicVendorReviews = async (
       hasPreviousPage: page > 1,
     },
   };
+};
+
+const committedBookingStatuses: BookingStatus[] = [
+  BookingStatus.CONFIRMED,
+  BookingStatus.DEPOSIT_PENDING,
+  BookingStatus.ACTIVE,
+  BookingStatus.DISPUTED,
+];
+
+const availabilityBlockSelect = {
+  id: true,
+  startsAt: true,
+  endsAt: true,
+  reason: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+const availabilityBookingSelect = {
+  id: true,
+  serviceStart: true,
+  serviceEnd: true,
+  status: true,
+} as const;
+
+const getUtcDayEnd = (date: Date) => {
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate() + 1,
+    ),
+  );
+};
+
+const getEffectiveBookingEnd = (booking: {
+  serviceStart: Date;
+  serviceEnd: Date | null;
+}) => {
+  return booking.serviceEnd ?? getUtcDayEnd(booking.serviceStart);
+};
+
+const rangesOverlap = (
+  firstStart: Date,
+  firstEnd: Date,
+  secondStart: Date,
+  secondEnd: Date,
+) => {
+  return firstStart < secondEnd && firstEnd > secondStart;
+};
+
+const getVendorProfileIdByUserId = async (userId: string) => {
+  const vendor = await prisma.vendorProfile.findUnique({
+    where: {
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!vendor) {
+    throw new AppError(
+      404,
+      'Vendor profile not found',
+      'VENDOR_PROFILE_NOT_FOUND',
+    );
+  }
+
+  return vendor.id;
+};
+
+const getApprovedPublicVendorId = async (slug: string) => {
+  const vendor = await prisma.vendorProfile.findFirst({
+    where: {
+      slug,
+      verificationStatus: VendorVerificationStatus.APPROVED,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!vendor) {
+    throw new AppError(
+      404,
+      'Vendor not found',
+      'PUBLIC_VENDOR_NOT_FOUND',
+    );
+  }
+
+  return vendor.id;
+};
+
+const getAvailabilityBookings = async (
+  vendorId: string,
+  rangeStart: Date,
+  rangeEnd: Date,
+) => {
+  const rangeStartUtcDay = new Date(
+    Date.UTC(
+      rangeStart.getUTCFullYear(),
+      rangeStart.getUTCMonth(),
+      rangeStart.getUTCDate(),
+    ),
+  );
+
+  const bookings = await prisma.booking.findMany({
+    where: {
+      vendorId,
+
+      status: {
+        in: committedBookingStatuses,
+      },
+
+      OR: [
+        {
+          serviceEnd: {
+            not: null,
+            gt: rangeStart,
+          },
+
+          serviceStart: {
+            lt: rangeEnd,
+          },
+        },
+
+        {
+          serviceEnd: null,
+
+          serviceStart: {
+            gte: rangeStartUtcDay,
+            lt: rangeEnd,
+          },
+        },
+      ],
+    },
+
+    select: availabilityBookingSelect,
+
+    orderBy: {
+      serviceStart: 'asc',
+    },
+  });
+
+  return bookings.filter((booking) =>
+    rangesOverlap(
+      booking.serviceStart,
+      getEffectiveBookingEnd(booking),
+      rangeStart,
+      rangeEnd,
+    ),
+  );
+};
+
+const getAvailabilityBlocks = async (
+  vendorId: string,
+  rangeStart: Date,
+  rangeEnd: Date,
+) => {
+  return prisma.vendorAvailabilityBlock.findMany({
+    where: {
+      vendorId,
+
+      startsAt: {
+        lt: rangeEnd,
+      },
+
+      endsAt: {
+        gt: rangeStart,
+      },
+    },
+
+    select: availabilityBlockSelect,
+
+    orderBy: {
+      startsAt: 'asc',
+    },
+  });
+};
+
+export const getVendorAvailability = async (
+  vendorUserId: string,
+  query: GetVendorAvailabilityQuery,
+) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  const rangeStart = new Date(query.from);
+  const rangeEnd = new Date(query.to);
+
+  const [blocks, bookings] = await Promise.all([
+    getAvailabilityBlocks(vendorId, rangeStart, rangeEnd),
+    getAvailabilityBookings(vendorId, rangeStart, rangeEnd),
+  ]);
+
+  return {
+    range: {
+      from: rangeStart,
+      to: rangeEnd,
+    },
+
+    blocks,
+
+    bookings: bookings.map((booking) => ({
+      id: booking.id,
+      startsAt: booking.serviceStart,
+      endsAt: getEffectiveBookingEnd(booking),
+      originalServiceEnd: booking.serviceEnd,
+      status: booking.status,
+    })),
+  };
+};
+
+export const getPublicVendorAvailability = async (
+  slug: string,
+  query: GetPublicVendorAvailabilityQuery,
+) => {
+  const vendorId = await getApprovedPublicVendorId(slug);
+
+  const rangeStart = new Date(query.from);
+  const rangeEnd = new Date(query.to);
+
+  const [blocks, bookings] = await Promise.all([
+    getAvailabilityBlocks(vendorId, rangeStart, rangeEnd),
+    getAvailabilityBookings(vendorId, rangeStart, rangeEnd),
+  ]);
+
+  const unavailableRanges = [
+    ...blocks.map((block) => ({
+      startsAt: block.startsAt,
+      endsAt: block.endsAt,
+      source: 'VENDOR_BLOCK' as const,
+    })),
+
+    ...bookings.map((booking) => ({
+      startsAt: booking.serviceStart,
+      endsAt: getEffectiveBookingEnd(booking),
+      source: 'BOOKING' as const,
+    })),
+  ].sort(
+    (first, second) =>
+      first.startsAt.getTime() - second.startsAt.getTime(),
+  );
+
+  return {
+    range: {
+      from: rangeStart,
+      to: rangeEnd,
+    },
+
+    unavailableRanges,
+  };
+};
+
+export const createVendorAvailabilityBlock = async (
+  vendorUserId: string,
+  input: CreateVendorAvailabilityBlockInput,
+) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  const startsAt = new Date(input.startsAt);
+  const endsAt = new Date(input.endsAt);
+
+  const existingBlock =
+    await prisma.vendorAvailabilityBlock.findFirst({
+      where: {
+        vendorId,
+
+        startsAt: {
+          lt: endsAt,
+        },
+
+        endsAt: {
+          gt: startsAt,
+        },
+      },
+
+      select: {
+        id: true,
+      },
+    });
+
+  if (existingBlock) {
+    throw new AppError(
+      409,
+      'This availability block overlaps an existing block',
+      'AVAILABILITY_BLOCK_CONFLICT',
+    );
+  }
+
+  const conflictingBookings = await getAvailabilityBookings(
+    vendorId,
+    startsAt,
+    endsAt,
+  );
+
+  if (conflictingBookings.length > 0) {
+    throw new AppError(
+      409,
+      'This availability block overlaps a committed booking',
+      'AVAILABILITY_BOOKING_CONFLICT',
+    );
+  }
+
+  return prisma.vendorAvailabilityBlock.create({
+    data: {
+      vendorId,
+      startsAt,
+      endsAt,
+      reason: input.reason ?? null,
+    },
+
+    select: availabilityBlockSelect,
+  });
+};
+
+export const deleteVendorAvailabilityBlock = async (
+  vendorUserId: string,
+  blockId: string,
+) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  const deleteResult =
+    await prisma.vendorAvailabilityBlock.deleteMany({
+      where: {
+        id: blockId,
+        vendorId,
+      },
+    });
+
+  if (deleteResult.count === 0) {
+    throw new AppError(
+      404,
+      'Availability block not found',
+      'AVAILABILITY_BLOCK_NOT_FOUND',
+    );
+  }
 };

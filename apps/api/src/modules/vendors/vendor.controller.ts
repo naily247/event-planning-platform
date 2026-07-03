@@ -7,6 +7,11 @@ import type {
   GetPublicVendorsQuery,
   GetPublicVendorReviewsParams,
   GetPublicVendorReviewsQuery,
+  GetPublicVendorAvailabilityParams,
+  GetPublicVendorAvailabilityQuery,
+  GetVendorAvailabilityQuery,
+  CreateVendorAvailabilityBlockInput,
+  DeleteVendorAvailabilityBlockParams,
 } from './vendor.schemas.js';
 import {
   getVendorOnboardingProfile,
@@ -16,7 +21,12 @@ import {
   getPublicVendorBySlug,
   getPublicVendors,
   getPublicVendorReviews,
+  getPublicVendorAvailability,
+  getVendorAvailability,
+  createVendorAvailabilityBlock,
+  deleteVendorAvailabilityBlock,
 } from './vendor.service.js';
+
 export const getPublicVendorsHandler: RequestHandler = asyncHandler(async (req, res) => {
   const result = await getPublicVendors(req.query as unknown as GetPublicVendorsQuery);
 
@@ -81,7 +91,8 @@ export const updateVendorOnboardingProfileHandler: RequestHandler = asyncHandler
   },
 );
 
-export const updateVendorCategoriesHandler: RequestHandler = asyncHandler(async (req, res) => {
+export const updateVendorCategoriesHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
   const result = await updateVendorCategories(
     req.auth!.userId,
     req.body as UpdateVendorCategoriesInput,
@@ -103,3 +114,58 @@ export const submitVendorOnboardingProfileHandler: RequestHandler = asyncHandler
     });
   },
 );
+
+export const getPublicVendorAvailabilityHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { slug } =
+      req.params as GetPublicVendorAvailabilityParams;
+
+    const result = await getPublicVendorAvailability(
+      slug,
+      req.query as unknown as GetPublicVendorAvailabilityQuery,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  });
+
+export const getVendorAvailabilityHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const result = await getVendorAvailability(
+      req.auth!.userId,
+      req.query as unknown as GetVendorAvailabilityQuery,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  });
+
+export const createVendorAvailabilityBlockHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const result = await createVendorAvailabilityBlock(
+      req.auth!.userId,
+      req.body as CreateVendorAvailabilityBlockInput,
+    );
+
+    res.status(201).json({
+      success: true,
+      data: result,
+    });
+  });
+
+export const deleteVendorAvailabilityBlockHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { blockId } =
+      req.params as DeleteVendorAvailabilityBlockParams;
+
+    await deleteVendorAvailabilityBlock(
+      req.auth!.userId,
+      blockId,
+    );
+
+    res.status(204).send();
+  });

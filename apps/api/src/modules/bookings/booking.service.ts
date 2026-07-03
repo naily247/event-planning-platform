@@ -210,6 +210,119 @@ const isSameUtcCalendarDate = (
   firstDate.getUTCMonth() === secondDate.getUTCMonth() &&
   firstDate.getUTCDate() === secondDate.getUTCDate();
 
+const committedBookingStatuses: BookingStatus[] = [
+  BookingStatus.CONFIRMED,
+  BookingStatus.DEPOSIT_PENDING,
+  BookingStatus.ACTIVE,
+  BookingStatus.DISPUTED,
+];
+
+const getUtcDayEnd = (date: Date): Date =>
+  new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate() + 1,
+    ),
+  );
+
+const getEffectiveBookingEnd = (
+  serviceStart: Date,
+  serviceEnd: Date | null,
+): Date => serviceEnd ?? getUtcDayEnd(serviceStart);
+
+const rangesOverlap = (
+  firstStart: Date,
+  firstEnd: Date,
+  secondStart: Date,
+  secondEnd: Date,
+): boolean =>
+  firstStart < secondEnd &&
+  firstEnd > secondStart;
+
+const ensureVendorHasNoScheduleConflict = async ({
+  vendorId,
+  serviceStart,
+  serviceEnd,
+  excludedBookingId,
+}: {
+  vendorId: string;
+  serviceStart: Date;
+  serviceEnd: Date | null;
+  excludedBookingId?: string;
+}): Promise<void> => {
+  const effectiveServiceEnd = getEffectiveBookingEnd(
+    serviceStart,
+    serviceEnd,
+  );
+
+  const [availabilityBlock, possibleBookingConflicts] =
+    await Promise.all([
+      prisma.vendorAvailabilityBlock.findFirst({
+        where: {
+          vendorId,
+          startsAt: {
+            lt: effectiveServiceEnd,
+          },
+          endsAt: {
+            gt: serviceStart,
+          },
+        },
+
+        select: {
+          id: true,
+        },
+      }),
+
+      prisma.booking.findMany({
+        where: {
+          vendorId,
+          status: {
+            in: committedBookingStatuses,
+          },
+
+          ...(excludedBookingId
+            ? {
+                id: {
+                  not: excludedBookingId,
+                },
+              }
+            : {}),
+
+          serviceStart: {
+            lt: effectiveServiceEnd,
+          },
+        },
+
+        select: {
+          serviceStart: true,
+          serviceEnd: true,
+        },
+      }),
+    ]);
+
+  const bookingConflict = possibleBookingConflicts.some(
+    (booking) =>
+      rangesOverlap(
+        booking.serviceStart,
+        getEffectiveBookingEnd(
+          booking.serviceStart,
+          booking.serviceEnd,
+        ),
+        serviceStart,
+        effectiveServiceEnd,
+      ),
+  );
+
+  if (availabilityBlock || bookingConflict) {
+    throw new AppError(
+      409,
+      'The vendor is unavailable during the requested service time',
+      'VENDOR_SCHEDULE_CONFLICT',
+    );
+  }
+};
+
 const getBookingOrderBy = (
   sort:
     | GetCustomerBookingsQuery['sort']
@@ -304,6 +417,8 @@ const getOwnedVendorBooking = async (
     select: {
       id: true,
       status: true,
+      serviceStart: true,
+      serviceEnd: true,
     },
   });
 
@@ -628,6 +743,13 @@ export const confirmVendorBooking = async (
   );
 
   ensureBookingAwaitsVendorResponse(existingBooking.status);
+
+  await ensureVendorHasNoScheduleConflict({
+    vendorId,
+    serviceStart: existingBooking.serviceStart,
+    serviceEnd: existingBooking.serviceEnd,
+    excludedBookingId: existingBooking.id,
+  });
 
   const updateResult = await prisma.booking.updateMany({
     where: {
@@ -1035,6 +1157,12 @@ export const createCustomerBooking = async (
       'SERVICE_DATE_DOES_NOT_MATCH_EVENT',
     );
   }
+
+  await ensureVendorHasNoScheduleConflict({
+    vendorId: quotation.quotationRequest.vendorId,
+    serviceStart,
+    serviceEnd,
+  });
 
   try {
     const booking = await prisma.booking.create({

@@ -78,18 +78,18 @@ enum PaymentStatus {
 }
 
 model User {
-  id            String           @id @default(cuid())
-  email         String           @unique
-  passwordHash  String
-  firstName     String
-  lastName      String
-  role          UserRole
-  status        AccountStatus    @default(ACTIVE)
-  customer      CustomerProfile?
-  vendor        VendorProfile?
-  createdEvents Event[]          @relation("EventOwner")
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id              String           @id @default(cuid())
+  email           String           @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  role            UserRole
+  status          AccountStatus    @default(ACTIVE)
+  customer        CustomerProfile?
+  vendor          VendorProfile?
+  createdEvents   Event[]          @relation("EventOwner")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   customerReviews Review[]
 }
 
@@ -101,27 +101,28 @@ model CustomerProfile {
 }
 
 model VendorProfile {
-  id                 String                   @id @default(cuid())
-  userId             String                   @unique
+  id                 String                    @id @default(cuid())
+  userId             String                    @unique
   businessName       String
-  slug               String                   @unique
+  slug               String                    @unique
   description        String?
   contactPhone       String?
   website            String?
   baseLocation       String?
-  serviceAreas       String[]                 @default([])
-  verificationStatus VendorVerificationStatus @default(DRAFT)
+  serviceAreas       String[]                  @default([])
+  verificationStatus VendorVerificationStatus  @default(DRAFT)
   submittedAt        DateTime?
   reviewedAt         DateTime?
   rejectionReason    String?
-  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories         VendorCategory[]
   packages           ServicePackage[]
   quotationRequests  QuotationRequest[]
   bookings           Booking[]
+  availabilityBlocks VendorAvailabilityBlock[]
   reviews            Review[]
-  createdAt          DateTime                 @default(now())
-  updatedAt          DateTime                 @updatedAt
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
 }
 
 model ServiceCategory {
@@ -243,6 +244,20 @@ model Booking {
 
   @@index([vendorId, status, createdAt])
   @@index([vendorId, serviceStart, serviceEnd])
+}
+
+model VendorAvailabilityBlock {
+  id        String        @id @default(cuid())
+  vendorId  String
+  startsAt  DateTime
+  endsAt    DateTime
+  reason    String?
+  vendor    VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([vendorId, startsAt, endsAt])
+  @@index([vendorId, createdAt])
 }
 
 model Payment {

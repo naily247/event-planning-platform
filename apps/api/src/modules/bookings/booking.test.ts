@@ -283,6 +283,47 @@ const prepareAcceptedQuotation = async () => {
   };
 };
 
+const createAdditionalAcceptedQuotation = async ({
+  eventId,
+  vendorId,
+  packageId,
+}: {
+  eventId: string;
+  vendorId: string;
+  packageId: string;
+}) => {
+  const quotationRequest = await prisma.quotationRequest.create({
+    data: {
+      eventId,
+      vendorId,
+      packageId,
+      requirements:
+        'Additional photography coverage request for the same event.',
+      status: QuotationRequestStatus.ACCEPTED,
+    },
+  });
+
+  const quotation = await prisma.quotation.create({
+    data: {
+      quotationRequestId: quotationRequest.id,
+      version: 1,
+      status: QuotationStatus.ACCEPTED,
+      proposedPrice: 165000,
+      depositAmount: 45000,
+      inclusions:
+        'Photography coverage, edited digital photographs, and online delivery.',
+      exclusions: 'Printed albums are not included.',
+      terms: 'A deposit is required after vendor confirmation.',
+      expiresAt: new Date('2030-07-20T09:00:00.000Z'),
+    },
+  });
+
+  return {
+    quotationRequestId: quotationRequest.id,
+    quotationId: quotation.id,
+  };
+};
+
 const prepareBooking = async () => {
   const preparedData = await prepareAcceptedQuotation();
 
@@ -555,6 +596,177 @@ describe('Customer booking creation API', () => {
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
       expect(response.body.error.code).toBe('QUOTATION_NOT_ACCEPTED');
+    });
+
+    it('rejects booking creation when the requested time overlaps a vendor availability block', async () => {
+      const preparedData = await prepareAcceptedQuotation();
+
+      await prisma.vendorAvailabilityBlock.create({
+        data: {
+          vendorId: preparedData.vendorId,
+          startsAt: new Date('2030-08-20T12:00:00.000Z'),
+          endsAt: new Date('2030-08-20T20:00:00.000Z'),
+          reason: 'Vendor is unavailable during the afternoon.',
+        },
+      });
+
+      const response = await createBookingRequest(
+        preparedData.customerAccessToken,
+        preparedData.quotationId,
+        {
+          serviceStart: '2030-08-20T08:00:00.000Z',
+          serviceEnd: '2030-08-20T18:00:00.000Z',
+        },
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_SCHEDULE_CONFLICT',
+      );
+    });
+
+    it('allows booking creation when the service ends exactly when a vendor availability block begins', async () => {
+      const preparedData = await prepareAcceptedQuotation();
+
+      await prisma.vendorAvailabilityBlock.create({
+        data: {
+          vendorId: preparedData.vendorId,
+          startsAt: new Date('2030-08-20T18:00:00.000Z'),
+          endsAt: new Date('2030-08-20T20:00:00.000Z'),
+          reason: 'Vendor is unavailable during the evening.',
+        },
+      });
+
+      const response = await createBookingRequest(
+        preparedData.customerAccessToken,
+        preparedData.quotationId,
+        {
+          serviceStart: '2030-08-20T08:00:00.000Z',
+          serviceEnd: '2030-08-20T18:00:00.000Z',
+        },
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.status).toBe(
+        'AWAITING_VENDOR_CONFIRMATION',
+      );
+    });
+
+    it('treats a booking without a service end as occupying the rest of its UTC day', async () => {
+      const preparedData = await prepareAcceptedQuotation();
+
+      await prisma.vendorAvailabilityBlock.create({
+        data: {
+          vendorId: preparedData.vendorId,
+          startsAt: new Date('2030-08-20T20:00:00.000Z'),
+          endsAt: new Date('2030-08-20T21:00:00.000Z'),
+          reason: 'Vendor has another commitment that evening.',
+        },
+      });
+
+      const response = await createBookingRequest(
+        preparedData.customerAccessToken,
+        preparedData.quotationId,
+        {
+          serviceStart: '2030-08-20T08:00:00.000Z',
+          serviceEnd: null,
+        },
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+        'VENDOR_SCHEDULE_CONFLICT',
+      );
+    });
+
+    it('allows an overlapping booking after the previous confirmed booking is cancelled', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const confirmationResponse =
+        await confirmVendorBookingRequest(
+          preparedBooking.vendorAccessToken,
+          preparedBooking.bookingId,
+        );
+
+      expect(confirmationResponse.status).toBe(200);
+
+      const cancellationResponse =
+        await cancelCustomerBookingRequest(
+          preparedBooking.customerAccessToken,
+          preparedBooking.bookingId,
+          {
+            reason:
+              'The original booking is no longer required for the event.',
+          },
+        );
+
+      expect(cancellationResponse.status).toBe(200);
+      expect(cancellationResponse.body.data.status).toBe('CANCELLED');
+
+      const additionalQuotation =
+        await createAdditionalAcceptedQuotation({
+          eventId: preparedBooking.eventId,
+          vendorId: preparedBooking.vendorId,
+          packageId: preparedBooking.packageId,
+        });
+
+      const replacementBookingResponse =
+        await createBookingRequest(
+          preparedBooking.customerAccessToken,
+          additionalQuotation.quotationId,
+          {
+            serviceStart: '2030-08-20T10:00:00.000Z',
+            serviceEnd: '2030-08-20T16:00:00.000Z',
+          },
+        );
+
+      expect(replacementBookingResponse.status).toBe(201);
+      expect(replacementBookingResponse.body.success).toBe(true);
+      expect(replacementBookingResponse.body.data.status).toBe(
+        'AWAITING_VENDOR_CONFIRMATION',
+      );
+    });
+
+    it('allows an overlapping booking after the previous booking is rejected', async () => {
+      const preparedBooking = await prepareBooking();
+
+      const rejectionResponse = await rejectVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason:
+            'The vendor cannot provide the requested service for this event.',
+        },
+      );
+
+      expect(rejectionResponse.status).toBe(200);
+      expect(rejectionResponse.body.data.status).toBe('REJECTED');
+
+      const additionalQuotation =
+        await createAdditionalAcceptedQuotation({
+          eventId: preparedBooking.eventId,
+          vendorId: preparedBooking.vendorId,
+          packageId: preparedBooking.packageId,
+        });
+
+      const replacementBookingResponse =
+        await createBookingRequest(
+          preparedBooking.customerAccessToken,
+          additionalQuotation.quotationId,
+          {
+            serviceStart: '2030-08-20T10:00:00.000Z',
+            serviceEnd: '2030-08-20T16:00:00.000Z',
+          },
+        );
+
+      expect(replacementBookingResponse.status).toBe(201);
+      expect(replacementBookingResponse.body.success).toBe(true);
+      expect(replacementBookingResponse.body.data.status).toBe(
+        'AWAITING_VENDOR_CONFIRMATION',
+      );
     });
 
     it('rejects duplicate booking creation for the same quotation', async () => {
@@ -1539,6 +1751,170 @@ describe('Vendor booking response API', () => {
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
       expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects confirmation when a vendor availability block now overlaps the booking', async () => {
+      const preparedBooking = await prepareBooking();
+
+      await prisma.vendorAvailabilityBlock.create({
+        data: {
+          vendorId: preparedBooking.vendorId,
+          startsAt: new Date('2030-08-20T12:00:00.000Z'),
+          endsAt: new Date('2030-08-20T20:00:00.000Z'),
+          reason: 'The vendor became unavailable after receiving the request.',
+        },
+      });
+
+      const response = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe(
+          'VENDOR_SCHEDULE_CONFLICT',
+      );
+
+      const savedBooking = await prisma.booking.findUnique({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedBooking?.status).toBe(
+        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+      );
+      expect(savedBooking?.vendorRespondedAt).toBeNull();
+    });
+
+    it('allows overlapping pending bookings but rejects confirming the second one after the first is confirmed', async () => {
+      const preparedData = await prepareAcceptedQuotation();
+
+      const firstBookingResponse = await createBookingRequest(
+        preparedData.customerAccessToken,
+        preparedData.quotationId,
+        {
+          serviceStart: '2030-08-20T08:00:00.000Z',
+          serviceEnd: '2030-08-20T18:00:00.000Z',
+        },
+      );
+
+      expect(firstBookingResponse.status).toBe(201);
+
+      const additionalQuotation =
+        await createAdditionalAcceptedQuotation({
+          eventId: preparedData.eventId,
+          vendorId: preparedData.vendorId,
+          packageId: preparedData.packageId,
+        });
+
+      const secondBookingResponse = await createBookingRequest(
+        preparedData.customerAccessToken,
+        additionalQuotation.quotationId,
+        {
+          serviceStart: '2030-08-20T10:00:00.000Z',
+          serviceEnd: '2030-08-20T16:00:00.000Z',
+        },
+      );
+
+      expect(secondBookingResponse.status).toBe(201);
+
+      const firstBookingId = firstBookingResponse.body.data.id as string;
+      const secondBookingId = secondBookingResponse.body.data.id as string;
+
+      const firstConfirmationResponse =
+        await confirmVendorBookingRequest(
+          preparedData.vendorAccessToken,
+          firstBookingId,
+        );
+
+      expect(firstConfirmationResponse.status).toBe(200);
+      expect(firstConfirmationResponse.body.data.status).toBe(
+        'CONFIRMED',
+      );
+
+      const secondConfirmationResponse =
+        await confirmVendorBookingRequest(
+          preparedData.vendorAccessToken,
+          secondBookingId,
+        );
+
+      expect(secondConfirmationResponse.status).toBe(409);
+      expect(secondConfirmationResponse.body.success).toBe(false);
+      expect(secondConfirmationResponse.body.error.code).toBe(
+        'VENDOR_SCHEDULE_CONFLICT',
+      );
+
+      const savedSecondBooking = await prisma.booking.findUnique({
+        where: {
+          id: secondBookingId,
+        },
+      });
+
+      expect(savedSecondBooking?.status).toBe(
+        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+      );
+      expect(savedSecondBooking?.vendorRespondedAt).toBeNull();
+    });
+
+    it('allows confirming a booking that starts exactly when another confirmed booking ends', async () => {
+      const preparedData = await prepareAcceptedQuotation();
+
+      const firstBookingResponse = await createBookingRequest(
+        preparedData.customerAccessToken,
+        preparedData.quotationId,
+        {
+          serviceStart: '2030-08-20T08:00:00.000Z',
+          serviceEnd: '2030-08-20T12:00:00.000Z',
+        },
+      );
+
+      expect(firstBookingResponse.status).toBe(201);
+
+      const additionalQuotation =
+        await createAdditionalAcceptedQuotation({
+          eventId: preparedData.eventId,
+          vendorId: preparedData.vendorId,
+          packageId: preparedData.packageId,
+        });
+
+      const secondBookingResponse = await createBookingRequest(
+        preparedData.customerAccessToken,
+        additionalQuotation.quotationId,
+        {
+          serviceStart: '2030-08-20T12:00:00.000Z',
+          serviceEnd: '2030-08-20T18:00:00.000Z',
+        },
+      );
+
+      expect(secondBookingResponse.status).toBe(201);
+
+      const firstBookingId = firstBookingResponse.body.data.id as string;
+      const secondBookingId = secondBookingResponse.body.data.id as string;
+
+      const firstConfirmationResponse =
+        await confirmVendorBookingRequest(
+          preparedData.vendorAccessToken,
+          firstBookingId,
+        );
+
+      expect(firstConfirmationResponse.status).toBe(200);
+      expect(firstConfirmationResponse.body.data.status).toBe(
+        'CONFIRMED',
+      );
+
+      const secondConfirmationResponse =
+        await confirmVendorBookingRequest(
+          preparedData.vendorAccessToken,
+          secondBookingId,
+        );
+
+      expect(secondConfirmationResponse.status).toBe(200);
+      expect(secondConfirmationResponse.body.success).toBe(true);
+      expect(secondConfirmationResponse.body.data.status).toBe(
+        'CONFIRMED',
+      );
     });
 
     it('allows the assigned vendor to confirm a booking', async () => {

@@ -11,6 +11,10 @@ import {
   getPublicVendorBySlugHandler,
   getPublicVendorsHandler,
   getPublicVendorReviewsHandler,
+  getPublicVendorAvailabilityHandler,
+  getVendorAvailabilityHandler,
+  createVendorAvailabilityBlockHandler,
+  deleteVendorAvailabilityBlockHandler,
 } from './vendor.controller.js';
 import {
   updateVendorCategoriesSchema,
@@ -18,6 +22,10 @@ import {
   getPublicVendorBySlugSchema,
   getPublicVendorsSchema,
   getPublicVendorReviewsSchema,
+  getPublicVendorAvailabilitySchema,
+  getVendorAvailabilitySchema,
+  createVendorAvailabilityBlockSchema,
+  deleteVendorAvailabilityBlockSchema,
 } from './vendor.schemas.js';
 
 export const vendorRouter = Router();
@@ -64,4 +72,34 @@ vendorRouter.get(
   '/:slug/reviews',
   validate(getPublicVendorReviewsSchema),
   getPublicVendorReviewsHandler,
+);
+
+vendorRouter.get(
+  '/me/availability',
+  requireAuth,
+  authorize(UserRole.VENDOR),
+  validate(getVendorAvailabilitySchema),
+  getVendorAvailabilityHandler,
+);
+
+vendorRouter.post(
+  '/me/availability/blocks',
+  requireAuth,
+  authorize(UserRole.VENDOR),
+  validate(createVendorAvailabilityBlockSchema),
+  createVendorAvailabilityBlockHandler,
+);
+
+vendorRouter.delete(
+  '/me/availability/blocks/:blockId',
+  requireAuth,
+  authorize(UserRole.VENDOR),
+  validate(deleteVendorAvailabilityBlockSchema),
+  deleteVendorAvailabilityBlockHandler,
+);
+
+vendorRouter.get(
+  '/:slug/availability',
+  validate(getPublicVendorAvailabilitySchema),
+  getPublicVendorAvailabilityHandler,
 );
