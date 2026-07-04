@@ -4,9 +4,11 @@ import {
   QuotationRequestStatus,
   VendorVerificationStatus,
   QuotationStatus,
+  NotificationType,
 } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
+import { createNotification } from '../notifications/notification.service.js';
 import type {
   CreateQuotationRequestInput,
   CreateVendorQuotationDraftInput,
@@ -291,6 +293,28 @@ export const acceptCustomerQuotation = async (
     select: {
       id: true,
       status: true,
+      vendorId: true,
+      packageId: true,
+
+      event: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+
+      vendor: {
+        select: {
+          userId: true,
+          businessName: true,
+        },
+      },
+
+      package: {
+        select: {
+          title: true,
+        },
+      },
 
       quotations: {
         where: {
@@ -390,12 +414,36 @@ export const acceptCustomerQuotation = async (
       },
     });
 
-    return transaction.quotation.findUniqueOrThrow({
+    const updatedQuotation = await transaction.quotation.findUniqueOrThrow({
       where: {
         id: quotation.id,
       },
       select: quotationSelect,
     });
+
+    await createNotification(
+      {
+        recipientId: quotationRequest.vendor.userId,
+        type: NotificationType.QUOTATION_ACCEPTED,
+        title: 'Quotation accepted',
+        message: `Your quotation for ${
+          quotationRequest.package?.title ?? 'the requested service'
+        } for ${quotationRequest.event.name} was accepted.`,
+        entityType: 'quotation',
+        entityId: updatedQuotation.id,
+        metadata: {
+          quotationRequestId: quotationRequest.id,
+          quotationId: updatedQuotation.id,
+          eventId: quotationRequest.event.id,
+          vendorId: quotationRequest.vendorId,
+          packageId: quotationRequest.packageId,
+          status: updatedQuotation.status,
+        },
+      },
+      transaction,
+    );
+
+    return updatedQuotation;
   });
 
   return formatQuotation(acceptedQuotation);
@@ -773,6 +821,33 @@ export const sendVendorQuotationDraft = async (
       id: true,
       status: true,
       responseDueAt: true,
+      vendorId: true,
+      packageId: true,
+
+      event: {
+        select: {
+          id: true,
+          name: true,
+
+          owner: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
+
+      vendor: {
+        select: {
+          businessName: true,
+        },
+      },
+
+      package: {
+        select: {
+          title: true,
+        },
+      },
 
       quotations: {
         select: quotationSelect,
@@ -841,11 +916,34 @@ export const sendVendorQuotationDraft = async (
       },
     });
 
+    await createNotification(
+      {
+        recipientId: quotationRequest.event.owner.id,
+        type: NotificationType.QUOTATION_SENT,
+        title: 'New quotation received',
+        message: `${quotationRequest.vendor.businessName} sent you a quotation for ${
+          quotationRequest.package?.title ?? 'the requested service'
+        } for ${quotationRequest.event.name}.`,
+        entityType: 'quotation',
+        entityId: updatedQuotation.id,
+        metadata: {
+          quotationRequestId: quotationRequest.id,
+          quotationId: updatedQuotation.id,
+          eventId: quotationRequest.event.id,
+          vendorId: quotationRequest.vendorId,
+          packageId: quotationRequest.packageId,
+          status: updatedQuotation.status,
+        },
+      },
+      transaction,
+    );
+
     return updatedQuotation;
   });
 
   return formatQuotation(sentQuotation);
 };
+
 export const createCustomerQuotationRequest = async (
   customerId: string,
   input: CreateQuotationRequestInput,
@@ -857,6 +955,7 @@ export const createCustomerQuotationRequest = async (
     },
     select: {
       id: true,
+      name: true,
       status: true,
       eventDate: true,
     },
@@ -885,7 +984,14 @@ export const createCustomerQuotationRequest = async (
     },
     select: {
       id: true,
+      title: true,
       vendorId: true,
+
+      vendor: {
+        select: {
+          userId: true,
+        },
+      },
     },
   });
 
@@ -926,18 +1032,41 @@ export const createCustomerQuotationRequest = async (
     );
   }
 
-  const quotationRequest = await prisma.quotationRequest.create({
-    data: {
-      eventId: event.id,
-      vendorId: servicePackage.vendorId,
-      packageId: servicePackage.id,
-      requirements: input.requirements,
-      responseDueAt:
-        input.responseDueAt === undefined || input.responseDueAt === null
-          ? null
-          : new Date(input.responseDueAt),
-    },
-    select: quotationRequestSelect,
+  const quotationRequest = await prisma.$transaction(async (transaction) => {
+    const createdQuotationRequest = await transaction.quotationRequest.create({
+      data: {
+        eventId: event.id,
+        vendorId: servicePackage.vendorId,
+        packageId: servicePackage.id,
+        requirements: input.requirements,
+        responseDueAt:
+          input.responseDueAt === undefined || input.responseDueAt === null
+            ? null
+            : new Date(input.responseDueAt),
+      },
+      select: quotationRequestSelect,
+    });
+
+    await createNotification(
+      {
+        recipientId: servicePackage.vendor.userId,
+        type: NotificationType.QUOTATION_REQUEST_RECEIVED,
+        title: 'New quotation request',
+        message: `You received a quotation request for ${servicePackage.title} for ${event.name}.`,
+        entityType: 'quotationRequest',
+        entityId: createdQuotationRequest.id,
+        metadata: {
+          quotationRequestId: createdQuotationRequest.id,
+          eventId: event.id,
+          vendorId: servicePackage.vendorId,
+          packageId: servicePackage.id,
+          status: createdQuotationRequest.status,
+        },
+      },
+      transaction,
+    );
+
+    return createdQuotationRequest;
   });
 
   return formatQuotationRequest(quotationRequest);

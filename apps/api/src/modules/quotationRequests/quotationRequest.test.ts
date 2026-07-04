@@ -1,4 +1,9 @@
-import { QuotationRequestStatus, QuotationStatus, VendorVerificationStatus } from '@prisma/client';
+import {
+  NotificationType,
+  QuotationRequestStatus,
+  QuotationStatus,
+  VendorVerificationStatus,
+} from '@prisma/client';
 import request from 'supertest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -194,6 +199,7 @@ const prepareApprovedVendorPackage = async () => {
 
   return {
     vendorAccessToken: accessToken,
+    vendorUserId: userId,
     vendorId: vendor.id,
     packageId: packageResponse.body.data.id,
   };
@@ -309,7 +315,7 @@ describe('Customer quotation request API', () => {
       const customerRegistration = await registerCustomer(customerPayload);
       const customerAccessToken = customerRegistration.body.data.accessToken;
 
-      const { packageId, vendorId } = await prepareApprovedVendorPackage();
+      const { packageId, vendorId, vendorUserId } = await prepareApprovedVendorPackage();
 
       const eventId = await createPlanningEvent(customerAccessToken);
 
@@ -342,6 +348,37 @@ describe('Customer quotation request API', () => {
       expect(response.body.data.id).toEqual(expect.any(String));
       expect(response.body.data.createdAt).toEqual(expect.any(String));
       expect(response.body.data.updatedAt).toEqual(expect.any(String));
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: vendorUserId,
+          type: NotificationType.QUOTATION_REQUEST_RECEIVED,
+          entityType: 'quotationRequest',
+          entityId: response.body.data.id,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: vendorUserId,
+        type: NotificationType.QUOTATION_REQUEST_RECEIVED,
+        title: 'New quotation request',
+        message:
+          'You received a quotation request for Wedding Photography Package for Maya and Arjun Wedding.',
+        isRead: false,
+        readAt: null,
+        entityType: 'quotationRequest',
+        entityId: response.body.data.id,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        quotationRequestId: response.body.data.id,
+        eventId,
+        vendorId,
+        packageId,
+        status: QuotationRequestStatus.SENT,
+      });
     });
 
     it('hides an event owned by another customer', async () => {
@@ -1845,8 +1882,9 @@ describe('Vendor quotation request API', () => {
     const prepareQuotationDraft = async () => {
       const customerRegistration = await registerCustomer(customerPayload);
       const customerAccessToken = customerRegistration.body.data.accessToken;
+      const customerUserId = customerRegistration.body.data.user.id;
 
-      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+      const { vendorAccessToken, vendorId, packageId } = await prepareApprovedVendorPackage();
 
       const eventId = await createPlanningEvent(customerAccessToken);
 
@@ -1870,6 +1908,10 @@ describe('Vendor quotation request API', () => {
       expect(draftResponse.status).toBe(201);
 
       return {
+        customerUserId,
+        eventId,
+        vendorId,
+        packageId,
         quotationRequestId,
         quotationId: draftResponse.body.data.id,
         vendorAccessToken,
@@ -1899,7 +1941,15 @@ describe('Vendor quotation request API', () => {
     });
 
     it('sends an owned quotation draft and marks the quotation request as quoted', async () => {
-      const { quotationRequestId, vendorAccessToken } = await prepareQuotationDraft();
+      const {
+        customerUserId,
+        eventId,
+        vendorId,
+        packageId,
+        quotationRequestId,
+        quotationId,
+        vendorAccessToken,
+      } = await prepareQuotationDraft();
 
       const response = await request(app)
         .post(
@@ -1918,6 +1968,38 @@ describe('Vendor quotation request API', () => {
       });
 
       expect(savedQuotationRequest?.status).toBe('QUOTED');
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: customerUserId,
+          type: NotificationType.QUOTATION_SENT,
+          entityType: 'quotation',
+          entityId: quotationId,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: customerUserId,
+        type: NotificationType.QUOTATION_SENT,
+        title: 'New quotation received',
+        message:
+          'Quotation Photography Studio sent you a quotation for Wedding Photography Package for Maya and Arjun Wedding.',
+        isRead: false,
+        readAt: null,
+        entityType: 'quotation',
+        entityId: quotationId,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        quotationRequestId,
+        quotationId,
+        eventId,
+        vendorId,
+        packageId,
+        status: QuotationStatus.SENT,
+      });
     });
 
     it('rejects sending when no quotation draft exists', async () => {
@@ -2045,7 +2127,8 @@ describe('Vendor quotation request API', () => {
       const customerRegistration = await registerCustomer(customerPayload);
       const customerAccessToken = customerRegistration.body.data.accessToken;
 
-      const { vendorAccessToken, packageId } = await prepareApprovedVendorPackage();
+      const { vendorAccessToken, vendorUserId, vendorId, packageId } =
+        await prepareApprovedVendorPackage();
 
       const eventId = await createPlanningEvent(customerAccessToken);
 
@@ -2074,6 +2157,10 @@ describe('Vendor quotation request API', () => {
       return {
         customerAccessToken,
         vendorAccessToken,
+        vendorUserId,
+        vendorId,
+        packageId,
+        eventId,
         quotationRequestId,
         quotationId,
       };
@@ -2102,7 +2189,15 @@ describe('Vendor quotation request API', () => {
     });
 
     it('accepts a sent quotation and marks the quotation request as accepted', async () => {
-      const { customerAccessToken, quotationRequestId, quotationId } = await prepareSentQuotation();
+      const {
+        customerAccessToken,
+        vendorUserId,
+        vendorId,
+        packageId,
+        eventId,
+        quotationRequestId,
+        quotationId,
+      } = await prepareSentQuotation();
 
       const response = await request(app)
         .post(`/api/v1/quotation-requests/${quotationRequestId}/quotations/${quotationId}/accept`)
@@ -2119,7 +2214,7 @@ describe('Vendor quotation request API', () => {
         },
       });
 
-      expect(savedQuotation?.status).toBe('ACCEPTED');
+      expect(savedQuotation?.status).toBe(QuotationStatus.ACCEPTED);
 
       const savedQuotationRequest = await prisma.quotationRequest.findUnique({
         where: {
@@ -2127,7 +2222,39 @@ describe('Vendor quotation request API', () => {
         },
       });
 
-      expect(savedQuotationRequest?.status).toBe('ACCEPTED');
+      expect(savedQuotationRequest?.status).toBe(QuotationRequestStatus.ACCEPTED);
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: vendorUserId,
+          type: NotificationType.QUOTATION_ACCEPTED,
+          entityType: 'quotation',
+          entityId: quotationId,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: vendorUserId,
+        type: NotificationType.QUOTATION_ACCEPTED,
+        title: 'Quotation accepted',
+        message:
+          'Your quotation for Wedding Photography Package for Maya and Arjun Wedding was accepted.',
+        isRead: false,
+        readAt: null,
+        entityType: 'quotation',
+        entityId: quotationId,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        quotationRequestId,
+        quotationId,
+        eventId,
+        vendorId,
+        packageId,
+        status: QuotationStatus.ACCEPTED,
+      });
     });
 
     it('rejects accepting the same quotation twice', async () => {

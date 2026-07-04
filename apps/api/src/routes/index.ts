@@ -8,6 +8,7 @@ import { vendorRouter } from '../modules/vendors/vendor.routes.js';
 import { packageRouter } from '../modules/packages/package.routes.js';
 import { quotationRequestRouter } from '../modules/quotationRequests/quotationRequest.routes.js';
 import { bookingRouter } from '../modules/bookings/booking.routes.js';
+import { notificationRouter } from '../modules/notifications/notification.routes.js';
 
 export const apiRouter = Router();
 
@@ -20,3 +21,4 @@ apiRouter.use('/admin', adminRouter);
 apiRouter.use('/packages', packageRouter);
 apiRouter.use('/quotation-requests', quotationRequestRouter);
 apiRouter.use('/bookings', bookingRouter);
+apiRouter.use('/notifications', notificationRouter);

@@ -81,6 +81,23 @@ enum PaymentMethod {
   BANK_TRANSFER
 }
 
+enum NotificationType {
+  BOOKING_CREATED
+  BOOKING_CONFIRMED
+  BOOKING_REJECTED
+  BOOKING_CANCELLED
+  BOOKING_COMPLETED
+  QUOTATION_REQUEST_RECEIVED
+  QUOTATION_SENT
+  QUOTATION_ACCEPTED
+  PAYMENT_SUBMITTED
+  PAYMENT_VERIFIED
+  PAYMENT_REJECTED
+  VENDOR_APPROVED
+  VENDOR_REJECTED
+  SYSTEM
+}
+
 model User {
   id                String           @id @default(cuid())
   email             String           @unique
@@ -97,6 +114,7 @@ model User {
   customerReviews   Review[]
   submittedPayments Payment[]        @relation("PaymentSubmitter")
   reviewedPayments  Payment[]        @relation("PaymentReviewer")
+  notifications     Notification[]
 }
 
 model CustomerProfile {
@@ -309,4 +327,24 @@ model Review {
   @@index([customerId, createdAt])
   @@index([vendorId, overallRating])
   @@index([packageId, overallRating])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  type        NotificationType
+  title       String
+  message     String
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  entityType  String?
+  entityId    String?
+  metadata    Json?
+  recipient   User             @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([recipientId, isRead, createdAt])
+  @@index([recipientId, createdAt])
+  @@index([entityType, entityId])
 }

@@ -4,6 +4,7 @@ import {
   QuotationRequestStatus,
   QuotationStatus,
   VendorVerificationStatus,
+  NotificationType,
 } from '@prisma/client';
 import request from 'supertest';
 import { createApp } from '../../app.js';
@@ -297,8 +298,7 @@ const createAdditionalAcceptedQuotation = async ({
       eventId,
       vendorId,
       packageId,
-      requirements:
-        'Additional photography coverage request for the same event.',
+      requirements: 'Additional photography coverage request for the same event.',
       status: QuotationRequestStatus.ACCEPTED,
     },
   });
@@ -310,8 +310,7 @@ const createAdditionalAcceptedQuotation = async ({
       status: QuotationStatus.ACCEPTED,
       proposedPrice: 165000,
       depositAmount: 45000,
-      inclusions:
-        'Photography coverage, edited digital photographs, and online delivery.',
+      inclusions: 'Photography coverage, edited digital photographs, and online delivery.',
       exclusions: 'Printed albums are not included.',
       terms: 'A deposit is required after vendor confirmation.',
       expiresAt: new Date('2030-07-20T09:00:00.000Z'),
@@ -352,8 +351,7 @@ const prepareActiveBooking = async () => {
 
     data: {
       status: BookingStatus.ACTIVE,
-      vendorResponseNote:
-        'The requested event date is available and the booking is confirmed.',
+      vendorResponseNote: 'The requested event date is available and the booking is confirmed.',
       vendorRespondedAt: new Date(),
     },
   });
@@ -383,10 +381,7 @@ const getCustomerBookingsRequest = (accessToken: string, query = '') => {
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
-const getCustomerBookingByIdRequest = (
-  accessToken: string,
-  bookingId: string,
-) => {
+const getCustomerBookingByIdRequest = (accessToken: string, bookingId: string) => {
   return request(app)
     .get(`/api/v1/bookings/customer/${bookingId}`)
     .set('Authorization', `Bearer ${accessToken}`);
@@ -448,10 +443,7 @@ const cancelVendorBookingRequest = (
     .send(body);
 };
 
-const completeVendorBookingRequest = (
-  accessToken: string,
-  bookingId: string,
-) => {
+const completeVendorBookingRequest = (accessToken: string, bookingId: string) => {
   return request(app)
     .patch(`/api/v1/bookings/vendor/incoming/${bookingId}/complete`)
     .set('Authorization', `Bearer ${accessToken}`);
@@ -567,6 +559,35 @@ describe('Customer booking creation API', () => {
       expect(savedBooking?.vendorId).toBe(preparedData.vendorId);
       expect(savedBooking?.agreedCost.toFixed(2)).toBe('175000.00');
       expect(savedBooking?.status).toBe(BookingStatus.AWAITING_VENDOR_CONFIRMATION);
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: preparedData.vendorUserId,
+          type: NotificationType.BOOKING_CREATED,
+          entityType: 'booking',
+          entityId: response.body.data.id,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: preparedData.vendorUserId,
+        type: NotificationType.BOOKING_CREATED,
+        title: 'New booking request',
+        message: 'You received a new booking request for Maya and Arjun Wedding.',
+        isRead: false,
+        readAt: null,
+        entityType: 'booking',
+        entityId: response.body.data.id,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        bookingId: response.body.data.id,
+        eventId: preparedData.eventId,
+        quotationId: preparedData.quotationId,
+        customerId: preparedData.customerUserId,
+      });
     });
 
     it('does not allow another customer to book the quotation', async () => {
@@ -640,9 +661,7 @@ describe('Customer booking creation API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'VENDOR_SCHEDULE_CONFLICT',
-      );
+      expect(response.body.error.code).toBe('VENDOR_SCHEDULE_CONFLICT');
     });
 
     it('allows booking creation when the service ends exactly when a vendor availability block begins', async () => {
@@ -668,9 +687,7 @@ describe('Customer booking creation API', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.status).toBe(
-        'AWAITING_VENDOR_CONFIRMATION',
-      );
+      expect(response.body.data.status).toBe('AWAITING_VENDOR_CONFIRMATION');
     });
 
     it('treats a booking without a service end as occupying the rest of its UTC day', async () => {
@@ -696,57 +713,48 @@ describe('Customer booking creation API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'VENDOR_SCHEDULE_CONFLICT',
-      );
+      expect(response.body.error.code).toBe('VENDOR_SCHEDULE_CONFLICT');
     });
 
     it('allows an overlapping booking after the previous confirmed booking is cancelled', async () => {
       const preparedBooking = await prepareBooking();
 
-      const confirmationResponse =
-        await confirmVendorBookingRequest(
-          preparedBooking.vendorAccessToken,
-          preparedBooking.bookingId,
-        );
+      const confirmationResponse = await confirmVendorBookingRequest(
+        preparedBooking.vendorAccessToken,
+        preparedBooking.bookingId,
+      );
 
       expect(confirmationResponse.status).toBe(200);
 
-      const cancellationResponse =
-        await cancelCustomerBookingRequest(
-          preparedBooking.customerAccessToken,
-          preparedBooking.bookingId,
-          {
-            reason:
-              'The original booking is no longer required for the event.',
-          },
-        );
+      const cancellationResponse = await cancelCustomerBookingRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        {
+          reason: 'The original booking is no longer required for the event.',
+        },
+      );
 
       expect(cancellationResponse.status).toBe(200);
       expect(cancellationResponse.body.data.status).toBe('CANCELLED');
 
-      const additionalQuotation =
-        await createAdditionalAcceptedQuotation({
-          eventId: preparedBooking.eventId,
-          vendorId: preparedBooking.vendorId,
-          packageId: preparedBooking.packageId,
-        });
+      const additionalQuotation = await createAdditionalAcceptedQuotation({
+        eventId: preparedBooking.eventId,
+        vendorId: preparedBooking.vendorId,
+        packageId: preparedBooking.packageId,
+      });
 
-      const replacementBookingResponse =
-        await createBookingRequest(
-          preparedBooking.customerAccessToken,
-          additionalQuotation.quotationId,
-          {
-            serviceStart: '2030-08-20T10:00:00.000Z',
-            serviceEnd: '2030-08-20T16:00:00.000Z',
-          },
-        );
+      const replacementBookingResponse = await createBookingRequest(
+        preparedBooking.customerAccessToken,
+        additionalQuotation.quotationId,
+        {
+          serviceStart: '2030-08-20T10:00:00.000Z',
+          serviceEnd: '2030-08-20T16:00:00.000Z',
+        },
+      );
 
       expect(replacementBookingResponse.status).toBe(201);
       expect(replacementBookingResponse.body.success).toBe(true);
-      expect(replacementBookingResponse.body.data.status).toBe(
-        'AWAITING_VENDOR_CONFIRMATION',
-      );
+      expect(replacementBookingResponse.body.data.status).toBe('AWAITING_VENDOR_CONFIRMATION');
     });
 
     it('allows an overlapping booking after the previous booking is rejected', async () => {
@@ -756,36 +764,31 @@ describe('Customer booking creation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The vendor cannot provide the requested service for this event.',
+          reason: 'The vendor cannot provide the requested service for this event.',
         },
       );
 
       expect(rejectionResponse.status).toBe(200);
       expect(rejectionResponse.body.data.status).toBe('REJECTED');
 
-      const additionalQuotation =
-        await createAdditionalAcceptedQuotation({
-          eventId: preparedBooking.eventId,
-          vendorId: preparedBooking.vendorId,
-          packageId: preparedBooking.packageId,
-        });
+      const additionalQuotation = await createAdditionalAcceptedQuotation({
+        eventId: preparedBooking.eventId,
+        vendorId: preparedBooking.vendorId,
+        packageId: preparedBooking.packageId,
+      });
 
-      const replacementBookingResponse =
-        await createBookingRequest(
-          preparedBooking.customerAccessToken,
-          additionalQuotation.quotationId,
-          {
-            serviceStart: '2030-08-20T10:00:00.000Z',
-            serviceEnd: '2030-08-20T16:00:00.000Z',
-          },
-        );
+      const replacementBookingResponse = await createBookingRequest(
+        preparedBooking.customerAccessToken,
+        additionalQuotation.quotationId,
+        {
+          serviceStart: '2030-08-20T10:00:00.000Z',
+          serviceEnd: '2030-08-20T16:00:00.000Z',
+        },
+      );
 
       expect(replacementBookingResponse.status).toBe(201);
       expect(replacementBookingResponse.body.success).toBe(true);
-      expect(replacementBookingResponse.body.data.status).toBe(
-        'AWAITING_VENDOR_CONFIRMATION',
-      );
+      expect(replacementBookingResponse.body.data.status).toBe('AWAITING_VENDOR_CONFIRMATION');
     });
 
     it('rejects duplicate booking creation for the same quotation', async () => {
@@ -894,9 +897,7 @@ describe('Customer booking retrieval API', () => {
     it('rejects authenticated vendors', async () => {
       const vendorRegistration = await registerVendor();
 
-      const response = await getCustomerBookingsRequest(
-        vendorRegistration.body.data.accessToken,
-      );
+      const response = await getCustomerBookingsRequest(vendorRegistration.body.data.accessToken);
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
@@ -906,9 +907,7 @@ describe('Customer booking retrieval API', () => {
     it('returns only bookings belonging to the authenticated customer', async () => {
       const preparedBooking = await prepareBooking();
 
-      const secondCustomerRegistration = await registerCustomer(
-        secondCustomerPayload,
-      );
+      const secondCustomerRegistration = await registerCustomer(secondCustomerPayload);
 
       const secondCustomerResponse = await getCustomerBookingsRequest(
         secondCustomerRegistration.body.data.accessToken,
@@ -927,9 +926,7 @@ describe('Customer booking retrieval API', () => {
         hasPreviousPage: false,
       });
 
-      const ownerResponse = await getCustomerBookingsRequest(
-        preparedBooking.customerAccessToken,
-      );
+      const ownerResponse = await getCustomerBookingsRequest(preparedBooking.customerAccessToken);
 
       expect(ownerResponse.status).toBe(200);
       expect(ownerResponse.body.success).toBe(true);
@@ -983,8 +980,7 @@ describe('Customer booking retrieval API', () => {
     it('shows the vendor response to the customer', async () => {
       const preparedBooking = await prepareBooking();
 
-      const note =
-        'The event date is available and your booking has been confirmed.';
+      const note = 'The event date is available and your booking has been confirmed.';
 
       const confirmationResponse = await confirmVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -996,9 +992,7 @@ describe('Customer booking retrieval API', () => {
 
       expect(confirmationResponse.status).toBe(200);
 
-      const response = await getCustomerBookingsRequest(
-        preparedBooking.customerAccessToken,
-      );
+      const response = await getCustomerBookingsRequest(preparedBooking.customerAccessToken);
 
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveLength(1);
@@ -1009,9 +1003,7 @@ describe('Customer booking retrieval API', () => {
         vendorResponseNote: note,
       });
 
-      expect(response.body.data[0].vendorRespondedAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data[0].vendorRespondedAt).toEqual(expect.any(String));
     });
 
     it('filters customer bookings by status', async () => {
@@ -1162,8 +1154,7 @@ describe('Customer booking retrieval API', () => {
     it('shows a vendor rejection reason in customer booking details', async () => {
       const preparedBooking = await prepareBooking();
 
-      const reason =
-        'The requested event date is no longer available for our service.';
+      const reason = 'The requested event date is no longer available for our service.';
 
       const rejectionResponse = await rejectVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -1188,17 +1179,13 @@ describe('Customer booking retrieval API', () => {
         vendorResponseNote: reason,
       });
 
-      expect(response.body.data.vendorRespondedAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
     });
 
     it('does not allow another customer to access the booking', async () => {
       const preparedBooking = await prepareBooking();
 
-      const secondCustomerRegistration = await registerCustomer(
-        secondCustomerPayload,
-      );
+      const secondCustomerRegistration = await registerCustomer(secondCustomerPayload);
 
       const response = await getCustomerBookingByIdRequest(
         secondCustomerRegistration.body.data.accessToken,
@@ -1207,9 +1194,7 @@ describe('Customer booking retrieval API', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'CUSTOMER_BOOKING_NOT_FOUND',
-      );
+      expect(response.body.error.code).toBe('CUSTOMER_BOOKING_NOT_FOUND');
     });
 
     it('returns 404 when the customer booking does not exist', async () => {
@@ -1222,9 +1207,7 @@ describe('Customer booking retrieval API', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'CUSTOMER_BOOKING_NOT_FOUND',
-      );
+      expect(response.body.error.code).toBe('CUSTOMER_BOOKING_NOT_FOUND');
     });
 
     it('rejects an invalid booking ID', async () => {
@@ -1246,9 +1229,7 @@ describe('Customer booking cancellation API', () => {
   describe('PATCH /api/v1/bookings/customer/:bookingId/cancel', () => {
     it('rejects requests without authentication', async () => {
       const response = await request(app)
-        .patch(
-          '/api/v1/bookings/customer/clx0000000000000000000000/cancel',
-        )
+        .patch('/api/v1/bookings/customer/clx0000000000000000000000/cancel')
         .send({
           reason: 'The event has been cancelled by the customer.',
         });
@@ -1277,8 +1258,7 @@ describe('Customer booking cancellation API', () => {
     it('allows the customer to cancel a booking awaiting vendor confirmation', async () => {
       const preparedBooking = await prepareBooking();
 
-      const reason =
-        'The event plans have changed and this booking is no longer required.';
+      const reason = 'The event plans have changed and this booking is no longer required.';
 
       const response = await cancelCustomerBookingRequest(
         preparedBooking.customerAccessToken,
@@ -1299,9 +1279,7 @@ describe('Customer booking cancellation API', () => {
         vendorRespondedAt: null,
       });
 
-      expect(response.body.data.customerCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.customerCancelledAt).toEqual(expect.any(String));
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -1312,6 +1290,37 @@ describe('Customer booking cancellation API', () => {
       expect(savedBooking?.status).toBe(BookingStatus.CANCELLED);
       expect(savedBooking?.customerCancellationReason).toBe(reason);
       expect(savedBooking?.customerCancelledAt).not.toBeNull();
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: preparedBooking.vendorUserId,
+          type: NotificationType.BOOKING_CANCELLED,
+          entityType: 'booking',
+          entityId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: preparedBooking.vendorUserId,
+        type: NotificationType.BOOKING_CANCELLED,
+        title: 'Booking cancelled',
+        message: 'The customer cancelled the booking for Maya and Arjun Wedding.',
+        isRead: false,
+        readAt: null,
+        entityType: 'booking',
+        entityId: preparedBooking.bookingId,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        eventId: preparedBooking.eventId,
+        customerId: preparedBooking.customerUserId,
+        status: BookingStatus.CANCELLED,
+        cancelledBy: 'CUSTOMER',
+        reason,
+      });
     });
 
     it('allows the customer to cancel a confirmed booking', async () => {
@@ -1327,8 +1336,7 @@ describe('Customer booking cancellation API', () => {
 
       expect(confirmationResponse.status).toBe(200);
 
-      const reason =
-        'The event date has changed and the confirmed booking must be cancelled.';
+      const reason = 'The event date has changed and the confirmed booking must be cancelled.';
 
       const response = await cancelCustomerBookingRequest(
         preparedBooking.customerAccessToken,
@@ -1345,24 +1353,18 @@ describe('Customer booking cancellation API', () => {
         id: preparedBooking.bookingId,
         status: 'CANCELLED',
         customerCancellationReason: reason,
-        vendorResponseNote:
-          'The requested date is available and the booking is confirmed.',
+        vendorResponseNote: 'The requested date is available and the booking is confirmed.',
       });
 
-      expect(response.body.data.vendorRespondedAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
 
-      expect(response.body.data.customerCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.customerCancelledAt).toEqual(expect.any(String));
     });
 
     it('shows the customer cancellation to the assigned vendor', async () => {
       const preparedBooking = await prepareBooking();
 
-      const reason =
-        'The customer has postponed the event and no longer needs this booking.';
+      const reason = 'The customer has postponed the event and no longer needs this booking.';
 
       const cancellationResponse = await cancelCustomerBookingRequest(
         preparedBooking.customerAccessToken,
@@ -1388,32 +1390,25 @@ describe('Customer booking cancellation API', () => {
         customerCancellationReason: reason,
       });
 
-      expect(vendorResponse.body.data.customerCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(vendorResponse.body.data.customerCancelledAt).toEqual(expect.any(String));
     });
 
     it('does not allow another customer to cancel the booking', async () => {
       const preparedBooking = await prepareBooking();
 
-      const secondCustomerRegistration = await registerCustomer(
-        secondCustomerPayload,
-      );
+      const secondCustomerRegistration = await registerCustomer(secondCustomerPayload);
 
       const response = await cancelCustomerBookingRequest(
         secondCustomerRegistration.body.data.accessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The event plans have changed and this booking is no longer required.',
+          reason: 'The event plans have changed and this booking is no longer required.',
         },
       );
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'CUSTOMER_BOOKING_NOT_FOUND',
-      );
+      expect(response.body.error.code).toBe('CUSTOMER_BOOKING_NOT_FOUND');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -1421,9 +1416,7 @@ describe('Customer booking cancellation API', () => {
         },
       });
 
-      expect(savedBooking?.status).toBe(
-        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
-      );
+      expect(savedBooking?.status).toBe(BookingStatus.AWAITING_VENDOR_CONFIRMATION);
 
       expect(savedBooking?.customerCancellationReason).toBeNull();
       expect(savedBooking?.customerCancelledAt).toBeNull();
@@ -1436,8 +1429,7 @@ describe('Customer booking cancellation API', () => {
         preparedBooking.customerAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The event plans have changed and this booking is no longer required.',
+          reason: 'The event plans have changed and this booking is no longer required.',
         },
       );
 
@@ -1447,16 +1439,13 @@ describe('Customer booking cancellation API', () => {
         preparedBooking.customerAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The customer is trying to cancel the same booking for a second time.',
+          reason: 'The customer is trying to cancel the same booking for a second time.',
         },
       );
 
       expect(secondResponse.status).toBe(409);
       expect(secondResponse.body.success).toBe(false);
-      expect(secondResponse.body.error.code).toBe(
-        'BOOKING_ALREADY_CANCELLED',
-      );
+      expect(secondResponse.body.error.code).toBe('BOOKING_ALREADY_CANCELLED');
     });
 
     it('does not allow the customer to cancel a rejected booking', async () => {
@@ -1466,8 +1455,7 @@ describe('Customer booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The requested event date is no longer available for our service.',
+          reason: 'The requested event date is no longer available for our service.',
         },
       );
 
@@ -1477,16 +1465,13 @@ describe('Customer booking cancellation API', () => {
         preparedBooking.customerAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The customer would also like to cancel the rejected booking.',
+          reason: 'The customer would also like to cancel the rejected booking.',
         },
       );
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_CANCELLED',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_CANCELLED');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -1535,8 +1520,7 @@ describe('Customer booking cancellation API', () => {
         customerRegistration.body.data.accessToken,
         'invalid-id',
         {
-          reason:
-            'The event plans have changed and the booking must be cancelled.',
+          reason: 'The event plans have changed and the booking must be cancelled.',
         },
       );
 
@@ -1791,9 +1775,7 @@ describe('Vendor booking response API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-          'VENDOR_SCHEDULE_CONFLICT',
-      );
+      expect(response.body.error.code).toBe('VENDOR_SCHEDULE_CONFLICT');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -1801,9 +1783,7 @@ describe('Vendor booking response API', () => {
         },
       });
 
-      expect(savedBooking?.status).toBe(
-        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
-      );
+      expect(savedBooking?.status).toBe(BookingStatus.AWAITING_VENDOR_CONFIRMATION);
       expect(savedBooking?.vendorRespondedAt).toBeNull();
     });
 
@@ -1821,12 +1801,11 @@ describe('Vendor booking response API', () => {
 
       expect(firstBookingResponse.status).toBe(201);
 
-      const additionalQuotation =
-        await createAdditionalAcceptedQuotation({
-          eventId: preparedData.eventId,
-          vendorId: preparedData.vendorId,
-          packageId: preparedData.packageId,
-        });
+      const additionalQuotation = await createAdditionalAcceptedQuotation({
+        eventId: preparedData.eventId,
+        vendorId: preparedData.vendorId,
+        packageId: preparedData.packageId,
+      });
 
       const secondBookingResponse = await createBookingRequest(
         preparedData.customerAccessToken,
@@ -1842,28 +1821,22 @@ describe('Vendor booking response API', () => {
       const firstBookingId = firstBookingResponse.body.data.id as string;
       const secondBookingId = secondBookingResponse.body.data.id as string;
 
-      const firstConfirmationResponse =
-        await confirmVendorBookingRequest(
-          preparedData.vendorAccessToken,
-          firstBookingId,
-        );
-
-      expect(firstConfirmationResponse.status).toBe(200);
-      expect(firstConfirmationResponse.body.data.status).toBe(
-        'DEPOSIT_PENDING',
+      const firstConfirmationResponse = await confirmVendorBookingRequest(
+        preparedData.vendorAccessToken,
+        firstBookingId,
       );
 
-      const secondConfirmationResponse =
-        await confirmVendorBookingRequest(
-          preparedData.vendorAccessToken,
-          secondBookingId,
-        );
+      expect(firstConfirmationResponse.status).toBe(200);
+      expect(firstConfirmationResponse.body.data.status).toBe('DEPOSIT_PENDING');
+
+      const secondConfirmationResponse = await confirmVendorBookingRequest(
+        preparedData.vendorAccessToken,
+        secondBookingId,
+      );
 
       expect(secondConfirmationResponse.status).toBe(409);
       expect(secondConfirmationResponse.body.success).toBe(false);
-      expect(secondConfirmationResponse.body.error.code).toBe(
-        'VENDOR_SCHEDULE_CONFLICT',
-      );
+      expect(secondConfirmationResponse.body.error.code).toBe('VENDOR_SCHEDULE_CONFLICT');
 
       const savedSecondBooking = await prisma.booking.findUnique({
         where: {
@@ -1871,9 +1844,7 @@ describe('Vendor booking response API', () => {
         },
       });
 
-      expect(savedSecondBooking?.status).toBe(
-        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
-      );
+      expect(savedSecondBooking?.status).toBe(BookingStatus.AWAITING_VENDOR_CONFIRMATION);
       expect(savedSecondBooking?.vendorRespondedAt).toBeNull();
     });
 
@@ -1891,12 +1862,11 @@ describe('Vendor booking response API', () => {
 
       expect(firstBookingResponse.status).toBe(201);
 
-      const additionalQuotation =
-        await createAdditionalAcceptedQuotation({
-          eventId: preparedData.eventId,
-          vendorId: preparedData.vendorId,
-          packageId: preparedData.packageId,
-        });
+      const additionalQuotation = await createAdditionalAcceptedQuotation({
+        eventId: preparedData.eventId,
+        vendorId: preparedData.vendorId,
+        packageId: preparedData.packageId,
+      });
 
       const secondBookingResponse = await createBookingRequest(
         preparedData.customerAccessToken,
@@ -1912,35 +1882,28 @@ describe('Vendor booking response API', () => {
       const firstBookingId = firstBookingResponse.body.data.id as string;
       const secondBookingId = secondBookingResponse.body.data.id as string;
 
-      const firstConfirmationResponse =
-        await confirmVendorBookingRequest(
-          preparedData.vendorAccessToken,
-          firstBookingId,
-        );
-
-      expect(firstConfirmationResponse.status).toBe(200);
-      expect(firstConfirmationResponse.body.data.status).toBe(
-        'DEPOSIT_PENDING',
+      const firstConfirmationResponse = await confirmVendorBookingRequest(
+        preparedData.vendorAccessToken,
+        firstBookingId,
       );
 
-      const secondConfirmationResponse =
-        await confirmVendorBookingRequest(
-          preparedData.vendorAccessToken,
-          secondBookingId,
-        );
+      expect(firstConfirmationResponse.status).toBe(200);
+      expect(firstConfirmationResponse.body.data.status).toBe('DEPOSIT_PENDING');
+
+      const secondConfirmationResponse = await confirmVendorBookingRequest(
+        preparedData.vendorAccessToken,
+        secondBookingId,
+      );
 
       expect(secondConfirmationResponse.status).toBe(200);
       expect(secondConfirmationResponse.body.success).toBe(true);
-      expect(secondConfirmationResponse.body.data.status).toBe(
-        'DEPOSIT_PENDING',
-      );
+      expect(secondConfirmationResponse.body.data.status).toBe('DEPOSIT_PENDING');
     });
 
     it('moves a booking with a required deposit to deposit pending', async () => {
       const preparedBooking = await prepareBooking();
 
-      const note =
-        'The requested event date is available and the booking is confirmed.';
+      const note = 'The requested event date is available and the booking is confirmed.';
 
       const response = await confirmVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -1959,9 +1922,7 @@ describe('Vendor booking response API', () => {
         vendorResponseNote: note,
       });
 
-      expect(response.body.data.vendorRespondedAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -1969,11 +1930,39 @@ describe('Vendor booking response API', () => {
         },
       });
 
-      expect(savedBooking?.status).toBe(
-        BookingStatus.DEPOSIT_PENDING,
-      );
+      expect(savedBooking?.status).toBe(BookingStatus.DEPOSIT_PENDING);
       expect(savedBooking?.vendorResponseNote).toBe(note);
       expect(savedBooking?.vendorRespondedAt).not.toBeNull();
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: preparedBooking.customerUserId,
+          type: NotificationType.BOOKING_CONFIRMED,
+          entityType: 'booking',
+          entityId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: preparedBooking.customerUserId,
+        type: NotificationType.BOOKING_CONFIRMED,
+        title: 'Booking confirmed',
+        message: 'Booking Photography Studio confirmed your booking for Maya and Arjun Wedding.',
+        isRead: false,
+        readAt: null,
+        entityType: 'booking',
+        entityId: preparedBooking.bookingId,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        eventId: preparedBooking.eventId,
+        vendorId: preparedBooking.vendorId,
+        status: BookingStatus.DEPOSIT_PENDING,
+        depositRequired: true,
+      });
     });
 
     it('moves a booking without a required deposit directly to active', async () => {
@@ -1981,7 +1970,7 @@ describe('Vendor booking response API', () => {
 
       await prisma.quotation.update({
         where: {
-        id: preparedBooking.quotationId,
+          id: preparedBooking.quotationId,
         },
 
         data: {
@@ -2121,6 +2110,36 @@ describe('Vendor booking response API', () => {
       expect(savedBooking?.status).toBe(BookingStatus.REJECTED);
       expect(savedBooking?.vendorResponseNote).toBe(reason);
       expect(savedBooking?.vendorRespondedAt).not.toBeNull();
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: preparedBooking.customerUserId,
+          type: NotificationType.BOOKING_REJECTED,
+          entityType: 'booking',
+          entityId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: preparedBooking.customerUserId,
+        type: NotificationType.BOOKING_REJECTED,
+        title: 'Booking rejected',
+        message: 'Booking Photography Studio rejected your booking for Maya and Arjun Wedding.',
+        isRead: false,
+        readAt: null,
+        entityType: 'booking',
+        entityId: preparedBooking.bookingId,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        eventId: preparedBooking.eventId,
+        vendorId: preparedBooking.vendorId,
+        status: BookingStatus.REJECTED,
+        reason,
+      });
     });
 
     it('does not allow another vendor to reject the booking', async () => {
@@ -2238,12 +2257,9 @@ describe('Vendor booking cancellation API', () => {
   describe('PATCH /api/v1/bookings/vendor/incoming/:bookingId/cancel', () => {
     it('rejects requests without authentication', async () => {
       const response = await request(app)
-        .patch(
-          '/api/v1/bookings/vendor/incoming/clx0000000000000000000000/cancel',
-        )
+        .patch('/api/v1/bookings/vendor/incoming/clx0000000000000000000000/cancel')
         .send({
-          reason:
-            'An unavoidable equipment issue means we cannot provide the service.',
+          reason: 'An unavoidable equipment issue means we cannot provide the service.',
         });
 
       expect(response.status).toBe(401);
@@ -2258,8 +2274,7 @@ describe('Vendor booking cancellation API', () => {
         customerRegistration.body.data.accessToken,
         'clx0000000000000000000000',
         {
-          reason:
-            'An unavoidable equipment issue means we cannot provide the service.',
+          reason: 'An unavoidable equipment issue means we cannot provide the service.',
         },
       );
 
@@ -2275,15 +2290,13 @@ describe('Vendor booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          note:
-            'The requested date is available and the booking is confirmed.',
+          note: 'The requested date is available and the booking is confirmed.',
         },
       );
 
       expect(confirmationResponse.status).toBe(200);
 
-      const reason =
-        'An unavoidable equipment issue means we cannot provide the service.';
+      const reason = 'An unavoidable equipment issue means we cannot provide the service.';
 
       const response = await cancelVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -2302,17 +2315,12 @@ describe('Vendor booking cancellation API', () => {
         vendorCancellationReason: reason,
         customerCancellationReason: null,
         customerCancelledAt: null,
-        vendorResponseNote:
-          'The requested date is available and the booking is confirmed.',
+        vendorResponseNote: 'The requested date is available and the booking is confirmed.',
       });
 
-      expect(response.body.data.vendorCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.vendorCancelledAt).toEqual(expect.any(String));
 
-      expect(response.body.data.vendorRespondedAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2325,6 +2333,37 @@ describe('Vendor booking cancellation API', () => {
       expect(savedBooking?.vendorCancelledAt).not.toBeNull();
       expect(savedBooking?.customerCancellationReason).toBeNull();
       expect(savedBooking?.customerCancelledAt).toBeNull();
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: preparedBooking.customerUserId,
+          type: NotificationType.BOOKING_CANCELLED,
+          entityType: 'booking',
+          entityId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: preparedBooking.customerUserId,
+        type: NotificationType.BOOKING_CANCELLED,
+        title: 'Booking cancelled',
+        message: 'Booking Photography Studio cancelled your booking for Maya and Arjun Wedding.',
+        isRead: false,
+        readAt: null,
+        entityType: 'booking',
+        entityId: preparedBooking.bookingId,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        eventId: preparedBooking.eventId,
+        vendorId: preparedBooking.vendorId,
+        status: BookingStatus.CANCELLED,
+        cancelledBy: 'VENDOR',
+        reason,
+      });
     });
 
     it('trims the vendor cancellation reason before saving it', async () => {
@@ -2337,8 +2376,7 @@ describe('Vendor booking cancellation API', () => {
 
       expect(confirmationResponse.status).toBe(200);
 
-      const reason =
-        'An unavoidable staffing emergency means we cannot provide the service.';
+      const reason = 'An unavoidable staffing emergency means we cannot provide the service.';
 
       const response = await cancelVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -2370,8 +2408,7 @@ describe('Vendor booking cancellation API', () => {
 
       expect(confirmationResponse.status).toBe(200);
 
-      const reason =
-        'A critical equipment failure means the vendor cannot provide the service.';
+      const reason = 'A critical equipment failure means the vendor cannot provide the service.';
 
       const cancellationResponse = await cancelVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -2397,9 +2434,7 @@ describe('Vendor booking cancellation API', () => {
         vendorCancellationReason: reason,
       });
 
-      expect(customerResponse.body.data.vendorCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(customerResponse.body.data.vendorCancelledAt).toEqual(expect.any(String));
     });
 
     it('shows the vendor cancellation in customer booking lists', async () => {
@@ -2412,8 +2447,7 @@ describe('Vendor booking cancellation API', () => {
 
       expect(confirmationResponse.status).toBe(200);
 
-      const reason =
-        'An unexpected operational issue means the service cannot be delivered.';
+      const reason = 'An unexpected operational issue means the service cannot be delivered.';
 
       const cancellationResponse = await cancelVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -2438,9 +2472,7 @@ describe('Vendor booking cancellation API', () => {
         vendorCancellationReason: reason,
       });
 
-      expect(customerResponse.body.data[0].vendorCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(customerResponse.body.data[0].vendorCancelledAt).toEqual(expect.any(String));
     });
 
     it('shows the vendor cancellation in vendor booking lists and details', async () => {
@@ -2453,8 +2485,7 @@ describe('Vendor booking cancellation API', () => {
 
       expect(confirmationResponse.status).toBe(200);
 
-      const reason =
-        'An unavoidable operational emergency means the booking must be cancelled.';
+      const reason = 'An unavoidable operational emergency means the booking must be cancelled.';
 
       const cancellationResponse = await cancelVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -2466,9 +2497,7 @@ describe('Vendor booking cancellation API', () => {
 
       expect(cancellationResponse.status).toBe(200);
 
-      const listResponse = await getVendorBookingsRequest(
-        preparedBooking.vendorAccessToken,
-      );
+      const listResponse = await getVendorBookingsRequest(preparedBooking.vendorAccessToken);
 
       expect(listResponse.status).toBe(200);
       expect(listResponse.body.data).toHaveLength(1);
@@ -2479,9 +2508,7 @@ describe('Vendor booking cancellation API', () => {
         vendorCancellationReason: reason,
       });
 
-      expect(listResponse.body.data[0].vendorCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(listResponse.body.data[0].vendorCancelledAt).toEqual(expect.any(String));
 
       const detailResponse = await getVendorBookingByIdRequest(
         preparedBooking.vendorAccessToken,
@@ -2496,9 +2523,7 @@ describe('Vendor booking cancellation API', () => {
         vendorCancellationReason: reason,
       });
 
-      expect(detailResponse.body.data.vendorCancelledAt).toEqual(
-        expect.any(String),
-      );
+      expect(detailResponse.body.data.vendorCancelledAt).toEqual(expect.any(String));
     });
 
     it('does not allow another vendor to cancel the booking', async () => {
@@ -2511,24 +2536,19 @@ describe('Vendor booking cancellation API', () => {
 
       expect(confirmationResponse.status).toBe(200);
 
-      const secondVendorRegistration = await registerVendor(
-        secondVendorPayload,
-      );
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
 
       const response = await cancelVendorBookingRequest(
         secondVendorRegistration.body.data.accessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The second vendor is attempting to cancel a booking they do not own.',
+          reason: 'The second vendor is attempting to cancel a booking they do not own.',
         },
       );
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'VENDOR_BOOKING_NOT_FOUND',
-      );
+      expect(response.body.error.code).toBe('VENDOR_BOOKING_NOT_FOUND');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2548,16 +2568,13 @@ describe('Vendor booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The vendor cannot cancel while the booking is awaiting confirmation.',
+          reason: 'The vendor cannot cancel while the booking is awaiting confirmation.',
         },
       );
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2565,9 +2582,7 @@ describe('Vendor booking cancellation API', () => {
         },
       });
 
-      expect(savedBooking?.status).toBe(
-        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
-      );
+      expect(savedBooking?.status).toBe(BookingStatus.AWAITING_VENDOR_CONFIRMATION);
 
       expect(savedBooking?.vendorCancellationReason).toBeNull();
       expect(savedBooking?.vendorCancelledAt).toBeNull();
@@ -2587,8 +2602,7 @@ describe('Vendor booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'An unavoidable equipment issue means we cannot provide the service.',
+          reason: 'An unavoidable equipment issue means we cannot provide the service.',
         },
       );
 
@@ -2598,16 +2612,13 @@ describe('Vendor booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The vendor is attempting to cancel the same booking for a second time.',
+          reason: 'The vendor is attempting to cancel the same booking for a second time.',
         },
       );
 
       expect(secondResponse.status).toBe(409);
       expect(secondResponse.body.success).toBe(false);
-      expect(secondResponse.body.error.code).toBe(
-        'BOOKING_ALREADY_CANCELLED',
-      );
+      expect(secondResponse.body.error.code).toBe('BOOKING_ALREADY_CANCELLED');
     });
 
     it('does not allow the vendor to cancel a rejected booking', async () => {
@@ -2617,8 +2628,7 @@ describe('Vendor booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The requested event date is no longer available for our service.',
+          reason: 'The requested event date is no longer available for our service.',
         },
       );
 
@@ -2628,16 +2638,13 @@ describe('Vendor booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The vendor is attempting to cancel a booking that was already rejected.',
+          reason: 'The vendor is attempting to cancel a booking that was already rejected.',
         },
       );
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2667,16 +2674,13 @@ describe('Vendor booking cancellation API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The vendor is attempting to cancel a booking that is already completed.',
+          reason: 'The vendor is attempting to cancel a booking that is already completed.',
         },
       );
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_CANCELLED_BY_VENDOR');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2739,8 +2743,7 @@ describe('Vendor booking cancellation API', () => {
         vendorRegistration.body.data.accessToken,
         'invalid-id',
         {
-          reason:
-            'An unavoidable equipment issue means we cannot provide the service.',
+          reason: 'An unavoidable equipment issue means we cannot provide the service.',
         },
       );
 
@@ -2764,9 +2767,7 @@ describe('Vendor booking completion API', () => {
     });
 
     it('rejects authenticated customers', async () => {
-      const customerRegistration = await registerCustomer(
-        customerPayload,
-      );
+      const customerRegistration = await registerCustomer(customerPayload);
 
       const response = await completeVendorBookingRequest(
         customerRegistration.body.data.accessToken,
@@ -2792,21 +2793,16 @@ describe('Vendor booking completion API', () => {
       expect(response.body.data).toMatchObject({
         id: preparedBooking.bookingId,
         status: 'COMPLETED',
-        vendorResponseNote:
-          'The requested event date is available and the booking is confirmed.',
+        vendorResponseNote: 'The requested event date is available and the booking is confirmed.',
         vendorCancellationReason: null,
         vendorCancelledAt: null,
         customerCancellationReason: null,
         customerCancelledAt: null,
       });
 
-      expect(response.body.data.vendorRespondedAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.vendorRespondedAt).toEqual(expect.any(String));
 
-      expect(response.body.data.vendorCompletedAt).toEqual(
-        expect.any(String),
-      );
+      expect(response.body.data.vendorCompletedAt).toEqual(expect.any(String));
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2818,6 +2814,37 @@ describe('Vendor booking completion API', () => {
       expect(savedBooking?.vendorCompletedAt).not.toBeNull();
       expect(savedBooking?.vendorCancellationReason).toBeNull();
       expect(savedBooking?.vendorCancelledAt).toBeNull();
+
+      const notification = await prisma.notification.findFirst({
+        where: {
+          recipientId: preparedBooking.customerUserId,
+          type: NotificationType.BOOKING_COMPLETED,
+          entityType: 'booking',
+          entityId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(notification).not.toBeNull();
+
+      expect(notification).toMatchObject({
+        recipientId: preparedBooking.customerUserId,
+        type: NotificationType.BOOKING_COMPLETED,
+        title: 'Booking completed',
+        message:
+          'Booking Photography Studio marked your booking for Maya and Arjun Wedding as completed.',
+        isRead: false,
+        readAt: null,
+        entityType: 'booking',
+        entityId: preparedBooking.bookingId,
+      });
+
+      expect(notification?.metadata).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        eventId: preparedBooking.eventId,
+        vendorId: preparedBooking.vendorId,
+        status: BookingStatus.COMPLETED,
+        completedAt: expect.any(String),
+      });
     });
 
     it('shows the completed booking in customer booking details and lists', async () => {
@@ -2842,13 +2869,9 @@ describe('Vendor booking completion API', () => {
         status: 'COMPLETED',
       });
 
-      expect(detailResponse.body.data.vendorCompletedAt).toEqual(
-        expect.any(String),
-      );
+      expect(detailResponse.body.data.vendorCompletedAt).toEqual(expect.any(String));
 
-      const listResponse = await getCustomerBookingsRequest(
-        preparedBooking.customerAccessToken,
-      );
+      const listResponse = await getCustomerBookingsRequest(preparedBooking.customerAccessToken);
 
       expect(listResponse.status).toBe(200);
       expect(listResponse.body.data).toHaveLength(1);
@@ -2858,9 +2881,7 @@ describe('Vendor booking completion API', () => {
         status: 'COMPLETED',
       });
 
-      expect(listResponse.body.data[0].vendorCompletedAt).toEqual(
-        expect.any(String),
-      );
+      expect(listResponse.body.data[0].vendorCompletedAt).toEqual(expect.any(String));
     });
 
     it('shows the completed booking in vendor booking details and lists', async () => {
@@ -2885,13 +2906,9 @@ describe('Vendor booking completion API', () => {
         status: 'COMPLETED',
       });
 
-      expect(detailResponse.body.data.vendorCompletedAt).toEqual(
-        expect.any(String),
-      );
+      expect(detailResponse.body.data.vendorCompletedAt).toEqual(expect.any(String));
 
-      const listResponse = await getVendorBookingsRequest(
-        preparedBooking.vendorAccessToken,
-      );
+      const listResponse = await getVendorBookingsRequest(preparedBooking.vendorAccessToken);
 
       expect(listResponse.status).toBe(200);
       expect(listResponse.body.data).toHaveLength(1);
@@ -2901,17 +2918,13 @@ describe('Vendor booking completion API', () => {
         status: 'COMPLETED',
       });
 
-      expect(listResponse.body.data[0].vendorCompletedAt).toEqual(
-        expect.any(String),
-      );
+      expect(listResponse.body.data[0].vendorCompletedAt).toEqual(expect.any(String));
     });
 
     it('does not allow another vendor to complete the booking', async () => {
       const preparedBooking = await prepareActiveBooking();
 
-      const secondVendorRegistration = await registerVendor(
-        secondVendorPayload,
-      );
+      const secondVendorRegistration = await registerVendor(secondVendorPayload);
 
       const response = await completeVendorBookingRequest(
         secondVendorRegistration.body.data.accessToken,
@@ -2920,9 +2933,7 @@ describe('Vendor booking completion API', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'VENDOR_BOOKING_NOT_FOUND',
-      );
+      expect(response.body.error.code).toBe('VENDOR_BOOKING_NOT_FOUND');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2944,9 +2955,7 @@ describe('Vendor booking completion API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2954,9 +2963,7 @@ describe('Vendor booking completion API', () => {
         },
       });
 
-      expect(savedBooking?.status).toBe(
-        BookingStatus.AWAITING_VENDOR_CONFIRMATION,
-      );
+      expect(savedBooking?.status).toBe(BookingStatus.AWAITING_VENDOR_CONFIRMATION);
 
       expect(savedBooking?.vendorCompletedAt).toBeNull();
     });
@@ -2970,9 +2977,7 @@ describe('Vendor booking completion API', () => {
       );
 
       expect(confirmationResponse.status).toBe(200);
-      expect(confirmationResponse.body.data.status).toBe(
-        'DEPOSIT_PENDING',
-      );
+      expect(confirmationResponse.body.data.status).toBe('DEPOSIT_PENDING');
 
       const response = await completeVendorBookingRequest(
         preparedBooking.vendorAccessToken,
@@ -2981,9 +2986,7 @@ describe('Vendor booking completion API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -2991,9 +2994,7 @@ describe('Vendor booking completion API', () => {
         },
       });
 
-      expect(savedBooking?.status).toBe(
-        BookingStatus.DEPOSIT_PENDING,
-      );
+      expect(savedBooking?.status).toBe(BookingStatus.DEPOSIT_PENDING);
 
       expect(savedBooking?.vendorCompletedAt).toBeNull();
     });
@@ -3005,8 +3006,7 @@ describe('Vendor booking completion API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'The requested event date is no longer available for our service.',
+          reason: 'The requested event date is no longer available for our service.',
         },
       );
 
@@ -3019,9 +3019,7 @@ describe('Vendor booking completion API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -3040,8 +3038,7 @@ describe('Vendor booking completion API', () => {
         preparedBooking.vendorAccessToken,
         preparedBooking.bookingId,
         {
-          reason:
-            'An unavoidable equipment issue means we cannot provide the service.',
+          reason: 'An unavoidable equipment issue means we cannot provide the service.',
         },
       );
 
@@ -3054,9 +3051,7 @@ describe('Vendor booking completion API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR',
-      );
+      expect(response.body.error.code).toBe('BOOKING_CANNOT_BE_COMPLETED_BY_VENDOR');
 
       const savedBooking = await prisma.booking.findUnique({
         where: {
@@ -3085,9 +3080,7 @@ describe('Vendor booking completion API', () => {
 
       expect(secondResponse.status).toBe(409);
       expect(secondResponse.body.success).toBe(false);
-      expect(secondResponse.body.error.code).toBe(
-        'BOOKING_ALREADY_COMPLETED',
-      );
+      expect(secondResponse.body.error.code).toBe('BOOKING_ALREADY_COMPLETED');
     });
 
     it('rejects an invalid booking ID', async () => {
@@ -3109,9 +3102,7 @@ describe('Customer booking review API', () => {
   describe('POST /api/v1/bookings/customer/:bookingId/review', () => {
     it('rejects requests without authentication', async () => {
       const response = await request(app)
-        .post(
-          '/api/v1/bookings/customer/clx0000000000000000000000/review',
-        )
+        .post('/api/v1/bookings/customer/clx0000000000000000000000/review')
         .send({
           overallRating: 5,
         });
@@ -3203,9 +3194,7 @@ describe('Customer booking review API', () => {
 
       expect(savedReview).not.toBeNull();
 
-      expect(savedReview?.customerId).toBe(
-        preparedBooking.customerUserId,
-      );
+      expect(savedReview?.customerId).toBe(preparedBooking.customerUserId);
 
       expect(savedReview?.vendorId).toBe(preparedBooking.vendorId);
       expect(savedReview?.packageId).toBe(preparedBooking.packageId);
@@ -3273,8 +3262,7 @@ describe('Customer booking review API', () => {
         },
       });
 
-      const comment =
-        'The vendor communicated clearly and delivered an excellent service.';
+      const comment = 'The vendor communicated clearly and delivered an excellent service.';
 
       const response = await createCustomerBookingReviewRequest(
         preparedBooking.customerAccessToken,
@@ -3311,9 +3299,7 @@ describe('Customer booking review API', () => {
         },
       });
 
-      const secondCustomerRegistration = await registerCustomer(
-        secondCustomerPayload,
-      );
+      const secondCustomerRegistration = await registerCustomer(secondCustomerPayload);
 
       const response = await createCustomerBookingReviewRequest(
         secondCustomerRegistration.body.data.accessToken,
@@ -3325,9 +3311,7 @@ describe('Customer booking review API', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'CUSTOMER_BOOKING_NOT_FOUND',
-      );
+      expect(response.body.error.code).toBe('CUSTOMER_BOOKING_NOT_FOUND');
 
       const savedReview = await prisma.review.findUnique({
         where: {
@@ -3351,9 +3335,7 @@ describe('Customer booking review API', () => {
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-      expect(response.body.error.code).toBe(
-        'BOOKING_NOT_COMPLETED',
-      );
+      expect(response.body.error.code).toBe('BOOKING_NOT_COMPLETED');
 
       const savedReview = await prisma.review.findUnique({
         where: {
@@ -3383,8 +3365,7 @@ describe('Customer booking review API', () => {
         preparedBooking.bookingId,
         {
           overallRating: 5,
-          comment:
-            'The vendor provided a professional and reliable service.',
+          comment: 'The vendor provided a professional and reliable service.',
         },
       );
 
@@ -3395,16 +3376,13 @@ describe('Customer booking review API', () => {
         preparedBooking.bookingId,
         {
           overallRating: 4,
-          comment:
-            'The customer is attempting to review the same booking again.',
+          comment: 'The customer is attempting to review the same booking again.',
         },
       );
 
       expect(secondResponse.status).toBe(409);
       expect(secondResponse.body.success).toBe(false);
-      expect(secondResponse.body.error.code).toBe(
-        'BOOKING_REVIEW_ALREADY_EXISTS',
-      );
+      expect(secondResponse.body.error.code).toBe('BOOKING_REVIEW_ALREADY_EXISTS');
 
       const savedReviews = await prisma.review.count({
         where: {
@@ -3462,8 +3440,7 @@ describe('Customer booking review API', () => {
         preparedBooking.customerAccessToken,
         preparedBooking.bookingId,
         {
-          comment:
-            'The service was completed, but the required rating was omitted.',
+          comment: 'The service was completed, but the required rating was omitted.',
         },
       );
 
@@ -3501,9 +3478,7 @@ describe('Customer booking review API', () => {
     });
 
     it('rejects an invalid booking ID', async () => {
-      const customerRegistration = await registerCustomer(
-        customerPayload,
-      );
+      const customerRegistration = await registerCustomer(customerPayload);
 
       const response = await createCustomerBookingReviewRequest(
         customerRegistration.body.data.accessToken,
