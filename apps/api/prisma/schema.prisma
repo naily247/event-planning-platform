@@ -70,27 +70,33 @@ enum BookingStatus {
 
 enum PaymentStatus {
   PENDING
-  PAID
-  FAILED
+  VERIFIED
+  REJECTED
   CANCELLED
   REFUNDED
   PARTIALLY_REFUNDED
 }
 
+enum PaymentMethod {
+  BANK_TRANSFER
+}
+
 model User {
-  id              String           @id @default(cuid())
-  email           String           @unique
-  passwordHash    String
-  firstName       String
-  lastName        String
-  role            UserRole
-  status          AccountStatus    @default(ACTIVE)
-  customer        CustomerProfile?
-  vendor          VendorProfile?
-  createdEvents   Event[]          @relation("EventOwner")
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  customerReviews Review[]
+  id                String           @id @default(cuid())
+  email             String           @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  role              UserRole
+  status            AccountStatus    @default(ACTIVE)
+  customer          CustomerProfile?
+  vendor            VendorProfile?
+  createdEvents     Event[]          @relation("EventOwner")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  customerReviews   Review[]
+  submittedPayments Payment[]        @relation("PaymentSubmitter")
+  reviewedPayments  Payment[]        @relation("PaymentReviewer")
 }
 
 model CustomerProfile {
@@ -263,16 +269,24 @@ model VendorAvailabilityBlock {
 model Payment {
   id              String        @id @default(cuid())
   bookingId       String
+  submittedById   String
+  reviewedById    String?
   amount          Decimal       @db.Decimal(12, 2)
   status          PaymentStatus @default(PENDING)
-  dueAt           DateTime?
-  paidAt          DateTime?
-  method          String?
-  referenceNumber String?
+  method          PaymentMethod
+  referenceNumber String
+  reviewedAt      DateTime?
+  rejectionReason String?
   booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  submittedBy     User          @relation("PaymentSubmitter", fields: [submittedById], references: [id])
+  reviewedBy      User?         @relation("PaymentReviewer", fields: [reviewedById], references: [id])
   createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([bookingId, status])
+  @@index([status, createdAt])
+  @@index([submittedById, createdAt])
+  @@index([reviewedById, reviewedAt])
 }
 
 model Review {

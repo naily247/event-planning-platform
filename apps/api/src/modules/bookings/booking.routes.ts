@@ -4,30 +4,38 @@ import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
+  getCustomerBookingPaymentsHandler,
+  submitCustomerPaymentHandler,
+} from '../payments/payment.controller.js';
+import {
+  getCustomerPaymentsSchema,
+  submitCustomerPaymentSchema,
+} from '../payments/payment.schemas.js';
+import {
   cancelCustomerBookingHandler,
   cancelVendorBookingHandler,
+  completeVendorBookingHandler,
   confirmVendorBookingHandler,
   createCustomerBookingHandler,
+  createCustomerBookingReviewHandler,
   getCustomerBookingByIdHandler,
   getCustomerBookingsHandler,
   getVendorBookingByIdHandler,
   getVendorBookingsHandler,
   rejectVendorBookingHandler,
-  completeVendorBookingHandler,
-  createCustomerBookingReviewHandler,
 } from './booking.controller.js';
 import {
   cancelCustomerBookingSchema,
   cancelVendorBookingSchema,
+  completeVendorBookingSchema,
   confirmVendorBookingSchema,
+  createCustomerBookingReviewSchema,
   createCustomerBookingSchema,
   getCustomerBookingSchema,
   getCustomerBookingsSchema,
   getVendorBookingSchema,
   getVendorBookingsSchema,
   rejectVendorBookingSchema,
-  completeVendorBookingSchema,
-  createCustomerBookingReviewSchema,
 } from './booking.schemas.js';
 
 export const bookingRouter = Router();
@@ -49,6 +57,20 @@ bookingRouter.get(
   getCustomerBookingsHandler,
 );
 
+bookingRouter.post(
+  '/customer/:bookingId/payments',
+  ...customerOnly,
+  validate(submitCustomerPaymentSchema),
+  submitCustomerPaymentHandler,
+);
+
+bookingRouter.get(
+  '/customer/:bookingId/payments',
+  ...customerOnly,
+  validate(getCustomerPaymentsSchema),
+  getCustomerBookingPaymentsHandler,
+);
+
 bookingRouter.get(
   '/customer/:bookingId',
   ...customerOnly,
@@ -61,6 +83,13 @@ bookingRouter.patch(
   ...customerOnly,
   validate(cancelCustomerBookingSchema),
   cancelCustomerBookingHandler,
+);
+
+bookingRouter.post(
+  '/customer/:bookingId/review',
+  ...customerOnly,
+  validate(createCustomerBookingReviewSchema),
+  createCustomerBookingReviewHandler,
 );
 
 bookingRouter.get(
@@ -91,13 +120,6 @@ bookingRouter.patch(
   rejectVendorBookingHandler,
 );
 
-bookingRouter.post(
-  '/',
-  ...customerOnly,
-  validate(createCustomerBookingSchema),
-  createCustomerBookingHandler,
-);
-
 bookingRouter.patch(
   '/vendor/incoming/:bookingId/cancel',
   ...vendorOnly,
@@ -113,8 +135,8 @@ bookingRouter.patch(
 );
 
 bookingRouter.post(
-  '/customer/:bookingId/review',
+  '/',
   ...customerOnly,
-  validate(createCustomerBookingReviewSchema),
-  createCustomerBookingReviewHandler,
+  validate(createCustomerBookingSchema),
+  createCustomerBookingHandler,
 );
