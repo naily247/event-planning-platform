@@ -98,6 +98,12 @@ enum NotificationType {
   SYSTEM
 }
 
+enum ExpenseStatus {
+  PLANNED
+  PAID
+  CANCELLED
+}
+
 model User {
   id                String           @id @default(cuid())
   email             String           @unique
@@ -185,24 +191,60 @@ model ServicePackage {
 }
 
 model Event {
-  id                String             @id @default(cuid())
+  id                String                @id @default(cuid())
   ownerId           String
   name              String
   eventType         String
   eventDate         DateTime
   location          String
   guestCount        Int?
-  plannedBudget     Decimal?           @db.Decimal(12, 2)
+  plannedBudget     Decimal?              @db.Decimal(12, 2)
   theme             String?
   requirements      String?
-  status            EventStatus        @default(DRAFT)
-  owner             User               @relation("EventOwner", fields: [ownerId], references: [id])
+  status            EventStatus           @default(DRAFT)
+  owner             User                  @relation("EventOwner", fields: [ownerId], references: [id])
   quotationRequests QuotationRequest[]
   bookings          Booking[]
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  budgetCategories  EventBudgetCategory[]
+  expenses          Expense[]
 
   @@index([ownerId, eventDate])
+}
+
+model EventBudgetCategory {
+  id              String    @id @default(cuid())
+  eventId         String
+  name            String
+  allocatedAmount Decimal   @db.Decimal(12, 2)
+  event           Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  expenses        Expense[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([eventId, name])
+  @@index([eventId, createdAt])
+}
+
+model Expense {
+  id               String               @id @default(cuid())
+  eventId          String
+  budgetCategoryId String?
+  title            String
+  amount           Decimal              @db.Decimal(12, 2)
+  status           ExpenseStatus        @default(PLANNED)
+  expenseDate      DateTime?
+  dueDate          DateTime?
+  notes            String?
+  event            Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  budgetCategory   EventBudgetCategory? @relation(fields: [budgetCategoryId], references: [id], onDelete: SetNull)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([eventId, status])
+  @@index([budgetCategoryId])
+  @@index([eventId, dueDate])
 }
 
 model QuotationRequest {

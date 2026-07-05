@@ -9,6 +9,7 @@ import { packageRouter } from '../modules/packages/package.routes.js';
 import { quotationRequestRouter } from '../modules/quotationRequests/quotationRequest.routes.js';
 import { bookingRouter } from '../modules/bookings/booking.routes.js';
 import { notificationRouter } from '../modules/notifications/notification.routes.js';
+import { budgetRouter } from '../modules/budgets/budget.routes.js';
 
 export const apiRouter = Router();
 
@@ -22,3 +23,4 @@ apiRouter.use('/packages', packageRouter);
 apiRouter.use('/quotation-requests', quotationRequestRouter);
 apiRouter.use('/bookings', bookingRouter);
 apiRouter.use('/notifications', notificationRouter);
+apiRouter.use('/budgets', budgetRouter);
