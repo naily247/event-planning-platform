@@ -118,6 +118,14 @@ enum EventTaskPriority {
   URGENT
 }
 
+enum GuestStatus {
+  NOT_INVITED
+  INVITED
+  CONFIRMED
+  DECLINED
+  MAYBE
+}
+
 model User {
   id                String           @id @default(cuid())
   email             String           @unique
@@ -224,6 +232,7 @@ model Event {
   budgetCategories  EventBudgetCategory[]
   expenses          Expense[]
   tasks             EventTask[]
+  guests            Guest[]
 
   @@index([ownerId, eventDate])
 }
@@ -278,6 +287,31 @@ model EventTask {
   @@index([eventId, status])
   @@index([eventId, priority])
   @@index([eventId, dueDate])
+}
+
+model Guest {
+  id                  String      @id @default(cuid())
+  eventId             String
+  firstName           String
+  lastName            String
+  email               String?
+  phone               String?
+  groupName           String?
+  status              GuestStatus @default(NOT_INVITED)
+  partySize           Int         @default(1)
+  mealPreference      String?
+  dietaryRequirements String?
+  notes               String?
+  invitedAt           DateTime?
+  respondedAt         DateTime?
+  event               Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@unique([eventId, email])
+  @@index([eventId, status])
+  @@index([eventId, groupName])
+  @@index([eventId, lastName, firstName])
 }
 
 model QuotationRequest {

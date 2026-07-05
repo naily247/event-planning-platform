@@ -11,6 +11,7 @@ import { bookingRouter } from '../modules/bookings/booking.routes.js';
 import { notificationRouter } from '../modules/notifications/notification.routes.js';
 import { budgetRouter } from '../modules/budgets/budget.routes.js';
 import { eventTaskRouter } from '../modules/eventTasks/eventTask.routes.js';
+import { guestRouter } from '../modules/guests/guest.routes.js';
 
 export const apiRouter = Router();
 
@@ -26,3 +27,4 @@ apiRouter.use('/bookings', bookingRouter);
 apiRouter.use('/notifications', notificationRouter);
 apiRouter.use('/budgets', budgetRouter);
 apiRouter.use('/event-tasks', eventTaskRouter);
+apiRouter.use('/guests', guestRouter);
