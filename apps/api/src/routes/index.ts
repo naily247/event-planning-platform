@@ -13,6 +13,7 @@ import { budgetRouter } from '../modules/budgets/budget.routes.js';
 import { eventTaskRouter } from '../modules/eventTasks/eventTask.routes.js';
 import { guestRouter } from '../modules/guests/guest.routes.js';
 import { invitationRouter } from '../modules/invitations/invitation.routes.js';
+import { moodBoardRouter } from '../modules/moodBoards/moodBoard.routes.js';
 
 export const apiRouter = Router();
 
@@ -30,3 +31,4 @@ apiRouter.use('/budgets', budgetRouter);
 apiRouter.use('/event-tasks', eventTaskRouter);
 apiRouter.use('/guests', guestRouter);
 apiRouter.use('/invitations', invitationRouter);
+apiRouter.use('/mood-boards', moodBoardRouter);
