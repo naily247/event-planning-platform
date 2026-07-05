@@ -10,6 +10,7 @@ import { quotationRequestRouter } from '../modules/quotationRequests/quotationRe
 import { bookingRouter } from '../modules/bookings/booking.routes.js';
 import { notificationRouter } from '../modules/notifications/notification.routes.js';
 import { budgetRouter } from '../modules/budgets/budget.routes.js';
+import { eventTaskRouter } from '../modules/eventTasks/eventTask.routes.js';
 
 export const apiRouter = Router();
 
@@ -24,3 +25,4 @@ apiRouter.use('/quotation-requests', quotationRequestRouter);
 apiRouter.use('/bookings', bookingRouter);
 apiRouter.use('/notifications', notificationRouter);
 apiRouter.use('/budgets', budgetRouter);
+apiRouter.use('/event-tasks', eventTaskRouter);

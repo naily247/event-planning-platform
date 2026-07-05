@@ -104,6 +104,20 @@ enum ExpenseStatus {
   CANCELLED
 }
 
+enum EventTaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum EventTaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 model User {
   id                String           @id @default(cuid())
   email             String           @unique
@@ -209,6 +223,7 @@ model Event {
   updatedAt         DateTime              @updatedAt
   budgetCategories  EventBudgetCategory[]
   expenses          Expense[]
+  tasks             EventTask[]
 
   @@index([ownerId, eventDate])
 }
@@ -244,6 +259,24 @@ model Expense {
 
   @@index([eventId, status])
   @@index([budgetCategoryId])
+  @@index([eventId, dueDate])
+}
+
+model EventTask {
+  id          String            @id @default(cuid())
+  eventId     String
+  title       String
+  description String?
+  status      EventTaskStatus   @default(TODO)
+  priority    EventTaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  completedAt DateTime?
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([eventId, status])
+  @@index([eventId, priority])
   @@index([eventId, dueDate])
 }
 
