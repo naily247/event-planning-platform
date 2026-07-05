@@ -290,23 +290,24 @@ model EventTask {
 }
 
 model Guest {
-  id                  String      @id @default(cuid())
+  id                  String           @id @default(cuid())
   eventId             String
   firstName           String
   lastName            String
   email               String?
   phone               String?
   groupName           String?
-  status              GuestStatus @default(NOT_INVITED)
-  partySize           Int         @default(1)
+  status              GuestStatus      @default(NOT_INVITED)
+  partySize           Int              @default(1)
   mealPreference      String?
   dietaryRequirements String?
   notes               String?
   invitedAt           DateTime?
   respondedAt         DateTime?
-  event               Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  event               Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  invitation          EventInvitation?
 
   @@unique([eventId, email])
   @@index([eventId, status])
@@ -456,4 +457,20 @@ model Notification {
   @@index([recipientId, isRead, createdAt])
   @@index([recipientId, createdAt])
   @@index([entityType, entityId])
+}
+
+model EventInvitation {
+  id         String    @id @default(cuid())
+  guestId    String    @unique
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastSentAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  guest Guest @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@index([revokedAt])
 }
