@@ -42,11 +42,11 @@ const vendorPayload = {
 const testEmails = [customerEmail, secondCustomerEmail, vendorEmail];
 
 const registerCustomer = async (payload: typeof customerPayload | typeof secondCustomerPayload) => {
-  return request(app).post('/api/v1/auth/register/customer').send(payload);
+  return request(app).post('/api/v1/auth/register/customer').send(payload).expect(201);
 };
 
 const registerVendor = async () => {
-  return request(app).post('/api/v1/auth/register/vendor').send(vendorPayload);
+  return request(app).post('/api/v1/auth/register/vendor').send(vendorPayload).expect(201);
 };
 
 const createEventRequest = (accessToken: string, overrides: Record<string, unknown> = {}) => {
@@ -63,7 +63,8 @@ const createEventRequest = (accessToken: string, overrides: Record<string, unkno
       theme: 'Classic Garden',
       requirements: 'Outdoor ceremony with photography, catering, decoration, and live music.',
       ...overrides,
-    });
+    })
+    .expect(201);
 };
 
 const createBudgetCategoryRequest = (

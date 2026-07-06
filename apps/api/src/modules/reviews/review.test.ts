@@ -703,6 +703,52 @@ describe('Customer review management API', () => {
       });
     });
 
+    it('allows the owner to see a hidden review and its moderation state', async () => {
+      const fixture = await prepareBaseFixture();
+
+      const created = await createReviewFixture({
+        customerId: fixture.customerUserId,
+        eventId: fixture.customerEventId,
+        vendorId: fixture.vendorId,
+        packageId: fixture.vendorPackageId,
+        suffix: 'hidden-owned-review',
+      });
+
+      const moderationReason =
+        'The review contains content that requires administrator moderation.';
+
+      const moderatedAt = new Date('2032-09-01T10:00:00.000Z');
+
+      await prisma.review.update({
+        where: {
+          id: created.review.id,
+        },
+        data: {
+          isHidden: true,
+          moderationReason,
+          moderatedAt,
+        },
+      });
+
+      const response = await getCustomerReviewRequest(
+        fixture.customerAccessToken,
+        created.review.id,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: created.review.id,
+        isHidden: true,
+        moderationReason,
+        moderatedAt: moderatedAt.toISOString(),
+      });
+
+      expect(response.body.data).not.toHaveProperty('moderatedById');
+      expect(response.body.data).not.toHaveProperty('moderatedBy');
+    });
+
     it('hides another customer review behind a 404 response', async () => {
       const fixture = await prepareBaseFixture();
 

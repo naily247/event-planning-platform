@@ -429,8 +429,7 @@ const createEmptyRatingBreakdown = (): PublicVendorRatingSummary['ratingBreakdow
   5: 0,
 });
 
-const formatAverage = (value: number | null) =>
-  value === null ? null : Number(value.toFixed(2));
+const formatAverage = (value: number | null) => (value === null ? null : Number(value.toFixed(2)));
 
 const getPublicVendorRatingSummaries = async (
   vendorIds: string[],
@@ -456,6 +455,7 @@ const getPublicVendorRatingSummaries = async (
       vendorId: {
         in: vendorIds,
       },
+      isHidden: false,
       booking: {
         status: BookingStatus.COMPLETED,
       },
@@ -515,14 +515,12 @@ const getPublicVendorRatingSummaries = async (
       totalReviews: total.count,
       averageOverallRating: formatAverage(total.overall / total.count),
       averageServiceRating:
-        total.serviceCount === 0
-          ? null
-          : formatAverage(total.service / total.serviceCount),
+        total.serviceCount === 0 ? null : formatAverage(total.service / total.serviceCount),
 
       averageCommunicationRating:
         total.communicationCount === 0
-        ? null
-        : formatAverage(total.communication / total.communicationCount),
+          ? null
+          : formatAverage(total.communication / total.communicationCount),
       ratingBreakdown: total.ratingBreakdown,
     });
   }
@@ -592,9 +590,7 @@ export const getPublicVendors = async (query: GetPublicVendorsQuery) => {
     }),
   ]);
 
-      const ratingSummaries = await getPublicVendorRatingSummaries(
-    vendors.map((vendor) => vendor.id),
-  );
+  const ratingSummaries = await getPublicVendorRatingSummaries(vendors.map((vendor) => vendor.id));
 
   const totalPages = Math.ceil(total / limit);
 
@@ -619,7 +615,6 @@ export const getPublicVendors = async (query: GetPublicVendorsQuery) => {
     },
   };
 };
-
 
 export const getPublicVendorBySlug = async (slug: string) => {
   const vendor = await prisma.vendorProfile.findFirst({
@@ -662,10 +657,7 @@ export const getPublicVendorBySlug = async (slug: string) => {
   };
 };
 
-export const getPublicVendorReviews = async (
-  slug: string,
-  query: GetPublicVendorReviewsQuery,
-) => {
+export const getPublicVendorReviews = async (slug: string, query: GetPublicVendorReviewsQuery) => {
   const { page, limit, sort } = query;
 
   const vendor = await prisma.vendorProfile.findFirst({
@@ -679,15 +671,12 @@ export const getPublicVendorReviews = async (
   });
 
   if (!vendor) {
-    throw new AppError(
-      404,
-      'Vendor not found',
-      'PUBLIC_VENDOR_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor not found', 'PUBLIC_VENDOR_NOT_FOUND');
   }
 
   const where: Prisma.ReviewWhereInput = {
     vendorId: vendor.id,
+    isHidden: false,
 
     booking: {
       status: BookingStatus.COMPLETED,
@@ -794,15 +783,9 @@ export const getPublicVendorReviews = async (
 
     summary: {
       totalReviews: total,
-      averageOverallRating: formatAverage(
-        aggregate._avg.overallRating,
-      ),
-      averageServiceRating: formatAverage(
-        aggregate._avg.serviceRating,
-      ),
-      averageCommunicationRating: formatAverage(
-        aggregate._avg.communicationRating,
-      ),
+      averageOverallRating: formatAverage(aggregate._avg.overallRating),
+      averageServiceRating: formatAverage(aggregate._avg.serviceRating),
+      averageCommunicationRating: formatAverage(aggregate._avg.communicationRating),
       ratingBreakdown,
     },
 
@@ -841,28 +824,14 @@ const availabilityBookingSelect = {
 } as const;
 
 const getUtcDayEnd = (date: Date) => {
-  return new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate() + 1,
-    ),
-  );
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1));
 };
 
-const getEffectiveBookingEnd = (booking: {
-  serviceStart: Date;
-  serviceEnd: Date | null;
-}) => {
+const getEffectiveBookingEnd = (booking: { serviceStart: Date; serviceEnd: Date | null }) => {
   return booking.serviceEnd ?? getUtcDayEnd(booking.serviceStart);
 };
 
-const rangesOverlap = (
-  firstStart: Date,
-  firstEnd: Date,
-  secondStart: Date,
-  secondEnd: Date,
-) => {
+const rangesOverlap = (firstStart: Date, firstEnd: Date, secondStart: Date, secondEnd: Date) => {
   return firstStart < secondEnd && firstEnd > secondStart;
 };
 
@@ -877,11 +846,7 @@ const getVendorProfileIdByUserId = async (userId: string) => {
   });
 
   if (!vendor) {
-    throw new AppError(
-      404,
-      'Vendor profile not found',
-      'VENDOR_PROFILE_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor profile not found', 'VENDOR_PROFILE_NOT_FOUND');
   }
 
   return vendor.id;
@@ -899,27 +864,15 @@ const getApprovedPublicVendorId = async (slug: string) => {
   });
 
   if (!vendor) {
-    throw new AppError(
-      404,
-      'Vendor not found',
-      'PUBLIC_VENDOR_NOT_FOUND',
-    );
+    throw new AppError(404, 'Vendor not found', 'PUBLIC_VENDOR_NOT_FOUND');
   }
 
   return vendor.id;
 };
 
-const getAvailabilityBookings = async (
-  vendorId: string,
-  rangeStart: Date,
-  rangeEnd: Date,
-) => {
+const getAvailabilityBookings = async (vendorId: string, rangeStart: Date, rangeEnd: Date) => {
   const rangeStartUtcDay = new Date(
-    Date.UTC(
-      rangeStart.getUTCFullYear(),
-      rangeStart.getUTCMonth(),
-      rangeStart.getUTCDate(),
-    ),
+    Date.UTC(rangeStart.getUTCFullYear(), rangeStart.getUTCMonth(), rangeStart.getUTCDate()),
   );
 
   const bookings = await prisma.booking.findMany({
@@ -961,20 +914,11 @@ const getAvailabilityBookings = async (
   });
 
   return bookings.filter((booking) =>
-    rangesOverlap(
-      booking.serviceStart,
-      getEffectiveBookingEnd(booking),
-      rangeStart,
-      rangeEnd,
-    ),
+    rangesOverlap(booking.serviceStart, getEffectiveBookingEnd(booking), rangeStart, rangeEnd),
   );
 };
 
-const getAvailabilityBlocks = async (
-  vendorId: string,
-  rangeStart: Date,
-  rangeEnd: Date,
-) => {
+const getAvailabilityBlocks = async (vendorId: string, rangeStart: Date, rangeEnd: Date) => {
   return prisma.vendorAvailabilityBlock.findMany({
     where: {
       vendorId,
@@ -1054,10 +998,7 @@ export const getPublicVendorAvailability = async (
       endsAt: getEffectiveBookingEnd(booking),
       source: 'BOOKING' as const,
     })),
-  ].sort(
-    (first, second) =>
-      first.startsAt.getTime() - second.startsAt.getTime(),
-  );
+  ].sort((first, second) => first.startsAt.getTime() - second.startsAt.getTime());
 
   return {
     range: {
@@ -1078,24 +1019,23 @@ export const createVendorAvailabilityBlock = async (
   const startsAt = new Date(input.startsAt);
   const endsAt = new Date(input.endsAt);
 
-  const existingBlock =
-    await prisma.vendorAvailabilityBlock.findFirst({
-      where: {
-        vendorId,
+  const existingBlock = await prisma.vendorAvailabilityBlock.findFirst({
+    where: {
+      vendorId,
 
-        startsAt: {
-          lt: endsAt,
-        },
-
-        endsAt: {
-          gt: startsAt,
-        },
+      startsAt: {
+        lt: endsAt,
       },
 
-      select: {
-        id: true,
+      endsAt: {
+        gt: startsAt,
       },
-    });
+    },
+
+    select: {
+      id: true,
+    },
+  });
 
   if (existingBlock) {
     throw new AppError(
@@ -1105,11 +1045,7 @@ export const createVendorAvailabilityBlock = async (
     );
   }
 
-  const conflictingBookings = await getAvailabilityBookings(
-    vendorId,
-    startsAt,
-    endsAt,
-  );
+  const conflictingBookings = await getAvailabilityBookings(vendorId, startsAt, endsAt);
 
   if (conflictingBookings.length > 0) {
     throw new AppError(
@@ -1131,25 +1067,17 @@ export const createVendorAvailabilityBlock = async (
   });
 };
 
-export const deleteVendorAvailabilityBlock = async (
-  vendorUserId: string,
-  blockId: string,
-) => {
+export const deleteVendorAvailabilityBlock = async (vendorUserId: string, blockId: string) => {
   const vendorId = await getVendorProfileIdByUserId(vendorUserId);
 
-  const deleteResult =
-    await prisma.vendorAvailabilityBlock.deleteMany({
-      where: {
-        id: blockId,
-        vendorId,
-      },
-    });
+  const deleteResult = await prisma.vendorAvailabilityBlock.deleteMany({
+    where: {
+      id: blockId,
+      vendorId,
+    },
+  });
 
   if (deleteResult.count === 0) {
-    throw new AppError(
-      404,
-      'Availability block not found',
-      'AVAILABILITY_BLOCK_NOT_FOUND',
-    );
+    throw new AppError(404, 'Availability block not found', 'AVAILABILITY_BLOCK_NOT_FOUND');
   }
 };

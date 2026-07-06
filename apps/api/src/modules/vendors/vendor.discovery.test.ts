@@ -1,5 +1,11 @@
 import request from 'supertest';
-import { AccountStatus, Prisma, UserRole, VendorVerificationStatus, BookingStatus } from '@prisma/client';
+import {
+  AccountStatus,
+  Prisma,
+  UserRole,
+  VendorVerificationStatus,
+  BookingStatus,
+} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -226,6 +232,7 @@ const createPublicVendorReview = async ({
   communicationRating,
   comment,
   createdAt,
+  isHidden = false,
 }: {
   vendorSlug: string;
   overallRating: number;
@@ -233,6 +240,7 @@ const createPublicVendorReview = async ({
   communicationRating?: number;
   comment?: string;
   createdAt: Date;
+  isHidden?: boolean;
 }) => {
   const vendor = await prisma.vendorProfile.findUnique({
     where: {
@@ -331,6 +339,7 @@ const createPublicVendorReview = async ({
       serviceRating,
       communicationRating,
       comment,
+      isHidden,
       createdAt,
     },
   });
@@ -502,6 +511,40 @@ describe('Public vendor discovery API', () => {
       });
     });
 
+    it('excludes hidden reviews from vendor list rating summaries', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        serviceRating: 5,
+        communicationRating: 5,
+        comment: 'Visible five-star review.',
+        createdAt: new Date('2027-02-01T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 1,
+        serviceRating: 1,
+        communicationRating: 1,
+        comment: 'Hidden one-star review.',
+        createdAt: new Date('2027-02-02T10:00:00.000Z'),
+        isHidden: true,
+      });
+
+      const response = await request(app).get('/api/v1/vendors');
+
+      expect(response.status).toBe(200);
+
+      const photographyVendor = response.body.data.find(
+        (vendor: { slug: string }) => vendor.slug === 'golden-lens-photography',
+      );
+
+      expect(photographyVendor).toMatchObject({
+        averageRating: 5,
+        reviewCount: 1,
+      });
+    });
+
     it('filters vendors by search text', async () => {
       const response = await request(app).get('/api/v1/vendors?search=golden');
 
@@ -646,9 +689,7 @@ describe('Public vendor discovery API', () => {
         createdAt: new Date('2027-02-12T10:00:00.000Z'),
       });
 
-      const response = await request(app).get(
-        '/api/v1/vendors/golden-lens-photography',
-      );
+      const response = await request(app).get('/api/v1/vendors/golden-lens-photography');
 
       expect(response.status).toBe(200);
 
@@ -667,10 +708,47 @@ describe('Public vendor discovery API', () => {
       });
     });
 
+    it('excludes hidden reviews from vendor detail rating summaries', async () => {
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 4,
+        serviceRating: 4,
+        communicationRating: 4,
+        comment: 'Visible review.',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 1,
+        serviceRating: 1,
+        communicationRating: 1,
+        comment: 'Hidden review.',
+        createdAt: new Date('2027-02-12T10:00:00.000Z'),
+        isHidden: true,
+      });
+
+      const response = await request(app).get('/api/v1/vendors/golden-lens-photography');
+
+      expect(response.status).toBe(200);
+
+      expect(response.body.data.ratingSummary).toEqual({
+        overallAverage: 4,
+        serviceAverage: 4,
+        communicationAverage: 4,
+        reviewCount: 1,
+        breakdown: {
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 1,
+          5: 0,
+        },
+      });
+    });
+
     it('includes an empty rating summary for a vendor without reviews', async () => {
-      const response = await request(app).get(
-        '/api/v1/vendors/royal-feast-catering',
-      );
+      const response = await request(app).get('/api/v1/vendors/royal-feast-catering');
 
       expect(response.status).toBe(200);
 
@@ -726,9 +804,7 @@ describe('Public vendor discovery API', () => {
         createdAt: new Date('2027-02-12T10:00:00.000Z'),
       });
 
-      const response = await request(app).get(
-        '/api/v1/vendors/golden-lens-photography/reviews',
-      );
+      const response = await request(app).get('/api/v1/vendors/golden-lens-photography/reviews');
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -788,9 +864,7 @@ describe('Public vendor discovery API', () => {
     });
 
     it('hides reviews for a pending vendor', async () => {
-      const response = await request(app).get(
-        '/api/v1/vendors/pending-event-studio/reviews',
-      );
+      const response = await request(app).get('/api/v1/vendors/pending-event-studio/reviews');
 
       expect(response.status).toBe(404);
       expect(response.body).toMatchObject({
@@ -803,9 +877,7 @@ describe('Public vendor discovery API', () => {
     });
 
     it('returns 404 for reviews of an unknown vendor slug', async () => {
-      const response = await request(app).get(
-        '/api/v1/vendors/vendor-that-does-not-exist/reviews',
-      );
+      const response = await request(app).get('/api/v1/vendors/vendor-that-does-not-exist/reviews');
 
       expect(response.status).toBe(404);
       expect(response.body).toMatchObject({
@@ -818,9 +890,7 @@ describe('Public vendor discovery API', () => {
     });
 
     it('returns an empty review list with a zeroed summary', async () => {
-      const response = await request(app).get(
-        '/api/v1/vendors/royal-feast-catering/reviews',
-      );
+      const response = await request(app).get('/api/v1/vendors/royal-feast-catering/reviews');
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -992,6 +1062,63 @@ describe('Public vendor discovery API', () => {
       expect(response.body.data[1]).toMatchObject({
         overallRating: 5,
         comment: 'Higher-rated review',
+      });
+    });
+
+    it('excludes hidden reviews from the public review list and summary', async () => {
+      const visibleReview = await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 5,
+        serviceRating: 4,
+        communicationRating: 5,
+        comment: 'Visible public review.',
+        createdAt: new Date('2027-02-10T10:00:00.000Z'),
+      });
+
+      const hiddenReview = await createPublicVendorReview({
+        vendorSlug: 'golden-lens-photography',
+        overallRating: 1,
+        serviceRating: 1,
+        communicationRating: 1,
+        comment: 'Hidden moderated review.',
+        createdAt: new Date('2027-02-12T10:00:00.000Z'),
+        isHidden: true,
+      });
+
+      const response = await request(app).get('/api/v1/vendors/golden-lens-photography/reviews');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+
+      expect(response.body.data[0]).toMatchObject({
+        id: visibleReview.id,
+        overallRating: 5,
+        serviceRating: 4,
+        communicationRating: 5,
+        comment: 'Visible public review.',
+      });
+
+      expect(
+        response.body.data.some((review: { id: string }) => review.id === hiddenReview.id),
+      ).toBe(false);
+
+      expect(response.body.meta.summary).toEqual({
+        totalReviews: 1,
+        averageOverallRating: 5,
+        averageServiceRating: 4,
+        averageCommunicationRating: 5,
+        ratingBreakdown: {
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 1,
+        },
+      });
+
+      expect(response.body.meta.pagination).toMatchObject({
+        total: 1,
+        totalPages: 1,
       });
     });
   });

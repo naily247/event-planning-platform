@@ -14,6 +14,10 @@ const reviewSelect = {
   communicationRating: true,
   comment: true,
 
+  isHidden: true,
+  moderationReason: true,
+  moderatedAt: true,
+
   customer: {
     select: {
       id: true,

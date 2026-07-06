@@ -2,9 +2,12 @@ import type { RequestHandler } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { AppError } from '../../utils/AppError.js';
 import {
+  approveVendorApplication,
+  getAdminReviewById,
+  getAdminReviews,
   getPendingVendorApplications,
   getVendorApplicationById,
-  approveVendorApplication,
+  moderateAdminReview,
   rejectVendorApplication,
 } from './admin.service.js';
 
@@ -68,3 +71,51 @@ export const rejectVendorApplicationHandler: RequestHandler = asyncHandler(async
     message: 'Vendor application rejected successfully',
   });
 });
+
+export const getAdminReviewsHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const result = await getAdminReviews(req.query as never);
+
+    res.status(200).json({
+      success: true,
+      data: result.reviews,
+      meta: {
+        pagination: result.pagination,
+      },
+    });
+  },
+);
+
+export const getAdminReviewByIdHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { reviewId } = req.params as { reviewId: string };
+
+    const review = await getAdminReviewById(reviewId);
+
+    res.status(200).json({
+      success: true,
+      data: review,
+    });
+  },
+);
+
+export const moderateAdminReviewHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { reviewId } = req.params as { reviewId: string };
+
+    const review = await moderateAdminReview(
+      req.auth!.userId,
+      reviewId,
+      req.body,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: review,
+      message:
+        req.body.action === 'HIDE'
+          ? 'Review hidden successfully'
+          : 'Review restored successfully',
+    });
+  },
+);

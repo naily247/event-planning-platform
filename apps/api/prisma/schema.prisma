@@ -155,23 +155,30 @@ enum EventDocumentCategory {
   OTHER
 }
 
+enum ReviewModerationActionType {
+  HIDDEN
+  RESTORED
+}
+
 model User {
-  id                String           @id @default(cuid())
-  email             String           @unique
-  passwordHash      String
-  firstName         String
-  lastName          String
-  role              UserRole
-  status            AccountStatus    @default(ACTIVE)
-  customer          CustomerProfile?
-  vendor            VendorProfile?
-  createdEvents     Event[]          @relation("EventOwner")
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  customerReviews   Review[]
-  submittedPayments Payment[]        @relation("PaymentSubmitter")
-  reviewedPayments  Payment[]        @relation("PaymentReviewer")
-  notifications     Notification[]
+  id                      String                   @id @default(cuid())
+  email                   String                   @unique
+  passwordHash            String
+  firstName               String
+  lastName                String
+  role                    UserRole
+  status                  AccountStatus            @default(ACTIVE)
+  customer                CustomerProfile?
+  vendor                  VendorProfile?
+  createdEvents           Event[]                  @relation("EventOwner")
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  customerReviews         Review[]
+  moderatedReviews        Review[]                 @relation("ReviewCurrentModerator")
+  reviewModerationActions ReviewModerationAction[] @relation("ReviewModerationActor")
+  submittedPayments       Payment[]                @relation("PaymentSubmitter")
+  reviewedPayments        Payment[]                @relation("PaymentReviewer")
+  notifications           Notification[]
 }
 
 model CustomerProfile {
@@ -451,8 +458,8 @@ model Payment {
 }
 
 model Review {
-  id                  String          @id @default(cuid())
-  bookingId           String          @unique
+  id                  String  @id @default(cuid())
+  bookingId           String  @unique
   customerId          String
   vendorId            String
   packageId           String?
@@ -460,16 +467,45 @@ model Review {
   serviceRating       Int?
   communicationRating Int?
   comment             String?
-  booking             Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  customer            User            @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  vendor              VendorProfile   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  package             ServicePackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+
+  isHidden         Boolean   @default(false)
+  moderationReason String?
+  moderatedAt      DateTime?
+  moderatedById    String?
+
+  booking           Booking                  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customer          User                     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vendor            VendorProfile            @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  package           ServicePackage?          @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  moderatedBy       User?                    @relation("ReviewCurrentModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  moderationActions ReviewModerationAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([customerId, createdAt])
   @@index([vendorId, overallRating])
+  @@index([vendorId, isHidden, createdAt])
   @@index([packageId, overallRating])
+  @@index([isHidden, createdAt])
+  @@index([moderatedById, moderatedAt])
+}
+
+model ReviewModerationAction {
+  id          String                     @id @default(cuid())
+  reviewId    String
+  moderatorId String?
+  action      ReviewModerationActionType
+  reason      String
+
+  review    Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  moderator User?  @relation("ReviewModerationActor", fields: [moderatorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([reviewId, createdAt])
+  @@index([moderatorId, createdAt])
+  @@index([action, createdAt])
 }
 
 model Notification {
