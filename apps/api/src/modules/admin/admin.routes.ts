@@ -18,6 +18,12 @@ import {
   getVendorApplicationByIdHandler,
   moderateAdminReviewHandler,
   rejectVendorApplicationHandler,
+  getAdminComplaintsHandler,
+  getAdminComplaintByIdHandler,
+  updateAdminComplaintStatusHandler,
+  updateAdminComplaintAssignmentHandler,
+  updateAdminComplaintPriorityHandler,
+  reopenAdminComplaintHandler,
 } from './admin.controller.js';
 import {
   getAdminPaymentSchema,
@@ -32,6 +38,15 @@ import {
   rejectAdminPaymentHandler,
   verifyAdminPaymentHandler,
 } from '../payments/payment.controller.js';
+
+import {
+  getAdminComplaintsSchema,
+  getAdminComplaintSchema,
+  updateAdminComplaintStatusSchema,
+  updateAdminComplaintAssignmentSchema,
+  updateAdminComplaintPrioritySchema,
+  reopenAdminComplaintSchema,
+} from '../complaints/complaint.schemas.js';
 
 export const adminRouter = Router();
 
@@ -92,4 +107,46 @@ adminRouter.patch(
   ...adminOnly,
   validate(moderateAdminReviewSchema),
   moderateAdminReviewHandler,
+);
+
+adminRouter.get(
+  '/complaints',
+  ...adminOnly,
+  validate(getAdminComplaintsSchema),
+  getAdminComplaintsHandler,
+);
+
+adminRouter.get(
+  '/complaints/:complaintId',
+  ...adminOnly,
+  validate(getAdminComplaintSchema),
+  getAdminComplaintByIdHandler,
+);
+
+adminRouter.patch(
+  '/complaints/:complaintId/status',
+  ...adminOnly,
+  validate(updateAdminComplaintStatusSchema),
+  updateAdminComplaintStatusHandler,
+);
+
+adminRouter.patch(
+  '/complaints/:complaintId/assignment',
+  ...adminOnly,
+  validate(updateAdminComplaintAssignmentSchema),
+  updateAdminComplaintAssignmentHandler,
+);
+
+adminRouter.patch(
+  '/complaints/:complaintId/priority',
+  ...adminOnly,
+  validate(updateAdminComplaintPrioritySchema),
+  updateAdminComplaintPriorityHandler,
+);
+
+adminRouter.patch(
+  '/complaints/:complaintId/reopen',
+  ...adminOnly,
+  validate(reopenAdminComplaintSchema),
+  reopenAdminComplaintHandler,
 );
