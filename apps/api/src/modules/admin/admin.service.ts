@@ -4,6 +4,7 @@ import {
   ComplaintPriority,
   ComplaintStatus,
   EventStatus,
+  PaymentMethod,
   PaymentStatus,
   Prisma,
   ReviewModerationActionType,
@@ -15,6 +16,7 @@ import { AppError } from '../../utils/AppError.js';
 import type {
   GetAdminBookingReportQuery,
   GetAdminDashboardSummaryQuery,
+  GetAdminPaymentReportQuery,
   GetAdminReviewsQuery,
   GetAdminUserReportQuery,
   GetAdminUsersQuery,
@@ -220,6 +222,77 @@ const adminBookingReportSelect = {
     },
   },
 } satisfies Prisma.BookingSelect;
+
+const adminPaymentReportSelect = {
+  id: true,
+  amount: true,
+  status: true,
+  method: true,
+  referenceNumber: true,
+  reviewedAt: true,
+  rejectionReason: true,
+  createdAt: true,
+  updatedAt: true,
+
+  booking: {
+    select: {
+      id: true,
+      status: true,
+      agreedCost: true,
+      serviceStart: true,
+      serviceEnd: true,
+
+      event: {
+        select: {
+          id: true,
+          name: true,
+          eventType: true,
+          eventDate: true,
+          location: true,
+
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              status: true,
+            },
+          },
+        },
+      },
+
+      vendor: {
+        select: {
+          id: true,
+          businessName: true,
+          slug: true,
+          verificationStatus: true,
+        },
+      },
+    },
+  },
+
+  submittedBy: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+  },
+
+  reviewedBy: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+  },
+} satisfies Prisma.PaymentSelect;
 
 const pendingVendorSelect = {
   id: true,
@@ -860,6 +933,102 @@ const formatAdminBookingReportBooking = <
 ) => ({
   ...booking,
   agreedCost: booking.agreedCost.toString(),
+});
+
+const buildAdminPaymentReportWhere = (
+  query: GetAdminPaymentReportQuery,
+): Prisma.PaymentWhereInput => {
+  const toDate = query.to && isDateOnlyMidnight(query.to) ? addOneDay(query.to) : query.to;
+
+  return {
+    ...(query.status && {
+      status: query.status,
+    }),
+
+    ...(query.method && {
+      method: query.method,
+    }),
+
+    ...(query.vendorId && {
+      booking: {
+        vendorId: query.vendorId,
+      },
+    }),
+
+    ...(query.customerId && {
+      submittedById: query.customerId,
+    }),
+
+    ...(query.bookingId && {
+      bookingId: query.bookingId,
+    }),
+
+    ...((query.from || toDate) && {
+      createdAt: {
+        ...(query.from && {
+          gte: query.from,
+        }),
+
+        ...(toDate && {
+          lt: toDate,
+        }),
+      },
+    }),
+  };
+};
+
+const formatAdminPaymentReportBucket = (
+  date: Date,
+  groupBy: GetAdminPaymentReportQuery['groupBy'],
+) => {
+  const isoDate = date.toISOString();
+
+  if (groupBy === 'month') {
+    return isoDate.slice(0, 7);
+  }
+
+  return isoDate.slice(0, 10);
+};
+
+const groupAdminPaymentGrowth = (
+  payments: Array<{
+    createdAt: Date;
+  }>,
+  groupBy: GetAdminPaymentReportQuery['groupBy'],
+) => {
+  const buckets = new Map<string, number>();
+
+  payments.forEach((payment) => {
+    const bucket = formatAdminPaymentReportBucket(payment.createdAt, groupBy);
+
+    buckets.set(bucket, (buckets.get(bucket) ?? 0) + 1);
+  });
+
+  return Array.from(buckets.entries())
+    .map(([period, count]) => ({
+      period,
+      count,
+    }))
+    .sort((first, second) => first.period.localeCompare(second.period));
+};
+
+const formatAdminPaymentReportPayment = <
+  T extends {
+    amount: Prisma.Decimal;
+    booking: {
+      agreedCost: Prisma.Decimal;
+    };
+  },
+>(
+  payment: T,
+) => ({
+  ...payment,
+  amount: payment.amount.toString(),
+
+  booking: {
+    ...payment.booking,
+    agreedCost: payment.booking.agreedCost.toString(),
+  },
 });
 
 export const getAdminUsers = async (query: GetAdminUsersQuery) => {
@@ -1866,6 +2035,301 @@ export const getAdminBookingReport = async (query: GetAdminBookingReportQuery) =
     })),
 
     recentBookings: recentBookings.map(formatAdminBookingReportBooking),
+  };
+};
+
+export const getAdminPaymentReport = async (query: GetAdminPaymentReportQuery) => {
+  const where = buildAdminPaymentReportWhere(query);
+  const generatedAt = new Date();
+
+  const [
+    totalMatchingPayments,
+    pendingPayments,
+    verifiedPayments,
+    rejectedPayments,
+    cancelledPayments,
+    refundedPayments,
+    partiallyRefundedPayments,
+    bankTransferPayments,
+    totalAmountAggregate,
+    pendingAmountAggregate,
+    verifiedAmountAggregate,
+    rejectedAmountAggregate,
+    refundedAmountAggregate,
+    growthPayments,
+    recentPayments,
+    topVendors,
+    topCustomers,
+  ] = await prisma.$transaction([
+    prisma.payment.count({
+      where,
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.PENDING,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.VERIFIED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.REJECTED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.CANCELLED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.REFUNDED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.PARTIALLY_REFUNDED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        method: PaymentMethod.BANK_TRANSFER,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where,
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        ...where,
+        status: PaymentStatus.PENDING,
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        ...where,
+        status: PaymentStatus.VERIFIED,
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        ...where,
+        status: PaymentStatus.REJECTED,
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        ...where,
+        status: {
+          in: [PaymentStatus.REFUNDED, PaymentStatus.PARTIALLY_REFUNDED],
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.findMany({
+      where,
+      select: {
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+
+    prisma.payment.findMany({
+      where,
+      select: adminPaymentReportSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: query.recentLimit,
+    }),
+
+    prisma.payment.groupBy({
+      by: ['bookingId'],
+      where: {
+        ...where,
+        status: PaymentStatus.VERIFIED,
+      },
+      _count: {
+        bookingId: true,
+      },
+      _sum: {
+        amount: true,
+      },
+      orderBy: {
+        _sum: {
+          amount: 'desc',
+        },
+      },
+      take: 10,
+    }),
+
+    prisma.payment.groupBy({
+      by: ['submittedById'],
+      where,
+      _count: {
+        submittedById: true,
+      },
+      _sum: {
+        amount: true,
+      },
+      orderBy: {
+        _sum: {
+          amount: 'desc',
+        },
+      },
+      take: 5,
+    }),
+  ]);
+
+  const topVendorBookingIds = topVendors.map((vendor) => vendor.bookingId);
+
+  const topVendorBookings = topVendorBookingIds.length
+    ? await prisma.booking.findMany({
+        where: {
+          id: {
+            in: topVendorBookingIds,
+          },
+        },
+        select: {
+          id: true,
+
+          vendor: {
+            select: {
+              id: true,
+              businessName: true,
+              slug: true,
+              verificationStatus: true,
+            },
+          },
+        },
+      })
+    : [];
+
+  const topVendorBookingsById = new Map(
+    topVendorBookings.map((booking) => [booking.id, booking.vendor]),
+  );
+
+  const topCustomerIds = topCustomers.map((customer) => customer.submittedById);
+
+  const customers = topCustomerIds.length
+    ? await prisma.user.findMany({
+        where: {
+          id: {
+            in: topCustomerIds,
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          status: true,
+        },
+      })
+    : [];
+
+  const customersById = new Map(customers.map((customer) => [customer.id, customer]));
+
+  return {
+    generatedAt,
+
+    filters: {
+      from: query.from ?? null,
+      to: query.to ?? null,
+      status: query.status ?? null,
+      method: query.method ?? null,
+      vendorId: query.vendorId ?? null,
+      customerId: query.customerId ?? null,
+      bookingId: query.bookingId ?? null,
+      groupBy: query.groupBy,
+      recentLimit: query.recentLimit,
+    },
+
+    totals: {
+      payments: totalMatchingPayments,
+
+      byStatus: {
+        pending: pendingPayments,
+        verified: verifiedPayments,
+        rejected: rejectedPayments,
+        cancelled: cancelledPayments,
+        refunded: refundedPayments,
+        partiallyRefunded: partiallyRefundedPayments,
+      },
+
+      byMethod: {
+        bankTransfer: bankTransferPayments,
+      },
+    },
+
+    financials: {
+      totalAmount: totalAmountAggregate._sum.amount?.toString() ?? '0',
+      pendingAmount: pendingAmountAggregate._sum.amount?.toString() ?? '0',
+      verifiedAmount: verifiedAmountAggregate._sum.amount?.toString() ?? '0',
+      rejectedAmount: rejectedAmountAggregate._sum.amount?.toString() ?? '0',
+      refundedAmount: refundedAmountAggregate._sum.amount?.toString() ?? '0',
+    },
+
+    growth: groupAdminPaymentGrowth(growthPayments, query.groupBy),
+
+    topVendors: topVendors.map((vendor) => ({
+      vendor: topVendorBookingsById.get(vendor.bookingId) ?? null,
+      paymentCount:
+        typeof vendor._count === 'object' && vendor._count !== null
+          ? (vendor._count.bookingId ?? 0)
+          : 0,
+      verifiedAmount: vendor._sum?.amount?.toString() ?? '0',
+    })),
+
+    topCustomers: topCustomers.map((customer) => ({
+      customer: customersById.get(customer.submittedById) ?? null,
+      paymentCount:
+        typeof customer._count === 'object' && customer._count !== null
+          ? (customer._count.submittedById ?? 0)
+          : 0,
+      totalAmount: customer._sum?.amount?.toString() ?? '0',
+    })),
+
+    recentPayments: recentPayments.map(formatAdminPaymentReportPayment),
   };
 };
 

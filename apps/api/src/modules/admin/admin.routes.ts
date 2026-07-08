@@ -7,6 +7,7 @@ import { validate } from '../../middleware/validate.js';
 import {
   getAdminBookingReportSchema,
   getAdminDashboardSummarySchema,
+  getAdminPaymentReportSchema,
   getAdminReviewByIdSchema,
   getAdminReviewsSchema,
   getAdminUserByIdSchema,
@@ -24,6 +25,7 @@ import {
   getAdminComplaintByIdHandler,
   getAdminComplaintsHandler,
   getAdminDashboardSummaryHandler,
+  getAdminPaymentReportHandler,
   getAdminReviewByIdHandler,
   getAdminReviewsHandler,
   getAdminUserByIdHandler,
@@ -209,4 +211,11 @@ adminRouter.get(
   ...adminOnly,
   validate(getAdminBookingReportSchema),
   getAdminBookingReportHandler,
+);
+
+adminRouter.get(
+  '/reports/payments',
+  ...adminOnly,
+  validate(getAdminPaymentReportSchema),
+  getAdminPaymentReportHandler,
 );

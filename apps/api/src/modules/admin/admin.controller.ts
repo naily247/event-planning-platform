@@ -5,6 +5,7 @@ import {
   approveVendorApplication,
   getAdminBookingReport,
   getAdminDashboardSummary,
+  getAdminPaymentReport,
   getAdminReviewById,
   getAdminReviews,
   getAdminUserById,
@@ -93,6 +94,15 @@ export const getAdminVendorReportHandler: RequestHandler = asyncHandler(async (r
 
 export const getAdminBookingReportHandler: RequestHandler = asyncHandler(async (req, res) => {
   const report = await getAdminBookingReport(req.query as never);
+
+  res.status(200).json({
+    success: true,
+    data: report,
+  });
+});
+
+export const getAdminPaymentReportHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const report = await getAdminPaymentReport(req.query as never);
 
   res.status(200).json({
     success: true,

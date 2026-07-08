@@ -1,6 +1,7 @@
 import {
   AccountStatus,
   BookingStatus,
+  PaymentMethod,
   PaymentStatus,
   ReviewModerationActionType,
   UserRole,
@@ -138,6 +139,23 @@ export const getAdminBookingReportSchema = z.object({
     .superRefine(validateDateRange),
 });
 
+export const getAdminPaymentReportSchema = z.object({
+  query: z
+    .object({
+      ...dateRangeQuerySchema,
+      status: z.nativeEnum(PaymentStatus).optional(),
+      method: z.nativeEnum(PaymentMethod).optional(),
+      vendorId: cuidSchema.optional(),
+      customerId: cuidSchema.optional(),
+      bookingId: cuidSchema.optional(),
+      groupBy: z.enum(['day', 'month']).default('day'),
+      recentLimit: z.coerce.number().int().min(1).max(20).default(10),
+    })
+    .strict()
+    .default({})
+    .superRefine(validateDateRange),
+});
+
 export const getPendingVendorApplicationsSchema = z.object({
   query: z.object({}).strict().default({}),
 });
@@ -264,6 +282,8 @@ export type UpdateAdminUserStatusInput = z.infer<typeof updateAdminUserStatusSch
 export type GetAdminDashboardSummaryQuery = z.infer<typeof getAdminDashboardSummarySchema>['query'];
 
 export type GetAdminUserReportQuery = z.infer<typeof getAdminUserReportSchema>['query'];
+
+export type GetAdminPaymentReportQuery = z.infer<typeof getAdminPaymentReportSchema>['query'];
 
 export type GetAdminVendorReportQuery = z.infer<typeof getAdminVendorReportSchema>['query'];
 
