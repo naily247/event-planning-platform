@@ -17,6 +17,7 @@ import type {
   GetAdminReviewsQuery,
   GetAdminUserReportQuery,
   GetAdminUsersQuery,
+  GetAdminVendorReportQuery,
   ModerateAdminReviewInput,
   RejectVendorApplicationInput,
   UpdateAdminUserStatusInput,
@@ -108,6 +109,57 @@ const adminUserDetailSelect = {
     },
   },
 } satisfies Prisma.UserSelect;
+
+const adminVendorReportSelect = {
+  id: true,
+  businessName: true,
+  slug: true,
+  baseLocation: true,
+  serviceAreas: true,
+  verificationStatus: true,
+  submittedAt: true,
+  reviewedAt: true,
+  rejectionReason: true,
+  createdAt: true,
+  updatedAt: true,
+
+  user: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+      createdAt: true,
+    },
+  },
+
+  categories: {
+    select: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+
+    orderBy: {
+      category: {
+        name: 'asc',
+      },
+    },
+  },
+
+  _count: {
+    select: {
+      packages: true,
+      bookings: true,
+      reviews: true,
+    },
+  },
+} satisfies Prisma.VendorProfileSelect;
 
 const pendingVendorSelect = {
   id: true,
@@ -575,6 +627,96 @@ const groupAdminUserGrowth = (
     }))
     .sort((first, second) => first.period.localeCompare(second.period));
 };
+
+const buildAdminVendorReportWhere = (
+  query: GetAdminVendorReportQuery,
+): Prisma.VendorProfileWhereInput => {
+  const toDate = query.to && isDateOnlyMidnight(query.to) ? addOneDay(query.to) : query.to;
+
+  return {
+    ...(query.verificationStatus && {
+      verificationStatus: query.verificationStatus,
+    }),
+
+    ...(query.accountStatus && {
+      user: {
+        status: query.accountStatus,
+      },
+    }),
+
+    ...(query.categoryId && {
+      categories: {
+        some: {
+          categoryId: query.categoryId,
+        },
+      },
+    }),
+
+    ...((query.from || toDate) && {
+      createdAt: {
+        ...(query.from && {
+          gte: query.from,
+        }),
+
+        ...(toDate && {
+          lt: toDate,
+        }),
+      },
+    }),
+  };
+};
+
+const formatAdminVendorReportBucket = (
+  date: Date,
+  groupBy: GetAdminVendorReportQuery['groupBy'],
+) => {
+  const isoDate = date.toISOString();
+
+  if (groupBy === 'month') {
+    return isoDate.slice(0, 7);
+  }
+
+  return isoDate.slice(0, 10);
+};
+
+const groupAdminVendorGrowth = (
+  vendors: Array<{
+    createdAt: Date;
+  }>,
+  groupBy: GetAdminVendorReportQuery['groupBy'],
+) => {
+  const buckets = new Map<string, number>();
+
+  vendors.forEach((vendor) => {
+    const bucket = formatAdminVendorReportBucket(vendor.createdAt, groupBy);
+
+    buckets.set(bucket, (buckets.get(bucket) ?? 0) + 1);
+  });
+
+  return Array.from(buckets.entries())
+    .map(([period, count]) => ({
+      period,
+      count,
+    }))
+    .sort((first, second) => first.period.localeCompare(second.period));
+};
+
+const formatAdminVendorReportVendor = <
+  T extends {
+    categories: Array<{
+      category: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+    }>;
+  },
+>(
+  vendor: T,
+) => ({
+  ...vendor,
+  categories: vendor.categories.map(({ category }) => category),
+});
 
 export const getAdminUsers = async (query: GetAdminUsersQuery) => {
   const { page, limit, search, role, status, sort } = query;
@@ -1178,6 +1320,192 @@ export const getAdminUserReport = async (query: GetAdminUserReportQuery) => {
       ...user,
       vendorProfile: vendor,
     })),
+  };
+};
+
+export const getAdminVendorReport = async (query: GetAdminVendorReportQuery) => {
+  const where = buildAdminVendorReportWhere(query);
+  const generatedAt = new Date();
+
+  const [
+    totalMatchingVendors,
+    draftVendors,
+    pendingVendors,
+    approvedVendors,
+    rejectedVendors,
+    activeAccountVendors,
+    pendingVerificationAccountVendors,
+    suspendedAccountVendors,
+    deactivatedAccountVendors,
+    growthVendors,
+    recentVendors,
+    topCategories,
+  ] = await prisma.$transaction([
+    prisma.vendorProfile.count({
+      where,
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        verificationStatus: VendorVerificationStatus.DRAFT,
+      },
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        verificationStatus: VendorVerificationStatus.PENDING,
+      },
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        verificationStatus: VendorVerificationStatus.APPROVED,
+      },
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        verificationStatus: VendorVerificationStatus.REJECTED,
+      },
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        user: {
+          status: AccountStatus.ACTIVE,
+        },
+      },
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        user: {
+          status: AccountStatus.PENDING_VERIFICATION,
+        },
+      },
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        user: {
+          status: AccountStatus.SUSPENDED,
+        },
+      },
+    }),
+
+    prisma.vendorProfile.count({
+      where: {
+        ...where,
+        user: {
+          status: AccountStatus.DEACTIVATED,
+        },
+      },
+    }),
+
+    prisma.vendorProfile.findMany({
+      where,
+      select: {
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+
+    prisma.vendorProfile.findMany({
+      where,
+      select: adminVendorReportSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: query.recentLimit,
+    }),
+
+    prisma.vendorCategory.groupBy({
+      by: ['categoryId'],
+      where: {
+        vendor: where,
+      },
+      _count: {
+        categoryId: true,
+      },
+      orderBy: {
+        _count: {
+          categoryId: 'desc',
+        },
+      },
+      take: 5,
+    }),
+  ]);
+
+  const categoryIds = topCategories.map((category) => category.categoryId);
+
+  const categories = categoryIds.length
+    ? await prisma.serviceCategory.findMany({
+        where: {
+          id: {
+            in: categoryIds,
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      })
+    : [];
+
+  const categoriesById = new Map(categories.map((category) => [category.id, category]));
+
+  return {
+    generatedAt,
+
+    filters: {
+      from: query.from ?? null,
+      to: query.to ?? null,
+      verificationStatus: query.verificationStatus ?? null,
+      accountStatus: query.accountStatus ?? null,
+      categoryId: query.categoryId ?? null,
+      groupBy: query.groupBy,
+      recentLimit: query.recentLimit,
+    },
+
+    totals: {
+      vendors: totalMatchingVendors,
+
+      byVerificationStatus: {
+        draft: draftVendors,
+        pending: pendingVendors,
+        approved: approvedVendors,
+        rejected: rejectedVendors,
+      },
+
+      byAccountStatus: {
+        active: activeAccountVendors,
+        pendingVerification: pendingVerificationAccountVendors,
+        suspended: suspendedAccountVendors,
+        deactivated: deactivatedAccountVendors,
+      },
+    },
+
+    growth: groupAdminVendorGrowth(growthVendors, query.groupBy),
+
+    topCategories: topCategories.map((category) => ({
+      category: categoriesById.get(category.categoryId) ?? null,
+      vendorCount:
+        typeof category._count === 'object' && category._count !== null
+          ? (category._count.categoryId ?? 0)
+          : 0,
+    })),
+
+    recentVendors: recentVendors.map(formatAdminVendorReportVendor),
   };
 };
 

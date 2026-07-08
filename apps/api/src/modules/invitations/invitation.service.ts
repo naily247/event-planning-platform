@@ -8,7 +8,6 @@ import type {
   PublicRsvpBody,
   RegenerateInvitationBody,
 } from './invitation.schemas.js';
-import { id } from 'zod/v4/locales';
 
 const DEFAULT_EXPIRY_DAYS = 14;
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -499,37 +498,51 @@ export const getEventInvitations = async (
   const { status, search, page, limit, sort } = query;
   const now = new Date();
 
-  const where: Prisma.EventInvitationWhereInput = {
-    guest: {
-      eventId,
+  const guestWhere: Prisma.GuestWhereInput = {
+    eventId,
 
-      event: {
-        ownerId,
-      },
-
-      ...(search && {
-        OR: [
-          {
-            firstName: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            lastName: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            email: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      }),
+    event: {
+      ownerId,
     },
+
+    ...(search && {
+      OR: [
+        {
+          firstName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          lastName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          email: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ],
+    }),
+
+    ...(status === 'responded' && {
+      status: {
+        in: respondedGuestStatuses,
+      },
+    }),
+
+    ...(status === 'unresponded' && {
+      status: {
+        notIn: respondedGuestStatuses,
+      },
+    }),
+  };
+
+  const where: Prisma.EventInvitationWhereInput = {
+    guest: guestWhere,
 
     ...(status === 'active' && {
       revokedAt: null,
@@ -548,80 +561,6 @@ export const getEventInvitations = async (
     ...(status === 'revoked' && {
       revokedAt: {
         not: null,
-      },
-    }),
-
-    ...(status === 'responded' && {
-      guest: {
-        eventId,
-
-        event: {
-          ownerId,
-        },
-
-        status: {
-          in: respondedGuestStatuses,
-        },
-
-        ...(search && {
-          OR: [
-            {
-              firstName: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              lastName: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              email: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-          ],
-        }),
-      },
-    }),
-
-    ...(status === 'unresponded' && {
-      guest: {
-        eventId,
-
-        event: {
-          ownerId,
-        },
-
-        status: {
-          notIn: respondedGuestStatuses,
-        },
-
-        ...(search && {
-          OR: [
-            {
-              firstName: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              lastName: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              email: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-          ],
-        }),
       },
     }),
   };

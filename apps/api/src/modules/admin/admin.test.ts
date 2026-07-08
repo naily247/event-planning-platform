@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { AccountStatus, UserRole } from '@prisma/client';
+import { AccountStatus, UserRole, VendorVerificationStatus } from '@prisma/client';
 import request from 'supertest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -162,6 +162,12 @@ const registerVendor = async (payload: typeof vendorPayload) => {
 const getAdminUserReportRequest = (accessToken: string, query = '') => {
   return request(app)
     .get(`/api/v1/admin/reports/users${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const getAdminVendorReportRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/reports/vendors${query}`)
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
@@ -1133,6 +1139,324 @@ describe('Admin user management API', () => {
             user.role === 'CUSTOMER' && user.status === 'SUSPENDED',
         ),
       ).toBe(true);
+    });
+  });
+
+  describe('GET /api/v1/admin/reports/vendors', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/reports/vendors');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      const registrationResponse = await registerVendor(vendorPayload);
+
+      expect(registrationResponse.status).toBe(201);
+
+      const vendorAccessToken = registrationResponse.body.data.accessToken as string;
+
+      const response = await getAdminVendorReportRequest(vendorAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects invalid report query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminVendorReportRequest(
+        adminAccessToken,
+        '?from=2030-02-01&to=2030-01-01&verificationStatus=INVALID&accountStatus=INVALID&categoryId=invalid-category&groupBy=year&recentLimit=0&unknown=value',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns vendor report totals, breakdowns, growth, top categories and recent vendors to an admin', async () => {
+      const category = await prisma.serviceCategory.findUnique({
+        where: {
+          slug: 'photography',
+        },
+      });
+
+      expect(category).not.toBeNull();
+
+      if (!category) {
+        throw new Error('Photography service category must exist in the test database');
+      }
+
+      const pendingVendorRegistration = await registerVendor(vendorPayload);
+
+      expect(pendingVendorRegistration.status).toBe(201);
+
+      const pendingVendorAccessToken = pendingVendorRegistration.body.data.accessToken as string;
+
+      const submissionResponse = await completeAndSubmitVendor(
+        pendingVendorAccessToken,
+        category.id,
+      );
+
+      expect(submissionResponse.status).toBe(200);
+
+      const draftVendorRegistration = await registerVendor(draftVendorPayload);
+
+      expect(draftVendorRegistration.status).toBe(201);
+
+      await prisma.vendorProfile.update({
+        where: {
+          userId: pendingVendorRegistration.body.data.user.id,
+        },
+        data: {
+          createdAt: new Date('2030-01-01T10:00:00.000Z'),
+        },
+      });
+
+      await prisma.vendorProfile.update({
+        where: {
+          userId: draftVendorRegistration.body.data.user.id,
+        },
+        data: {
+          createdAt: new Date('2030-01-02T10:00:00.000Z'),
+        },
+      });
+
+      await prisma.user.update({
+        where: {
+          email: draftVendorEmail,
+        },
+        data: {
+          status: AccountStatus.SUSPENDED,
+        },
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminVendorReportRequest(
+        adminAccessToken,
+        '?from=2030-01-01&to=2030-01-02&groupBy=day&recentLimit=2',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.generatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.filters).toMatchObject({
+        from: expect.any(String),
+        to: expect.any(String),
+        verificationStatus: null,
+        accountStatus: null,
+        categoryId: null,
+        groupBy: 'day',
+        recentLimit: 2,
+      });
+
+      expect(response.body.data.totals).toMatchObject({
+        vendors: 2,
+
+        byVerificationStatus: {
+          draft: 1,
+          pending: 1,
+          approved: 0,
+          rejected: 0,
+        },
+
+        byAccountStatus: {
+          active: 1,
+          pendingVerification: 0,
+          suspended: 1,
+          deactivated: 0,
+        },
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01-01',
+          count: 1,
+        },
+        {
+          period: '2030-01-02',
+          count: 1,
+        },
+      ]);
+
+      expect(response.body.data.topCategories).toEqual([
+        {
+          category: {
+            id: category.id,
+            name: 'Photography',
+            slug: 'photography',
+          },
+          vendorCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.recentVendors).toHaveLength(2);
+
+      expect(response.body.data.recentVendors[0]).toMatchObject({
+        businessName: 'Draft Events Studio',
+        verificationStatus: 'DRAFT',
+        user: {
+          email: draftVendorEmail,
+          status: 'SUSPENDED',
+        },
+        categories: [],
+        _count: {
+          packages: 0,
+          bookings: 0,
+          reviews: 0,
+        },
+      });
+
+      expect(response.body.data.recentVendors[1]).toMatchObject({
+        businessName: 'Pending Moments Photography',
+        verificationStatus: 'PENDING',
+        baseLocation: 'Kandy',
+        serviceAreas: ['Kandy', 'Colombo'],
+        user: {
+          email: vendorEmail,
+          status: 'ACTIVE',
+        },
+        categories: [
+          {
+            id: category.id,
+            name: 'Photography',
+            slug: 'photography',
+          },
+        ],
+        _count: {
+          packages: 0,
+          bookings: 0,
+          reviews: 0,
+        },
+      });
+
+      expect(response.body.data.recentVendors[0].user.passwordHash).toBeUndefined();
+      expect(response.body.data.recentVendors[0].user.refreshToken).toBeUndefined();
+    });
+
+    it('supports verification status, account status, category and month grouping filters', async () => {
+      const category = await prisma.serviceCategory.findUnique({
+        where: {
+          slug: 'photography',
+        },
+      });
+
+      expect(category).not.toBeNull();
+
+      if (!category) {
+        throw new Error('Photography service category must exist in the test database');
+      }
+
+      const pendingVendorRegistration = await registerVendor(vendorPayload);
+
+      expect(pendingVendorRegistration.status).toBe(201);
+
+      const pendingVendorAccessToken = pendingVendorRegistration.body.data.accessToken as string;
+
+      await completeAndSubmitVendor(pendingVendorAccessToken, category.id);
+
+      const draftVendorRegistration = await registerVendor(draftVendorPayload);
+
+      expect(draftVendorRegistration.status).toBe(201);
+
+      await prisma.vendorProfile.update({
+        where: {
+          userId: pendingVendorRegistration.body.data.user.id,
+        },
+        data: {
+          verificationStatus: VendorVerificationStatus.APPROVED,
+          reviewedAt: new Date('2030-02-15T10:00:00.000Z'),
+          createdAt: new Date('2030-02-10T10:00:00.000Z'),
+        },
+      });
+
+      await prisma.vendorProfile.update({
+        where: {
+          userId: draftVendorRegistration.body.data.user.id,
+        },
+        data: {
+          createdAt: new Date('2030-02-20T10:00:00.000Z'),
+        },
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminVendorReportRequest(
+        adminAccessToken,
+        `?from=2030-02-01&to=2030-02-28&verificationStatus=APPROVED&accountStatus=ACTIVE&categoryId=${category.id}&groupBy=month&recentLimit=5`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.filters).toMatchObject({
+        verificationStatus: 'APPROVED',
+        accountStatus: 'ACTIVE',
+        categoryId: category.id,
+        groupBy: 'month',
+        recentLimit: 5,
+      });
+
+      expect(response.body.data.totals).toMatchObject({
+        vendors: 1,
+
+        byVerificationStatus: {
+          draft: 0,
+          pending: 0,
+          approved: 1,
+          rejected: 0,
+        },
+
+        byAccountStatus: {
+          active: 1,
+          pendingVerification: 0,
+          suspended: 0,
+          deactivated: 0,
+        },
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-02',
+          count: 1,
+        },
+      ]);
+
+      expect(response.body.data.topCategories).toEqual([
+        {
+          category: {
+            id: category.id,
+            name: 'Photography',
+            slug: 'photography',
+          },
+          vendorCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.recentVendors).toHaveLength(1);
+
+      expect(response.body.data.recentVendors[0]).toMatchObject({
+        businessName: 'Pending Moments Photography',
+        verificationStatus: 'APPROVED',
+        user: {
+          email: vendorEmail,
+          status: 'ACTIVE',
+        },
+        categories: [
+          {
+            id: category.id,
+            name: 'Photography',
+            slug: 'photography',
+          },
+        ],
+      });
     });
   });
 

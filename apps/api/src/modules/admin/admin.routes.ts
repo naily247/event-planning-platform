@@ -11,6 +11,7 @@ import {
   getAdminUserByIdSchema,
   getAdminUserReportSchema,
   getAdminUsersSchema,
+  getAdminVendorReportSchema,
   moderateAdminReviewSchema,
   rejectVendorApplicationSchema,
   updateAdminUserStatusSchema,
@@ -26,6 +27,7 @@ import {
   getAdminUserByIdHandler,
   getAdminUserReportHandler,
   getAdminUsersHandler,
+  getAdminVendorReportHandler,
   getPendingVendorApplicationsHandler,
   getVendorApplicationByIdHandler,
   moderateAdminReviewHandler,
@@ -191,4 +193,11 @@ adminRouter.patch(
   ...adminOnly,
   validate(reopenAdminComplaintSchema),
   reopenAdminComplaintHandler,
+);
+
+adminRouter.get(
+  '/reports/vendors',
+  ...adminOnly,
+  validate(getAdminVendorReportSchema),
+  getAdminVendorReportHandler,
 );
