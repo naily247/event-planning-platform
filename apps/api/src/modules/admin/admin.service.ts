@@ -13,6 +13,7 @@ import {
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
+  GetAdminBookingReportQuery,
   GetAdminDashboardSummaryQuery,
   GetAdminReviewsQuery,
   GetAdminUserReportQuery,
@@ -160,6 +161,65 @@ const adminVendorReportSelect = {
     },
   },
 } satisfies Prisma.VendorProfileSelect;
+
+const adminBookingReportSelect = {
+  id: true,
+  status: true,
+  agreedCost: true,
+  serviceStart: true,
+  serviceEnd: true,
+  vendorRespondedAt: true,
+  vendorCompletedAt: true,
+  customerCancelledAt: true,
+  createdAt: true,
+  updatedAt: true,
+
+  event: {
+    select: {
+      id: true,
+      name: true,
+      eventType: true,
+      eventDate: true,
+      location: true,
+
+      owner: {
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          status: true,
+        },
+      },
+    },
+  },
+
+  vendor: {
+    select: {
+      id: true,
+      businessName: true,
+      slug: true,
+      verificationStatus: true,
+
+      user: {
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          status: true,
+        },
+      },
+    },
+  },
+
+  _count: {
+    select: {
+      payments: true,
+      complaints: true,
+    },
+  },
+} satisfies Prisma.BookingSelect;
 
 const pendingVendorSelect = {
   id: true,
@@ -716,6 +776,90 @@ const formatAdminVendorReportVendor = <
 ) => ({
   ...vendor,
   categories: vendor.categories.map(({ category }) => category),
+});
+
+const buildAdminBookingReportWhere = (
+  query: GetAdminBookingReportQuery,
+): Prisma.BookingWhereInput => {
+  const toDate = query.to && isDateOnlyMidnight(query.to) ? addOneDay(query.to) : query.to;
+
+  return {
+    ...(query.status && {
+      status: query.status,
+    }),
+
+    ...(query.vendorId && {
+      vendorId: query.vendorId,
+    }),
+
+    ...(query.customerId && {
+      event: {
+        ownerId: query.customerId,
+      },
+    }),
+
+    ...(query.eventId && {
+      eventId: query.eventId,
+    }),
+
+    ...((query.from || toDate) && {
+      createdAt: {
+        ...(query.from && {
+          gte: query.from,
+        }),
+
+        ...(toDate && {
+          lt: toDate,
+        }),
+      },
+    }),
+  };
+};
+
+const formatAdminBookingReportBucket = (
+  date: Date,
+  groupBy: GetAdminBookingReportQuery['groupBy'],
+) => {
+  const isoDate = date.toISOString();
+
+  if (groupBy === 'month') {
+    return isoDate.slice(0, 7);
+  }
+
+  return isoDate.slice(0, 10);
+};
+
+const groupAdminBookingGrowth = (
+  bookings: Array<{
+    createdAt: Date;
+  }>,
+  groupBy: GetAdminBookingReportQuery['groupBy'],
+) => {
+  const buckets = new Map<string, number>();
+
+  bookings.forEach((booking) => {
+    const bucket = formatAdminBookingReportBucket(booking.createdAt, groupBy);
+
+    buckets.set(bucket, (buckets.get(bucket) ?? 0) + 1);
+  });
+
+  return Array.from(buckets.entries())
+    .map(([period, count]) => ({
+      period,
+      count,
+    }))
+    .sort((first, second) => first.period.localeCompare(second.period));
+};
+
+const formatAdminBookingReportBooking = <
+  T extends {
+    agreedCost: Prisma.Decimal;
+  },
+>(
+  booking: T,
+) => ({
+  ...booking,
+  agreedCost: booking.agreedCost.toString(),
 });
 
 export const getAdminUsers = async (query: GetAdminUsersQuery) => {
@@ -1506,6 +1650,222 @@ export const getAdminVendorReport = async (query: GetAdminVendorReportQuery) => 
     })),
 
     recentVendors: recentVendors.map(formatAdminVendorReportVendor),
+  };
+};
+
+export const getAdminBookingReport = async (query: GetAdminBookingReportQuery) => {
+  const where = buildAdminBookingReportWhere(query);
+  const generatedAt = new Date();
+
+  const [
+    totalMatchingBookings,
+    awaitingVendorConfirmationBookings,
+    confirmedBookings,
+    depositPendingBookings,
+    activeBookings,
+    completedBookings,
+    cancelledBookings,
+    rejectedBookings,
+    disputedBookings,
+    totalAgreedCostAggregate,
+    completedAgreedCostAggregate,
+    verifiedPaymentAmountAggregate,
+    growthBookings,
+    recentBookings,
+    topVendors,
+  ] = await prisma.$transaction([
+    prisma.booking.count({
+      where,
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.CONFIRMED,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.DEPOSIT_PENDING,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.ACTIVE,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.COMPLETED,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.CANCELLED,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.REJECTED,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        ...where,
+        status: BookingStatus.DISPUTED,
+      },
+    }),
+
+    prisma.booking.aggregate({
+      where,
+      _sum: {
+        agreedCost: true,
+      },
+    }),
+
+    prisma.booking.aggregate({
+      where: {
+        ...where,
+        status: BookingStatus.COMPLETED,
+      },
+      _sum: {
+        agreedCost: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        status: PaymentStatus.VERIFIED,
+
+        booking: where,
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.booking.findMany({
+      where,
+      select: {
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+
+    prisma.booking.findMany({
+      where,
+      select: adminBookingReportSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: query.recentLimit,
+    }),
+
+    prisma.booking.groupBy({
+      by: ['vendorId'],
+      where,
+      _count: {
+        vendorId: true,
+      },
+      _sum: {
+        agreedCost: true,
+      },
+      orderBy: {
+        _count: {
+          vendorId: 'desc',
+        },
+      },
+      take: 5,
+    }),
+  ]);
+
+  const vendorIds = topVendors.map((vendor) => vendor.vendorId);
+
+  const vendors = vendorIds.length
+    ? await prisma.vendorProfile.findMany({
+        where: {
+          id: {
+            in: vendorIds,
+          },
+        },
+        select: {
+          id: true,
+          businessName: true,
+          slug: true,
+          verificationStatus: true,
+        },
+      })
+    : [];
+
+  const vendorsById = new Map(vendors.map((vendor) => [vendor.id, vendor]));
+
+  return {
+    generatedAt,
+
+    filters: {
+      from: query.from ?? null,
+      to: query.to ?? null,
+      status: query.status ?? null,
+      vendorId: query.vendorId ?? null,
+      customerId: query.customerId ?? null,
+      eventId: query.eventId ?? null,
+      groupBy: query.groupBy,
+      recentLimit: query.recentLimit,
+    },
+
+    totals: {
+      bookings: totalMatchingBookings,
+
+      byStatus: {
+        awaitingVendorConfirmation: awaitingVendorConfirmationBookings,
+        confirmed: confirmedBookings,
+        depositPending: depositPendingBookings,
+        active: activeBookings,
+        completed: completedBookings,
+        cancelled: cancelledBookings,
+        rejected: rejectedBookings,
+        disputed: disputedBookings,
+      },
+    },
+
+    financials: {
+      totalAgreedCost: totalAgreedCostAggregate._sum.agreedCost?.toString() ?? '0',
+      completedAgreedCost: completedAgreedCostAggregate._sum.agreedCost?.toString() ?? '0',
+      verifiedPaymentAmount: verifiedPaymentAmountAggregate._sum.amount?.toString() ?? '0',
+    },
+
+    growth: groupAdminBookingGrowth(growthBookings, query.groupBy),
+
+    topVendors: topVendors.map((vendor) => ({
+      vendor: vendorsById.get(vendor.vendorId) ?? null,
+      bookingCount:
+        typeof vendor._count === 'object' && vendor._count !== null
+          ? (vendor._count.vendorId ?? 0)
+          : 0,
+      agreedCost: vendor._sum?.agreedCost?.toString() ?? '0',
+    })),
+
+    recentBookings: recentBookings.map(formatAdminBookingReportBooking),
   };
 };
 

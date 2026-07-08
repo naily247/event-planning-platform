@@ -206,46 +206,24 @@ export const updateVendorCategoriesSchema = z.object({
   }),
 });
 
-export type GetPublicVendorsQuery = z.infer<
-  typeof getPublicVendorsSchema
->['query'];
+export type GetPublicVendorsQuery = z.infer<typeof getPublicVendorsSchema>['query'];
 
-export type GetPublicVendorBySlugParams = z.infer<
-  typeof getPublicVendorBySlugSchema
->['params'];
+export type GetPublicVendorBySlugParams = z.infer<typeof getPublicVendorBySlugSchema>['params'];
 
-export type GetPublicVendorReviewsParams = z.infer<
-  typeof getPublicVendorReviewsSchema
->['params'];
+export type GetPublicVendorReviewsParams = z.infer<typeof getPublicVendorReviewsSchema>['params'];
 
-export type GetPublicVendorReviewsQuery = z.infer<
-  typeof getPublicVendorReviewsSchema
->['query'];
+export type GetPublicVendorReviewsQuery = z.infer<typeof getPublicVendorReviewsSchema>['query'];
 
-export type GetPublicVendorAvailabilityParams = z.infer<
-  typeof getPublicVendorAvailabilitySchema
->['params'];
+export type GetPublicVendorAvailabilityParams = z.infer<typeof getPublicVendorAvailabilitySchema>['params'];
 
-export type GetPublicVendorAvailabilityQuery = z.infer<
-  typeof getPublicVendorAvailabilitySchema
->['query'];
+export type GetPublicVendorAvailabilityQuery = z.infer<typeof getPublicVendorAvailabilitySchema>['query'];
 
-export type GetVendorAvailabilityQuery = z.infer<
-  typeof getVendorAvailabilitySchema
->['query'];
+export type GetVendorAvailabilityQuery = z.infer<typeof getVendorAvailabilitySchema>['query'];
 
-export type CreateVendorAvailabilityBlockInput = z.infer<
-  typeof createVendorAvailabilityBlockSchema
->['body'];
+export type CreateVendorAvailabilityBlockInput = z.infer<typeof createVendorAvailabilityBlockSchema>['body'];
 
-export type DeleteVendorAvailabilityBlockParams = z.infer<
-  typeof deleteVendorAvailabilityBlockSchema
->['params'];
+export type DeleteVendorAvailabilityBlockParams = z.infer<typeof deleteVendorAvailabilityBlockSchema>['params'];
 
-export type UpdateVendorProfileInput = z.infer<
-  typeof updateVendorProfileSchema
->['body'];
+export type UpdateVendorProfileInput = z.infer<typeof updateVendorProfileSchema>['body'];
 
-export type UpdateVendorCategoriesInput = z.infer<
-  typeof updateVendorCategoriesSchema
->['body'];
+export type UpdateVendorCategoriesInput = z.infer<typeof updateVendorCategoriesSchema>['body'];

@@ -1,5 +1,15 @@
 import bcrypt from 'bcryptjs';
-import { AccountStatus, UserRole, VendorVerificationStatus } from '@prisma/client';
+import {
+  AccountStatus,
+  BookingStatus,
+  EventStatus,
+  PaymentMethod,
+  PaymentStatus,
+  QuotationRequestStatus,
+  QuotationStatus,
+  UserRole,
+  VendorVerificationStatus,
+} from '@prisma/client';
 import request from 'supertest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
@@ -171,6 +181,12 @@ const getAdminVendorReportRequest = (accessToken: string, query = '') => {
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const getAdminBookingReportRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/reports/bookings${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
 const completeAndSubmitVendor = async (accessToken: string, categoryId: string) => {
   await request(app)
     .patch('/api/v1/vendors/me/onboarding')
@@ -195,7 +211,356 @@ const completeAndSubmitVendor = async (accessToken: string, categoryId: string) 
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const createAdminBookingReportFixture = async () => {
+  const category = await prisma.serviceCategory.findUnique({
+    where: {
+      slug: 'photography',
+    },
+  });
+
+  expect(category).not.toBeNull();
+
+  if (!category) {
+    throw new Error('Photography service category must exist in the test database');
+  }
+
+  const customer = await createManagedUser({
+    email: customerEmail,
+    firstName: 'Maya',
+    lastName: 'Fernando',
+    role: UserRole.CUSTOMER,
+  });
+
+  const secondCustomer = await createManagedUser({
+    email: secondCustomerEmail,
+    firstName: 'Nila',
+    lastName: 'Perera',
+    role: UserRole.CUSTOMER,
+  });
+
+  const vendorRegistration = await registerVendor(vendorPayload);
+
+  expect(vendorRegistration.status).toBe(201);
+
+  const secondVendorRegistration = await registerVendor(draftVendorPayload);
+
+  expect(secondVendorRegistration.status).toBe(201);
+
+  const vendor = await prisma.vendorProfile.update({
+    where: {
+      userId: vendorRegistration.body.data.user.id,
+    },
+    data: {
+      verificationStatus: VendorVerificationStatus.APPROVED,
+      reviewedAt: new Date('2030-01-01T08:00:00.000Z'),
+    },
+  });
+
+  const secondVendor = await prisma.vendorProfile.update({
+    where: {
+      userId: secondVendorRegistration.body.data.user.id,
+    },
+    data: {
+      verificationStatus: VendorVerificationStatus.APPROVED,
+      reviewedAt: new Date('2030-01-01T08:30:00.000Z'),
+    },
+  });
+
+  const firstPackage = await prisma.servicePackage.create({
+    data: {
+      vendorId: vendor.id,
+      categoryId: category.id,
+      title: 'Admin Booking Report Photography Package',
+      description: 'Photography package used for admin booking report testing.',
+      basePrice: 150000,
+      isActive: true,
+    },
+  });
+
+  const secondPackage = await prisma.servicePackage.create({
+    data: {
+      vendorId: secondVendor.id,
+      categoryId: category.id,
+      title: 'Admin Booking Report Premium Package',
+      description: 'Premium photography package used for admin booking report testing.',
+      basePrice: 250000,
+      isActive: true,
+    },
+  });
+
+  const firstEvent = await prisma.event.create({
+    data: {
+      ownerId: customer.id,
+      name: 'Admin Booking Report Wedding',
+      eventType: 'Wedding',
+      eventDate: new Date('2030-06-20T09:00:00.000Z'),
+      location: 'Colombo',
+      guestCount: 150,
+      plannedBudget: 1200000,
+      theme: 'Classic',
+      requirements: 'Photography and event coverage.',
+      status: EventStatus.PLANNING,
+    },
+  });
+
+  const secondEvent = await prisma.event.create({
+    data: {
+      ownerId: secondCustomer.id,
+      name: 'Admin Booking Report Birthday',
+      eventType: 'Birthday',
+      eventDate: new Date('2030-07-10T09:00:00.000Z'),
+      location: 'Kandy',
+      guestCount: 80,
+      plannedBudget: 600000,
+      theme: 'Garden',
+      requirements: 'Photography for a private birthday event.',
+      status: EventStatus.PLANNING,
+    },
+  });
+
+  const firstQuotationRequest = await prisma.quotationRequest.create({
+    data: {
+      eventId: firstEvent.id,
+      vendorId: vendor.id,
+      packageId: firstPackage.id,
+      requirements: 'Full-day wedding photography coverage.',
+      status: QuotationRequestStatus.ACCEPTED,
+    },
+  });
+
+  const secondQuotationRequest = await prisma.quotationRequest.create({
+    data: {
+      eventId: secondEvent.id,
+      vendorId: secondVendor.id,
+      packageId: secondPackage.id,
+      requirements: 'Birthday event photography coverage.',
+      status: QuotationRequestStatus.ACCEPTED,
+    },
+  });
+
+  const firstQuotation = await prisma.quotation.create({
+    data: {
+      quotationRequestId: firstQuotationRequest.id,
+      version: 1,
+      status: QuotationStatus.ACCEPTED,
+      proposedPrice: 150000,
+      depositAmount: 50000,
+      inclusions: 'Full-day coverage and edited photographs.',
+      exclusions: 'Printed albums are not included.',
+      terms: 'Deposit is required before the event.',
+      expiresAt: new Date('2030-06-01T09:00:00.000Z'),
+    },
+  });
+
+  const secondQuotation = await prisma.quotation.create({
+    data: {
+      quotationRequestId: secondQuotationRequest.id,
+      version: 1,
+      status: QuotationStatus.ACCEPTED,
+      proposedPrice: 250000,
+      depositAmount: 75000,
+      inclusions: 'Premium photography coverage and edited photographs.',
+      exclusions: 'Printed albums are not included.',
+      terms: 'Deposit is required before the event.',
+      expiresAt: new Date('2030-07-01T09:00:00.000Z'),
+    },
+  });
+
+  const completedBooking = await prisma.booking.create({
+    data: {
+      eventId: firstEvent.id,
+      vendorId: vendor.id,
+      acceptedQuotationId: firstQuotation.id,
+      agreedCost: 150000,
+      serviceStart: new Date('2030-06-20T08:00:00.000Z'),
+      serviceEnd: new Date('2030-06-20T18:00:00.000Z'),
+      status: BookingStatus.COMPLETED,
+      vendorRespondedAt: new Date('2030-01-01T10:00:00.000Z'),
+      vendorCompletedAt: new Date('2030-06-20T18:30:00.000Z'),
+      createdAt: new Date('2030-01-10T10:00:00.000Z'),
+    },
+  });
+
+  const confirmedBooking = await prisma.booking.create({
+    data: {
+      eventId: secondEvent.id,
+      vendorId: secondVendor.id,
+      acceptedQuotationId: secondQuotation.id,
+      agreedCost: 250000,
+      serviceStart: new Date('2030-07-10T08:00:00.000Z'),
+      serviceEnd: new Date('2030-07-10T18:00:00.000Z'),
+      status: BookingStatus.CONFIRMED,
+      vendorRespondedAt: new Date('2030-02-01T10:00:00.000Z'),
+      createdAt: new Date('2030-02-10T10:00:00.000Z'),
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      bookingId: completedBooking.id,
+      submittedById: customer.id,
+      amount: 50000,
+      status: PaymentStatus.VERIFIED,
+      method: PaymentMethod.BANK_TRANSFER,
+      referenceNumber: 'ADMIN-BOOKING-REPORT-001',
+      reviewedAt: new Date('2030-01-11T10:00:00.000Z'),
+      reviewedById: (
+        await prisma.user.findUniqueOrThrow({
+          where: {
+            email: adminEmail,
+          },
+          select: {
+            id: true,
+          },
+        })
+      ).id,
+    },
+  });
+
+  return {
+    category,
+    customer,
+    secondCustomer,
+    vendor,
+    secondVendor,
+    firstEvent,
+    secondEvent,
+    completedBooking,
+    confirmedBooking,
+  };
+};
+
+const cleanupAdminTestData = async () => {
+  await prisma.payment.deleteMany({
+    where: {
+      booking: {
+        OR: [
+          {
+            event: {
+              owner: {
+                email: {
+                  in: testEmails,
+                },
+              },
+            },
+          },
+          {
+            vendor: {
+              user: {
+                email: {
+                  in: testEmails,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.booking.deleteMany({
+    where: {
+      OR: [
+        {
+          event: {
+            owner: {
+              email: {
+                in: testEmails,
+              },
+            },
+          },
+        },
+        {
+          vendor: {
+            user: {
+              email: {
+                in: testEmails,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await prisma.quotation.deleteMany({
+    where: {
+      quotationRequest: {
+        OR: [
+          {
+            event: {
+              owner: {
+                email: {
+                  in: testEmails,
+                },
+              },
+            },
+          },
+          {
+            vendor: {
+              user: {
+                email: {
+                  in: testEmails,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.quotationRequest.deleteMany({
+    where: {
+      OR: [
+        {
+          event: {
+            owner: {
+              email: {
+                in: testEmails,
+              },
+            },
+          },
+        },
+        {
+          vendor: {
+            user: {
+              email: {
+                in: testEmails,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await prisma.event.deleteMany({
+    where: {
+      owner: {
+        email: {
+          in: testEmails,
+        },
+      },
+    },
+  });
+
+  await prisma.servicePackage.deleteMany({
+    where: {
+      vendor: {
+        user: {
+          email: {
+            in: testEmails,
+          },
+        },
+      },
+    },
+  });
+};
+
 beforeEach(async () => {
+  await cleanupAdminTestData();
+
   await prisma.user.deleteMany({
     where: {
       email: {
@@ -208,6 +573,8 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  await cleanupAdminTestData();
+
   await prisma.user.deleteMany({
     where: {
       email: {
@@ -1456,6 +1823,263 @@ describe('Admin user management API', () => {
             slug: 'photography',
           },
         ],
+      });
+    });
+  });
+
+  describe('GET /api/v1/admin/reports/bookings', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/reports/bookings');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminBookingReportRequest(customerAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects invalid report query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminBookingReportRequest(
+        adminAccessToken,
+        '?from=2030-02-01&to=2030-01-01&status=INVALID&vendorId=invalid-vendor&customerId=invalid-customer&eventId=invalid-event&groupBy=year&recentLimit=0&unknown=value',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns booking report totals, financials, growth, top vendors and recent bookings to an admin', async () => {
+      const fixture = await createAdminBookingReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminBookingReportRequest(
+        adminAccessToken,
+        '?from=2030-01-01&to=2030-02-28&groupBy=month&recentLimit=2',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.generatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.filters).toMatchObject({
+        from: expect.any(String),
+        to: expect.any(String),
+        status: null,
+        vendorId: null,
+        customerId: null,
+        eventId: null,
+        groupBy: 'month',
+        recentLimit: 2,
+      });
+
+      expect(response.body.data.totals).toMatchObject({
+        bookings: 2,
+
+        byStatus: {
+          awaitingVendorConfirmation: 0,
+          confirmed: 1,
+          depositPending: 0,
+          active: 0,
+          completed: 1,
+          cancelled: 0,
+          rejected: 0,
+          disputed: 0,
+        },
+      });
+
+      expect(response.body.data.financials).toEqual({
+        totalAgreedCost: '400000',
+        completedAgreedCost: '150000',
+        verifiedPaymentAmount: '50000',
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01',
+          count: 1,
+        },
+        {
+          period: '2030-02',
+          count: 1,
+        },
+      ]);
+
+      expect(response.body.data.topVendors).toHaveLength(2);
+
+      expect(response.body.data.topVendors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            vendor: expect.objectContaining({
+              id: fixture.vendor.id,
+              businessName: 'Pending Moments Photography',
+              verificationStatus: 'APPROVED',
+            }),
+            bookingCount: 1,
+            agreedCost: '150000',
+          }),
+          expect.objectContaining({
+            vendor: expect.objectContaining({
+              id: fixture.secondVendor.id,
+              businessName: 'Draft Events Studio',
+              verificationStatus: 'APPROVED',
+            }),
+            bookingCount: 1,
+            agreedCost: '250000',
+          }),
+        ]),
+      );
+
+      expect(response.body.data.recentBookings).toHaveLength(2);
+
+      expect(response.body.data.recentBookings[0]).toMatchObject({
+        id: fixture.confirmedBooking.id,
+        status: 'CONFIRMED',
+        agreedCost: '250000',
+        event: {
+          id: fixture.secondEvent.id,
+          name: 'Admin Booking Report Birthday',
+          eventType: 'Birthday',
+          location: 'Kandy',
+          owner: {
+            id: fixture.secondCustomer.id,
+            email: secondCustomerEmail,
+          },
+        },
+        vendor: {
+          id: fixture.secondVendor.id,
+          businessName: 'Draft Events Studio',
+          verificationStatus: 'APPROVED',
+        },
+        _count: {
+          payments: 0,
+          complaints: 0,
+        },
+      });
+
+      expect(response.body.data.recentBookings[1]).toMatchObject({
+        id: fixture.completedBooking.id,
+        status: 'COMPLETED',
+        agreedCost: '150000',
+        event: {
+          id: fixture.firstEvent.id,
+          name: 'Admin Booking Report Wedding',
+          eventType: 'Wedding',
+          location: 'Colombo',
+          owner: {
+            id: fixture.customer.id,
+            email: customerEmail,
+          },
+        },
+        vendor: {
+          id: fixture.vendor.id,
+          businessName: 'Pending Moments Photography',
+          verificationStatus: 'APPROVED',
+        },
+        _count: {
+          payments: 1,
+          complaints: 0,
+        },
+      });
+
+      expect(response.body.data.recentBookings[0].vendor.user.passwordHash).toBeUndefined();
+      expect(response.body.data.recentBookings[0].event.owner.passwordHash).toBeUndefined();
+    });
+
+    it('supports status, vendor, customer, event and day grouping filters', async () => {
+      const fixture = await createAdminBookingReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminBookingReportRequest(
+        adminAccessToken,
+        `?from=2030-01-01&to=2030-01-31&status=COMPLETED&vendorId=${fixture.vendor.id}&customerId=${fixture.customer.id}&eventId=${fixture.firstEvent.id}&groupBy=day&recentLimit=5`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.filters).toMatchObject({
+        status: 'COMPLETED',
+        vendorId: fixture.vendor.id,
+        customerId: fixture.customer.id,
+        eventId: fixture.firstEvent.id,
+        groupBy: 'day',
+        recentLimit: 5,
+      });
+
+      expect(response.body.data.totals).toMatchObject({
+        bookings: 1,
+
+        byStatus: {
+          awaitingVendorConfirmation: 0,
+          confirmed: 0,
+          depositPending: 0,
+          active: 0,
+          completed: 1,
+          cancelled: 0,
+          rejected: 0,
+          disputed: 0,
+        },
+      });
+
+      expect(response.body.data.financials).toEqual({
+        totalAgreedCost: '150000',
+        completedAgreedCost: '150000',
+        verifiedPaymentAmount: '50000',
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01-10',
+          count: 1,
+        },
+      ]);
+
+      expect(response.body.data.topVendors).toEqual([
+        {
+          vendor: {
+            id: fixture.vendor.id,
+            businessName: 'Pending Moments Photography',
+            slug: expect.any(String),
+            verificationStatus: 'APPROVED',
+          },
+          bookingCount: 1,
+          agreedCost: '150000',
+        },
+      ]);
+
+      expect(response.body.data.recentBookings).toHaveLength(1);
+      expect(response.body.data.recentBookings[0]).toMatchObject({
+        id: fixture.completedBooking.id,
+        status: 'COMPLETED',
+        agreedCost: '150000',
+        event: {
+          id: fixture.firstEvent.id,
+          owner: {
+            id: fixture.customer.id,
+          },
+        },
+        vendor: {
+          id: fixture.vendor.id,
+        },
       });
     });
   });

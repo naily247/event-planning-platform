@@ -3,6 +3,7 @@ import { asyncHandler } from '../../utils/asyncHandler.js';
 import { AppError } from '../../utils/AppError.js';
 import {
   approveVendorApplication,
+  getAdminBookingReport,
   getAdminDashboardSummary,
   getAdminReviewById,
   getAdminReviews,
@@ -83,6 +84,15 @@ export const getAdminUserReportHandler: RequestHandler = asyncHandler(async (req
 
 export const getAdminVendorReportHandler: RequestHandler = asyncHandler(async (req, res) => {
   const report = await getAdminVendorReport(req.query as never);
+
+  res.status(200).json({
+    success: true,
+    data: report,
+  });
+});
+
+export const getAdminBookingReportHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const report = await getAdminBookingReport(req.query as never);
 
   res.status(200).json({
     success: true,
