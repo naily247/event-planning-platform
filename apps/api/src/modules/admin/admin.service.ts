@@ -15,6 +15,7 @@ import { AppError } from '../../utils/AppError.js';
 import type {
   GetAdminDashboardSummaryQuery,
   GetAdminReviewsQuery,
+  GetAdminUserReportQuery,
   GetAdminUsersQuery,
   ModerateAdminReviewInput,
   RejectVendorApplicationInput,
@@ -502,6 +503,79 @@ const formatDashboardPayment = <
   amount: payment.amount.toString(),
 });
 
+const addOneDay = (date: Date) => {
+  const nextDate = new Date(date);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  return nextDate;
+};
+
+const isDateOnlyMidnight = (date: Date) => {
+  return (
+    date.getUTCHours() === 0 &&
+    date.getUTCMinutes() === 0 &&
+    date.getUTCSeconds() === 0 &&
+    date.getUTCMilliseconds() === 0
+  );
+};
+
+const buildAdminUserReportWhere = (query: GetAdminUserReportQuery): Prisma.UserWhereInput => {
+  const toDate = query.to && isDateOnlyMidnight(query.to) ? addOneDay(query.to) : query.to;
+
+  return {
+    ...(query.role && {
+      role: query.role,
+    }),
+
+    ...(query.status && {
+      status: query.status,
+    }),
+
+    ...((query.from || toDate) && {
+      createdAt: {
+        ...(query.from && {
+          gte: query.from,
+        }),
+
+        ...(toDate && {
+          lt: toDate,
+        }),
+      },
+    }),
+  };
+};
+
+const formatAdminUserReportBucket = (date: Date, groupBy: GetAdminUserReportQuery['groupBy']) => {
+  const isoDate = date.toISOString();
+
+  if (groupBy === 'month') {
+    return isoDate.slice(0, 7);
+  }
+
+  return isoDate.slice(0, 10);
+};
+
+const groupAdminUserGrowth = (
+  users: Array<{
+    createdAt: Date;
+  }>,
+  groupBy: GetAdminUserReportQuery['groupBy'],
+) => {
+  const buckets = new Map<string, number>();
+
+  users.forEach((user) => {
+    const bucket = formatAdminUserReportBucket(user.createdAt, groupBy);
+
+    buckets.set(bucket, (buckets.get(bucket) ?? 0) + 1);
+  });
+
+  return Array.from(buckets.entries())
+    .map(([period, count]) => ({
+      period,
+      count,
+    }))
+    .sort((first, second) => first.period.localeCompare(second.period));
+};
+
 export const getAdminUsers = async (query: GetAdminUsersQuery) => {
   const { page, limit, search, role, status, sort } = query;
 
@@ -977,6 +1051,133 @@ export const getAdminDashboardSummary = async (query: GetAdminDashboardSummaryQu
       recentPayments: recentPayments.map(formatDashboardPayment),
       recentComplaints,
     },
+  };
+};
+
+export const getAdminUserReport = async (query: GetAdminUserReportQuery) => {
+  const where = buildAdminUserReportWhere(query);
+  const generatedAt = new Date();
+
+  const [
+    totalMatchingUsers,
+    customerUsers,
+    vendorUsers,
+    adminUsers,
+    activeUsers,
+    pendingVerificationUsers,
+    suspendedUsers,
+    deactivatedUsers,
+    growthUsers,
+    recentUsers,
+  ] = await prisma.$transaction([
+    prisma.user.count({
+      where,
+    }),
+
+    prisma.user.count({
+      where: {
+        ...where,
+        role: UserRole.CUSTOMER,
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        ...where,
+        role: UserRole.VENDOR,
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        ...where,
+        role: UserRole.ADMIN,
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        ...where,
+        status: AccountStatus.ACTIVE,
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        ...where,
+        status: AccountStatus.PENDING_VERIFICATION,
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        ...where,
+        status: AccountStatus.SUSPENDED,
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        ...where,
+        status: AccountStatus.DEACTIVATED,
+      },
+    }),
+
+    prisma.user.findMany({
+      where,
+      select: {
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+
+    prisma.user.findMany({
+      where,
+      select: adminUserListSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: query.recentLimit,
+    }),
+  ]);
+
+  return {
+    generatedAt,
+
+    filters: {
+      from: query.from ?? null,
+      to: query.to ?? null,
+      role: query.role ?? null,
+      status: query.status ?? null,
+      groupBy: query.groupBy,
+      recentLimit: query.recentLimit,
+    },
+
+    totals: {
+      users: totalMatchingUsers,
+
+      byRole: {
+        customers: customerUsers,
+        vendors: vendorUsers,
+        admins: adminUsers,
+      },
+
+      byStatus: {
+        active: activeUsers,
+        pendingVerification: pendingVerificationUsers,
+        suspended: suspendedUsers,
+        deactivated: deactivatedUsers,
+      },
+    },
+
+    growth: groupAdminUserGrowth(growthUsers, query.groupBy),
+
+    recentUsers: recentUsers.map(({ vendor, ...user }) => ({
+      ...user,
+      vendorProfile: vendor,
+    })),
   };
 };
 

@@ -9,6 +9,7 @@ import {
   getAdminReviewByIdSchema,
   getAdminReviewsSchema,
   getAdminUserByIdSchema,
+  getAdminUserReportSchema,
   getAdminUsersSchema,
   moderateAdminReviewSchema,
   rejectVendorApplicationSchema,
@@ -23,6 +24,7 @@ import {
   getAdminReviewByIdHandler,
   getAdminReviewsHandler,
   getAdminUserByIdHandler,
+  getAdminUserReportHandler,
   getAdminUsersHandler,
   getPendingVendorApplicationsHandler,
   getVendorApplicationByIdHandler,
@@ -67,6 +69,13 @@ adminRouter.get(
   ...adminOnly,
   validate(getAdminDashboardSummarySchema),
   getAdminDashboardSummaryHandler,
+);
+
+adminRouter.get(
+  '/reports/users',
+  ...adminOnly,
+  validate(getAdminUserReportSchema),
+  getAdminUserReportHandler,
 );
 
 adminRouter.get('/users', ...adminOnly, validate(getAdminUsersSchema), getAdminUsersHandler);

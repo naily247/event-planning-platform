@@ -159,6 +159,12 @@ const registerVendor = async (payload: typeof vendorPayload) => {
   return request(app).post('/api/v1/auth/register/vendor').send(payload);
 };
 
+const getAdminUserReportRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/reports/users${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
 const completeAndSubmitVendor = async (accessToken: string, categoryId: string) => {
   await request(app)
     .patch('/api/v1/vendors/me/onboarding')
@@ -880,6 +886,251 @@ describe('Admin user management API', () => {
       expect(
         response.body.data.activity.recentUsers.some(
           (user: { email: string }) => user.email === vendorEmail,
+        ),
+      ).toBe(true);
+    });
+  });
+
+  describe('GET /api/v1/admin/reports/users', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/reports/users');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminUserReportRequest(customerAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects invalid report query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUserReportRequest(
+        adminAccessToken,
+        '?from=2030-02-01&to=2030-01-01&role=INVALID&status=INVALID&groupBy=year&recentLimit=0&unknown=value',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns user report totals, breakdowns, growth and recent users to an admin', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-01T10:00:00.000Z'),
+      });
+
+      await createManagedUser({
+        email: secondCustomerEmail,
+        firstName: 'Nila',
+        lastName: 'Perera',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-01T12:00:00.000Z'),
+      });
+
+      await createManagedUser({
+        email: suspendedCustomerEmail,
+        firstName: 'Suspended',
+        lastName: 'Customer',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.SUSPENDED,
+        createdAt: new Date('2030-01-02T10:00:00.000Z'),
+      });
+
+      const vendorRegistration = await registerVendor(vendorPayload);
+
+      expect(vendorRegistration.status).toBe(201);
+
+      await prisma.user.update({
+        where: {
+          email: vendorEmail,
+        },
+        data: {
+          createdAt: new Date('2030-01-03T10:00:00.000Z'),
+        },
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUserReportRequest(
+        adminAccessToken,
+        '?from=2030-01-01&to=2030-01-03&groupBy=day&recentLimit=2',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.generatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.filters).toMatchObject({
+        from: expect.any(String),
+        to: expect.any(String),
+        role: null,
+        status: null,
+        groupBy: 'day',
+        recentLimit: 2,
+      });
+
+      expect(response.body.data.totals).toMatchObject({
+        users: 4,
+
+        byRole: {
+          customers: 3,
+          vendors: 1,
+          admins: 0,
+        },
+
+        byStatus: {
+          active: 3,
+          pendingVerification: 0,
+          suspended: 1,
+          deactivated: 0,
+        },
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01-01',
+          count: 2,
+        },
+        {
+          period: '2030-01-02',
+          count: 1,
+        },
+        {
+          period: '2030-01-03',
+          count: 1,
+        },
+      ]);
+
+      expect(response.body.data.recentUsers).toHaveLength(2);
+
+      expect(response.body.data.recentUsers[0]).toMatchObject({
+        email: vendorEmail,
+        role: 'VENDOR',
+        vendorProfile: {
+          businessName: 'Pending Moments Photography',
+          verificationStatus: 'DRAFT',
+        },
+      });
+
+      expect(response.body.data.recentUsers[1]).toMatchObject({
+        email: suspendedCustomerEmail,
+        role: 'CUSTOMER',
+        status: 'SUSPENDED',
+        vendorProfile: null,
+      });
+
+      expect(response.body.data.recentUsers[0].passwordHash).toBeUndefined();
+      expect(response.body.data.recentUsers[0].vendor).toBeUndefined();
+    });
+
+    it('supports role, status and month grouping filters', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-10T10:00:00.000Z'),
+      });
+
+      await createManagedUser({
+        email: secondCustomerEmail,
+        firstName: 'Nila',
+        lastName: 'Perera',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.SUSPENDED,
+        createdAt: new Date('2030-02-10T10:00:00.000Z'),
+      });
+
+      await createManagedUser({
+        email: suspendedCustomerEmail,
+        firstName: 'Ravi',
+        lastName: 'Silva',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.SUSPENDED,
+        createdAt: new Date('2030-02-15T10:00:00.000Z'),
+      });
+
+      const vendorRegistration = await registerVendor(vendorPayload);
+
+      expect(vendorRegistration.status).toBe(201);
+
+      await prisma.user.update({
+        where: {
+          email: vendorEmail,
+        },
+        data: {
+          createdAt: new Date('2030-02-20T10:00:00.000Z'),
+        },
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUserReportRequest(
+        adminAccessToken,
+        '?from=2030-01-01&to=2030-02-28&role=CUSTOMER&status=SUSPENDED&groupBy=month&recentLimit=5',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.filters).toMatchObject({
+        role: 'CUSTOMER',
+        status: 'SUSPENDED',
+        groupBy: 'month',
+        recentLimit: 5,
+      });
+
+      expect(response.body.data.totals).toMatchObject({
+        users: 2,
+
+        byRole: {
+          customers: 2,
+          vendors: 0,
+          admins: 0,
+        },
+
+        byStatus: {
+          active: 1,
+          pendingVerification: 0,
+          suspended: 2,
+          deactivated: 0,
+        },
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-02',
+          count: 2,
+        },
+      ]);
+
+      expect(response.body.data.recentUsers).toHaveLength(2);
+
+      expect(
+        response.body.data.recentUsers.every(
+          (user: { role: string; status: string }) =>
+            user.role === 'CUSTOMER' && user.status === 'SUSPENDED',
         ),
       ).toBe(true);
     });

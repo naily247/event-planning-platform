@@ -10,6 +10,27 @@ const paginationQuerySchema = {
   limit: z.coerce.number().int().min(1).max(100).default(20),
 };
 
+const dateRangeQuerySchema = {
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+};
+
+const validateDateRange = (
+  query: {
+    from?: Date;
+    to?: Date;
+  },
+  ctx: z.RefinementCtx,
+) => {
+  if (query.from && query.to && query.from > query.to) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['to'],
+      message: 'The end date must be after or equal to the start date',
+    });
+  }
+};
+
 export const getAdminUsersSchema = z.object({
   query: z
     .object({
@@ -63,6 +84,20 @@ export const getAdminDashboardSummarySchema = z.object({
     })
     .strict()
     .default({}),
+});
+
+export const getAdminUserReportSchema = z.object({
+  query: z
+    .object({
+      ...dateRangeQuerySchema,
+      role: z.nativeEnum(UserRole).optional(),
+      status: z.nativeEnum(AccountStatus).optional(),
+      groupBy: z.enum(['day', 'month']).default('day'),
+      recentLimit: z.coerce.number().int().min(1).max(20).default(10),
+    })
+    .strict()
+    .default({})
+    .superRefine(validateDateRange),
 });
 
 export const getPendingVendorApplicationsSchema = z.object({
@@ -189,6 +224,8 @@ export type UpdateAdminUserStatusParams = z.infer<typeof updateAdminUserStatusSc
 export type UpdateAdminUserStatusInput = z.infer<typeof updateAdminUserStatusSchema>['body'];
 
 export type GetAdminDashboardSummaryQuery = z.infer<typeof getAdminDashboardSummarySchema>['query'];
+
+export type GetAdminUserReportQuery = z.infer<typeof getAdminUserReportSchema>['query'];
 
 export type GetPendingVendorApplicationsQuery = z.infer<
   typeof getPendingVendorApplicationsSchema

@@ -22,6 +22,7 @@ const VENDOR_EMAIL = 'admin-review-vendor@example.com';
 const SECOND_VENDOR_EMAIL = 'admin-review-second-vendor@example.com';
 
 const ADMIN_PASSWORD = 'Admin@2026';
+const REVIEW_TEST_RUN_ID = `${process.pid}-${Date.now()}`;
 
 const customerPayload = {
   email: CUSTOMER_EMAIL,
@@ -50,7 +51,7 @@ const vendorPayload = {
   password: 'Vendor@2026',
   firstName: 'Ravi',
   lastName: 'Perera',
-  businessName: 'Admin Review Photography',
+  businessName: `Admin Review Photography ${REVIEW_TEST_RUN_ID}`,
 };
 
 const secondVendorPayload = {
@@ -58,7 +59,7 @@ const secondVendorPayload = {
   password: 'Vendor@2026',
   firstName: 'Arun',
   lastName: 'Silva',
-  businessName: 'Second Admin Review Studio',
+  businessName: `Second Admin Review Studio ${REVIEW_TEST_RUN_ID}`,
 };
 
 const testEmails = [
@@ -606,7 +607,7 @@ describe('Administrator review moderation API', () => {
         },
         vendor: {
           id: fixture.vendorId,
-          businessName: 'Admin Review Photography',
+          businessName: vendorPayload.businessName,
         },
         package: {
           id: fixture.vendorPackageId,
