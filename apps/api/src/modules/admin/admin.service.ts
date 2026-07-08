@@ -1,11 +1,106 @@
-import { Prisma, ReviewModerationActionType, VendorVerificationStatus } from '@prisma/client';
+import {
+  AccountStatus,
+  Prisma,
+  ReviewModerationActionType,
+  UserRole,
+  VendorVerificationStatus,
+} from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   GetAdminReviewsQuery,
+  GetAdminUsersQuery,
   ModerateAdminReviewInput,
   RejectVendorApplicationInput,
+  UpdateAdminUserStatusInput,
 } from './admin.schemas.js';
+
+const adminUserListSelect = {
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  role: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+
+  vendor: {
+    select: {
+      id: true,
+      businessName: true,
+      slug: true,
+      verificationStatus: true,
+    },
+  },
+} satisfies Prisma.UserSelect;
+
+const adminUserDetailSelect = {
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  role: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+
+  customer: true,
+
+  vendor: {
+    select: {
+      id: true,
+      businessName: true,
+      slug: true,
+      description: true,
+      contactPhone: true,
+      website: true,
+      baseLocation: true,
+      serviceAreas: true,
+      verificationStatus: true,
+      submittedAt: true,
+      reviewedAt: true,
+      rejectionReason: true,
+      createdAt: true,
+      updatedAt: true,
+
+      categories: {
+        select: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+
+        orderBy: {
+          category: {
+            name: 'asc',
+          },
+        },
+      },
+    },
+  },
+
+  _count: {
+    select: {
+      createdEvents: true,
+      customerReviews: true,
+      moderatedReviews: true,
+      reviewModerationActions: true,
+      submittedPayments: true,
+      reviewedPayments: true,
+      notifications: true,
+      submittedComplaints: true,
+      receivedComplaints: true,
+      assignedComplaints: true,
+      complaintMessages: true,
+      performedComplaintActions: true,
+    },
+  },
+} satisfies Prisma.UserSelect;
 
 const pendingVendorSelect = {
   id: true,
@@ -22,6 +117,7 @@ const pendingVendorSelect = {
   updatedAt: true,
   reviewedAt: true,
   rejectionReason: true,
+
   user: {
     select: {
       id: true,
@@ -32,6 +128,7 @@ const pendingVendorSelect = {
       createdAt: true,
     },
   },
+
   categories: {
     select: {
       category: {
@@ -42,6 +139,7 @@ const pendingVendorSelect = {
         },
       },
     },
+
     orderBy: {
       category: {
         name: 'asc',
@@ -135,6 +233,69 @@ const adminReviewDetailSelect = {
   },
 } as const;
 
+const getAdminUserOrderBy = (
+  sort: GetAdminUsersQuery['sort'],
+): Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[] => {
+  switch (sort) {
+    case 'oldest':
+      return {
+        createdAt: 'asc',
+      };
+
+    case 'name_asc':
+      return [
+        {
+          firstName: 'asc',
+        },
+        {
+          lastName: 'asc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ];
+
+    case 'name_desc':
+      return [
+        {
+          firstName: 'desc',
+        },
+        {
+          lastName: 'desc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ];
+
+    case 'email_asc':
+      return [
+        {
+          email: 'asc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ];
+
+    case 'email_desc':
+      return [
+        {
+          email: 'desc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ];
+
+    case 'newest':
+    default:
+      return {
+        createdAt: 'desc',
+      };
+  }
+};
+
 const getAdminReviewOrderBy = (
   sort: GetAdminReviewsQuery['sort'],
 ): Prisma.ReviewOrderByWithRelationInput | Prisma.ReviewOrderByWithRelationInput[] => {
@@ -202,12 +363,189 @@ const formatPendingVendor = <
   categories: vendor.categories.map(({ category }) => category),
 });
 
+export const getAdminUsers = async (query: GetAdminUsersQuery) => {
+  const { page, limit, search, role, status, sort } = query;
+
+  const where: Prisma.UserWhereInput = {
+    ...(role && {
+      role,
+    }),
+
+    ...(status && {
+      status,
+    }),
+
+    ...(search && {
+      OR: [
+        {
+          email: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          firstName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          lastName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ],
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [users, total] = await prisma.$transaction([
+    prisma.user.findMany({
+      where,
+      select: adminUserListSelect,
+      orderBy: getAdminUserOrderBy(sort),
+      skip,
+      take: limit,
+    }),
+
+    prisma.user.count({
+      where,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    users: users.map(({ vendor, ...user }) => ({
+      ...user,
+      vendorProfile: vendor,
+    })),
+
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
+
+export const getAdminUserById = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+
+    select: adminUserDetailSelect,
+  });
+
+  if (!user) {
+    throw new AppError(404, 'User not found', 'ADMIN_USER_NOT_FOUND');
+  }
+
+  const { vendor, ...userDetails } = user;
+
+  return {
+    ...userDetails,
+
+    vendorProfile: vendor
+      ? {
+          ...vendor,
+          categories: vendor.categories.map(({ category }) => category),
+        }
+      : null,
+  };
+};
+
+export const updateAdminUserStatus = async (
+  adminUserId: string,
+  userId: string,
+  input: UpdateAdminUserStatusInput,
+) => {
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+
+    select: {
+      id: true,
+      role: true,
+      status: true,
+    },
+  });
+
+  if (!existingUser) {
+    throw new AppError(404, 'User not found', 'ADMIN_USER_NOT_FOUND');
+  }
+
+  if (existingUser.id === adminUserId) {
+    throw new AppError(
+      409,
+      'You cannot change the status of your own administrator account',
+      'ADMIN_SELF_STATUS_CHANGE_NOT_ALLOWED',
+    );
+  }
+
+  if (existingUser.role === UserRole.ADMIN) {
+    throw new AppError(
+      403,
+      'Administrator account status cannot be changed through this endpoint',
+      'ADMIN_ACCOUNT_STATUS_CHANGE_FORBIDDEN',
+    );
+  }
+
+  if (existingUser.status === input.status) {
+    throw new AppError(
+      409,
+      `User account is already ${input.status.toLowerCase()}`,
+      'USER_STATUS_ALREADY_SET',
+    );
+  }
+
+  const allowedTransition =
+    (existingUser.status === AccountStatus.ACTIVE && input.status === AccountStatus.SUSPENDED) ||
+    (existingUser.status === AccountStatus.SUSPENDED && input.status === AccountStatus.ACTIVE);
+
+  if (!allowedTransition) {
+    throw new AppError(
+      409,
+      `User status cannot be changed from ${existingUser.status} to ${input.status}`,
+      'INVALID_USER_STATUS_TRANSITION',
+    );
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+
+    data: {
+      status: input.status,
+    },
+
+    select: adminUserListSelect,
+  });
+
+  const { vendor, ...user } = updatedUser;
+
+  return {
+    ...user,
+    vendorProfile: vendor,
+  };
+};
+
 export const getPendingVendorApplications = async () => {
   const vendors = await prisma.vendorProfile.findMany({
     where: {
       verificationStatus: VendorVerificationStatus.PENDING,
     },
+
     select: pendingVendorSelect,
+
     orderBy: {
       submittedAt: 'asc',
     },
@@ -220,10 +558,12 @@ export const getVendorApplicationById = async (vendorId: string) => {
   const vendor = await prisma.vendorProfile.findUnique({
     where: {
       id: vendorId,
+
       verificationStatus: {
         not: VendorVerificationStatus.DRAFT,
       },
     },
+
     select: pendingVendorSelect,
   });
 
@@ -239,6 +579,7 @@ export const approveVendorApplication = async (vendorId: string) => {
     where: {
       id: vendorId,
     },
+
     select: {
       id: true,
       verificationStatus: true,
@@ -261,11 +602,13 @@ export const approveVendorApplication = async (vendorId: string) => {
     where: {
       id: vendorId,
     },
+
     data: {
       verificationStatus: VendorVerificationStatus.APPROVED,
       reviewedAt: new Date(),
       rejectionReason: null,
     },
+
     select: pendingVendorSelect,
   });
 
@@ -280,6 +623,7 @@ export const rejectVendorApplication = async (
     where: {
       id: vendorId,
     },
+
     select: {
       id: true,
       verificationStatus: true,
@@ -302,11 +646,13 @@ export const rejectVendorApplication = async (
     where: {
       id: vendorId,
     },
+
     data: {
       verificationStatus: VendorVerificationStatus.REJECTED,
       reviewedAt: new Date(),
       rejectionReason: input.reason,
     },
+
     select: pendingVendorSelect,
   });
 
@@ -375,6 +721,7 @@ export const getAdminReviewById = async (reviewId: string) => {
     where: {
       id: reviewId,
     },
+
     select: adminReviewDetailSelect,
   });
 
@@ -394,6 +741,7 @@ export const moderateAdminReview = async (
     where: {
       id: reviewId,
     },
+
     select: {
       id: true,
       isHidden: true,
@@ -447,6 +795,7 @@ export const moderateAdminReview = async (
       where: {
         id: reviewId,
       },
+
       select: adminReviewDetailSelect,
     });
   });

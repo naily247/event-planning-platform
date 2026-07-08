@@ -3,28 +3,36 @@ import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
+
 import {
   getAdminReviewByIdSchema,
   getAdminReviewsSchema,
+  getAdminUserByIdSchema,
+  getAdminUsersSchema,
   moderateAdminReviewSchema,
   rejectVendorApplicationSchema,
+  updateAdminUserStatusSchema,
 } from './admin.schemas.js';
 
 import {
   approveVendorApplicationHandler,
+  getAdminComplaintByIdHandler,
+  getAdminComplaintsHandler,
   getAdminReviewByIdHandler,
   getAdminReviewsHandler,
+  getAdminUserByIdHandler,
+  getAdminUsersHandler,
   getPendingVendorApplicationsHandler,
   getVendorApplicationByIdHandler,
   moderateAdminReviewHandler,
   rejectVendorApplicationHandler,
-  getAdminComplaintsHandler,
-  getAdminComplaintByIdHandler,
-  updateAdminComplaintStatusHandler,
+  reopenAdminComplaintHandler,
   updateAdminComplaintAssignmentHandler,
   updateAdminComplaintPriorityHandler,
-  reopenAdminComplaintHandler,
+  updateAdminComplaintStatusHandler,
+  updateAdminUserStatusHandler,
 } from './admin.controller.js';
+
 import {
   getAdminPaymentSchema,
   getPendingPaymentsSchema,
@@ -40,17 +48,33 @@ import {
 } from '../payments/payment.controller.js';
 
 import {
-  getAdminComplaintsSchema,
   getAdminComplaintSchema,
-  updateAdminComplaintStatusSchema,
+  getAdminComplaintsSchema,
+  reopenAdminComplaintSchema,
   updateAdminComplaintAssignmentSchema,
   updateAdminComplaintPrioritySchema,
-  reopenAdminComplaintSchema,
+  updateAdminComplaintStatusSchema,
 } from '../complaints/complaint.schemas.js';
 
 export const adminRouter = Router();
 
 const adminOnly = [requireAuth, authorize(UserRole.ADMIN)] as const;
+
+adminRouter.get('/users', ...adminOnly, validate(getAdminUsersSchema), getAdminUsersHandler);
+
+adminRouter.get(
+  '/users/:userId',
+  ...adminOnly,
+  validate(getAdminUserByIdSchema),
+  getAdminUserByIdHandler,
+);
+
+adminRouter.patch(
+  '/users/:userId/status',
+  ...adminOnly,
+  validate(updateAdminUserStatusSchema),
+  updateAdminUserStatusHandler,
+);
 
 adminRouter.get(
   '/payments/pending',

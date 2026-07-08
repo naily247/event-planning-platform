@@ -5,19 +5,61 @@ import {
   approveVendorApplication,
   getAdminReviewById,
   getAdminReviews,
+  getAdminUserById,
+  getAdminUsers,
   getPendingVendorApplications,
   getVendorApplicationById,
   moderateAdminReview,
   rejectVendorApplication,
+  updateAdminUserStatus,
 } from './admin.service.js';
 import {
   getAdminComplaintById,
   getAdminComplaints,
-  updateAdminComplaintAssignment,
-  updateAdminComplaintStatus,
-  updateAdminComplaintPriority,
   reopenAdminComplaint,
+  updateAdminComplaintAssignment,
+  updateAdminComplaintPriority,
+  updateAdminComplaintStatus,
 } from '../complaints/complaint.service.js';
+
+export const getAdminUsersHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const result = await getAdminUsers(req.query as never);
+
+  res.status(200).json({
+    success: true,
+    data: result.users,
+    meta: {
+      pagination: result.pagination,
+    },
+  });
+});
+
+export const getAdminUserByIdHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { userId } = req.params as { userId: string };
+
+  const user = await getAdminUserById(userId);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
+export const updateAdminUserStatusHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { userId } = req.params as { userId: string };
+
+  const user = await updateAdminUserStatus(req.auth!.userId, userId, req.body);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+    message:
+      req.body.status === 'SUSPENDED'
+        ? 'User account suspended successfully'
+        : 'User account reactivated successfully',
+  });
+});
+
 export const getPendingVendorApplicationsHandler: RequestHandler = asyncHandler(
   async (_req, res) => {
     const vendors = await getPendingVendorApplications();
@@ -91,6 +133,30 @@ export const getAdminReviewsHandler: RequestHandler = asyncHandler(async (req, r
   });
 });
 
+export const getAdminReviewByIdHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { reviewId } = req.params as { reviewId: string };
+
+  const review = await getAdminReviewById(reviewId);
+
+  res.status(200).json({
+    success: true,
+    data: review,
+  });
+});
+
+export const moderateAdminReviewHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { reviewId } = req.params as { reviewId: string };
+
+  const review = await moderateAdminReview(req.auth!.userId, reviewId, req.body);
+
+  res.status(200).json({
+    success: true,
+    data: review,
+    message:
+      req.body.action === 'HIDE' ? 'Review hidden successfully' : 'Review restored successfully',
+  });
+});
+
 export const getAdminComplaintsHandler: RequestHandler = asyncHandler(async (req, res) => {
   const result = await getAdminComplaints(req.query as never);
 
@@ -155,30 +221,6 @@ export const updateAdminComplaintPriorityHandler: RequestHandler = asyncHandler(
     });
   },
 );
-
-export const getAdminReviewByIdHandler: RequestHandler = asyncHandler(async (req, res) => {
-  const { reviewId } = req.params as { reviewId: string };
-
-  const review = await getAdminReviewById(reviewId);
-
-  res.status(200).json({
-    success: true,
-    data: review,
-  });
-});
-
-export const moderateAdminReviewHandler: RequestHandler = asyncHandler(async (req, res) => {
-  const { reviewId } = req.params as { reviewId: string };
-
-  const review = await moderateAdminReview(req.auth!.userId, reviewId, req.body);
-
-  res.status(200).json({
-    success: true,
-    data: review,
-    message:
-      req.body.action === 'HIDE' ? 'Review hidden successfully' : 'Review restored successfully',
-  });
-});
 
 export const reopenAdminComplaintHandler: RequestHandler = asyncHandler(async (req, res) => {
   const { complaintId } = req.params as { complaintId: string };

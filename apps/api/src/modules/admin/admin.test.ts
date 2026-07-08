@@ -7,11 +7,26 @@ import { prisma } from '../../config/prisma.js';
 const app = createApp();
 
 const adminEmail = 'admin-review-test@example.com';
+const secondAdminEmail = 'admin-second-test@example.com';
 const vendorEmail = 'admin-pending-vendor@example.com';
 const draftVendorEmail = 'admin-draft-vendor@example.com';
+const customerEmail = 'admin-user-customer@example.com';
+const secondCustomerEmail = 'admin-user-second-customer@example.com';
+const suspendedCustomerEmail = 'admin-user-suspended@example.com';
 
 const adminPassword = 'Admin@2026';
 const vendorPassword = 'Vendor@2026';
+const userPassword = 'User@2026';
+
+const testEmails = [
+  adminEmail,
+  secondAdminEmail,
+  vendorEmail,
+  draftVendorEmail,
+  customerEmail,
+  secondCustomerEmail,
+  suspendedCustomerEmail,
+];
 
 const vendorPayload = {
   email: vendorEmail,
@@ -60,7 +75,78 @@ const loginTestAdmin = async () => {
     password: adminPassword,
   });
 
+  expect(response.status).toBe(200);
+
   return response.body.data.accessToken as string;
+};
+
+const createManagedUser = async ({
+  email,
+  firstName,
+  lastName,
+  role,
+  status = AccountStatus.ACTIVE,
+  createdAt,
+}: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  status?: AccountStatus;
+  createdAt?: Date;
+}) => {
+  const passwordHash = await bcrypt.hash(userPassword, 12);
+
+  return prisma.user.create({
+    data: {
+      email,
+      passwordHash,
+      firstName,
+      lastName,
+      role,
+      status,
+      ...(createdAt && {
+        createdAt,
+      }),
+    },
+  });
+};
+
+const loginUser = async (email: string, password: string) => {
+  const response = await request(app).post('/api/v1/auth/login').send({
+    email,
+    password,
+  });
+
+  expect(response.status).toBe(200);
+
+  return response.body.data.accessToken as string;
+};
+
+const getAdminUsersRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/users${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const getAdminUserByIdRequest = (accessToken: string, userId: string) => {
+  return request(app)
+    .get(`/api/v1/admin/users/${userId}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const updateAdminUserStatusRequest = (
+  accessToken: string,
+  userId: string,
+  body: {
+    status: string;
+    reason?: string;
+  },
+) => {
+  return request(app)
+    .patch(`/api/v1/admin/users/${userId}/status`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send(body);
 };
 
 const registerVendor = async (payload: typeof vendorPayload) => {
@@ -95,7 +181,7 @@ beforeEach(async () => {
   await prisma.user.deleteMany({
     where: {
       email: {
-        in: [adminEmail, vendorEmail, draftVendorEmail],
+        in: testEmails,
       },
     },
   });
@@ -107,12 +193,852 @@ afterAll(async () => {
   await prisma.user.deleteMany({
     where: {
       email: {
-        in: [adminEmail, vendorEmail, draftVendorEmail],
+        in: testEmails,
       },
     },
   });
 
   await prisma.$disconnect();
+});
+
+describe('Admin user management API', () => {
+  describe('GET /api/v1/admin/users', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/users');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminUsersRequest(customerAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('returns safe user summaries with pagination metadata', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUsersRequest(
+        adminAccessToken,
+        `?search=${encodeURIComponent(customerEmail)}`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(1);
+
+      expect(response.body.data[0]).toMatchObject({
+        id: customer.id,
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: 'CUSTOMER',
+        status: 'ACTIVE',
+        vendorProfile: null,
+      });
+
+      expect(response.body.data[0].passwordHash).toBeUndefined();
+      expect(response.body.data[0].refreshToken).toBeUndefined();
+
+      expect(response.body.meta.pagination).toEqual({
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+    });
+
+    it('searches users by email, first name and last name', async () => {
+      const expectedUser = await createManagedUser({
+        email: customerEmail,
+        firstName: 'UniqueMaya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      await createManagedUser({
+        email: secondCustomerEmail,
+        firstName: 'Nila',
+        lastName: 'Perera',
+        role: UserRole.CUSTOMER,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const emailResponse = await getAdminUsersRequest(
+        adminAccessToken,
+        '?search=admin-user-customer',
+      );
+
+      expect(emailResponse.status).toBe(200);
+      expect(emailResponse.body.data).toHaveLength(1);
+      expect(emailResponse.body.data[0].id).toBe(expectedUser.id);
+
+      const firstNameResponse = await getAdminUsersRequest(adminAccessToken, '?search=uniquemaya');
+
+      expect(firstNameResponse.status).toBe(200);
+      expect(firstNameResponse.body.data).toHaveLength(1);
+      expect(firstNameResponse.body.data[0].id).toBe(expectedUser.id);
+
+      const lastNameResponse = await getAdminUsersRequest(adminAccessToken, '?search=fernando');
+
+      expect(lastNameResponse.status).toBe(200);
+      expect(lastNameResponse.body.data).toHaveLength(1);
+      expect(lastNameResponse.body.data[0].id).toBe(expectedUser.id);
+    });
+
+    it('filters users by role', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const vendorRegistration = await registerVendor(vendorPayload);
+
+      expect(vendorRegistration.status).toBe(201);
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUsersRequest(
+        adminAccessToken,
+        `?search=${encodeURIComponent(vendorEmail)}&role=VENDOR`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+
+      expect(response.body.data[0]).toMatchObject({
+        email: vendorEmail,
+        role: 'VENDOR',
+        vendorProfile: {
+          businessName: 'Pending Moments Photography',
+          verificationStatus: 'DRAFT',
+        },
+      });
+    });
+
+    it('filters users by account status', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const suspendedUser = await createManagedUser({
+        email: suspendedCustomerEmail,
+        firstName: 'Suspended',
+        lastName: 'Customer',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.SUSPENDED,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUsersRequest(adminAccessToken, '?status=SUSPENDED');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+
+      expect(response.body.data[0]).toMatchObject({
+        id: suspendedUser.id,
+        email: suspendedCustomerEmail,
+        status: 'SUSPENDED',
+      });
+    });
+
+    it('supports pagination', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-01T10:00:00.000Z'),
+      });
+
+      const secondUser = await createManagedUser({
+        email: secondCustomerEmail,
+        firstName: 'Nila',
+        lastName: 'Perera',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-02T10:00:00.000Z'),
+      });
+
+      await createManagedUser({
+        email: suspendedCustomerEmail,
+        firstName: 'Ravi',
+        lastName: 'Silva',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-03T10:00:00.000Z'),
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUsersRequest(
+        adminAccessToken,
+        '?role=CUSTOMER&page=2&limit=1&sort=newest',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].id).toBe(secondUser.id);
+
+      expect(response.body.meta.pagination).toEqual({
+        page: 2,
+        limit: 1,
+        total: 3,
+        totalPages: 3,
+        hasNextPage: true,
+        hasPreviousPage: true,
+      });
+    });
+
+    it('supports name, email, newest and oldest sorting', async () => {
+      const maya = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-01T10:00:00.000Z'),
+      });
+
+      const nila = await createManagedUser({
+        email: secondCustomerEmail,
+        firstName: 'Nila',
+        lastName: 'Perera',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-02T10:00:00.000Z'),
+      });
+
+      const ravi = await createManagedUser({
+        email: suspendedCustomerEmail,
+        firstName: 'Ravi',
+        lastName: 'Silva',
+        role: UserRole.CUSTOMER,
+        createdAt: new Date('2030-01-03T10:00:00.000Z'),
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const nameAscendingResponse = await getAdminUsersRequest(
+        adminAccessToken,
+        '?role=CUSTOMER&sort=name_asc',
+      );
+
+      expect(nameAscendingResponse.status).toBe(200);
+
+      expect(nameAscendingResponse.body.data.map((user: { id: string }) => user.id)).toEqual([
+        maya.id,
+        nila.id,
+        ravi.id,
+      ]);
+
+      const nameDescendingResponse = await getAdminUsersRequest(
+        adminAccessToken,
+        '?role=CUSTOMER&sort=name_desc',
+      );
+
+      expect(nameDescendingResponse.body.data.map((user: { id: string }) => user.id)).toEqual([
+        ravi.id,
+        nila.id,
+        maya.id,
+      ]);
+
+      const emailAscendingResponse = await getAdminUsersRequest(
+        adminAccessToken,
+        '?role=CUSTOMER&sort=email_asc',
+      );
+
+      const ascendingEmails = emailAscendingResponse.body.data.map(
+        (user: { email: string }) => user.email,
+      );
+
+      expect(ascendingEmails).toEqual([...ascendingEmails].sort());
+
+      const emailDescendingResponse = await getAdminUsersRequest(
+        adminAccessToken,
+        '?role=CUSTOMER&sort=email_desc',
+      );
+
+      const descendingEmails = emailDescendingResponse.body.data.map(
+        (user: { email: string }) => user.email,
+      );
+
+      expect(descendingEmails).toEqual([...descendingEmails].sort().reverse());
+
+      const newestResponse = await getAdminUsersRequest(
+        adminAccessToken,
+        '?role=CUSTOMER&sort=newest',
+      );
+
+      expect(newestResponse.body.data[0].id).toBe(ravi.id);
+
+      const oldestResponse = await getAdminUsersRequest(
+        adminAccessToken,
+        '?role=CUSTOMER&sort=oldest',
+      );
+
+      expect(oldestResponse.body.data[0].id).toBe(maya.id);
+    });
+
+    it('rejects invalid list query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUsersRequest(
+        adminAccessToken,
+        '?page=0&limit=101&role=INVALID&status=INVALID&sort=invalid',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects unexpected query parameters', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUsersRequest(adminAccessToken, '?unknownFilter=value');
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('GET /api/v1/admin/users/:userId', () => {
+    it('rejects requests without an access token', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const response = await request(app).get(`/api/v1/admin/users/${customer.id}`);
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const secondCustomer = await createManagedUser({
+        email: secondCustomerEmail,
+        firstName: 'Nila',
+        lastName: 'Perera',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminUserByIdRequest(customerAccessToken, secondCustomer.id);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects an invalid user ID', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUserByIdRequest(adminAccessToken, 'invalid-user-id');
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns 404 when the user does not exist', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUserByIdRequest(adminAccessToken, 'cly0000000000000000000000');
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('ADMIN_USER_NOT_FOUND');
+    });
+
+    it('returns safe customer account details to an admin', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUserByIdRequest(adminAccessToken, customer.id);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: customer.id,
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: 'CUSTOMER',
+        status: 'ACTIVE',
+        customer: null,
+        vendorProfile: null,
+      });
+
+      expect(response.body.data.createdAt).toEqual(expect.any(String));
+      expect(response.body.data.updatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data._count).toEqual({
+        createdEvents: 0,
+        customerReviews: 0,
+        moderatedReviews: 0,
+        reviewModerationActions: 0,
+        submittedPayments: 0,
+        reviewedPayments: 0,
+        notifications: 0,
+        submittedComplaints: 0,
+        receivedComplaints: 0,
+        assignedComplaints: 0,
+        complaintMessages: 0,
+        performedComplaintActions: 0,
+      });
+
+      expect(response.body.data.passwordHash).toBeUndefined();
+      expect(response.body.data.refreshToken).toBeUndefined();
+      expect(response.body.data.vendor).toBeUndefined();
+    });
+
+    it('returns detailed vendor profile information with flattened categories', async () => {
+      const category = await prisma.serviceCategory.findUnique({
+        where: {
+          slug: 'photography',
+        },
+      });
+
+      expect(category).not.toBeNull();
+
+      if (!category) {
+        throw new Error('Photography service category must exist in the test database');
+      }
+
+      const registrationResponse = await registerVendor(vendorPayload);
+
+      expect(registrationResponse.status).toBe(201);
+
+      const vendorAccessToken = registrationResponse.body.data.accessToken as string;
+      const vendorUserId = registrationResponse.body.data.user.id as string;
+
+      const submissionResponse = await completeAndSubmitVendor(vendorAccessToken, category.id);
+
+      expect(submissionResponse.status).toBe(200);
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminUserByIdRequest(adminAccessToken, vendorUserId);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: vendorUserId,
+        email: vendorEmail,
+        firstName: 'Pending',
+        lastName: 'Vendor',
+        role: 'VENDOR',
+        status: 'ACTIVE',
+        customer: null,
+
+        vendorProfile: {
+          businessName: 'Pending Moments Photography',
+          description: 'Professional photography services for weddings and private events.',
+          contactPhone: '+94771234567',
+          website: 'https://pending-moments.example.com',
+          baseLocation: 'Kandy',
+          serviceAreas: ['Kandy', 'Colombo'],
+          verificationStatus: 'PENDING',
+
+          categories: [
+            {
+              id: category.id,
+              name: 'Photography',
+              slug: 'photography',
+            },
+          ],
+        },
+      });
+
+      expect(response.body.data.vendorProfile.id).toEqual(expect.any(String));
+      expect(response.body.data.vendorProfile.slug).toEqual(expect.any(String));
+      expect(response.body.data.vendorProfile.submittedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.passwordHash).toBeUndefined();
+      expect(response.body.data.vendor).toBeUndefined();
+    });
+  });
+
+  describe('PATCH /api/v1/admin/users/:userId/status', () => {
+    const suspensionReason =
+      'The account has been temporarily suspended following a policy review.';
+
+    it('rejects requests without an access token', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const response = await request(app).patch(`/api/v1/admin/users/${customer.id}/status`).send({
+        status: 'SUSPENDED',
+        reason: suspensionReason,
+      });
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const secondCustomer = await createManagedUser({
+        email: secondCustomerEmail,
+        firstName: 'Nila',
+        lastName: 'Perera',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await updateAdminUserStatusRequest(customerAccessToken, secondCustomer.id, {
+        status: 'SUSPENDED',
+        reason: suspensionReason,
+      });
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects an invalid user ID', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, 'invalid-user-id', {
+        status: 'SUSPENDED',
+        reason: suspensionReason,
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects unsupported account statuses', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, customer.id, {
+        status: 'PENDING',
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('requires a reason when suspending an account', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, customer.id, {
+        status: 'SUSPENDED',
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects unexpected request body fields', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await request(app)
+        .patch(`/api/v1/admin/users/${customer.id}/status`)
+        .set('Authorization', `Bearer ${adminAccessToken}`)
+        .send({
+          status: 'SUSPENDED',
+          reason: suspensionReason,
+          role: 'ADMIN',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns 404 when the user does not exist', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(
+        adminAccessToken,
+        'cly0000000000000000000000',
+        {
+          status: 'SUSPENDED',
+          reason: suspensionReason,
+        },
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('ADMIN_USER_NOT_FOUND');
+    });
+
+    it('prevents an administrator from changing their own account status', async () => {
+      const admin = await prisma.user.findUnique({
+        where: {
+          email: adminEmail,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      expect(admin).not.toBeNull();
+
+      if (!admin) {
+        throw new Error('Test administrator must exist');
+      }
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, admin.id, {
+        status: 'SUSPENDED',
+        reason: suspensionReason,
+      });
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('ADMIN_SELF_STATUS_CHANGE_NOT_ALLOWED');
+    });
+
+    it('prevents changing another administrator account status', async () => {
+      const secondAdmin = await createManagedUser({
+        email: secondAdminEmail,
+        firstName: 'Second',
+        lastName: 'Admin',
+        role: UserRole.ADMIN,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, secondAdmin.id, {
+        status: 'SUSPENDED',
+        reason: suspensionReason,
+      });
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('ADMIN_ACCOUNT_STATUS_CHANGE_FORBIDDEN');
+    });
+
+    it('rejects a status transition when the requested status is already set', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.ACTIVE,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, customer.id, {
+        status: 'ACTIVE',
+      });
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('USER_STATUS_ALREADY_SET');
+    });
+
+    it('allows an admin to suspend an active customer account', async () => {
+      const customer = await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.ACTIVE,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, customer.id, {
+        status: 'SUSPENDED',
+        reason: suspensionReason,
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('User account suspended successfully');
+
+      expect(response.body.data).toMatchObject({
+        id: customer.id,
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: 'CUSTOMER',
+        status: 'SUSPENDED',
+        vendorProfile: null,
+      });
+
+      expect(response.body.data.passwordHash).toBeUndefined();
+      expect(response.body.data.vendor).toBeUndefined();
+
+      const storedCustomer = await prisma.user.findUnique({
+        where: {
+          id: customer.id,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      expect(storedCustomer?.status).toBe(AccountStatus.SUSPENDED);
+    });
+
+    it('allows an admin to suspend an active vendor account', async () => {
+      const registrationResponse = await registerVendor(vendorPayload);
+
+      expect(registrationResponse.status).toBe(201);
+
+      const vendorUserId = registrationResponse.body.data.user.id as string;
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, vendorUserId, {
+        status: 'SUSPENDED',
+        reason: suspensionReason,
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data).toMatchObject({
+        id: vendorUserId,
+        email: vendorEmail,
+        role: 'VENDOR',
+        status: 'SUSPENDED',
+
+        vendorProfile: {
+          businessName: 'Pending Moments Photography',
+          verificationStatus: 'DRAFT',
+        },
+      });
+
+      const storedVendorUser = await prisma.user.findUnique({
+        where: {
+          id: vendorUserId,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      expect(storedVendorUser?.status).toBe(AccountStatus.SUSPENDED);
+    });
+
+    it('allows an admin to reactivate a suspended account', async () => {
+      const suspendedCustomer = await createManagedUser({
+        email: suspendedCustomerEmail,
+        firstName: 'Suspended',
+        lastName: 'Customer',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.SUSPENDED,
+      });
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await updateAdminUserStatusRequest(adminAccessToken, suspendedCustomer.id, {
+        status: 'ACTIVE',
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('User account reactivated successfully');
+
+      expect(response.body.data).toMatchObject({
+        id: suspendedCustomer.id,
+        email: suspendedCustomerEmail,
+        role: 'CUSTOMER',
+        status: 'ACTIVE',
+        vendorProfile: null,
+      });
+
+      const storedCustomer = await prisma.user.findUnique({
+        where: {
+          id: suspendedCustomer.id,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      expect(storedCustomer?.status).toBe(AccountStatus.ACTIVE);
+    });
+  });
 });
 
 describe('Admin vendor review API', () => {
@@ -318,6 +1244,7 @@ describe('Admin vendor review API', () => {
       expect(response.body.error.code).toBe('VENDOR_APPLICATION_NOT_FOUND');
     });
   });
+
   describe('PATCH /api/v1/admin/vendors/:vendorId/approve', () => {
     it('returns 404 when the vendor application does not exist', async () => {
       const adminAccessToken = await loginTestAdmin();
@@ -431,6 +1358,7 @@ describe('Admin vendor review API', () => {
       expect(storedVendor?.reviewedAt).toBeInstanceOf(Date);
     });
   });
+
   describe('PATCH /api/v1/admin/vendors/:vendorId/reject', () => {
     const rejectionReason = 'The business information requires additional supporting details.';
 
