@@ -149,6 +149,12 @@ const updateAdminUserStatusRequest = (
     .send(body);
 };
 
+const getAdminDashboardSummaryRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/dashboard/summary${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
 const registerVendor = async (payload: typeof vendorPayload) => {
   return request(app).post('/api/v1/auth/register/vendor').send(payload);
 };
@@ -703,6 +709,179 @@ describe('Admin user management API', () => {
 
       expect(response.body.data.passwordHash).toBeUndefined();
       expect(response.body.data.vendor).toBeUndefined();
+    });
+  });
+
+  describe('GET /api/v1/admin/dashboard/summary', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/dashboard/summary');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminDashboardSummaryRequest(customerAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects invalid dashboard query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminDashboardSummaryRequest(
+        adminAccessToken,
+        '?recentLimit=0&unknown=value',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns platform-wide dashboard summary metrics to an admin', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      await createManagedUser({
+        email: suspendedCustomerEmail,
+        firstName: 'Suspended',
+        lastName: 'Customer',
+        role: UserRole.CUSTOMER,
+        status: AccountStatus.SUSPENDED,
+      });
+
+      const vendorRegistration = await registerVendor(vendorPayload);
+
+      expect(vendorRegistration.status).toBe(201);
+
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminDashboardSummaryRequest(adminAccessToken, '?recentLimit=2');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.generatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.users).toMatchObject({
+        total: expect.any(Number),
+
+        byRole: {
+          customers: expect.any(Number),
+          vendors: expect.any(Number),
+          admins: expect.any(Number),
+        },
+
+        byStatus: {
+          active: expect.any(Number),
+          pendingVerification: expect.any(Number),
+          suspended: expect.any(Number),
+          deactivated: expect.any(Number),
+        },
+
+        newThisMonth: expect.any(Number),
+      });
+
+      expect(response.body.data.users.byRole.customers).toBeGreaterThanOrEqual(2);
+      expect(response.body.data.users.byRole.vendors).toBeGreaterThanOrEqual(1);
+      expect(response.body.data.users.byRole.admins).toBeGreaterThanOrEqual(1);
+      expect(response.body.data.users.byStatus.suspended).toBeGreaterThanOrEqual(1);
+
+      expect(response.body.data.vendors).toMatchObject({
+        total: expect.any(Number),
+        draft: expect.any(Number),
+        pending: expect.any(Number),
+        approved: expect.any(Number),
+        rejected: expect.any(Number),
+      });
+
+      expect(response.body.data.vendors.draft).toBeGreaterThanOrEqual(1);
+
+      expect(response.body.data.events).toMatchObject({
+        total: expect.any(Number),
+        draft: expect.any(Number),
+        planning: expect.any(Number),
+        active: expect.any(Number),
+        completed: expect.any(Number),
+        cancelled: expect.any(Number),
+      });
+
+      expect(response.body.data.bookings).toMatchObject({
+        total: expect.any(Number),
+        awaitingVendorConfirmation: expect.any(Number),
+        confirmed: expect.any(Number),
+        depositPending: expect.any(Number),
+        active: expect.any(Number),
+        completed: expect.any(Number),
+        cancelled: expect.any(Number),
+        rejected: expect.any(Number),
+        disputed: expect.any(Number),
+      });
+
+      expect(response.body.data.payments).toMatchObject({
+        total: expect.any(Number),
+        pending: expect.any(Number),
+        verified: expect.any(Number),
+        rejected: expect.any(Number),
+        cancelled: expect.any(Number),
+        refunded: expect.any(Number),
+        partiallyRefunded: expect.any(Number),
+        totalVerifiedAmount: expect.any(String),
+      });
+
+      expect(response.body.data.complaints).toMatchObject({
+        total: expect.any(Number),
+        open: expect.any(Number),
+        underReview: expect.any(Number),
+        underInvestigation: expect.any(Number),
+        awaitingResponse: expect.any(Number),
+        awaitingCustomerResponse: expect.any(Number),
+        awaitingVendorResponse: expect.any(Number),
+        resolved: expect.any(Number),
+        dismissed: expect.any(Number),
+        closed: expect.any(Number),
+        urgent: expect.any(Number),
+        unassigned: expect.any(Number),
+      });
+
+      expect(response.body.data.reviews).toMatchObject({
+        total: expect.any(Number),
+        visible: expect.any(Number),
+        hidden: expect.any(Number),
+      });
+
+      expect(
+        typeof response.body.data.reviews.averageRating === 'number' ||
+          response.body.data.reviews.averageRating === null,
+      ).toBe(true);
+
+      expect(response.body.data.activity.recentUsers.length).toBeLessThanOrEqual(2);
+      expect(response.body.data.activity.recentBookings.length).toBeLessThanOrEqual(2);
+      expect(response.body.data.activity.recentPayments.length).toBeLessThanOrEqual(2);
+      expect(response.body.data.activity.recentComplaints.length).toBeLessThanOrEqual(2);
+
+      expect(
+        response.body.data.activity.recentUsers.some(
+          (user: { email: string }) => user.email === vendorEmail,
+        ),
+      ).toBe(true);
     });
   });
 

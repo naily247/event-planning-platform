@@ -3,6 +3,7 @@ import { asyncHandler } from '../../utils/asyncHandler.js';
 import { AppError } from '../../utils/AppError.js';
 import {
   approveVendorApplication,
+  getAdminDashboardSummary,
   getAdminReviewById,
   getAdminReviews,
   getAdminUserById,
@@ -57,6 +58,15 @@ export const updateAdminUserStatusHandler: RequestHandler = asyncHandler(async (
       req.body.status === 'SUSPENDED'
         ? 'User account suspended successfully'
         : 'User account reactivated successfully',
+  });
+});
+
+export const getAdminDashboardSummaryHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const dashboard = await getAdminDashboardSummary(req.query as never);
+
+  res.status(200).json({
+    success: true,
+    data: dashboard,
   });
 });
 

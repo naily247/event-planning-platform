@@ -5,6 +5,7 @@ import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 
 import {
+  getAdminDashboardSummarySchema,
   getAdminReviewByIdSchema,
   getAdminReviewsSchema,
   getAdminUserByIdSchema,
@@ -18,6 +19,7 @@ import {
   approveVendorApplicationHandler,
   getAdminComplaintByIdHandler,
   getAdminComplaintsHandler,
+  getAdminDashboardSummaryHandler,
   getAdminReviewByIdHandler,
   getAdminReviewsHandler,
   getAdminUserByIdHandler,
@@ -59,6 +61,13 @@ import {
 export const adminRouter = Router();
 
 const adminOnly = [requireAuth, authorize(UserRole.ADMIN)] as const;
+
+adminRouter.get(
+  '/dashboard/summary',
+  ...adminOnly,
+  validate(getAdminDashboardSummarySchema),
+  getAdminDashboardSummaryHandler,
+);
 
 adminRouter.get('/users', ...adminOnly, validate(getAdminUsersSchema), getAdminUsersHandler);
 

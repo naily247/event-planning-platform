@@ -1,5 +1,10 @@
 import {
   AccountStatus,
+  BookingStatus,
+  ComplaintPriority,
+  ComplaintStatus,
+  EventStatus,
+  PaymentStatus,
   Prisma,
   ReviewModerationActionType,
   UserRole,
@@ -8,6 +13,7 @@ import {
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
+  GetAdminDashboardSummaryQuery,
   GetAdminReviewsQuery,
   GetAdminUsersQuery,
   ModerateAdminReviewInput,
@@ -233,6 +239,117 @@ const adminReviewDetailSelect = {
   },
 } as const;
 
+const dashboardRecentUserSelect = {
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  role: true,
+  status: true,
+  createdAt: true,
+} satisfies Prisma.UserSelect;
+
+const dashboardRecentBookingSelect = {
+  id: true,
+  status: true,
+  agreedCost: true,
+  serviceStart: true,
+  createdAt: true,
+
+  event: {
+    select: {
+      id: true,
+      name: true,
+      eventDate: true,
+    },
+  },
+
+  vendor: {
+    select: {
+      id: true,
+      businessName: true,
+      slug: true,
+    },
+  },
+} satisfies Prisma.BookingSelect;
+
+const dashboardRecentPaymentSelect = {
+  id: true,
+  amount: true,
+  status: true,
+  method: true,
+  referenceNumber: true,
+  createdAt: true,
+
+  booking: {
+    select: {
+      id: true,
+
+      event: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+
+      vendor: {
+        select: {
+          id: true,
+          businessName: true,
+          slug: true,
+        },
+      },
+    },
+  },
+
+  submittedBy: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+    },
+  },
+} satisfies Prisma.PaymentSelect;
+
+const dashboardRecentComplaintSelect = {
+  id: true,
+  type: true,
+  subject: true,
+  status: true,
+  priority: true,
+  createdAt: true,
+
+  complainant: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+    },
+  },
+
+  respondent: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+    },
+  },
+
+  assignedAdmin: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+    },
+  },
+} satisfies Prisma.ComplaintSelect;
+
 const getAdminUserOrderBy = (
   sort: GetAdminUsersQuery['sort'],
 ): Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[] => {
@@ -361,6 +478,28 @@ const formatPendingVendor = <
 ) => ({
   ...vendor,
   categories: vendor.categories.map(({ category }) => category),
+});
+
+const formatDashboardBooking = <
+  T extends {
+    agreedCost: Prisma.Decimal;
+  },
+>(
+  booking: T,
+) => ({
+  ...booking,
+  agreedCost: booking.agreedCost.toString(),
+});
+
+const formatDashboardPayment = <
+  T extends {
+    amount: Prisma.Decimal;
+  },
+>(
+  payment: T,
+) => ({
+  ...payment,
+  amount: payment.amount.toString(),
 });
 
 export const getAdminUsers = async (query: GetAdminUsersQuery) => {
@@ -535,6 +674,309 @@ export const updateAdminUserStatus = async (
   return {
     ...user,
     vendorProfile: vendor,
+  };
+};
+
+export const getAdminDashboardSummary = async (query: GetAdminDashboardSummaryQuery) => {
+  const { recentLimit } = query;
+  const generatedAt = new Date();
+  const startOfCurrentMonth = new Date(generatedAt.getFullYear(), generatedAt.getMonth(), 1);
+
+  const [
+    totalUsers,
+    customerUsers,
+    vendorUsers,
+    adminUsers,
+    activeUsers,
+    pendingVerificationUsers,
+    suspendedUsers,
+    deactivatedUsers,
+    newUsersThisMonth,
+
+    totalVendors,
+    draftVendors,
+    pendingVendors,
+    approvedVendors,
+    rejectedVendors,
+
+    totalEvents,
+    draftEvents,
+    planningEvents,
+    activeEvents,
+    completedEvents,
+    cancelledEvents,
+
+    totalBookings,
+    awaitingVendorConfirmationBookings,
+    confirmedBookings,
+    depositPendingBookings,
+    activeBookings,
+    completedBookings,
+    cancelledBookings,
+    rejectedBookings,
+    disputedBookings,
+
+    totalPayments,
+    pendingPayments,
+    verifiedPayments,
+    rejectedPayments,
+    cancelledPayments,
+    refundedPayments,
+    partiallyRefundedPayments,
+    verifiedPaymentAmountAggregate,
+
+    totalComplaints,
+    openComplaints,
+    underReviewComplaints,
+    awaitingCustomerResponseComplaints,
+    awaitingVendorResponseComplaints,
+    underInvestigationComplaints,
+    resolvedComplaints,
+    dismissedComplaints,
+    closedComplaints,
+    urgentComplaints,
+    unassignedComplaints,
+
+    totalReviews,
+    visibleReviews,
+    hiddenReviews,
+    reviewRatingAggregate,
+
+    recentUsers,
+    recentBookings,
+    recentPayments,
+    recentComplaints,
+  ] = await prisma.$transaction([
+    prisma.user.count(),
+    prisma.user.count({ where: { role: UserRole.CUSTOMER } }),
+    prisma.user.count({ where: { role: UserRole.VENDOR } }),
+    prisma.user.count({ where: { role: UserRole.ADMIN } }),
+    prisma.user.count({ where: { status: AccountStatus.ACTIVE } }),
+    prisma.user.count({
+      where: { status: AccountStatus.PENDING_VERIFICATION },
+    }),
+    prisma.user.count({ where: { status: AccountStatus.SUSPENDED } }),
+    prisma.user.count({ where: { status: AccountStatus.DEACTIVATED } }),
+    prisma.user.count({
+      where: {
+        createdAt: {
+          gte: startOfCurrentMonth,
+        },
+      },
+    }),
+
+    prisma.vendorProfile.count(),
+    prisma.vendorProfile.count({
+      where: { verificationStatus: VendorVerificationStatus.DRAFT },
+    }),
+    prisma.vendorProfile.count({
+      where: { verificationStatus: VendorVerificationStatus.PENDING },
+    }),
+    prisma.vendorProfile.count({
+      where: { verificationStatus: VendorVerificationStatus.APPROVED },
+    }),
+    prisma.vendorProfile.count({
+      where: { verificationStatus: VendorVerificationStatus.REJECTED },
+    }),
+
+    prisma.event.count(),
+    prisma.event.count({ where: { status: EventStatus.DRAFT } }),
+    prisma.event.count({ where: { status: EventStatus.PLANNING } }),
+    prisma.event.count({ where: { status: EventStatus.ACTIVE } }),
+    prisma.event.count({ where: { status: EventStatus.COMPLETED } }),
+    prisma.event.count({ where: { status: EventStatus.CANCELLED } }),
+
+    prisma.booking.count(),
+    prisma.booking.count({
+      where: { status: BookingStatus.AWAITING_VENDOR_CONFIRMATION },
+    }),
+    prisma.booking.count({ where: { status: BookingStatus.CONFIRMED } }),
+    prisma.booking.count({ where: { status: BookingStatus.DEPOSIT_PENDING } }),
+    prisma.booking.count({ where: { status: BookingStatus.ACTIVE } }),
+    prisma.booking.count({ where: { status: BookingStatus.COMPLETED } }),
+    prisma.booking.count({ where: { status: BookingStatus.CANCELLED } }),
+    prisma.booking.count({ where: { status: BookingStatus.REJECTED } }),
+    prisma.booking.count({ where: { status: BookingStatus.DISPUTED } }),
+
+    prisma.payment.count(),
+    prisma.payment.count({ where: { status: PaymentStatus.PENDING } }),
+    prisma.payment.count({ where: { status: PaymentStatus.VERIFIED } }),
+    prisma.payment.count({ where: { status: PaymentStatus.REJECTED } }),
+    prisma.payment.count({ where: { status: PaymentStatus.CANCELLED } }),
+    prisma.payment.count({ where: { status: PaymentStatus.REFUNDED } }),
+    prisma.payment.count({
+      where: { status: PaymentStatus.PARTIALLY_REFUNDED },
+    }),
+    prisma.payment.aggregate({
+      where: {
+        status: PaymentStatus.VERIFIED,
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.complaint.count(),
+    prisma.complaint.count({ where: { status: ComplaintStatus.OPEN } }),
+    prisma.complaint.count({
+      where: { status: ComplaintStatus.UNDER_REVIEW },
+    }),
+    prisma.complaint.count({
+      where: { status: ComplaintStatus.AWAITING_CUSTOMER_RESPONSE },
+    }),
+    prisma.complaint.count({
+      where: { status: ComplaintStatus.AWAITING_VENDOR_RESPONSE },
+    }),
+    prisma.complaint.count({
+      where: { status: ComplaintStatus.UNDER_INVESTIGATION },
+    }),
+    prisma.complaint.count({ where: { status: ComplaintStatus.RESOLVED } }),
+    prisma.complaint.count({ where: { status: ComplaintStatus.DISMISSED } }),
+    prisma.complaint.count({ where: { status: ComplaintStatus.CLOSED } }),
+    prisma.complaint.count({
+      where: { priority: ComplaintPriority.URGENT },
+    }),
+    prisma.complaint.count({
+      where: {
+        assignedAdminId: null,
+        status: {
+          notIn: [ComplaintStatus.RESOLVED, ComplaintStatus.DISMISSED, ComplaintStatus.CLOSED],
+        },
+      },
+    }),
+
+    prisma.review.count(),
+    prisma.review.count({ where: { isHidden: false } }),
+    prisma.review.count({ where: { isHidden: true } }),
+    prisma.review.aggregate({
+      _avg: {
+        overallRating: true,
+      },
+    }),
+
+    prisma.user.findMany({
+      select: dashboardRecentUserSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: recentLimit,
+    }),
+
+    prisma.booking.findMany({
+      select: dashboardRecentBookingSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: recentLimit,
+    }),
+
+    prisma.payment.findMany({
+      select: dashboardRecentPaymentSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: recentLimit,
+    }),
+
+    prisma.complaint.findMany({
+      select: dashboardRecentComplaintSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: recentLimit,
+    }),
+  ]);
+
+  return {
+    generatedAt,
+
+    users: {
+      total: totalUsers,
+
+      byRole: {
+        customers: customerUsers,
+        vendors: vendorUsers,
+        admins: adminUsers,
+      },
+
+      byStatus: {
+        active: activeUsers,
+        pendingVerification: pendingVerificationUsers,
+        suspended: suspendedUsers,
+        deactivated: deactivatedUsers,
+      },
+
+      newThisMonth: newUsersThisMonth,
+    },
+
+    vendors: {
+      total: totalVendors,
+      draft: draftVendors,
+      pending: pendingVendors,
+      approved: approvedVendors,
+      rejected: rejectedVendors,
+    },
+
+    events: {
+      total: totalEvents,
+      draft: draftEvents,
+      planning: planningEvents,
+      active: activeEvents,
+      completed: completedEvents,
+      cancelled: cancelledEvents,
+    },
+
+    bookings: {
+      total: totalBookings,
+      awaitingVendorConfirmation: awaitingVendorConfirmationBookings,
+      confirmed: confirmedBookings,
+      depositPending: depositPendingBookings,
+      active: activeBookings,
+      completed: completedBookings,
+      cancelled: cancelledBookings,
+      rejected: rejectedBookings,
+      disputed: disputedBookings,
+    },
+
+    payments: {
+      total: totalPayments,
+      pending: pendingPayments,
+      verified: verifiedPayments,
+      rejected: rejectedPayments,
+      cancelled: cancelledPayments,
+      refunded: refundedPayments,
+      partiallyRefunded: partiallyRefundedPayments,
+      totalVerifiedAmount: verifiedPaymentAmountAggregate._sum.amount?.toString() ?? '0',
+    },
+
+    complaints: {
+      total: totalComplaints,
+      open: openComplaints,
+      underReview: underReviewComplaints,
+      underInvestigation: underInvestigationComplaints,
+      awaitingResponse: awaitingCustomerResponseComplaints + awaitingVendorResponseComplaints,
+      awaitingCustomerResponse: awaitingCustomerResponseComplaints,
+      awaitingVendorResponse: awaitingVendorResponseComplaints,
+      resolved: resolvedComplaints,
+      dismissed: dismissedComplaints,
+      closed: closedComplaints,
+      urgent: urgentComplaints,
+      unassigned: unassignedComplaints,
+    },
+
+    reviews: {
+      total: totalReviews,
+      visible: visibleReviews,
+      hidden: hiddenReviews,
+      averageRating: reviewRatingAggregate._avg.overallRating,
+    },
+
+    activity: {
+      recentUsers,
+      recentBookings: recentBookings.map(formatDashboardBooking),
+      recentPayments: recentPayments.map(formatDashboardPayment),
+      recentComplaints,
+    },
   };
 };
 

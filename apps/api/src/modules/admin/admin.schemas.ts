@@ -1,51 +1,22 @@
-import { AccountStatus, UserRole } from '@prisma/client';
+import { AccountStatus, PaymentStatus, ReviewModerationActionType, UserRole } from '@prisma/client';
 import { z } from 'zod';
 
-const cuidSchema = z.string().cuid('Invalid ID format');
+const cuidSchema = z.string().cuid();
+
+const optionalTrimmedSearchSchema = z.string().trim().min(1).max(100).optional();
 
 const paginationQuerySchema = {
-  page: z.coerce
-    .number()
-    .int('Page must be an integer')
-    .min(1, 'Page must be at least 1')
-    .default(1),
-
-  limit: z.coerce
-    .number()
-    .int('Limit must be an integer')
-    .min(1, 'Limit must be at least 1')
-    .max(100, 'Limit must not exceed 100')
-    .default(20),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 };
-
-export const rejectVendorApplicationSchema = z.object({
-  body: z
-    .object({
-      reason: z
-        .string()
-        .trim()
-        .min(10, 'Rejection reason must be at least 10 characters long')
-        .max(500, 'Rejection reason must not exceed 500 characters'),
-    })
-    .strict(),
-});
 
 export const getAdminUsersSchema = z.object({
   query: z
     .object({
       ...paginationQuerySchema,
-
-      search: z
-        .string()
-        .trim()
-        .min(1, 'Search must not be empty')
-        .max(100, 'Search must not exceed 100 characters')
-        .optional(),
-
+      search: optionalTrimmedSearchSchema,
       role: z.nativeEnum(UserRole).optional(),
-
       status: z.nativeEnum(AccountStatus).optional(),
-
       sort: z
         .enum(['newest', 'oldest', 'name_asc', 'name_desc', 'email_asc', 'email_desc'])
         .default('newest'),
@@ -71,13 +42,7 @@ export const updateAdminUserStatusSchema = z.object({
   body: z
     .object({
       status: z.enum([AccountStatus.ACTIVE, AccountStatus.SUSPENDED]),
-
-      reason: z
-        .string()
-        .trim()
-        .min(10, 'Status change reason must be at least 10 characters long')
-        .max(500, 'Status change reason must not exceed 500 characters')
-        .optional(),
+      reason: z.string().trim().min(10).max(500).optional(),
     })
     .strict()
     .superRefine((body, ctx) => {
@@ -85,29 +50,106 @@ export const updateAdminUserStatusSchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['reason'],
-          message: 'A reason is required when suspending an account',
+          message: 'Suspension reason is required',
         });
       }
     }),
+});
+
+export const getAdminDashboardSummarySchema = z.object({
+  query: z
+    .object({
+      recentLimit: z.coerce.number().int().min(1).max(20).default(5),
+    })
+    .strict()
+    .default({}),
+});
+
+export const getPendingVendorApplicationsSchema = z.object({
+  query: z.object({}).strict().default({}),
+});
+
+export const getVendorApplicationSchema = z.object({
+  params: z
+    .object({
+      vendorId: z.string().trim().min(1),
+    })
+    .strict(),
+});
+
+export const getVendorApplicationByIdSchema = getVendorApplicationSchema;
+
+export const approveVendorApplicationSchema = z.object({
+  params: z
+    .object({
+      vendorId: z.string().trim().min(1),
+    })
+    .strict(),
+});
+
+export const rejectVendorApplicationSchema = z.object({
+  params: z
+    .object({
+      vendorId: z.string().trim().min(1),
+    })
+    .strict(),
+
+  body: z
+    .object({
+      reason: z.string().trim().min(10).max(1000),
+    })
+    .strict(),
+});
+
+export const getAdminPendingPaymentsSchema = z.object({
+  query: z
+    .object({
+      ...paginationQuerySchema,
+      status: z.nativeEnum(PaymentStatus).optional(),
+      sort: z.enum(['newest', 'oldest', 'amount_highest']).default('newest'),
+    })
+    .strict(),
+});
+
+export const getAdminPaymentByIdSchema = z.object({
+  params: z
+    .object({
+      paymentId: cuidSchema,
+    })
+    .strict(),
+});
+
+export const verifyAdminPaymentSchema = z.object({
+  params: z
+    .object({
+      paymentId: cuidSchema,
+    })
+    .strict(),
+});
+
+export const rejectAdminPaymentSchema = z.object({
+  params: z
+    .object({
+      paymentId: cuidSchema,
+    })
+    .strict(),
+
+  body: z
+    .object({
+      reason: z.string().trim().min(10).max(1000),
+    })
+    .strict(),
 });
 
 export const getAdminReviewsSchema = z.object({
   query: z
     .object({
       ...paginationQuerySchema,
-
+      search: optionalTrimmedSearchSchema,
       vendorId: cuidSchema.optional(),
       customerId: cuidSchema.optional(),
-
-      overallRating: z.coerce
-        .number()
-        .int('Overall rating must be an integer')
-        .min(1, 'Overall rating must be at least 1')
-        .max(5, 'Overall rating must not exceed 5')
-        .optional(),
-
+      overallRating: z.coerce.number().int().min(1).max(5).optional(),
       visibility: z.enum(['all', 'visible', 'hidden']).default('all'),
-
       sort: z
         .enum(['newest', 'oldest', 'rating_highest', 'rating_lowest', 'recently_moderated'])
         .default('newest'),
@@ -133,17 +175,10 @@ export const moderateAdminReviewSchema = z.object({
   body: z
     .object({
       action: z.enum(['HIDE', 'RESTORE']),
-
-      reason: z
-        .string()
-        .trim()
-        .min(10, 'Moderation reason must be at least 10 characters long')
-        .max(500, 'Moderation reason must not exceed 500 characters'),
+      reason: z.string().trim().min(10).max(1000),
     })
     .strict(),
 });
-
-export type RejectVendorApplicationInput = z.infer<typeof rejectVendorApplicationSchema>['body'];
 
 export type GetAdminUsersQuery = z.infer<typeof getAdminUsersSchema>['query'];
 
@@ -153,6 +188,36 @@ export type UpdateAdminUserStatusParams = z.infer<typeof updateAdminUserStatusSc
 
 export type UpdateAdminUserStatusInput = z.infer<typeof updateAdminUserStatusSchema>['body'];
 
+export type GetAdminDashboardSummaryQuery = z.infer<typeof getAdminDashboardSummarySchema>['query'];
+
+export type GetPendingVendorApplicationsQuery = z.infer<
+  typeof getPendingVendorApplicationsSchema
+>['query'];
+
+export type GetVendorApplicationParams = z.infer<typeof getVendorApplicationSchema>['params'];
+
+export type GetVendorApplicationByIdParams = z.infer<
+  typeof getVendorApplicationByIdSchema
+>['params'];
+
+export type ApproveVendorApplicationParams = z.infer<
+  typeof approveVendorApplicationSchema
+>['params'];
+
+export type RejectVendorApplicationParams = z.infer<typeof rejectVendorApplicationSchema>['params'];
+
+export type RejectVendorApplicationInput = z.infer<typeof rejectVendorApplicationSchema>['body'];
+
+export type GetAdminPendingPaymentsQuery = z.infer<typeof getAdminPendingPaymentsSchema>['query'];
+
+export type GetAdminPaymentByIdParams = z.infer<typeof getAdminPaymentByIdSchema>['params'];
+
+export type VerifyAdminPaymentParams = z.infer<typeof verifyAdminPaymentSchema>['params'];
+
+export type RejectAdminPaymentParams = z.infer<typeof rejectAdminPaymentSchema>['params'];
+
+export type RejectAdminPaymentInput = z.infer<typeof rejectAdminPaymentSchema>['body'];
+
 export type GetAdminReviewsQuery = z.infer<typeof getAdminReviewsSchema>['query'];
 
 export type GetAdminReviewByIdParams = z.infer<typeof getAdminReviewByIdSchema>['params'];
@@ -160,3 +225,5 @@ export type GetAdminReviewByIdParams = z.infer<typeof getAdminReviewByIdSchema>[
 export type ModerateAdminReviewParams = z.infer<typeof moderateAdminReviewSchema>['params'];
 
 export type ModerateAdminReviewInput = z.infer<typeof moderateAdminReviewSchema>['body'];
+
+export type AdminReviewModerationAction = ReviewModerationActionType;
