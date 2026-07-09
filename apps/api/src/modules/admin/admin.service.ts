@@ -15,9 +15,11 @@ import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   GetAdminBookingReportQuery,
+  GetAdminComplaintReportQuery,
   GetAdminDashboardSummaryQuery,
   GetAdminEventReportQuery,
   GetAdminPaymentReportQuery,
+  GetAdminRevenueReportQuery,
   GetAdminReviewsQuery,
   GetAdminUserReportQuery,
   GetAdminUsersQuery,
@@ -25,7 +27,6 @@ import type {
   ModerateAdminReviewInput,
   RejectVendorApplicationInput,
   UpdateAdminUserStatusInput,
-  GetAdminComplaintReportQuery,
 } from './admin.schemas.js';
 
 const adminUserListSelect = {
@@ -302,6 +303,86 @@ const adminPaymentReportSelect = {
           businessName: true,
           slug: true,
           verificationStatus: true,
+        },
+      },
+    },
+  },
+
+  submittedBy: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+  },
+
+  reviewedBy: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+  },
+} satisfies Prisma.PaymentSelect;
+
+const adminRevenueReportPaymentSelect = {
+  id: true,
+  amount: true,
+  status: true,
+  method: true,
+  referenceNumber: true,
+  reviewedAt: true,
+  createdAt: true,
+  updatedAt: true,
+
+  booking: {
+    select: {
+      id: true,
+      status: true,
+      agreedCost: true,
+      serviceStart: true,
+      serviceEnd: true,
+
+      event: {
+        select: {
+          id: true,
+          name: true,
+          eventType: true,
+          eventDate: true,
+          location: true,
+
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              status: true,
+            },
+          },
+        },
+      },
+
+      vendor: {
+        select: {
+          id: true,
+          businessName: true,
+          slug: true,
+          verificationStatus: true,
+
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              status: true,
+            },
+          },
         },
       },
     },
@@ -1257,6 +1338,110 @@ const groupAdminPaymentGrowth = (
 };
 
 const formatAdminPaymentReportPayment = <
+  T extends {
+    amount: Prisma.Decimal;
+    booking: {
+      agreedCost: Prisma.Decimal;
+    };
+  },
+>(
+  payment: T,
+) => ({
+  ...payment,
+  amount: payment.amount.toString(),
+
+  booking: {
+    ...payment.booking,
+    agreedCost: payment.booking.agreedCost.toString(),
+  },
+});
+
+const buildAdminRevenueReportWhere = (
+  query: GetAdminRevenueReportQuery,
+): Prisma.PaymentWhereInput => {
+  const toDate = query.to && isDateOnlyMidnight(query.to) ? addOneDay(query.to) : query.to;
+
+  return {
+    ...(query.method && {
+      method: query.method,
+    }),
+
+    ...(query.vendorId && {
+      booking: {
+        vendorId: query.vendorId,
+      },
+    }),
+
+    ...(query.customerId && {
+      submittedById: query.customerId,
+    }),
+
+    ...(query.bookingId && {
+      bookingId: query.bookingId,
+    }),
+
+    ...((query.from || toDate) && {
+      createdAt: {
+        ...(query.from && {
+          gte: query.from,
+        }),
+
+        ...(toDate && {
+          lt: toDate,
+        }),
+      },
+    }),
+  };
+};
+
+const formatAdminRevenueReportBucket = (
+  date: Date,
+  groupBy: GetAdminRevenueReportQuery['groupBy'],
+) => {
+  const isoDate = date.toISOString();
+
+  if (groupBy === 'month') {
+    return isoDate.slice(0, 7);
+  }
+
+  return isoDate.slice(0, 10);
+};
+
+const groupAdminRevenueGrowth = (
+  payments: Array<{
+    amount: Prisma.Decimal;
+    createdAt: Date;
+  }>,
+  groupBy: GetAdminRevenueReportQuery['groupBy'],
+) => {
+  const buckets = new Map<
+    string,
+    {
+      paymentCount: number;
+      revenue: Prisma.Decimal;
+    }
+  >();
+
+  payments.forEach((payment) => {
+    const bucket = formatAdminRevenueReportBucket(payment.createdAt, groupBy);
+    const existingBucket = buckets.get(bucket);
+
+    buckets.set(bucket, {
+      paymentCount: (existingBucket?.paymentCount ?? 0) + 1,
+      revenue: (existingBucket?.revenue ?? new Prisma.Decimal(0)).add(payment.amount),
+    });
+  });
+
+  return Array.from(buckets.entries())
+    .map(([period, data]) => ({
+      period,
+      paymentCount: data.paymentCount,
+      revenue: data.revenue.toString(),
+    }))
+    .sort((first, second) => first.period.localeCompare(second.period));
+};
+
+const formatAdminRevenueReportPayment = <
   T extends {
     amount: Prisma.Decimal;
     booking: {
@@ -2915,6 +3100,325 @@ export const getAdminPaymentReport = async (query: GetAdminPaymentReportQuery) =
     })),
 
     recentPayments: recentPayments.map(formatAdminPaymentReportPayment),
+  };
+};
+
+export const getAdminRevenueReport = async (query: GetAdminRevenueReportQuery) => {
+  const where = buildAdminRevenueReportWhere(query);
+  const generatedAt = new Date();
+
+  const verifiedWhere: Prisma.PaymentWhereInput = {
+    ...where,
+    status: PaymentStatus.VERIFIED,
+  };
+
+  const [
+    totalPayments,
+    verifiedPayments,
+    pendingPayments,
+    rejectedPayments,
+    cancelledPayments,
+    refundedPayments,
+    partiallyRefundedPayments,
+    totalRevenueAggregate,
+    pendingAmountAggregate,
+    rejectedAmountAggregate,
+    refundedAmountAggregate,
+    averageVerifiedPaymentAggregate,
+    revenueGrowthPayments,
+    paymentsByMethod,
+    recentVerifiedPayments,
+    topVendorBookings,
+    topCustomers,
+  ] = await prisma.$transaction([
+    prisma.payment.count({
+      where,
+    }),
+
+    prisma.payment.count({
+      where: verifiedWhere,
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.PENDING,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.REJECTED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.CANCELLED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.REFUNDED,
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        ...where,
+        status: PaymentStatus.PARTIALLY_REFUNDED,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: verifiedWhere,
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        ...where,
+        status: PaymentStatus.PENDING,
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        ...where,
+        status: PaymentStatus.REJECTED,
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        ...where,
+        status: {
+          in: [PaymentStatus.REFUNDED, PaymentStatus.PARTIALLY_REFUNDED],
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: verifiedWhere,
+      _avg: {
+        amount: true,
+      },
+    }),
+
+    prisma.payment.findMany({
+      where: verifiedWhere,
+      select: {
+        amount: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+
+    prisma.payment.groupBy({
+      by: ['method'],
+      where: verifiedWhere,
+      _count: {
+        method: true,
+      },
+      _sum: {
+        amount: true,
+      },
+      orderBy: {
+        _sum: {
+          amount: 'desc',
+        },
+      },
+      take: 10,
+    }),
+
+    prisma.payment.findMany({
+      where: verifiedWhere,
+      select: adminRevenueReportPaymentSelect,
+      orderBy: {
+        reviewedAt: {
+          sort: 'desc',
+          nulls: 'last',
+        },
+      },
+      take: query.recentLimit,
+    }),
+
+    prisma.payment.groupBy({
+      by: ['bookingId'],
+      where: verifiedWhere,
+      _count: {
+        bookingId: true,
+      },
+      _sum: {
+        amount: true,
+      },
+      orderBy: {
+        _sum: {
+          amount: 'desc',
+        },
+      },
+      take: 10,
+    }),
+
+    prisma.payment.groupBy({
+      by: ['submittedById'],
+      where: verifiedWhere,
+      _count: {
+        submittedById: true,
+      },
+      _sum: {
+        amount: true,
+      },
+      orderBy: {
+        _sum: {
+          amount: 'desc',
+        },
+      },
+      take: 5,
+    }),
+  ]);
+
+  const topVendorBookingIds = topVendorBookings.map((vendor) => vendor.bookingId);
+
+  const topVendorBookingRows = topVendorBookingIds.length
+    ? await prisma.booking.findMany({
+        where: {
+          id: {
+            in: topVendorBookingIds,
+          },
+        },
+        select: {
+          id: true,
+
+          vendor: {
+            select: {
+              id: true,
+              businessName: true,
+              slug: true,
+              verificationStatus: true,
+
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  status: true,
+                },
+              },
+            },
+          },
+        },
+      })
+    : [];
+
+  const topVendorBookingsById = new Map(
+    topVendorBookingRows.map((booking) => [booking.id, booking.vendor]),
+  );
+
+  const topCustomerIds = topCustomers.map((customer) => customer.submittedById);
+
+  const customers = topCustomerIds.length
+    ? await prisma.user.findMany({
+        where: {
+          id: {
+            in: topCustomerIds,
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          status: true,
+        },
+      })
+    : [];
+
+  const customersById = new Map(customers.map((customer) => [customer.id, customer]));
+
+  return {
+    generatedAt,
+
+    filters: {
+      from: query.from ?? null,
+      to: query.to ?? null,
+      method: query.method ?? null,
+      vendorId: query.vendorId ?? null,
+      customerId: query.customerId ?? null,
+      bookingId: query.bookingId ?? null,
+      groupBy: query.groupBy,
+      recentLimit: query.recentLimit,
+    },
+
+    totals: {
+      payments: totalPayments,
+
+      byStatus: {
+        verified: verifiedPayments,
+        pending: pendingPayments,
+        rejected: rejectedPayments,
+        cancelled: cancelledPayments,
+        refunded: refundedPayments,
+        partiallyRefunded: partiallyRefundedPayments,
+      },
+    },
+
+    revenue: {
+      totalVerifiedRevenue: totalRevenueAggregate._sum.amount?.toString() ?? '0',
+      pendingAmount: pendingAmountAggregate._sum.amount?.toString() ?? '0',
+      rejectedAmount: rejectedAmountAggregate._sum.amount?.toString() ?? '0',
+      refundedAmount: refundedAmountAggregate._sum.amount?.toString() ?? '0',
+      averageVerifiedPayment: averageVerifiedPaymentAggregate._avg.amount?.toString() ?? null,
+    },
+
+    growth: groupAdminRevenueGrowth(revenueGrowthPayments, query.groupBy),
+
+    byMethod: paymentsByMethod.map((paymentMethod) => ({
+      method: paymentMethod.method,
+      paymentCount:
+        typeof paymentMethod._count === 'object' && paymentMethod._count !== null
+          ? (paymentMethod._count.method ?? 0)
+          : 0,
+      revenue: paymentMethod._sum?.amount?.toString() ?? '0',
+    })),
+
+    topVendors: topVendorBookings.map((vendor) => ({
+      vendor: topVendorBookingsById.get(vendor.bookingId) ?? null,
+      paymentCount:
+        typeof vendor._count === 'object' && vendor._count !== null
+          ? (vendor._count.bookingId ?? 0)
+          : 0,
+      revenue: vendor._sum?.amount?.toString() ?? '0',
+    })),
+
+    topCustomers: topCustomers.map((customer) => ({
+      customer: customersById.get(customer.submittedById) ?? null,
+      paymentCount:
+        typeof customer._count === 'object' && customer._count !== null
+          ? (customer._count.submittedById ?? 0)
+          : 0,
+      revenue: customer._sum?.amount?.toString() ?? '0',
+    })),
+
+    recentPayments: recentVerifiedPayments.map(formatAdminRevenueReportPayment),
   };
 };
 

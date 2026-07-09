@@ -6,9 +6,11 @@ import { validate } from '../../middleware/validate.js';
 
 import {
   getAdminBookingReportSchema,
+  getAdminComplaintReportSchema,
   getAdminDashboardSummarySchema,
   getAdminEventReportSchema,
   getAdminPaymentReportSchema,
+  getAdminRevenueReportSchema,
   getAdminReviewByIdSchema,
   getAdminReviewsSchema,
   getAdminUserByIdSchema,
@@ -18,7 +20,6 @@ import {
   moderateAdminReviewSchema,
   rejectVendorApplicationSchema,
   updateAdminUserStatusSchema,
-  getAdminComplaintReportSchema,
 } from './admin.schemas.js';
 
 import {
@@ -30,6 +31,7 @@ import {
   getAdminDashboardSummaryHandler,
   getAdminEventReportHandler,
   getAdminPaymentReportHandler,
+  getAdminRevenueReportHandler,
   getAdminReviewByIdHandler,
   getAdminReviewsHandler,
   getAdminUserByIdHandler,
@@ -236,4 +238,11 @@ adminRouter.get(
   ...adminOnly,
   validate(getAdminComplaintReportSchema),
   getAdminComplaintReportHandler,
+);
+
+adminRouter.get(
+  '/reports/revenue',
+  ...adminOnly,
+  validate(getAdminRevenueReportSchema),
+  getAdminRevenueReportHandler,
 );

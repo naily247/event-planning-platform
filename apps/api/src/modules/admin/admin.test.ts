@@ -202,6 +202,12 @@ const getAdminPaymentReportRequest = (accessToken: string, query = '') => {
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const getAdminRevenueReportRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/reports/revenue${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
 const getAdminComplaintReportRequest = (accessToken: string, query = '') => {
   return request(app)
     .get(`/api/v1/admin/reports/complaints${query}`)
@@ -2871,6 +2877,294 @@ describe('Admin user management API', () => {
           },
           paymentCount: 1,
           totalAmount: '50000',
+        },
+      ]);
+
+      expect(response.body.data.recentPayments).toHaveLength(1);
+      expect(response.body.data.recentPayments[0]).toMatchObject({
+        id: fixture.verifiedPayment.id,
+        amount: '50000',
+        status: 'VERIFIED',
+        booking: {
+          id: fixture.completedBooking.id,
+          vendor: {
+            id: fixture.vendor.id,
+          },
+        },
+        submittedBy: {
+          id: fixture.customer.id,
+        },
+      });
+    });
+  });
+
+  describe('GET /api/v1/admin/reports/revenue', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/reports/revenue');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminRevenueReportRequest(customerAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects invalid report query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminRevenueReportRequest(
+        adminAccessToken,
+        '?from=2030-02-01&to=2030-01-01&method=INVALID&vendorId=invalid-vendor&customerId=invalid-customer&bookingId=invalid-booking&groupBy=year&recentLimit=0&unknown=value',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns verified revenue analytics, growth, payment methods, top vendors, top customers and recent verified payments to an admin', async () => {
+      const fixture = await createAdminBookingReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminRevenueReportRequest(
+        adminAccessToken,
+        '?from=2030-01-01&to=2030-02-28&groupBy=month&recentLimit=2',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.generatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.filters).toMatchObject({
+        from: expect.any(String),
+        to: expect.any(String),
+        method: null,
+        vendorId: null,
+        customerId: null,
+        bookingId: null,
+        groupBy: 'month',
+        recentLimit: 2,
+      });
+
+      expect(response.body.data.totals).toEqual({
+        payments: 2,
+
+        byStatus: {
+          verified: 1,
+          pending: 1,
+          rejected: 0,
+          cancelled: 0,
+          refunded: 0,
+          partiallyRefunded: 0,
+        },
+      });
+
+      expect(response.body.data.revenue).toEqual({
+        totalVerifiedRevenue: '50000',
+        pendingAmount: '75000',
+        rejectedAmount: '0',
+        refundedAmount: '0',
+        averageVerifiedPayment: '50000',
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01',
+          paymentCount: 1,
+          revenue: '50000',
+        },
+      ]);
+
+      expect(response.body.data.byMethod).toEqual([
+        {
+          method: 'BANK_TRANSFER',
+          paymentCount: 1,
+          revenue: '50000',
+        },
+      ]);
+
+      expect(response.body.data.topVendors).toEqual([
+        {
+          vendor: {
+            id: fixture.vendor.id,
+            businessName: 'Pending Moments Photography',
+            slug: expect.any(String),
+            verificationStatus: 'APPROVED',
+            user: {
+              id: expect.any(String),
+              email: vendorEmail,
+              firstName: 'Pending',
+              lastName: 'Vendor',
+              status: 'ACTIVE',
+            },
+          },
+          paymentCount: 1,
+          revenue: '50000',
+        },
+      ]);
+
+      expect(response.body.data.topCustomers).toEqual([
+        {
+          customer: {
+            id: fixture.customer.id,
+            email: customerEmail,
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            status: 'ACTIVE',
+          },
+          paymentCount: 1,
+          revenue: '50000',
+        },
+      ]);
+
+      expect(response.body.data.recentPayments).toHaveLength(1);
+
+      expect(response.body.data.recentPayments[0]).toMatchObject({
+        id: fixture.verifiedPayment.id,
+        amount: '50000',
+        status: 'VERIFIED',
+        method: 'BANK_TRANSFER',
+        referenceNumber: 'ADMIN-BOOKING-REPORT-001',
+        booking: {
+          id: fixture.completedBooking.id,
+          status: 'COMPLETED',
+          agreedCost: '150000',
+          event: {
+            id: fixture.firstEvent.id,
+            name: 'Admin Booking Report Wedding',
+            owner: {
+              id: fixture.customer.id,
+              email: customerEmail,
+            },
+          },
+          vendor: {
+            id: fixture.vendor.id,
+            businessName: 'Pending Moments Photography',
+            verificationStatus: 'APPROVED',
+            user: {
+              email: vendorEmail,
+            },
+          },
+        },
+        submittedBy: {
+          id: fixture.customer.id,
+          email: customerEmail,
+        },
+        reviewedBy: {
+          email: adminEmail,
+        },
+      });
+
+      expect(response.body.data.recentPayments[0].submittedBy.passwordHash).toBeUndefined();
+      expect(response.body.data.recentPayments[0].booking.event.owner.passwordHash).toBeUndefined();
+      expect(response.body.data.recentPayments[0].booking.vendor.user.passwordHash).toBeUndefined();
+    });
+
+    it('supports method, vendor, customer, booking and day grouping filters', async () => {
+      const fixture = await createAdminBookingReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminRevenueReportRequest(
+        adminAccessToken,
+        `?from=2030-01-01&to=2030-01-31&method=BANK_TRANSFER&vendorId=${fixture.vendor.id}&customerId=${fixture.customer.id}&bookingId=${fixture.completedBooking.id}&groupBy=day&recentLimit=5`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.filters).toMatchObject({
+        method: 'BANK_TRANSFER',
+        vendorId: fixture.vendor.id,
+        customerId: fixture.customer.id,
+        bookingId: fixture.completedBooking.id,
+        groupBy: 'day',
+        recentLimit: 5,
+      });
+
+      expect(response.body.data.totals).toEqual({
+        payments: 1,
+
+        byStatus: {
+          verified: 1,
+          pending: 0,
+          rejected: 0,
+          cancelled: 0,
+          refunded: 0,
+          partiallyRefunded: 0,
+        },
+      });
+
+      expect(response.body.data.revenue).toEqual({
+        totalVerifiedRevenue: '50000',
+        pendingAmount: '0',
+        rejectedAmount: '0',
+        refundedAmount: '0',
+        averageVerifiedPayment: '50000',
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01-11',
+          paymentCount: 1,
+          revenue: '50000',
+        },
+      ]);
+
+      expect(response.body.data.byMethod).toEqual([
+        {
+          method: 'BANK_TRANSFER',
+          paymentCount: 1,
+          revenue: '50000',
+        },
+      ]);
+
+      expect(response.body.data.topVendors).toEqual([
+        {
+          vendor: {
+            id: fixture.vendor.id,
+            businessName: 'Pending Moments Photography',
+            slug: expect.any(String),
+            verificationStatus: 'APPROVED',
+            user: {
+              id: expect.any(String),
+              email: vendorEmail,
+              firstName: 'Pending',
+              lastName: 'Vendor',
+              status: 'ACTIVE',
+            },
+          },
+          paymentCount: 1,
+          revenue: '50000',
+        },
+      ]);
+
+      expect(response.body.data.topCustomers).toEqual([
+        {
+          customer: {
+            id: fixture.customer.id,
+            email: customerEmail,
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            status: 'ACTIVE',
+          },
+          paymentCount: 1,
+          revenue: '50000',
         },
       ]);
 

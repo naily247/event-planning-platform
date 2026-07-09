@@ -4,9 +4,11 @@ import { AppError } from '../../utils/AppError.js';
 import {
   approveVendorApplication,
   getAdminBookingReport,
+  getAdminComplaintReport,
   getAdminDashboardSummary,
   getAdminEventReport,
   getAdminPaymentReport,
+  getAdminRevenueReport,
   getAdminReviewById,
   getAdminReviews,
   getAdminUserById,
@@ -18,7 +20,6 @@ import {
   moderateAdminReview,
   rejectVendorApplication,
   updateAdminUserStatus,
-  getAdminComplaintReport,
 } from './admin.service.js';
 import {
   getAdminComplaintById,
@@ -114,6 +115,15 @@ export const getAdminBookingReportHandler: RequestHandler = asyncHandler(async (
 
 export const getAdminPaymentReportHandler: RequestHandler = asyncHandler(async (req, res) => {
   const report = await getAdminPaymentReport(req.query as never);
+
+  res.status(200).json({
+    success: true,
+    data: report,
+  });
+});
+
+export const getAdminRevenueReportHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const report = await getAdminRevenueReport(req.query as never);
 
   res.status(200).json({
     success: true,
