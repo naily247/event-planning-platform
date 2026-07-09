@@ -1,6 +1,7 @@
 import {
   AccountStatus,
   BookingStatus,
+  EventStatus,
   PaymentMethod,
   PaymentStatus,
   ReviewModerationActionType,
@@ -100,6 +101,22 @@ export const getAdminUserReportSchema = z.object({
       ...dateRangeQuerySchema,
       role: z.nativeEnum(UserRole).optional(),
       status: z.nativeEnum(AccountStatus).optional(),
+      groupBy: z.enum(['day', 'month']).default('day'),
+      recentLimit: z.coerce.number().int().min(1).max(20).default(10),
+    })
+    .strict()
+    .default({})
+    .superRefine(validateDateRange),
+});
+
+export const getAdminEventReportSchema = z.object({
+  query: z
+    .object({
+      ...dateRangeQuerySchema,
+      status: z.nativeEnum(EventStatus).optional(),
+      ownerId: cuidSchema.optional(),
+      eventType: z.string().trim().min(1).max(100).optional(),
+      location: z.string().trim().min(1).max(150).optional(),
       groupBy: z.enum(['day', 'month']).default('day'),
       recentLimit: z.coerce.number().int().min(1).max(20).default(10),
     })
@@ -283,25 +300,21 @@ export type GetAdminDashboardSummaryQuery = z.infer<typeof getAdminDashboardSumm
 
 export type GetAdminUserReportQuery = z.infer<typeof getAdminUserReportSchema>['query'];
 
+export type GetAdminEventReportQuery = z.infer<typeof getAdminEventReportSchema>['query'];
+
 export type GetAdminPaymentReportQuery = z.infer<typeof getAdminPaymentReportSchema>['query'];
 
 export type GetAdminVendorReportQuery = z.infer<typeof getAdminVendorReportSchema>['query'];
 
 export type GetAdminBookingReportQuery = z.infer<typeof getAdminBookingReportSchema>['query'];
 
-export type GetPendingVendorApplicationsQuery = z.infer<
-  typeof getPendingVendorApplicationsSchema
->['query'];
+export type GetPendingVendorApplicationsQuery = z.infer<typeof getPendingVendorApplicationsSchema>['query'];
 
 export type GetVendorApplicationParams = z.infer<typeof getVendorApplicationSchema>['params'];
 
-export type GetVendorApplicationByIdParams = z.infer<
-  typeof getVendorApplicationByIdSchema
->['params'];
+export type GetVendorApplicationByIdParams = z.infer<typeof getVendorApplicationByIdSchema>['params'];
 
-export type ApproveVendorApplicationParams = z.infer<
-  typeof approveVendorApplicationSchema
->['params'];
+export type ApproveVendorApplicationParams = z.infer<typeof approveVendorApplicationSchema>['params'];
 
 export type RejectVendorApplicationParams = z.infer<typeof rejectVendorApplicationSchema>['params'];
 

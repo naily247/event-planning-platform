@@ -16,6 +16,7 @@ import { AppError } from '../../utils/AppError.js';
 import type {
   GetAdminBookingReportQuery,
   GetAdminDashboardSummaryQuery,
+  GetAdminEventReportQuery,
   GetAdminPaymentReportQuery,
   GetAdminReviewsQuery,
   GetAdminUserReportQuery,
@@ -163,6 +164,38 @@ const adminVendorReportSelect = {
     },
   },
 } satisfies Prisma.VendorProfileSelect;
+
+const adminEventReportSelect = {
+  id: true,
+  name: true,
+  eventType: true,
+  eventDate: true,
+  location: true,
+  guestCount: true,
+  plannedBudget: true,
+  theme: true,
+  requirements: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+
+  owner: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+  },
+
+  _count: {
+    select: {
+      bookings: true,
+      guests: true,
+    },
+  },
+} satisfies Prisma.EventSelect;
 
 const adminBookingReportSelect = {
   id: true,
@@ -760,6 +793,89 @@ const groupAdminUserGrowth = (
     }))
     .sort((first, second) => first.period.localeCompare(second.period));
 };
+
+const buildAdminEventReportWhere = (query: GetAdminEventReportQuery): Prisma.EventWhereInput => {
+  const toDate = query.to && isDateOnlyMidnight(query.to) ? addOneDay(query.to) : query.to;
+
+  return {
+    ...(query.status && {
+      status: query.status,
+    }),
+
+    ...(query.ownerId && {
+      ownerId: query.ownerId,
+    }),
+
+    ...(query.eventType && {
+      eventType: {
+        contains: query.eventType,
+        mode: 'insensitive',
+      },
+    }),
+
+    ...(query.location && {
+      location: {
+        contains: query.location,
+        mode: 'insensitive',
+      },
+    }),
+
+    ...((query.from || toDate) && {
+      createdAt: {
+        ...(query.from && {
+          gte: query.from,
+        }),
+
+        ...(toDate && {
+          lt: toDate,
+        }),
+      },
+    }),
+  };
+};
+
+const formatAdminEventReportBucket = (date: Date, groupBy: GetAdminEventReportQuery['groupBy']) => {
+  const isoDate = date.toISOString();
+
+  if (groupBy === 'month') {
+    return isoDate.slice(0, 7);
+  }
+
+  return isoDate.slice(0, 10);
+};
+
+const groupAdminEventGrowth = (
+  events: Array<{
+    createdAt: Date;
+  }>,
+  groupBy: GetAdminEventReportQuery['groupBy'],
+) => {
+  const buckets = new Map<string, number>();
+
+  events.forEach((event) => {
+    const bucket = formatAdminEventReportBucket(event.createdAt, groupBy);
+
+    buckets.set(bucket, (buckets.get(bucket) ?? 0) + 1);
+  });
+
+  return Array.from(buckets.entries())
+    .map(([period, count]) => ({
+      period,
+      count,
+    }))
+    .sort((first, second) => first.period.localeCompare(second.period));
+};
+
+const formatAdminEventReportEvent = <
+  T extends {
+    plannedBudget: Prisma.Decimal | null;
+  },
+>(
+  event: T,
+) => ({
+  ...event,
+  plannedBudget: event.plannedBudget?.toString() ?? null,
+});
 
 const buildAdminVendorReportWhere = (
   query: GetAdminVendorReportQuery,
@@ -1506,6 +1622,237 @@ export const getAdminDashboardSummary = async (query: GetAdminDashboardSummaryQu
       recentPayments: recentPayments.map(formatDashboardPayment),
       recentComplaints,
     },
+  };
+};
+
+export const getAdminEventReport = async (query: GetAdminEventReportQuery) => {
+  const where = buildAdminEventReportWhere(query);
+  const generatedAt = new Date();
+
+  const [
+    totalMatchingEvents,
+    draftEvents,
+    planningEvents,
+    activeEvents,
+    completedEvents,
+    cancelledEvents,
+    totalPlannedBudgetAggregate,
+    averageGuestCountAggregate,
+    totalGuestCountAggregate,
+    growthEvents,
+    recentEvents,
+    topEventTypes,
+    topLocations,
+    topCustomers,
+  ] = await prisma.$transaction([
+    prisma.event.count({
+      where,
+    }),
+
+    prisma.event.count({
+      where: {
+        ...where,
+        status: EventStatus.DRAFT,
+      },
+    }),
+
+    prisma.event.count({
+      where: {
+        ...where,
+        status: EventStatus.PLANNING,
+      },
+    }),
+
+    prisma.event.count({
+      where: {
+        ...where,
+        status: EventStatus.ACTIVE,
+      },
+    }),
+
+    prisma.event.count({
+      where: {
+        ...where,
+        status: EventStatus.COMPLETED,
+      },
+    }),
+
+    prisma.event.count({
+      where: {
+        ...where,
+        status: EventStatus.CANCELLED,
+      },
+    }),
+
+    prisma.event.aggregate({
+      where,
+      _sum: {
+        plannedBudget: true,
+      },
+    }),
+
+    prisma.event.aggregate({
+      where,
+      _avg: {
+        guestCount: true,
+      },
+    }),
+
+    prisma.event.aggregate({
+      where,
+      _sum: {
+        guestCount: true,
+      },
+    }),
+
+    prisma.event.findMany({
+      where,
+      select: {
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+
+    prisma.event.findMany({
+      where,
+      select: adminEventReportSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: query.recentLimit,
+    }),
+
+    prisma.event.groupBy({
+      by: ['eventType'],
+      where,
+      _count: {
+        eventType: true,
+      },
+      orderBy: {
+        _count: {
+          eventType: 'desc',
+        },
+      },
+      take: 5,
+    }),
+
+    prisma.event.groupBy({
+      by: ['location'],
+      where,
+      _count: {
+        location: true,
+      },
+      orderBy: {
+        _count: {
+          location: 'desc',
+        },
+      },
+      take: 5,
+    }),
+
+    prisma.event.groupBy({
+      by: ['ownerId'],
+      where,
+      _count: {
+        ownerId: true,
+      },
+      _sum: {
+        plannedBudget: true,
+        guestCount: true,
+      },
+      orderBy: {
+        _count: {
+          ownerId: 'desc',
+        },
+      },
+      take: 5,
+    }),
+  ]);
+
+  const topCustomerIds = topCustomers.map((customer) => customer.ownerId);
+
+  const customers = topCustomerIds.length
+    ? await prisma.user.findMany({
+        where: {
+          id: {
+            in: topCustomerIds,
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          status: true,
+        },
+      })
+    : [];
+
+  const customersById = new Map(customers.map((customer) => [customer.id, customer]));
+
+  return {
+    generatedAt,
+
+    filters: {
+      from: query.from ?? null,
+      to: query.to ?? null,
+      status: query.status ?? null,
+      ownerId: query.ownerId ?? null,
+      eventType: query.eventType ?? null,
+      location: query.location ?? null,
+      groupBy: query.groupBy,
+      recentLimit: query.recentLimit,
+    },
+
+    totals: {
+      events: totalMatchingEvents,
+
+      byStatus: {
+        draft: draftEvents,
+        planning: planningEvents,
+        active: activeEvents,
+        completed: completedEvents,
+        cancelled: cancelledEvents,
+      },
+    },
+
+    planning: {
+      totalPlannedBudget: totalPlannedBudgetAggregate._sum.plannedBudget?.toString() ?? '0',
+      totalGuestCount: totalGuestCountAggregate._sum.guestCount ?? 0,
+      averageGuestCount: averageGuestCountAggregate._avg.guestCount ?? null,
+    },
+
+    growth: groupAdminEventGrowth(growthEvents, query.groupBy),
+
+    topEventTypes: topEventTypes.map((eventType) => ({
+      eventType: eventType.eventType,
+      eventCount:
+        typeof eventType._count === 'object' && eventType._count !== null
+          ? (eventType._count.eventType ?? 0)
+          : 0,
+    })),
+
+    topLocations: topLocations.map((location) => ({
+      location: location.location,
+      eventCount:
+        typeof location._count === 'object' && location._count !== null
+          ? (location._count.location ?? 0)
+          : 0,
+    })),
+
+    topCustomers: topCustomers.map((customer) => ({
+      customer: customersById.get(customer.ownerId) ?? null,
+      eventCount:
+        typeof customer._count === 'object' && customer._count !== null
+          ? (customer._count.ownerId ?? 0)
+          : 0,
+      plannedBudget: customer._sum?.plannedBudget?.toString() ?? '0',
+      guestCount: customer._sum?.guestCount ?? 0,
+    })),
+
+    recentEvents: recentEvents.map(formatAdminEventReportEvent),
   };
 };
 

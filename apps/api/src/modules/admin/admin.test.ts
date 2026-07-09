@@ -175,6 +175,12 @@ const getAdminUserReportRequest = (accessToken: string, query = '') => {
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const getAdminEventReportRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/reports/events${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
 const getAdminVendorReportRequest = (accessToken: string, query = '') => {
   return request(app)
     .get(`/api/v1/admin/reports/vendors${query}`)
@@ -215,6 +221,78 @@ const completeAndSubmitVendor = async (accessToken: string, categoryId: string) 
   return request(app)
     .post('/api/v1/vendors/me/onboarding/submit')
     .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const createAdminEventReportFixture = async () => {
+  const customer = await createManagedUser({
+    email: customerEmail,
+    firstName: 'Maya',
+    lastName: 'Fernando',
+    role: UserRole.CUSTOMER,
+  });
+
+  const secondCustomer = await createManagedUser({
+    email: secondCustomerEmail,
+    firstName: 'Nila',
+    lastName: 'Perera',
+    role: UserRole.CUSTOMER,
+  });
+
+  const weddingEvent = await prisma.event.create({
+    data: {
+      ownerId: customer.id,
+      name: 'Admin Event Report Wedding',
+      eventType: 'Wedding',
+      eventDate: new Date('2030-06-20T09:00:00.000Z'),
+      location: 'Colombo',
+      guestCount: 150,
+      plannedBudget: 1200000,
+      theme: 'Classic',
+      requirements: 'Wedding planning requirements.',
+      status: EventStatus.PLANNING,
+      createdAt: new Date('2030-01-10T10:00:00.000Z'),
+    },
+  });
+
+  const birthdayEvent = await prisma.event.create({
+    data: {
+      ownerId: secondCustomer.id,
+      name: 'Admin Event Report Birthday',
+      eventType: 'Birthday',
+      eventDate: new Date('2030-07-10T09:00:00.000Z'),
+      location: 'Kandy',
+      guestCount: 80,
+      plannedBudget: 600000,
+      theme: 'Garden',
+      requirements: 'Birthday event requirements.',
+      status: EventStatus.COMPLETED,
+      createdAt: new Date('2030-02-10T10:00:00.000Z'),
+    },
+  });
+
+  const corporateEvent = await prisma.event.create({
+    data: {
+      ownerId: customer.id,
+      name: 'Admin Event Report Corporate Meetup',
+      eventType: 'Corporate',
+      eventDate: new Date('2030-08-15T09:00:00.000Z'),
+      location: 'Colombo',
+      guestCount: 200,
+      plannedBudget: 2000000,
+      theme: 'Modern',
+      requirements: 'Corporate event requirements.',
+      status: EventStatus.CANCELLED,
+      createdAt: new Date('2030-02-15T10:00:00.000Z'),
+    },
+  });
+
+  return {
+    customer,
+    secondCustomer,
+    weddingEvent,
+    birthdayEvent,
+    corporateEvent,
+  };
 };
 
 const createAdminBookingReportFixture = async () => {
@@ -1527,6 +1605,293 @@ describe('Admin user management API', () => {
             user.role === 'CUSTOMER' && user.status === 'SUSPENDED',
         ),
       ).toBe(true);
+    });
+  });
+
+  describe('GET /api/v1/admin/reports/events', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/reports/events');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminEventReportRequest(customerAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects invalid report query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminEventReportRequest(
+        adminAccessToken,
+        '?from=2030-02-01&to=2030-01-01&status=INVALID&ownerId=invalid-owner&eventType=&location=&groupBy=year&recentLimit=0&unknown=value',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns event report totals, planning summary, growth, top groups and recent events to an admin', async () => {
+      const fixture = await createAdminEventReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminEventReportRequest(
+        adminAccessToken,
+        '?from=2030-01-01&to=2030-02-28&groupBy=month&recentLimit=2',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.generatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.filters).toMatchObject({
+        from: expect.any(String),
+        to: expect.any(String),
+        status: null,
+        ownerId: null,
+        eventType: null,
+        location: null,
+        groupBy: 'month',
+        recentLimit: 2,
+      });
+
+      expect(response.body.data.totals).toEqual({
+        events: 3,
+
+        byStatus: {
+          draft: 0,
+          planning: 1,
+          active: 0,
+          completed: 1,
+          cancelled: 1,
+        },
+      });
+
+      expect(response.body.data.planning).toEqual({
+        totalPlannedBudget: '3800000',
+        totalGuestCount: 430,
+        averageGuestCount: expect.any(Number),
+      });
+
+      expect(response.body.data.planning.averageGuestCount).toBeCloseTo(143.33333333333334);
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01',
+          count: 1,
+        },
+        {
+          period: '2030-02',
+          count: 2,
+        },
+      ]);
+
+      expect(response.body.data.topEventTypes).toEqual(
+        expect.arrayContaining([
+          {
+            eventType: 'Wedding',
+            eventCount: 1,
+          },
+          {
+            eventType: 'Birthday',
+            eventCount: 1,
+          },
+          {
+            eventType: 'Corporate',
+            eventCount: 1,
+          },
+        ]),
+      );
+
+      expect(response.body.data.topLocations).toEqual(
+        expect.arrayContaining([
+          {
+            location: 'Colombo',
+            eventCount: 2,
+          },
+          {
+            location: 'Kandy',
+            eventCount: 1,
+          },
+        ]),
+      );
+
+      expect(response.body.data.topCustomers).toEqual(
+        expect.arrayContaining([
+          {
+            customer: {
+              id: fixture.customer.id,
+              email: customerEmail,
+              firstName: 'Maya',
+              lastName: 'Fernando',
+              status: 'ACTIVE',
+            },
+            eventCount: 2,
+            plannedBudget: '3200000',
+            guestCount: 350,
+          },
+          {
+            customer: {
+              id: fixture.secondCustomer.id,
+              email: secondCustomerEmail,
+              firstName: 'Nila',
+              lastName: 'Perera',
+              status: 'ACTIVE',
+            },
+            eventCount: 1,
+            plannedBudget: '600000',
+            guestCount: 80,
+          },
+        ]),
+      );
+
+      expect(response.body.data.recentEvents).toHaveLength(2);
+
+      expect(response.body.data.recentEvents[0]).toMatchObject({
+        id: fixture.corporateEvent.id,
+        name: 'Admin Event Report Corporate Meetup',
+        eventType: 'Corporate',
+        location: 'Colombo',
+        guestCount: 200,
+        plannedBudget: '2000000',
+        theme: 'Modern',
+        requirements: 'Corporate event requirements.',
+        status: 'CANCELLED',
+        owner: {
+          id: fixture.customer.id,
+          email: customerEmail,
+        },
+        _count: {
+          bookings: 0,
+          guests: 0,
+        },
+      });
+
+      expect(response.body.data.recentEvents[1]).toMatchObject({
+        id: fixture.birthdayEvent.id,
+        name: 'Admin Event Report Birthday',
+        eventType: 'Birthday',
+        location: 'Kandy',
+        guestCount: 80,
+        plannedBudget: '600000',
+        status: 'COMPLETED',
+        owner: {
+          id: fixture.secondCustomer.id,
+          email: secondCustomerEmail,
+        },
+        _count: {
+          bookings: 0,
+          guests: 0,
+        },
+      });
+
+      expect(response.body.data.recentEvents[0].owner.passwordHash).toBeUndefined();
+    });
+
+    it('supports status, owner, event type, location and day grouping filters', async () => {
+      const fixture = await createAdminEventReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminEventReportRequest(
+        adminAccessToken,
+        `?from=2030-01-01&to=2030-01-31&status=PLANNING&ownerId=${fixture.customer.id}&eventType=wedding&location=colombo&groupBy=day&recentLimit=5`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.filters).toMatchObject({
+        status: 'PLANNING',
+        ownerId: fixture.customer.id,
+        eventType: 'wedding',
+        location: 'colombo',
+        groupBy: 'day',
+        recentLimit: 5,
+      });
+
+      expect(response.body.data.totals).toEqual({
+        events: 1,
+
+        byStatus: {
+          draft: 0,
+          planning: 1,
+          active: 0,
+          completed: 0,
+          cancelled: 0,
+        },
+      });
+
+      expect(response.body.data.planning).toEqual({
+        totalPlannedBudget: '1200000',
+        totalGuestCount: 150,
+        averageGuestCount: 150,
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01-10',
+          count: 1,
+        },
+      ]);
+
+      expect(response.body.data.topEventTypes).toEqual([
+        {
+          eventType: 'Wedding',
+          eventCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.topLocations).toEqual([
+        {
+          location: 'Colombo',
+          eventCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.topCustomers).toEqual([
+        {
+          customer: {
+            id: fixture.customer.id,
+            email: customerEmail,
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            status: 'ACTIVE',
+          },
+          eventCount: 1,
+          plannedBudget: '1200000',
+          guestCount: 150,
+        },
+      ]);
+
+      expect(response.body.data.recentEvents).toHaveLength(1);
+      expect(response.body.data.recentEvents[0]).toMatchObject({
+        id: fixture.weddingEvent.id,
+        name: 'Admin Event Report Wedding',
+        eventType: 'Wedding',
+        location: 'Colombo',
+        plannedBudget: '1200000',
+        status: 'PLANNING',
+        owner: {
+          id: fixture.customer.id,
+        },
+      });
     });
   });
 
