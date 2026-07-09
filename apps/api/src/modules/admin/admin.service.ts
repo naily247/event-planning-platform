@@ -25,6 +25,7 @@ import type {
   ModerateAdminReviewInput,
   RejectVendorApplicationInput,
   UpdateAdminUserStatusInput,
+  GetAdminComplaintReportQuery,
 } from './admin.schemas.js';
 
 const adminUserListSelect = {
@@ -565,6 +566,133 @@ const dashboardRecentComplaintSelect = {
       email: true,
       firstName: true,
       lastName: true,
+    },
+  },
+} satisfies Prisma.ComplaintSelect;
+
+const adminComplaintReportSelect = {
+  id: true,
+  type: true,
+  subject: true,
+  description: true,
+  status: true,
+  priority: true,
+  resolutionSummary: true,
+  resolvedAt: true,
+  closedAt: true,
+  createdAt: true,
+  updatedAt: true,
+
+  complainant: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      status: true,
+    },
+  },
+
+  respondent: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      status: true,
+    },
+  },
+
+  assignedAdmin: {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+  },
+
+  booking: {
+    select: {
+      id: true,
+      status: true,
+      serviceStart: true,
+      serviceEnd: true,
+
+      event: {
+        select: {
+          id: true,
+          name: true,
+          eventType: true,
+          eventDate: true,
+          location: true,
+        },
+      },
+
+      vendor: {
+        select: {
+          id: true,
+          businessName: true,
+          slug: true,
+          verificationStatus: true,
+        },
+      },
+    },
+  },
+
+  payment: {
+    select: {
+      id: true,
+      amount: true,
+      status: true,
+      method: true,
+      referenceNumber: true,
+    },
+  },
+
+  review: {
+    select: {
+      id: true,
+      overallRating: true,
+      isHidden: true,
+      createdAt: true,
+    },
+  },
+
+  quotationRequest: {
+    select: {
+      id: true,
+      status: true,
+      createdAt: true,
+
+      event: {
+        select: {
+          id: true,
+          name: true,
+          eventType: true,
+          eventDate: true,
+          location: true,
+        },
+      },
+
+      vendor: {
+        select: {
+          id: true,
+          businessName: true,
+          slug: true,
+          verificationStatus: true,
+        },
+      },
+    },
+  },
+
+  _count: {
+    select: {
+      messages: true,
+      actions: true,
     },
   },
 } satisfies Prisma.ComplaintSelect;
@@ -1145,6 +1273,116 @@ const formatAdminPaymentReportPayment = <
     ...payment.booking,
     agreedCost: payment.booking.agreedCost.toString(),
   },
+});
+
+const buildAdminComplaintReportWhere = (
+  query: GetAdminComplaintReportQuery,
+): Prisma.ComplaintWhereInput => {
+  const toDate = query.to && isDateOnlyMidnight(query.to) ? addOneDay(query.to) : query.to;
+
+  return {
+    ...(query.status && {
+      status: query.status,
+    }),
+
+    ...(query.type && {
+      type: query.type,
+    }),
+
+    ...(query.priority && {
+      priority: query.priority,
+    }),
+
+    ...(query.complainantId && {
+      complainantId: query.complainantId,
+    }),
+
+    ...(query.respondentId && {
+      respondentId: query.respondentId,
+    }),
+
+    ...(query.assignedAdminId
+      ? {
+          assignedAdminId: query.assignedAdminId,
+        }
+      : query.assignment === 'assigned'
+        ? {
+            assignedAdminId: {
+              not: null,
+            },
+          }
+        : query.assignment === 'unassigned'
+          ? {
+              assignedAdminId: null,
+            }
+          : {}),
+
+    ...((query.from || toDate) && {
+      createdAt: {
+        ...(query.from && {
+          gte: query.from,
+        }),
+
+        ...(toDate && {
+          lt: toDate,
+        }),
+      },
+    }),
+  };
+};
+
+const formatAdminComplaintReportBucket = (
+  date: Date,
+  groupBy: GetAdminComplaintReportQuery['groupBy'],
+) => {
+  const isoDate = date.toISOString();
+
+  if (groupBy === 'month') {
+    return isoDate.slice(0, 7);
+  }
+
+  return isoDate.slice(0, 10);
+};
+
+const groupAdminComplaintGrowth = (
+  complaints: Array<{
+    createdAt: Date;
+  }>,
+  groupBy: GetAdminComplaintReportQuery['groupBy'],
+) => {
+  const buckets = new Map<string, number>();
+
+  complaints.forEach((complaint) => {
+    const bucket = formatAdminComplaintReportBucket(complaint.createdAt, groupBy);
+
+    buckets.set(bucket, (buckets.get(bucket) ?? 0) + 1);
+  });
+
+  return Array.from(buckets.entries())
+    .map(([period, count]) => ({
+      period,
+      count,
+    }))
+    .sort((first, second) => first.period.localeCompare(second.period));
+};
+
+const formatAdminComplaintReportComplaint = <
+  T extends {
+    payment: {
+      amount: Prisma.Decimal;
+    } | null;
+  },
+>(
+  complaint: T,
+) => ({
+  ...complaint,
+
+  payment: complaint.payment
+    ? {
+        ...complaint.payment,
+        amount: complaint.payment.amount.toString(),
+      }
+    : null,
 });
 
 export const getAdminUsers = async (query: GetAdminUsersQuery) => {
@@ -2677,6 +2915,334 @@ export const getAdminPaymentReport = async (query: GetAdminPaymentReportQuery) =
     })),
 
     recentPayments: recentPayments.map(formatAdminPaymentReportPayment),
+  };
+};
+
+export const getAdminComplaintReport = async (query: GetAdminComplaintReportQuery) => {
+  const where = buildAdminComplaintReportWhere(query);
+  const generatedAt = new Date();
+
+  const [
+    totalMatchingComplaints,
+    openComplaints,
+    underReviewComplaints,
+    awaitingCustomerResponseComplaints,
+    awaitingVendorResponseComplaints,
+    underInvestigationComplaints,
+    resolvedComplaints,
+    dismissedComplaints,
+    closedComplaints,
+    assignedComplaints,
+    unassignedComplaints,
+    growthComplaints,
+    recentComplaints,
+    complaintsByType,
+    complaintsByPriority,
+    topComplainants,
+    topRespondents,
+  ] = await prisma.$transaction([
+    prisma.complaint.count({
+      where,
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.OPEN,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.UNDER_REVIEW,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.AWAITING_CUSTOMER_RESPONSE,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.AWAITING_VENDOR_RESPONSE,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.UNDER_INVESTIGATION,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.RESOLVED,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.DISMISSED,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        status: ComplaintStatus.CLOSED,
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        assignedAdminId: {
+          not: null,
+        },
+      },
+    }),
+
+    prisma.complaint.count({
+      where: {
+        ...where,
+        assignedAdminId: null,
+      },
+    }),
+
+    prisma.complaint.findMany({
+      where,
+      select: {
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+
+    prisma.complaint.findMany({
+      where,
+      select: adminComplaintReportSelect,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: query.recentLimit,
+    }),
+
+    prisma.complaint.groupBy({
+      by: ['type'],
+      where,
+      _count: {
+        type: true,
+      },
+      orderBy: {
+        _count: {
+          type: 'desc',
+        },
+      },
+      take: 10,
+    }),
+
+    prisma.complaint.groupBy({
+      by: ['priority'],
+      where,
+      _count: {
+        priority: true,
+      },
+      orderBy: {
+        _count: {
+          priority: 'desc',
+        },
+      },
+      take: 10,
+    }),
+
+    prisma.complaint.groupBy({
+      by: ['complainantId'],
+      where,
+      _count: {
+        complainantId: true,
+      },
+      orderBy: {
+        _count: {
+          complainantId: 'desc',
+        },
+      },
+      take: 5,
+    }),
+
+    prisma.complaint.groupBy({
+      by: ['respondentId'],
+      where,
+      _count: {
+        respondentId: true,
+      },
+      orderBy: {
+        _count: {
+          respondentId: 'desc',
+        },
+      },
+      take: 5,
+    }),
+  ]);
+
+  const complainantIds = topComplainants.map((complainant) => complainant.complainantId);
+  const respondentIds = topRespondents
+    .map((respondent) => respondent.respondentId)
+    .filter((respondentId): respondentId is string => respondentId !== null);
+
+  const [complainants, respondents] = await prisma.$transaction([
+    complainantIds.length
+      ? prisma.user.findMany({
+          where: {
+            id: {
+              in: complainantIds,
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            status: true,
+          },
+        })
+      : prisma.user.findMany({
+          where: {
+            id: {
+              in: [],
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            status: true,
+          },
+        }),
+
+    respondentIds.length
+      ? prisma.user.findMany({
+          where: {
+            id: {
+              in: respondentIds,
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            status: true,
+          },
+        })
+      : prisma.user.findMany({
+          where: {
+            id: {
+              in: [],
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            status: true,
+          },
+        }),
+  ]);
+
+  const complainantsById = new Map(
+    complainants.map((complainant) => [complainant.id, complainant]),
+  );
+  const respondentsById = new Map(respondents.map((respondent) => [respondent.id, respondent]));
+
+  return {
+    generatedAt,
+
+    filters: {
+      from: query.from ?? null,
+      to: query.to ?? null,
+      status: query.status ?? null,
+      type: query.type ?? null,
+      priority: query.priority ?? null,
+      complainantId: query.complainantId ?? null,
+      respondentId: query.respondentId ?? null,
+      assignedAdminId: query.assignedAdminId ?? null,
+      assignment: query.assignment,
+      groupBy: query.groupBy,
+      recentLimit: query.recentLimit,
+    },
+
+    totals: {
+      complaints: totalMatchingComplaints,
+
+      byStatus: {
+        open: openComplaints,
+        underReview: underReviewComplaints,
+        awaitingCustomerResponse: awaitingCustomerResponseComplaints,
+        awaitingVendorResponse: awaitingVendorResponseComplaints,
+        underInvestigation: underInvestigationComplaints,
+        resolved: resolvedComplaints,
+        dismissed: dismissedComplaints,
+        closed: closedComplaints,
+      },
+
+      byAssignment: {
+        assigned: assignedComplaints,
+        unassigned: unassignedComplaints,
+      },
+    },
+
+    growth: groupAdminComplaintGrowth(growthComplaints, query.groupBy),
+
+    byType: complaintsByType.map((complaintType) => ({
+      type: complaintType.type,
+      complaintCount:
+        typeof complaintType._count === 'object' && complaintType._count !== null
+          ? (complaintType._count.type ?? 0)
+          : 0,
+    })),
+
+    byPriority: complaintsByPriority.map((complaintPriority) => ({
+      priority: complaintPriority.priority,
+      complaintCount:
+        typeof complaintPriority._count === 'object' && complaintPriority._count !== null
+          ? (complaintPriority._count.priority ?? 0)
+          : 0,
+    })),
+
+    topComplainants: topComplainants.map((complainant) => ({
+      complainant: complainantsById.get(complainant.complainantId) ?? null,
+      complaintCount:
+        typeof complainant._count === 'object' && complainant._count !== null
+          ? (complainant._count.complainantId ?? 0)
+          : 0,
+    })),
+
+    topRespondents: topRespondents.map((respondent) => ({
+      respondent: respondent.respondentId
+        ? (respondentsById.get(respondent.respondentId) ?? null)
+        : null,
+      complaintCount:
+        typeof respondent._count === 'object' && respondent._count !== null
+          ? (respondent._count.respondentId ?? 0)
+          : 0,
+    })),
+
+    recentComplaints: recentComplaints.map(formatAdminComplaintReportComplaint),
   };
 };
 

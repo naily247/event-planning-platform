@@ -2,6 +2,9 @@ import bcrypt from 'bcryptjs';
 import {
   AccountStatus,
   BookingStatus,
+  ComplaintPriority,
+  ComplaintStatus,
+  ComplaintType,
   EventStatus,
   PaymentMethod,
   PaymentStatus,
@@ -199,6 +202,12 @@ const getAdminPaymentReportRequest = (accessToken: string, query = '') => {
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const getAdminComplaintReportRequest = (accessToken: string, query = '') => {
+  return request(app)
+    .get(`/api/v1/admin/reports/complaints${query}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
 const completeAndSubmitVendor = async (accessToken: string, categoryId: string) => {
   await request(app)
     .patch('/api/v1/vendors/me/onboarding')
@@ -292,6 +301,82 @@ const createAdminEventReportFixture = async () => {
     weddingEvent,
     birthdayEvent,
     corporateEvent,
+  };
+};
+
+const createAdminComplaintReportFixture = async () => {
+  const customer = await createManagedUser({
+    email: customerEmail,
+    firstName: 'Maya',
+    lastName: 'Fernando',
+    role: UserRole.CUSTOMER,
+  });
+
+  const secondCustomer = await createManagedUser({
+    email: secondCustomerEmail,
+    firstName: 'Nila',
+    lastName: 'Perera',
+    role: UserRole.CUSTOMER,
+  });
+
+  const adminUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: adminEmail,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  const openComplaint = await prisma.complaint.create({
+    data: {
+      complainantId: customer.id,
+      respondentId: secondCustomer.id,
+      assignedAdminId: adminUser.id,
+      type: ComplaintType.BOOKING,
+      subject: 'Admin complaint report booking issue',
+      description: 'The booking complaint was created for admin complaint report testing.',
+      status: ComplaintStatus.OPEN,
+      priority: ComplaintPriority.URGENT,
+      createdAt: new Date('2030-01-10T10:00:00.000Z'),
+    },
+  });
+
+  const resolvedComplaint = await prisma.complaint.create({
+    data: {
+      complainantId: customer.id,
+      respondentId: secondCustomer.id,
+      type: ComplaintType.PAYMENT,
+      subject: 'Admin complaint report payment issue',
+      description: 'The payment complaint was created for admin complaint report testing.',
+      status: ComplaintStatus.RESOLVED,
+      priority: ComplaintPriority.HIGH,
+      resolutionSummary: 'The payment complaint was resolved by the administrator.',
+      resolvedAt: new Date('2030-02-11T10:00:00.000Z'),
+      createdAt: new Date('2030-02-10T10:00:00.000Z'),
+    },
+  });
+
+  const platformComplaint = await prisma.complaint.create({
+    data: {
+      complainantId: secondCustomer.id,
+      assignedAdminId: adminUser.id,
+      type: ComplaintType.PLATFORM,
+      subject: 'Admin complaint report platform issue',
+      description: 'The platform complaint was created for admin complaint report testing.',
+      status: ComplaintStatus.UNDER_REVIEW,
+      priority: ComplaintPriority.LOW,
+      createdAt: new Date('2030-02-15T10:00:00.000Z'),
+    },
+  });
+
+  return {
+    customer,
+    secondCustomer,
+    adminUser,
+    openComplaint,
+    resolvedComplaint,
+    platformComplaint,
   };
 };
 
@@ -530,6 +615,33 @@ const createAdminBookingReportFixture = async () => {
 };
 
 const cleanupAdminTestData = async () => {
+  await prisma.complaint.deleteMany({
+    where: {
+      OR: [
+        {
+          complainant: {
+            email: {
+              in: testEmails,
+            },
+          },
+        },
+        {
+          respondent: {
+            email: {
+              in: testEmails,
+            },
+          },
+        },
+        {
+          assignedAdmin: {
+            email: {
+              in: testEmails,
+            },
+          },
+        },
+      ],
+    },
+  });
   await prisma.payment.deleteMany({
     where: {
       booking: {
@@ -2775,6 +2887,348 @@ describe('Admin user management API', () => {
         },
         submittedBy: {
           id: fixture.customer.id,
+        },
+      });
+    });
+  });
+
+  describe('GET /api/v1/admin/reports/complaints', () => {
+    it('rejects requests without an access token', async () => {
+      const response = await request(app).get('/api/v1/admin/reports/complaints');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects authenticated non-admin users', async () => {
+      await createManagedUser({
+        email: customerEmail,
+        firstName: 'Maya',
+        lastName: 'Fernando',
+        role: UserRole.CUSTOMER,
+      });
+
+      const customerAccessToken = await loginUser(customerEmail, userPassword);
+
+      const response = await getAdminComplaintReportRequest(customerAccessToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('rejects invalid report query values', async () => {
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminComplaintReportRequest(
+        adminAccessToken,
+        '?from=2030-02-01&to=2030-01-01&status=INVALID&type=INVALID&priority=INVALID&complainantId=invalid-complainant&respondentId=invalid-respondent&assignedAdminId=invalid-admin&assignment=maybe&groupBy=year&recentLimit=0&unknown=value',
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('returns complaint report totals, growth, breakdowns, top users and recent complaints to an admin', async () => {
+      const fixture = await createAdminComplaintReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminComplaintReportRequest(
+        adminAccessToken,
+        '?from=2030-01-01&to=2030-02-28&groupBy=month&recentLimit=2',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.generatedAt).toEqual(expect.any(String));
+
+      expect(response.body.data.filters).toMatchObject({
+        from: expect.any(String),
+        to: expect.any(String),
+        status: null,
+        type: null,
+        priority: null,
+        complainantId: null,
+        respondentId: null,
+        assignedAdminId: null,
+        assignment: 'all',
+        groupBy: 'month',
+        recentLimit: 2,
+      });
+
+      expect(response.body.data.totals).toEqual({
+        complaints: 3,
+
+        byStatus: {
+          open: 1,
+          underReview: 1,
+          awaitingCustomerResponse: 0,
+          awaitingVendorResponse: 0,
+          underInvestigation: 0,
+          resolved: 1,
+          dismissed: 0,
+          closed: 0,
+        },
+
+        byAssignment: {
+          assigned: 2,
+          unassigned: 1,
+        },
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01',
+          count: 1,
+        },
+        {
+          period: '2030-02',
+          count: 2,
+        },
+      ]);
+
+      expect(response.body.data.byType).toEqual(
+        expect.arrayContaining([
+          {
+            type: 'BOOKING',
+            complaintCount: 1,
+          },
+          {
+            type: 'PAYMENT',
+            complaintCount: 1,
+          },
+          {
+            type: 'PLATFORM',
+            complaintCount: 1,
+          },
+        ]),
+      );
+
+      expect(response.body.data.byPriority).toEqual(
+        expect.arrayContaining([
+          {
+            priority: 'URGENT',
+            complaintCount: 1,
+          },
+          {
+            priority: 'HIGH',
+            complaintCount: 1,
+          },
+          {
+            priority: 'LOW',
+            complaintCount: 1,
+          },
+        ]),
+      );
+
+      expect(response.body.data.topComplainants).toEqual(
+        expect.arrayContaining([
+          {
+            complainant: {
+              id: fixture.customer.id,
+              email: customerEmail,
+              firstName: 'Maya',
+              lastName: 'Fernando',
+              role: 'CUSTOMER',
+              status: 'ACTIVE',
+            },
+            complaintCount: 2,
+          },
+          {
+            complainant: {
+              id: fixture.secondCustomer.id,
+              email: secondCustomerEmail,
+              firstName: 'Nila',
+              lastName: 'Perera',
+              role: 'CUSTOMER',
+              status: 'ACTIVE',
+            },
+            complaintCount: 1,
+          },
+        ]),
+      );
+
+      expect(response.body.data.topRespondents).toEqual(
+        expect.arrayContaining([
+          {
+            respondent: {
+              id: fixture.secondCustomer.id,
+              email: secondCustomerEmail,
+              firstName: 'Nila',
+              lastName: 'Perera',
+              role: 'CUSTOMER',
+              status: 'ACTIVE',
+            },
+            complaintCount: 2,
+          },
+        ]),
+      );
+
+      expect(response.body.data.recentComplaints).toHaveLength(2);
+
+      expect(response.body.data.recentComplaints[0]).toMatchObject({
+        id: fixture.platformComplaint.id,
+        type: 'PLATFORM',
+        subject: 'Admin complaint report platform issue',
+        description: 'The platform complaint was created for admin complaint report testing.',
+        status: 'UNDER_REVIEW',
+        priority: 'LOW',
+        complainant: {
+          id: fixture.secondCustomer.id,
+          email: secondCustomerEmail,
+        },
+        respondent: null,
+        assignedAdmin: {
+          id: fixture.adminUser.id,
+          email: adminEmail,
+        },
+        booking: null,
+        payment: null,
+        review: null,
+        quotationRequest: null,
+        _count: {
+          messages: 0,
+          actions: 0,
+        },
+      });
+
+      expect(response.body.data.recentComplaints[1]).toMatchObject({
+        id: fixture.resolvedComplaint.id,
+        type: 'PAYMENT',
+        subject: 'Admin complaint report payment issue',
+        status: 'RESOLVED',
+        priority: 'HIGH',
+        resolutionSummary: 'The payment complaint was resolved by the administrator.',
+        complainant: {
+          id: fixture.customer.id,
+          email: customerEmail,
+        },
+        respondent: {
+          id: fixture.secondCustomer.id,
+          email: secondCustomerEmail,
+        },
+        assignedAdmin: null,
+        _count: {
+          messages: 0,
+          actions: 0,
+        },
+      });
+
+      expect(response.body.data.recentComplaints[0].complainant.passwordHash).toBeUndefined();
+      expect(response.body.data.recentComplaints[0].assignedAdmin.passwordHash).toBeUndefined();
+    });
+
+    it('supports status, type, priority, participant, assignment and day grouping filters', async () => {
+      const fixture = await createAdminComplaintReportFixture();
+      const adminAccessToken = await loginTestAdmin();
+
+      const response = await getAdminComplaintReportRequest(
+        adminAccessToken,
+        `?from=2030-01-01&to=2030-01-31&status=OPEN&type=BOOKING&priority=URGENT&complainantId=${fixture.customer.id}&respondentId=${fixture.secondCustomer.id}&assignedAdminId=${fixture.adminUser.id}&assignment=assigned&groupBy=day&recentLimit=5`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+
+      expect(response.body.data.filters).toMatchObject({
+        status: 'OPEN',
+        type: 'BOOKING',
+        priority: 'URGENT',
+        complainantId: fixture.customer.id,
+        respondentId: fixture.secondCustomer.id,
+        assignedAdminId: fixture.adminUser.id,
+        assignment: 'assigned',
+        groupBy: 'day',
+        recentLimit: 5,
+      });
+
+      expect(response.body.data.totals).toEqual({
+        complaints: 1,
+
+        byStatus: {
+          open: 1,
+          underReview: 0,
+          awaitingCustomerResponse: 0,
+          awaitingVendorResponse: 0,
+          underInvestigation: 0,
+          resolved: 0,
+          dismissed: 0,
+          closed: 0,
+        },
+
+        byAssignment: {
+          assigned: 1,
+          unassigned: 0,
+        },
+      });
+
+      expect(response.body.data.growth).toEqual([
+        {
+          period: '2030-01-10',
+          count: 1,
+        },
+      ]);
+
+      expect(response.body.data.byType).toEqual([
+        {
+          type: 'BOOKING',
+          complaintCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.byPriority).toEqual([
+        {
+          priority: 'URGENT',
+          complaintCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.topComplainants).toEqual([
+        {
+          complainant: {
+            id: fixture.customer.id,
+            email: customerEmail,
+            firstName: 'Maya',
+            lastName: 'Fernando',
+            role: 'CUSTOMER',
+            status: 'ACTIVE',
+          },
+          complaintCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.topRespondents).toEqual([
+        {
+          respondent: {
+            id: fixture.secondCustomer.id,
+            email: secondCustomerEmail,
+            firstName: 'Nila',
+            lastName: 'Perera',
+            role: 'CUSTOMER',
+            status: 'ACTIVE',
+          },
+          complaintCount: 1,
+        },
+      ]);
+
+      expect(response.body.data.recentComplaints).toHaveLength(1);
+      expect(response.body.data.recentComplaints[0]).toMatchObject({
+        id: fixture.openComplaint.id,
+        type: 'BOOKING',
+        subject: 'Admin complaint report booking issue',
+        status: 'OPEN',
+        priority: 'URGENT',
+        complainant: {
+          id: fixture.customer.id,
+        },
+        respondent: {
+          id: fixture.secondCustomer.id,
+        },
+        assignedAdmin: {
+          id: fixture.adminUser.id,
         },
       });
     });

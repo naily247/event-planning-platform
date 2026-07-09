@@ -1,6 +1,9 @@
 import {
   AccountStatus,
   BookingStatus,
+  ComplaintPriority,
+  ComplaintStatus,
+  ComplaintType,
   EventStatus,
   PaymentMethod,
   PaymentStatus,
@@ -173,6 +176,25 @@ export const getAdminPaymentReportSchema = z.object({
     .superRefine(validateDateRange),
 });
 
+export const getAdminComplaintReportSchema = z.object({
+  query: z
+    .object({
+      ...dateRangeQuerySchema,
+      status: z.nativeEnum(ComplaintStatus).optional(),
+      type: z.nativeEnum(ComplaintType).optional(),
+      priority: z.nativeEnum(ComplaintPriority).optional(),
+      complainantId: cuidSchema.optional(),
+      respondentId: cuidSchema.optional(),
+      assignedAdminId: cuidSchema.optional(),
+      assignment: z.enum(['all', 'assigned', 'unassigned']).default('all'),
+      groupBy: z.enum(['day', 'month']).default('day'),
+      recentLimit: z.coerce.number().int().min(1).max(20).default(10),
+    })
+    .strict()
+    .default({})
+    .superRefine(validateDateRange),
+});
+
 export const getPendingVendorApplicationsSchema = z.object({
   query: z.object({}).strict().default({}),
 });
@@ -302,11 +324,13 @@ export type GetAdminUserReportQuery = z.infer<typeof getAdminUserReportSchema>['
 
 export type GetAdminEventReportQuery = z.infer<typeof getAdminEventReportSchema>['query'];
 
-export type GetAdminPaymentReportQuery = z.infer<typeof getAdminPaymentReportSchema>['query'];
-
 export type GetAdminVendorReportQuery = z.infer<typeof getAdminVendorReportSchema>['query'];
 
 export type GetAdminBookingReportQuery = z.infer<typeof getAdminBookingReportSchema>['query'];
+
+export type GetAdminPaymentReportQuery = z.infer<typeof getAdminPaymentReportSchema>['query'];
+
+export type GetAdminComplaintReportQuery = z.infer<typeof getAdminComplaintReportSchema>['query'];
 
 export type GetPendingVendorApplicationsQuery = z.infer<typeof getPendingVendorApplicationsSchema>['query'];
 

@@ -18,12 +18,14 @@ import {
   moderateAdminReviewSchema,
   rejectVendorApplicationSchema,
   updateAdminUserStatusSchema,
+  getAdminComplaintReportSchema,
 } from './admin.schemas.js';
 
 import {
   approveVendorApplicationHandler,
   getAdminBookingReportHandler,
   getAdminComplaintByIdHandler,
+  getAdminComplaintReportHandler,
   getAdminComplaintsHandler,
   getAdminDashboardSummaryHandler,
   getAdminEventReportHandler,
@@ -227,4 +229,11 @@ adminRouter.get(
   ...adminOnly,
   validate(getAdminEventReportSchema),
   getAdminEventReportHandler,
+);
+
+adminRouter.get(
+  '/reports/complaints',
+  ...adminOnly,
+  validate(getAdminComplaintReportSchema),
+  getAdminComplaintReportHandler,
 );
