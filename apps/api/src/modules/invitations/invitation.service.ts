@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { GuestStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
+import { sendInvitationEmail } from '../communications/email.service.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   CreateInvitationBody,
@@ -195,6 +196,12 @@ const getOwnedGuest = async (ownerId: string, eventId: string, guestId: string) 
       notes: true,
       invitedAt: true,
       respondedAt: true,
+
+      event: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
@@ -361,10 +368,24 @@ export const createInvitation = async (
     });
   });
 
+  const invitationUrl = buildInvitationUrl(rawToken);
+
+  if (guest.email) {
+    await sendInvitationEmail({
+      to: {
+        email: guest.email,
+        name: `${guest.firstName} ${guest.lastName ?? ''}`.trim(),
+      },
+      eventName: guest.event.name,
+      guestName: guest.firstName,
+      invitationUrl,
+    });
+  }
+
   return {
     invitation: formatInvitation(invitation),
     token: rawToken,
-    invitationUrl: buildInvitationUrl(rawToken),
+    invitationUrl,
   };
 };
 
@@ -426,10 +447,24 @@ export const regenerateInvitation = async (
     });
   });
 
+  const invitationUrl = buildInvitationUrl(rawToken);
+
+  if (guest.email) {
+    await sendInvitationEmail({
+      to: {
+        email: guest.email,
+        name: `${guest.firstName} ${guest.lastName ?? ''}`.trim(),
+      },
+      eventName: guest.event.name,
+      guestName: guest.firstName,
+      invitationUrl,
+    });
+  }
+
   return {
     invitation: formatInvitation(invitation),
     token: rawToken,
-    invitationUrl: buildInvitationUrl(rawToken),
+    invitationUrl,
   };
 };
 
