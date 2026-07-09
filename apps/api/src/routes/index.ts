@@ -17,6 +17,7 @@ import { moodBoardRouter } from '../modules/moodBoards/moodBoard.routes.js';
 import { eventDocumentRouter } from '../modules/eventDocuments/eventDocument.routes.js';
 import { reviewRouter } from '../modules/reviews/review.routes.js';
 import { complaintRouter } from '../modules/complaints/complaint.routes.js';
+import { dashboardRouter } from '../modules/dashboards/dashboard.routes.js';
 
 export const apiRouter = Router();
 
@@ -38,3 +39,4 @@ apiRouter.use('/mood-boards', moodBoardRouter);
 apiRouter.use('/event-documents', eventDocumentRouter);
 apiRouter.use('/reviews', reviewRouter);
 apiRouter.use('/complaints', complaintRouter);
+apiRouter.use('/dashboard', dashboardRouter);
