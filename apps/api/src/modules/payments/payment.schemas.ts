@@ -25,8 +25,18 @@ export const submitCustomerPaymentSchema = z.object({
   }),
 
   body: z.object({
-    method: z.nativeEnum(PaymentMethod),
+    method: z.literal(PaymentMethod.BANK_TRANSFER),
 
+    referenceNumber: referenceNumberSchema,
+  }),
+});
+
+export const submitCustomerPaymentWithProofSchema = z.object({
+  params: z.object({
+    bookingId: bookingIdSchema,
+  }),
+
+  body: z.object({
     referenceNumber: referenceNumberSchema,
   }),
 });
@@ -76,6 +86,10 @@ export const rejectAdminPaymentSchema = z.object({
 });
 
 export type SubmitCustomerPaymentInput = z.infer<typeof submitCustomerPaymentSchema>['body'];
+
+export type SubmitCustomerPaymentWithProofInput = z.infer<
+  typeof submitCustomerPaymentWithProofSchema
+>['body'];
 
 export type CustomerPaymentParams = z.infer<typeof getCustomerPaymentsSchema>['params'];
 

@@ -8,6 +8,7 @@ import type {
   GetPendingPaymentsQuery,
   RejectAdminPaymentInput,
   SubmitCustomerPaymentInput,
+  SubmitCustomerPaymentWithProofInput,
 } from './payment.schemas.js';
 import {
   completeStripeCheckoutPayment,
@@ -17,6 +18,7 @@ import {
   getPendingPayments,
   rejectAdminPayment,
   submitCustomerPayment,
+  submitCustomerPaymentWithProof,
   verifyAdminPayment,
 } from './payment.service.js';
 
@@ -36,25 +38,39 @@ export const submitCustomerPaymentHandler: RequestHandler = asyncHandler(async (
   });
 });
 
-export const createStripeCheckoutSessionHandler: RequestHandler = asyncHandler(
+export const submitCustomerPaymentWithProofHandler: RequestHandler = asyncHandler(
   async (req, res) => {
-    const { bookingId } = req.params as CreateStripeCheckoutSessionParams;
+    const { bookingId } = req.params as CustomerPaymentParams;
 
-    const result = await createStripeCheckoutSession(req.auth!.userId, bookingId);
+    const payment = await submitCustomerPaymentWithProof(
+      req.auth!.userId,
+      bookingId,
+      req.body as SubmitCustomerPaymentWithProofInput,
+      req.file,
+    );
 
     res.status(201).json({
       success: true,
-      data: result,
-      message: 'Stripe checkout session created successfully',
+      data: payment,
+      message: 'Deposit payment proof submitted successfully',
     });
   },
 );
 
+export const createStripeCheckoutSessionHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { bookingId } = req.params as CreateStripeCheckoutSessionParams;
+
+  const result = await createStripeCheckoutSession(req.auth!.userId, bookingId);
+
+  res.status(201).json({
+    success: true,
+    data: result,
+    message: 'Stripe checkout session created successfully',
+  });
+});
+
 export const handleStripeWebhookHandler: RequestHandler = asyncHandler(async (req, res) => {
-  const event = constructStripeWebhookEvent(
-    req.body as Buffer,
-    req.headers['stripe-signature'],
-  );
+  const event = constructStripeWebhookEvent(req.body as Buffer, req.headers['stripe-signature']);
 
   if (event.type === 'checkout.session.completed') {
     const result = await completeStripeCheckoutPayment(event.data.object);

@@ -13,14 +13,17 @@ import {
 import request from 'supertest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
-import {
-  constructStripeWebhookEvent,
-  getStripeClient,
-} from '../../services/stripe.service.js';
+import { constructStripeWebhookEvent, getStripeClient } from '../../services/stripe.service.js';
+import { AppError } from '../../utils/AppError.js';
+import { uploadAsset } from '../uploads/upload.service.js';
 
 jest.mock('../../services/stripe.service.js', () => ({
   constructStripeWebhookEvent: jest.fn(),
   getStripeClient: jest.fn(),
+}));
+
+jest.mock('../uploads/upload.service.js', () => ({
+  uploadAsset: jest.fn(),
 }));
 
 const app = createApp();
@@ -28,6 +31,7 @@ const app = createApp();
 const mockedConstructStripeWebhookEvent = jest.mocked(constructStripeWebhookEvent);
 const mockedGetStripeClient = jest.mocked(getStripeClient);
 const mockedStripeCheckoutSessionCreate = jest.fn();
+const mockedUploadAsset = jest.mocked(uploadAsset);
 
 const customerEmail = 'payment-customer@example.com';
 const secondCustomerEmail = 'payment-second-customer@example.com';
@@ -416,6 +420,21 @@ const createStripeCheckoutSessionRequest = (accessToken: string, bookingId: stri
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const submitCustomerPaymentWithProofRequest = (
+  accessToken: string,
+  bookingId: string,
+  referenceNumber = 'TXN-PROOF-2026-001',
+) => {
+  return request(app)
+    .post(`/api/v1/payments/bookings/${bookingId}/manual/proof`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .field('referenceNumber', referenceNumber)
+    .attach('file', Buffer.from('fake payment proof file'), {
+      filename: 'payment-proof.pdf',
+      contentType: 'application/pdf',
+    });
+};
+
 const sendStripeWebhookRequest = () => {
   return request(app)
     .post('/api/v1/payments/stripe/webhook')
@@ -459,6 +478,7 @@ beforeEach(async () => {
   mockedConstructStripeWebhookEvent.mockReset();
   mockedGetStripeClient.mockReset();
   mockedStripeCheckoutSessionCreate.mockReset();
+  mockedUploadAsset.mockReset();
 
   mockedGetStripeClient.mockReturnValue({
     checkout: {
@@ -471,6 +491,16 @@ beforeEach(async () => {
   mockedStripeCheckoutSessionCreate.mockResolvedValue({
     id: 'cs_test_deposit_payment',
     url: 'https://checkout.stripe.com/c/pay/cs_test_deposit_payment',
+  });
+
+  mockedUploadAsset.mockResolvedValue({
+    fileUrl: 'https://res.cloudinary.com/demo/raw/upload/payment-proof.pdf',
+    filePublicId: 'event-platform/payments/payment-proof',
+    originalName: 'payment-proof.pdf',
+    mimeType: 'application/pdf',
+    fileSize: 24,
+    resourceType: 'raw',
+    format: 'pdf',
   });
 
   await clearTestData();
@@ -633,6 +663,125 @@ describe('Booking deposit payment API', () => {
     });
   });
 
+  describe('POST /api/v1/payments/bookings/:bookingId/manual/proof', () => {
+    it('rejects proof uploads without authentication', async () => {
+      const response = await request(app)
+        .post('/api/v1/payments/bookings/clx0000000000000000000000/manual/proof')
+        .field('referenceNumber', 'TXN-PROOF-2026-001')
+        .attach('file', Buffer.from('fake payment proof file'), {
+          filename: 'payment-proof.pdf',
+          contentType: 'application/pdf',
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+      expect(mockedUploadAsset).not.toHaveBeenCalled();
+    });
+
+    it('submits a manual deposit payment with proof file metadata', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      const response = await submitCustomerPaymentWithProofRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Deposit payment proof submitted successfully');
+
+      expect(response.body.data).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        submittedById: preparedBooking.customerUserId,
+        reviewedById: null,
+        status: PaymentStatus.PENDING,
+        method: PaymentMethod.BANK_TRANSFER,
+        referenceNumber: 'TXN-PROOF-2026-001',
+        proofFileUrl: 'https://res.cloudinary.com/demo/raw/upload/payment-proof.pdf',
+        proofFilePublicId: 'event-platform/payments/payment-proof',
+        proofFileOriginalName: 'payment-proof.pdf',
+        proofFileMimeType: 'application/pdf',
+        proofFileSize: 24,
+        reviewedAt: null,
+        rejectionReason: null,
+      });
+
+      expect(Number(response.body.data.amount)).toBe(50000);
+
+      expect(mockedUploadAsset).toHaveBeenCalledTimes(1);
+      expect(mockedUploadAsset).toHaveBeenCalledWith({
+        file: expect.objectContaining({
+          originalname: 'payment-proof.pdf',
+          mimetype: 'application/pdf',
+        }),
+        folder: `event-platform/payments/${preparedBooking.bookingId}/proofs`,
+      });
+
+      const savedPayment = await prisma.payment.findFirstOrThrow({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(savedPayment.status).toBe(PaymentStatus.PENDING);
+      expect(savedPayment.method).toBe(PaymentMethod.BANK_TRANSFER);
+      expect(savedPayment.referenceNumber).toBe('TXN-PROOF-2026-001');
+      expect(savedPayment.proofFileUrl).toBe(
+        'https://res.cloudinary.com/demo/raw/upload/payment-proof.pdf',
+      );
+      expect(savedPayment.proofFilePublicId).toBe('event-platform/payments/payment-proof');
+      expect(savedPayment.proofFileOriginalName).toBe('payment-proof.pdf');
+      expect(savedPayment.proofFileMimeType).toBe('application/pdf');
+      expect(savedPayment.proofFileSize).toBe(24);
+      expect(savedPayment.amount.toFixed(2)).toBe('50000.00');
+    });
+
+    it('rejects proof submission when the proof file is missing', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      mockedUploadAsset.mockImplementationOnce(() => {
+        throw new AppError(400, 'File is required', 'UPLOAD_FILE_REQUIRED');
+      });
+
+      const response = await request(app)
+        .post(`/api/v1/payments/bookings/${preparedBooking.bookingId}/manual/proof`)
+        .set('Authorization', `Bearer ${preparedBooking.customerAccessToken}`)
+        .field('referenceNumber', 'TXN-PROOF-2026-001');
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UPLOAD_FILE_REQUIRED');
+
+      const payments = await prisma.payment.findMany({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(payments).toHaveLength(0);
+    });
+
+    it('rejects another proof payment while one payment is pending', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      await submitCustomerPaymentWithProofRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      const response = await submitCustomerPaymentWithProofRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+        'TXN-PROOF-2026-002',
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('PAYMENT_ALREADY_PENDING');
+    });
+  });
+
   describe('GET /api/v1/bookings/customer/:bookingId/payments', () => {
     it('returns the customer payment history', async () => {
       const preparedBooking = await prepareDepositPendingBooking();
@@ -661,7 +810,7 @@ describe('Booking deposit payment API', () => {
     });
   });
 
-    describe('POST /api/v1/payments/bookings/:bookingId/checkout-session', () => {
+  describe('POST /api/v1/payments/bookings/:bookingId/checkout-session', () => {
     it('rejects Stripe checkout requests without authentication', async () => {
       const response = await request(app).post(
         '/api/v1/payments/bookings/clx0000000000000000000000/checkout-session',
@@ -707,8 +856,7 @@ describe('Booking deposit payment API', () => {
         mode: 'payment',
         customer_email: customerEmail,
         client_reference_id: response.body.data.payment.id,
-        success_url:
-          'http://localhost:5173/payments/success?session_id=%7BCHECKOUT_SESSION_ID%7D',
+        success_url: 'http://localhost:5173/payments/success?session_id=%7BCHECKOUT_SESSION_ID%7D',
         cancel_url: `http://localhost:5173/payments/cancel?bookingId=${preparedBooking.bookingId}`,
 
         metadata: {
@@ -889,16 +1037,18 @@ describe('Booking deposit payment API', () => {
 
     it('rejects webhook requests with an invalid Stripe signature', async () => {
       mockedConstructStripeWebhookEvent.mockImplementationOnce(() => {
-        throw new Error('Invalid Stripe webhook signature');
+        throw new AppError(400, 'Invalid Stripe webhook signature', 'STRIPE_SIGNATURE_INVALID');
       });
 
       const response = await sendStripeWebhookRequest();
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('STRIPE_SIGNATURE_INVALID');
       expect(mockedConstructStripeWebhookEvent).toHaveBeenCalledTimes(1);
     });
   });
-  
+
   describe('Admin payment review API', () => {
     it('returns pending payments to an admin', async () => {
       const preparedBooking = await prepareDepositPendingBooking();

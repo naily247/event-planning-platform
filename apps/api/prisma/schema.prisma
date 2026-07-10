@@ -486,27 +486,33 @@ model VendorAvailabilityBlock {
 }
 
 model Payment {
-  id              String        @id @default(cuid())
-  bookingId       String
-  submittedById   String
-  reviewedById    String?
-  amount          Decimal       @db.Decimal(12, 2)
-  status          PaymentStatus @default(PENDING)
-  method          PaymentMethod
-  referenceNumber String
-  reviewedAt      DateTime?
-  rejectionReason String?
-  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  submittedBy     User          @relation("PaymentSubmitter", fields: [submittedById], references: [id])
-  reviewedBy      User?         @relation("PaymentReviewer", fields: [reviewedById], references: [id])
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  complaints      Complaint[]
+  id                    String        @id @default(cuid())
+  bookingId             String
+  submittedById         String
+  reviewedById          String?
+  amount                Decimal       @db.Decimal(12, 2)
+  status                PaymentStatus @default(PENDING)
+  method                PaymentMethod
+  referenceNumber       String
+  proofFileUrl          String?
+  proofFilePublicId     String?
+  proofFileOriginalName String?
+  proofFileMimeType     String?
+  proofFileSize         Int?
+  reviewedAt            DateTime?
+  rejectionReason       String?
+  booking               Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  submittedBy           User          @relation("PaymentSubmitter", fields: [submittedById], references: [id])
+  reviewedBy            User?         @relation("PaymentReviewer", fields: [reviewedById], references: [id])
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  complaints            Complaint[]
 
   @@index([bookingId, status])
   @@index([status, createdAt])
   @@index([submittedById, createdAt])
   @@index([reviewedById, reviewedAt])
+  @@index([proofFilePublicId])
 }
 
 model Review {

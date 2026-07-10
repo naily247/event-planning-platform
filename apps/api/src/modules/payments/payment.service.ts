@@ -5,10 +5,12 @@ import { env } from '../../config/env.js';
 import { prisma } from '../../config/prisma.js';
 import { getStripeClient } from '../../services/stripe.service.js';
 import { AppError } from '../../utils/AppError.js';
+import { uploadAsset } from '../uploads/upload.service.js';
 import type {
   GetPendingPaymentsQuery,
   RejectAdminPaymentInput,
   SubmitCustomerPaymentInput,
+  SubmitCustomerPaymentWithProofInput,
 } from './payment.schemas.js';
 
 const paymentSelect = {
@@ -20,6 +22,11 @@ const paymentSelect = {
   status: true,
   method: true,
   referenceNumber: true,
+  proofFileUrl: true,
+  proofFilePublicId: true,
+  proofFileOriginalName: true,
+  proofFileMimeType: true,
+  proofFileSize: true,
   reviewedAt: true,
   rejectionReason: true,
   createdAt: true,
@@ -113,6 +120,10 @@ const getStripeCancelUrl = (bookingId: string) => {
   const url = new URL(env.STRIPE_CANCEL_URL);
   url.searchParams.set('bookingId', bookingId);
   return url.toString();
+};
+
+const getPaymentProofUploadFolder = (bookingId: string) => {
+  return `event-platform/payments/${bookingId}/proofs`;
 };
 
 const getCustomerDepositBooking = async (customerId: string, bookingId: string) => {
@@ -230,6 +241,38 @@ export const submitCustomerPayment = async (
       amount: booking.depositAmount,
       method: input.method,
       referenceNumber: input.referenceNumber,
+      status: PaymentStatus.PENDING,
+    },
+
+    select: paymentSelect,
+  });
+};
+
+export const submitCustomerPaymentWithProof = async (
+  customerId: string,
+  bookingId: string,
+  input: SubmitCustomerPaymentWithProofInput,
+  file: Express.Multer.File | undefined,
+) => {
+  const booking = await getCustomerDepositBooking(customerId, bookingId);
+
+  const uploadedProof = await uploadAsset({
+    file,
+    folder: getPaymentProofUploadFolder(bookingId),
+  });
+
+  return prisma.payment.create({
+    data: {
+      bookingId,
+      submittedById: customerId,
+      amount: booking.depositAmount,
+      method: PaymentMethod.BANK_TRANSFER,
+      referenceNumber: input.referenceNumber,
+      proofFileUrl: uploadedProof.fileUrl,
+      proofFilePublicId: uploadedProof.filePublicId,
+      proofFileOriginalName: uploadedProof.originalName,
+      proofFileMimeType: uploadedProof.mimeType,
+      proofFileSize: uploadedProof.fileSize,
       status: PaymentStatus.PENDING,
     },
 
