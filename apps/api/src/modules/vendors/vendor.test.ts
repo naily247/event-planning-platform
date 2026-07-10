@@ -781,6 +781,33 @@ describe('Vendor onboarding API', () => {
         });
       });
 
+      it('stores isFeatured as false when multipart value is false', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const response = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Ceremony aisle design',
+          isFeatured: 'false',
+        });
+
+        expect(response.status).toBe(201);
+        expect(response.body.success).toBe(true);
+
+        expect(response.body.data).toMatchObject({
+          title: 'Ceremony aisle design',
+          isFeatured: false,
+        });
+
+        const storedItem = await prisma.vendorPortfolioItem.findUnique({
+          where: {
+            id: response.body.data.id,
+          },
+        });
+
+        expect(storedItem?.isFeatured).toBe(false);
+      });
+
       it('rejects portfolio upload when the image file is missing', async () => {
         mockedUploadAsset.mockRejectedValueOnce(
           new AppError(400, 'File is required', 'UPLOAD_FILE_REQUIRED'),
@@ -855,6 +882,172 @@ describe('Vendor onboarding API', () => {
           'First image',
           'Second image',
         ]);
+      });
+    });
+
+    describe('PATCH /api/v1/vendors/me/portfolio/:portfolioItemId', () => {
+      it('updates the authenticated vendor portfolio item metadata', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const uploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Original portfolio title',
+          description: 'Original portfolio description for this image.',
+          displayOrder: '3',
+          isFeatured: 'false',
+        });
+
+        const response = await request(app)
+          .patch(`/api/v1/vendors/me/portfolio/${uploadResponse.body.data.id}`)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({
+            title: 'Updated portfolio title',
+            description: 'Updated portfolio description for this image.',
+            displayOrder: 1,
+            isFeatured: true,
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
+        expect(response.body.message).toBe('Vendor portfolio item updated successfully');
+
+        expect(response.body.data).toMatchObject({
+          id: uploadResponse.body.data.id,
+          title: 'Updated portfolio title',
+          description: 'Updated portfolio description for this image.',
+          imageUrl: 'https://res.cloudinary.com/demo/image/upload/vendor-portfolio.jpg',
+          imagePublicId: 'event-platform/vendors/vendor-id/portfolio/vendor-portfolio',
+          originalName: 'portfolio-image.jpg',
+          mimeType: 'image/jpeg',
+          fileSize: 20,
+          displayOrder: 1,
+          isFeatured: true,
+        });
+
+        const storedItem = await prisma.vendorPortfolioItem.findUnique({
+          where: {
+            id: uploadResponse.body.data.id,
+          },
+        });
+
+        expect(storedItem).toMatchObject({
+          title: 'Updated portfolio title',
+          description: 'Updated portfolio description for this image.',
+          displayOrder: 1,
+          isFeatured: true,
+        });
+      });
+
+      it('clears nullable portfolio text fields', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const uploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Portfolio title to clear',
+          description: 'Portfolio description that will be cleared.',
+        });
+
+        const response = await request(app)
+          .patch(`/api/v1/vendors/me/portfolio/${uploadResponse.body.data.id}`)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({
+            title: null,
+            description: null,
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
+
+        expect(response.body.data).toMatchObject({
+          id: uploadResponse.body.data.id,
+          title: null,
+          description: null,
+        });
+      });
+
+      it('rejects an empty portfolio metadata update body', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const uploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Portfolio item',
+        });
+
+        const response = await request(app)
+          .patch(`/api/v1/vendors/me/portfolio/${uploadResponse.body.data.id}`)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({});
+
+        expect(response.status).toBe(400);
+        expect(response.body.success).toBe(false);
+        expect(response.body.error.code).toBe('VALIDATION_ERROR');
+      });
+
+      it('rejects invalid portfolio metadata updates', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const uploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Portfolio item',
+        });
+
+        const response = await request(app)
+          .patch(`/api/v1/vendors/me/portfolio/${uploadResponse.body.data.id}`)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({
+            title: 'A',
+            displayOrder: -1,
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.success).toBe(false);
+        expect(response.body.error.code).toBe('VALIDATION_ERROR');
+      });
+
+      it('rejects updating a portfolio item that does not belong to the authenticated vendor', async () => {
+        const firstVendorResponse = await registerTestVendor();
+        const firstVendorToken = firstVendorResponse.body.data.accessToken;
+
+        const uploadResponse = await uploadVendorPortfolioImageRequest(firstVendorToken, {
+          title: 'First vendor portfolio item',
+        });
+
+        await prisma.user.deleteMany({
+          where: {
+            email: 'second-onboarding-vendor@example.com',
+          },
+        });
+
+        const secondVendorResponse = await request(app).post('/api/v1/auth/register/vendor').send({
+          email: 'second-onboarding-vendor@example.com',
+          password: 'Vendor@2026',
+          firstName: 'Ravi',
+          lastName: 'Silva',
+          businessName: 'Second Vendor Studio',
+        });
+
+        const secondVendorToken = secondVendorResponse.body.data.accessToken;
+
+        const response = await request(app)
+          .patch(`/api/v1/vendors/me/portfolio/${uploadResponse.body.data.id}`)
+          .set('Authorization', `Bearer ${secondVendorToken}`)
+          .send({
+            title: 'Trying to edit another vendor item',
+          });
+
+        expect(response.status).toBe(404);
+        expect(response.body.success).toBe(false);
+        expect(response.body.error.code).toBe('VENDOR_PORTFOLIO_ITEM_NOT_FOUND');
+
+        await prisma.user.deleteMany({
+          where: {
+            email: 'second-onboarding-vendor@example.com',
+          },
+        });
       });
     });
 

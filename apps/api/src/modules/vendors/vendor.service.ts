@@ -12,6 +12,7 @@ import type {
   GetVendorAvailabilityQuery,
   CreateVendorAvailabilityBlockInput,
   UploadVendorPortfolioImageInput,
+  UpdateVendorPortfolioItemInput,
 } from './vendor.schemas.js';
 
 const vendorProfileSelect = {
@@ -599,6 +600,52 @@ export const getVendorPortfolio = async (vendorUserId: string) => {
         createdAt: 'desc',
       },
     ],
+  });
+};
+
+export const updateVendorPortfolioItem = async (
+  vendorUserId: string,
+  portfolioItemId: string,
+  input: UpdateVendorPortfolioItemInput,
+) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  const portfolioItem = await prisma.vendorPortfolioItem.findFirst({
+    where: {
+      id: portfolioItemId,
+      vendorId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!portfolioItem) {
+    throw new AppError(404, 'Portfolio item not found', 'VENDOR_PORTFOLIO_ITEM_NOT_FOUND');
+  }
+
+  return prisma.vendorPortfolioItem.update({
+    where: {
+      id: portfolioItem.id,
+    },
+    data: {
+      ...(input.title !== undefined && {
+        title: input.title,
+      }),
+
+      ...(input.description !== undefined && {
+        description: input.description,
+      }),
+
+      ...(input.displayOrder !== undefined && {
+        displayOrder: input.displayOrder,
+      }),
+
+      ...(input.isFeatured !== undefined && {
+        isFeatured: input.isFeatured,
+      }),
+    },
+    select: vendorPortfolioItemSelect,
   });
 };
 

@@ -13,6 +13,8 @@ import type {
   CreateVendorAvailabilityBlockInput,
   DeleteVendorAvailabilityBlockParams,
   UploadVendorPortfolioImageInput,
+  UpdateVendorPortfolioItemInput,
+  UpdateVendorPortfolioItemParams,
   DeleteVendorPortfolioItemParams,
   GetPublicVendorPortfolioParams,
 } from './vendor.schemas.js';
@@ -30,6 +32,7 @@ import {
   deleteVendorAvailabilityBlock,
   uploadVendorPortfolioImage,
   getVendorPortfolio,
+  updateVendorPortfolioItem,
   deleteVendorPortfolioItem,
   getPublicVendorPortfolio,
 } from './vendor.service.js';
@@ -191,6 +194,22 @@ export const getVendorPortfolioHandler: RequestHandler = asyncHandler(async (req
   res.status(200).json({
     success: true,
     data: portfolioItems,
+  });
+});
+
+export const updateVendorPortfolioItemHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const { portfolioItemId } = req.params as UpdateVendorPortfolioItemParams;
+
+  const portfolioItem = await updateVendorPortfolioItem(
+    req.auth!.userId,
+    portfolioItemId,
+    req.body as UpdateVendorPortfolioItemInput,
+  );
+
+  res.status(200).json({
+    success: true,
+    data: portfolioItem,
+    message: 'Vendor portfolio item updated successfully',
   });
 });
 

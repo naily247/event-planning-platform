@@ -24,6 +24,27 @@ const portfolioDescriptionSchema = z
   .min(3, 'Portfolio description must contain at least 3 characters')
   .max(500, 'Portfolio description must not exceed 500 characters');
 
+const emptyStringToUndefined = (value: unknown) => (value === '' ? undefined : value);
+
+const portfolioFeaturedSchema = z.preprocess(
+  (value) => {
+    if (value === undefined || value === '') {
+      return false;
+    }
+
+    if (value === 'true') {
+      return true;
+    }
+
+    if (value === 'false') {
+      return false;
+    }
+
+    return value;
+  },
+  z.boolean({ message: 'isFeatured must be true or false' }),
+);
+
 const availabilityDateTimeSchema = z.string().datetime({
   message: 'Date and time must be a valid ISO 8601 value',
 });
@@ -85,14 +106,54 @@ export const getPublicVendorBySlugSchema = z.object({
 
 export const uploadVendorPortfolioImageSchema = z.object({
   body: z.object({
-    title: portfolioTitleSchema.optional(),
+    title: z.preprocess(emptyStringToUndefined, portfolioTitleSchema.optional()),
 
-    description: portfolioDescriptionSchema.optional(),
+    description: z.preprocess(emptyStringToUndefined, portfolioDescriptionSchema.optional()),
 
     displayOrder: z.coerce.number().int().min(0).max(1000).default(0),
 
-    isFeatured: z.coerce.boolean().default(false),
+    isFeatured: portfolioFeaturedSchema,
   }),
+});
+
+export const updateVendorPortfolioItemSchema = z.object({
+  params: z.object({
+    portfolioItemId: portfolioItemIdSchema,
+  }),
+
+  body: z
+    .object({
+      title: z.preprocess(emptyStringToUndefined, portfolioTitleSchema.nullable().optional()),
+
+      description: z.preprocess(
+        emptyStringToUndefined,
+        portfolioDescriptionSchema.nullable().optional(),
+      ),
+
+      displayOrder: z.coerce.number().int().min(0).max(1000).optional(),
+
+      isFeatured: z.preprocess(
+        (value) => {
+          if (value === undefined || value === '') {
+            return undefined;
+          }
+
+          if (value === 'true') {
+            return true;
+          }
+
+          if (value === 'false') {
+            return false;
+          }
+
+          return value;
+        },
+        z.boolean({ message: 'isFeatured must be true or false' }).optional(),
+      ),
+    })
+    .refine((body) => Object.keys(body).length > 0, {
+      message: 'At least one portfolio field must be provided',
+    }),
 });
 
 export const deleteVendorPortfolioItemSchema = z.object({
@@ -228,6 +289,14 @@ export type UpdateVendorCategoriesInput = z.infer<typeof updateVendorCategoriesS
 export type UploadVendorPortfolioImageInput = z.infer<
   typeof uploadVendorPortfolioImageSchema
 >['body'];
+
+export type UpdateVendorPortfolioItemInput = z.infer<
+  typeof updateVendorPortfolioItemSchema
+>['body'];
+
+export type UpdateVendorPortfolioItemParams = z.infer<
+  typeof updateVendorPortfolioItemSchema
+>['params'];
 
 export type DeleteVendorPortfolioItemParams = z.infer<
   typeof deleteVendorPortfolioItemSchema
