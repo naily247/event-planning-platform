@@ -8,11 +8,21 @@ const contactPhoneSchema = z
     'Phone number must use international format, for example +94771234567',
   );
 
-const vendorSlugSchema = z
+const vendorSlugSchema = z.string().trim().min(1, 'Vendor slug is required').max(160);
+
+const portfolioItemIdSchema = z.string().cuid('Portfolio item ID must be valid');
+
+const portfolioTitleSchema = z
   .string()
   .trim()
-  .min(1, 'Vendor slug is required')
-  .max(160);
+  .min(2, 'Portfolio title must contain at least 2 characters')
+  .max(120, 'Portfolio title must not exceed 120 characters');
+
+const portfolioDescriptionSchema = z
+  .string()
+  .trim()
+  .min(3, 'Portfolio description must contain at least 3 characters')
+  .max(500, 'Portfolio description must not exceed 500 characters');
 
 const availabilityDateTimeSchema = z.string().datetime({
   message: 'Date and time must be a valid ISO 8601 value',
@@ -37,10 +47,7 @@ const availabilityRangeQuerySchema = z
     to: availabilityDateTimeSchema,
   })
   .superRefine((data, context) => {
-    if (
-      new Date(data.to).getTime() <=
-      new Date(data.from).getTime()
-    ) {
+    if (new Date(data.to).getTime() <= new Date(data.from).getTime()) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['to'],
@@ -49,12 +56,7 @@ const availabilityRangeQuerySchema = z
     }
   });
 
-export const publicVendorSortOptions = [
-  'newest',
-  'oldest',
-  'name_asc',
-  'name_desc',
-] as const;
+export const publicVendorSortOptions = ['newest', 'oldest', 'name_asc', 'name_desc'] as const;
 
 export const publicVendorReviewSortOptions = [
   'newest',
@@ -81,6 +83,30 @@ export const getPublicVendorBySlugSchema = z.object({
   }),
 });
 
+export const uploadVendorPortfolioImageSchema = z.object({
+  body: z.object({
+    title: portfolioTitleSchema.optional(),
+
+    description: portfolioDescriptionSchema.optional(),
+
+    displayOrder: z.coerce.number().int().min(0).max(1000).default(0),
+
+    isFeatured: z.coerce.boolean().default(false),
+  }),
+});
+
+export const deleteVendorPortfolioItemSchema = z.object({
+  params: z.object({
+    portfolioItemId: portfolioItemIdSchema,
+  }),
+});
+
+export const getPublicVendorPortfolioSchema = z.object({
+  params: z.object({
+    slug: vendorSlugSchema,
+  }),
+});
+
 export const getPublicVendorReviewsSchema = z.object({
   params: z.object({
     slug: vendorSlugSchema,
@@ -89,9 +115,7 @@ export const getPublicVendorReviewsSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(50).default(10),
-    sort: z
-      .enum(publicVendorReviewSortOptions)
-      .default('newest'),
+    sort: z.enum(publicVendorReviewSortOptions).default('newest'),
   }),
 });
 
@@ -123,10 +147,7 @@ export const createVendorAvailabilityBlockSchema = z.object({
         .optional(),
     })
     .superRefine((data, context) => {
-      if (
-        new Date(data.endsAt).getTime() <=
-        new Date(data.startsAt).getTime()
-      ) {
+      if (new Date(data.endsAt).getTime() <= new Date(data.startsAt).getTime()) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['endsAt'],
@@ -138,52 +159,24 @@ export const createVendorAvailabilityBlockSchema = z.object({
 
 export const deleteVendorAvailabilityBlockSchema = z.object({
   params: z.object({
-    blockId: z
-      .string()
-      .cuid('Availability block ID must be valid'),
+    blockId: z.string().cuid('Availability block ID must be valid'),
   }),
 });
 
 export const updateVendorProfileSchema = z.object({
   body: z
     .object({
-      businessName: z
-        .string()
-        .trim()
-        .min(2)
-        .max(120)
-        .optional(),
+      businessName: z.string().trim().min(2).max(120).optional(),
 
-      description: z
-        .string()
-        .trim()
-        .min(20)
-        .max(2000)
-        .nullable()
-        .optional(),
+      description: z.string().trim().min(20).max(2000).nullable().optional(),
 
       contactPhone: contactPhoneSchema.nullable().optional(),
 
-      website: z
-        .string()
-        .trim()
-        .url()
-        .max(255)
-        .nullable()
-        .optional(),
+      website: z.string().trim().url().max(255).nullable().optional(),
 
-      baseLocation: z
-        .string()
-        .trim()
-        .min(2)
-        .max(120)
-        .nullable()
-        .optional(),
+      baseLocation: z.string().trim().min(2).max(120).nullable().optional(),
 
-      serviceAreas: z
-        .array(z.string().trim().min(2).max(80))
-        .max(20)
-        .optional(),
+      serviceAreas: z.array(z.string().trim().min(2).max(80)).max(20).optional(),
     })
     .refine((body) => Object.keys(body).length > 0, {
       message: 'At least one profile field must be provided',
@@ -196,13 +189,9 @@ export const updateVendorCategoriesSchema = z.object({
       .array(z.string().cuid('Each category ID must be valid'))
       .min(1, 'At least one service category must be selected')
       .max(5, 'A vendor can select up to five service categories')
-      .refine(
-        (categoryIds) =>
-          new Set(categoryIds).size === categoryIds.length,
-        {
-          message: 'Duplicate category IDs are not allowed',
-        },
-      ),
+      .refine((categoryIds) => new Set(categoryIds).size === categoryIds.length, {
+        message: 'Duplicate category IDs are not allowed',
+      }),
   }),
 });
 
@@ -214,16 +203,36 @@ export type GetPublicVendorReviewsParams = z.infer<typeof getPublicVendorReviews
 
 export type GetPublicVendorReviewsQuery = z.infer<typeof getPublicVendorReviewsSchema>['query'];
 
-export type GetPublicVendorAvailabilityParams = z.infer<typeof getPublicVendorAvailabilitySchema>['params'];
+export type GetPublicVendorAvailabilityParams = z.infer<
+  typeof getPublicVendorAvailabilitySchema
+>['params'];
 
-export type GetPublicVendorAvailabilityQuery = z.infer<typeof getPublicVendorAvailabilitySchema>['query'];
+export type GetPublicVendorAvailabilityQuery = z.infer<
+  typeof getPublicVendorAvailabilitySchema
+>['query'];
 
 export type GetVendorAvailabilityQuery = z.infer<typeof getVendorAvailabilitySchema>['query'];
 
-export type CreateVendorAvailabilityBlockInput = z.infer<typeof createVendorAvailabilityBlockSchema>['body'];
+export type CreateVendorAvailabilityBlockInput = z.infer<
+  typeof createVendorAvailabilityBlockSchema
+>['body'];
 
-export type DeleteVendorAvailabilityBlockParams = z.infer<typeof deleteVendorAvailabilityBlockSchema>['params'];
+export type DeleteVendorAvailabilityBlockParams = z.infer<
+  typeof deleteVendorAvailabilityBlockSchema
+>['params'];
 
 export type UpdateVendorProfileInput = z.infer<typeof updateVendorProfileSchema>['body'];
 
 export type UpdateVendorCategoriesInput = z.infer<typeof updateVendorCategoriesSchema>['body'];
+
+export type UploadVendorPortfolioImageInput = z.infer<
+  typeof uploadVendorPortfolioImageSchema
+>['body'];
+
+export type DeleteVendorPortfolioItemParams = z.infer<
+  typeof deleteVendorPortfolioItemSchema
+>['params'];
+
+export type GetPublicVendorPortfolioParams = z.infer<
+  typeof getPublicVendorPortfolioSchema
+>['params'];

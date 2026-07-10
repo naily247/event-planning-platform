@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { UserRole } from '@prisma/client';
 import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
+import { uploadSingleImage } from '../../middleware/upload.middleware.js';
 import { validate } from '../../middleware/validate.js';
 import {
   getVendorOnboardingProfileHandler,
@@ -15,6 +16,10 @@ import {
   getVendorAvailabilityHandler,
   createVendorAvailabilityBlockHandler,
   deleteVendorAvailabilityBlockHandler,
+  uploadVendorPortfolioImageHandler,
+  getVendorPortfolioHandler,
+  deleteVendorPortfolioItemHandler,
+  getPublicVendorPortfolioHandler,
 } from './vendor.controller.js';
 import {
   updateVendorCategoriesSchema,
@@ -26,46 +31,71 @@ import {
   getVendorAvailabilitySchema,
   createVendorAvailabilityBlockSchema,
   deleteVendorAvailabilityBlockSchema,
+  uploadVendorPortfolioImageSchema,
+  deleteVendorPortfolioItemSchema,
+  getPublicVendorPortfolioSchema,
 } from './vendor.schemas.js';
 
 export const vendorRouter = Router();
 
+const vendorOnly = [requireAuth, authorize(UserRole.VENDOR)] as const;
+
 vendorRouter.get('/', validate(getPublicVendorsSchema), getPublicVendorsHandler);
 
-vendorRouter.get(
-  '/me/onboarding',
-  requireAuth,
-  authorize(UserRole.VENDOR),
-  getVendorOnboardingProfileHandler,
-);
+vendorRouter.get('/me/onboarding', ...vendorOnly, getVendorOnboardingProfileHandler);
 
 vendorRouter.patch(
   '/me/onboarding',
-  requireAuth,
-  authorize(UserRole.VENDOR),
+  ...vendorOnly,
   validate(updateVendorProfileSchema),
   updateVendorOnboardingProfileHandler,
 );
 
 vendorRouter.put(
   '/me/onboarding/categories',
-  requireAuth,
-  authorize(UserRole.VENDOR),
+  ...vendorOnly,
   validate(updateVendorCategoriesSchema),
   updateVendorCategoriesHandler,
 );
 
-vendorRouter.post(
-  '/me/onboarding/submit',
-  requireAuth,
-  authorize(UserRole.VENDOR),
-  submitVendorOnboardingProfileHandler,
-);
+vendorRouter.post('/me/onboarding/submit', ...vendorOnly, submitVendorOnboardingProfileHandler);
 
 vendorRouter.get(
-  '/:slug', 
-  validate(getPublicVendorBySlugSchema), 
-  getPublicVendorBySlugHandler
+  '/me/availability',
+  ...vendorOnly,
+  validate(getVendorAvailabilitySchema),
+  getVendorAvailabilityHandler,
+);
+
+vendorRouter.post(
+  '/me/availability/blocks',
+  ...vendorOnly,
+  validate(createVendorAvailabilityBlockSchema),
+  createVendorAvailabilityBlockHandler,
+);
+
+vendorRouter.delete(
+  '/me/availability/blocks/:blockId',
+  ...vendorOnly,
+  validate(deleteVendorAvailabilityBlockSchema),
+  deleteVendorAvailabilityBlockHandler,
+);
+
+vendorRouter.post(
+  '/me/portfolio/upload',
+  ...vendorOnly,
+  uploadSingleImage,
+  validate(uploadVendorPortfolioImageSchema),
+  uploadVendorPortfolioImageHandler,
+);
+
+vendorRouter.get('/me/portfolio', ...vendorOnly, getVendorPortfolioHandler);
+
+vendorRouter.delete(
+  '/me/portfolio/:portfolioItemId',
+  ...vendorOnly,
+  validate(deleteVendorPortfolioItemSchema),
+  deleteVendorPortfolioItemHandler,
 );
 
 vendorRouter.get(
@@ -75,31 +105,15 @@ vendorRouter.get(
 );
 
 vendorRouter.get(
-  '/me/availability',
-  requireAuth,
-  authorize(UserRole.VENDOR),
-  validate(getVendorAvailabilitySchema),
-  getVendorAvailabilityHandler,
-);
-
-vendorRouter.post(
-  '/me/availability/blocks',
-  requireAuth,
-  authorize(UserRole.VENDOR),
-  validate(createVendorAvailabilityBlockSchema),
-  createVendorAvailabilityBlockHandler,
-);
-
-vendorRouter.delete(
-  '/me/availability/blocks/:blockId',
-  requireAuth,
-  authorize(UserRole.VENDOR),
-  validate(deleteVendorAvailabilityBlockSchema),
-  deleteVendorAvailabilityBlockHandler,
-);
-
-vendorRouter.get(
   '/:slug/availability',
   validate(getPublicVendorAvailabilitySchema),
   getPublicVendorAvailabilityHandler,
 );
+
+vendorRouter.get(
+  '/:slug/portfolio',
+  validate(getPublicVendorPortfolioSchema),
+  getPublicVendorPortfolioHandler,
+);
+
+vendorRouter.get('/:slug', validate(getPublicVendorBySlugSchema), getPublicVendorBySlugHandler);

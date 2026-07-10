@@ -1,6 +1,8 @@
 import { VendorVerificationStatus, Prisma, BookingStatus } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
+import { deleteCloudinaryAsset } from '../../services/cloudinary.service.js';
 import { AppError } from '../../utils/AppError.js';
+import { uploadAsset } from '../uploads/upload.service.js';
 import type {
   UpdateVendorCategoriesInput,
   UpdateVendorProfileInput,
@@ -9,6 +11,7 @@ import type {
   GetPublicVendorAvailabilityQuery,
   GetVendorAvailabilityQuery,
   CreateVendorAvailabilityBlockInput,
+  UploadVendorPortfolioImageInput,
 } from './vendor.schemas.js';
 
 const vendorProfileSelect = {
@@ -332,6 +335,24 @@ const publicVendorSelect = {
   updatedAt: true,
 } as const;
 
+const vendorPortfolioItemSelect = {
+  id: true,
+  title: true,
+  description: true,
+  imageUrl: true,
+  imagePublicId: true,
+  originalName: true,
+  mimeType: true,
+  fileSize: true,
+  displayOrder: true,
+  isFeatured: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+const getVendorPortfolioUploadFolder = (vendorId: string) =>
+  `event-platform/vendors/${vendorId}/portfolio`;
+
 const publicVendorDetailSelect = {
   ...publicVendorSelect,
   packages: {
@@ -526,6 +547,108 @@ const getPublicVendorRatingSummaries = async (
   }
 
   return summaries;
+};
+
+export const uploadVendorPortfolioImage = async (
+  vendorUserId: string,
+  input: UploadVendorPortfolioImageInput,
+  file: Express.Multer.File | undefined,
+) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  const uploadedImage = await uploadAsset({
+    file,
+    folder: getVendorPortfolioUploadFolder(vendorId),
+  });
+
+  try {
+    return await prisma.vendorPortfolioItem.create({
+      data: {
+        vendorId,
+        title: input.title ?? null,
+        description: input.description ?? null,
+        imageUrl: uploadedImage.fileUrl,
+        imagePublicId: uploadedImage.filePublicId,
+        originalName: uploadedImage.originalName,
+        mimeType: uploadedImage.mimeType,
+        fileSize: uploadedImage.fileSize,
+        displayOrder: input.displayOrder,
+        isFeatured: input.isFeatured,
+      },
+      select: vendorPortfolioItemSelect,
+    });
+  } catch (error) {
+    await deleteCloudinaryAsset(uploadedImage.filePublicId);
+    throw error;
+  }
+};
+
+export const getVendorPortfolio = async (vendorUserId: string) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  return prisma.vendorPortfolioItem.findMany({
+    where: {
+      vendorId,
+    },
+    select: vendorPortfolioItemSelect,
+    orderBy: [
+      {
+        displayOrder: 'asc',
+      },
+      {
+        createdAt: 'desc',
+      },
+    ],
+  });
+};
+
+export const deleteVendorPortfolioItem = async (vendorUserId: string, portfolioItemId: string) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  const portfolioItem = await prisma.vendorPortfolioItem.findFirst({
+    where: {
+      id: portfolioItemId,
+      vendorId,
+    },
+    select: {
+      id: true,
+      imagePublicId: true,
+    },
+  });
+
+  if (!portfolioItem) {
+    throw new AppError(404, 'Portfolio item not found', 'VENDOR_PORTFOLIO_ITEM_NOT_FOUND');
+  }
+
+  await prisma.vendorPortfolioItem.delete({
+    where: {
+      id: portfolioItem.id,
+    },
+  });
+
+  await deleteCloudinaryAsset(portfolioItem.imagePublicId);
+};
+
+export const getPublicVendorPortfolio = async (slug: string) => {
+  const vendorId = await getApprovedPublicVendorId(slug);
+
+  return prisma.vendorPortfolioItem.findMany({
+    where: {
+      vendorId,
+    },
+    select: vendorPortfolioItemSelect,
+    orderBy: [
+      {
+        isFeatured: 'desc',
+      },
+      {
+        displayOrder: 'asc',
+      },
+      {
+        createdAt: 'desc',
+      },
+    ],
+  });
 };
 
 export const getPublicVendors = async (query: GetPublicVendorsQuery) => {

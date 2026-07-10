@@ -413,6 +413,10 @@ describe('Customer quotation request API', () => {
           eventType: 'Wedding',
           eventDate: '2030-08-20T09:00:00.000Z',
           location: 'Colombo',
+          guestCount: 250,
+          plannedBudget: 2500000,
+          theme: 'Classic Garden',
+          requirements: 'Outdoor ceremony with photography, catering, decoration, and live music.',
         });
 
       const response = await createQuotationRequest(

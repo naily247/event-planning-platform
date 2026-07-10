@@ -25,6 +25,17 @@ const passwordHashPromise = bcrypt.hash('Vendor@2026', 12);
 const clearDiscoveryVendors = async () => {
   const emails = [...testEmails];
 
+  await prisma.vendorPortfolioItem.deleteMany({
+    where: {
+      vendor: {
+        user: {
+          email: {
+            in: emails,
+          },
+        },
+      },
+    },
+  });
   await prisma.review.deleteMany({
     where: {
       OR: [
@@ -221,6 +232,48 @@ const createDiscoveryVendor = async ({
     },
     include: {
       vendor: true,
+    },
+  });
+};
+
+const createPublicVendorPortfolioItem = async ({
+  vendorSlug,
+  title,
+  description,
+  displayOrder,
+  isFeatured = false,
+}: {
+  vendorSlug: string;
+  title: string;
+  description: string;
+  displayOrder: number;
+  isFeatured?: boolean;
+}) => {
+  const vendor = await prisma.vendorProfile.findUnique({
+    where: {
+      slug: vendorSlug,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!vendor) {
+    throw new Error(`Vendor "${vendorSlug}" was not found`);
+  }
+
+  return prisma.vendorPortfolioItem.create({
+    data: {
+      vendorId: vendor.id,
+      title,
+      description,
+      imageUrl: `https://res.cloudinary.com/demo/image/upload/${vendorSlug}-${displayOrder}.jpg`,
+      imagePublicId: `event-platform/vendors/${vendor.id}/portfolio/${vendorSlug}-${displayOrder}`,
+      originalName: `${vendorSlug}-${displayOrder}.jpg`,
+      mimeType: 'image/jpeg',
+      fileSize: 2048,
+      displayOrder,
+      isFeatured,
     },
   });
 };
@@ -1120,6 +1173,89 @@ describe('Public vendor discovery API', () => {
         total: 1,
         totalPages: 1,
       });
+    });
+  });
+
+  describe('GET /api/v1/vendors/:slug/portfolio', () => {
+    it('returns portfolio items for an approved vendor', async () => {
+      await createPublicVendorPortfolioItem({
+        vendorSlug: 'golden-lens-photography',
+        title: 'Featured wedding album',
+        description: 'A featured wedding photography portfolio item.',
+        displayOrder: 2,
+        isFeatured: true,
+      });
+
+      await createPublicVendorPortfolioItem({
+        vendorSlug: 'golden-lens-photography',
+        title: 'Engagement shoot',
+        description: 'An engagement photography portfolio item.',
+        displayOrder: 1,
+      });
+
+      const response = await request(app).get('/api/v1/vendors/golden-lens-photography/portfolio');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(2);
+
+      expect(response.body.data[0]).toMatchObject({
+        title: 'Featured wedding album',
+        description: 'A featured wedding photography portfolio item.',
+        isFeatured: true,
+        displayOrder: 2,
+        mimeType: 'image/jpeg',
+        fileSize: 2048,
+      });
+
+      expect(response.body.data[1]).toMatchObject({
+        title: 'Engagement shoot',
+        description: 'An engagement photography portfolio item.',
+        isFeatured: false,
+        displayOrder: 1,
+      });
+
+      for (const item of response.body.data) {
+        expect(item.id).toEqual(expect.any(String));
+        expect(item.imageUrl).toEqual(expect.any(String));
+        expect(item.imagePublicId).toEqual(expect.any(String));
+        expect(item.originalName).toEqual(expect.any(String));
+        expect(item.createdAt).toEqual(expect.any(String));
+        expect(item.updatedAt).toEqual(expect.any(String));
+      }
+    });
+
+    it('returns an empty portfolio list for an approved vendor without portfolio items', async () => {
+      const response = await request(app).get('/api/v1/vendors/royal-feast-catering/portfolio');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toEqual([]);
+    });
+
+    it('hides portfolio items for a pending vendor', async () => {
+      await createPublicVendorPortfolioItem({
+        vendorSlug: 'pending-event-studio',
+        title: 'Hidden pending vendor item',
+        description: 'This portfolio item must not be visible publicly.',
+        displayOrder: 1,
+      });
+
+      const response = await request(app).get('/api/v1/vendors/pending-event-studio/portfolio');
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('PUBLIC_VENDOR_NOT_FOUND');
+    });
+
+    it('returns 404 for an unknown vendor portfolio', async () => {
+      const response = await request(app).get(
+        '/api/v1/vendors/vendor-that-does-not-exist/portfolio',
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('PUBLIC_VENDOR_NOT_FOUND');
     });
   });
 });

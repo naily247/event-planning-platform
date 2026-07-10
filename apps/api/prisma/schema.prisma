@@ -262,6 +262,7 @@ model VendorProfile {
   updatedAt          DateTime                  @updatedAt
   moodBoardItems     MoodBoardItem[]
   eventDocuments     EventDocument[]
+  portfolioItems     VendorPortfolioItem[]
 }
 
 model ServiceCategory {
@@ -656,6 +657,27 @@ model EventDocumentFile {
 
   @@index([documentId, createdAt])
   @@index([mimeType])
+}
+
+model VendorPortfolioItem {
+  id            String        @id @default(cuid())
+  vendorId      String
+  title         String?
+  description   String?
+  imageUrl      String
+  imagePublicId String        @unique
+  originalName  String
+  mimeType      String
+  fileSize      Int
+  displayOrder  Int           @default(0)
+  isFeatured    Boolean       @default(false)
+  vendor        VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([vendorId, displayOrder])
+  @@index([vendorId, isFeatured])
+  @@index([vendorId, createdAt])
 }
 
 model Complaint {
