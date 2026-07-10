@@ -5,7 +5,12 @@ import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
+  uploadMultipleDocuments,
+  uploadSingleDocument,
+} from '../../middleware/upload.middleware.js';
+import {
   addEventDocumentFilesHandler,
+  addEventDocumentFilesWithUploadHandler,
   createEventDocumentHandler,
   deleteEventDocumentFileHandler,
   deleteEventDocumentHandler,
@@ -13,17 +18,21 @@ import {
   getEventDocumentsHandler,
   getEventDocumentSummaryHandler,
   replaceEventDocumentFileHandler,
+  replaceEventDocumentFileWithUploadHandler,
   updateEventDocumentHandler,
 } from './eventDocument.controller.js';
 import {
   addEventDocumentFilesRequestSchema,
+  addEventDocumentFilesWithUploadRequestSchema,
   createEventDocumentRequestSchema,
   deleteEventDocumentFileRequestSchema,
   deleteEventDocumentRequestSchema,
+  EVENT_DOCUMENT_MAX_FILES,
   getEventDocumentByIdRequestSchema,
   getEventDocumentsRequestSchema,
   getEventDocumentSummaryRequestSchema,
   replaceEventDocumentFileRequestSchema,
+  replaceEventDocumentFileWithUploadRequestSchema,
   updateEventDocumentRequestSchema,
 } from './eventDocument.schemas.js';
 
@@ -92,4 +101,19 @@ eventDocumentRouter.delete(
   ...customerOnly,
   validate(deleteEventDocumentFileRequestSchema),
   deleteEventDocumentFileHandler,
+);
+
+eventDocumentRouter.post(
+  '/events/:eventId/documents/:documentId/files/upload',
+  ...customerOnly,
+  uploadMultipleDocuments(EVENT_DOCUMENT_MAX_FILES),
+  validate(addEventDocumentFilesWithUploadRequestSchema),
+  addEventDocumentFilesWithUploadHandler,
+);
+eventDocumentRouter.patch(
+  '/events/:eventId/documents/:documentId/files/:fileId/upload',
+  ...customerOnly,
+  uploadSingleDocument,
+  validate(replaceEventDocumentFileWithUploadRequestSchema),
+  replaceEventDocumentFileWithUploadHandler,
 );

@@ -224,6 +224,14 @@ export const addEventDocumentFilesRequestSchema = z.object({
   body: addEventDocumentFilesSchema,
 });
 
+export const addEventDocumentFilesWithUploadRequestSchema = z.object({
+  params: eventDocumentParamsSchema,
+});
+
+export const replaceEventDocumentFileWithUploadRequestSchema = z.object({
+  params: eventDocumentFileParamsSchema,
+});
+
 export const replaceEventDocumentFileRequestSchema = z.object({
   params: eventDocumentFileParamsSchema,
   body: replaceEventDocumentFileSchema,

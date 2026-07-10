@@ -8,15 +8,26 @@ import {
   deleteCloudinaryAssets,
 } from '../../services/cloudinary.service.js';
 
+import { AppError } from '../../utils/AppError.js';
+import { uploadAsset, uploadAssets } from '../uploads/upload.service.js';
+
 jest.mock('../../services/cloudinary.service.js', () => ({
   deleteCloudinaryAsset: jest.fn(),
   deleteCloudinaryAssets: jest.fn(),
+}));
+
+jest.mock('../uploads/upload.service.js', () => ({
+  uploadAsset: jest.fn(),
+  uploadAssets: jest.fn(),
 }));
 
 const app = createApp();
 
 const mockedDeleteCloudinaryAsset = jest.mocked(deleteCloudinaryAsset);
 const mockedDeleteCloudinaryAssets = jest.mocked(deleteCloudinaryAssets);
+
+const mockedUploadAsset = jest.mocked(uploadAsset);
+const mockedUploadAssets = jest.mocked(uploadAssets);
 
 const CUSTOMER_EMAIL = 'event-documents-customer@example.com';
 const SECOND_CUSTOMER_EMAIL = 'event-documents-second-customer@example.com';
@@ -77,6 +88,26 @@ const createImageFile = (
   originalName: `${suffix}.jpg`,
   mimeType: 'image/jpeg' as const,
   fileSize: 500_000,
+  ...overrides,
+});
+
+const createUploadedAsset = (
+  suffix: string,
+  overrides: Partial<{
+    fileUrl: string;
+    filePublicId: string;
+    originalName: string;
+    mimeType: 'application/pdf' | 'image/jpeg' | 'image/png' | 'image/webp';
+    fileSize: number;
+    resourceType: 'image' | 'raw' | 'video';
+  }> = {},
+) => ({
+  fileUrl: `https://res.cloudinary.com/demo/raw/upload/event-documents/${suffix}`,
+  filePublicId: `event-documents/${suffix}`,
+  originalName: `${suffix}.pdf`,
+  mimeType: 'application/pdf' as const,
+  fileSize: 250_000,
+  resourceType: 'raw' as const,
   ...overrides,
 });
 
@@ -196,6 +227,9 @@ beforeEach(async () => {
 
   mockedDeleteCloudinaryAsset.mockReset();
   mockedDeleteCloudinaryAssets.mockReset();
+
+  mockedUploadAsset.mockReset();
+  mockedUploadAssets.mockReset();
 
   mockedDeleteCloudinaryAsset.mockResolvedValue(undefined);
   mockedDeleteCloudinaryAssets.mockResolvedValue(undefined);
@@ -871,6 +905,121 @@ describe('Event document routes', () => {
       );
     });
 
+        it('uploads multiple files and adds them to an existing document', async () => {
+      const customer = await registerCustomer();
+      const eventId = await createEvent(customer.token);
+
+      const document = await createDocument(customer.token, eventId, {
+        title: 'Upload Documents',
+        files: [createPdfFile('upload-existing-file')],
+      });
+
+      const uploadedFiles = [
+        createUploadedAsset('upload-new-contract'),
+        createUploadedAsset('upload-new-layout', {
+          fileUrl:
+            'https://res.cloudinary.com/demo/image/upload/event-documents/upload-new-layout.jpg',
+          originalName: 'upload-new-layout.jpg',
+          mimeType: 'image/jpeg',
+          fileSize: 500_000,
+        }),
+      ];
+
+      mockedUploadAssets.mockResolvedValue(uploadedFiles);
+
+      const response = await request(app)
+        .post(`/api/v1/event-documents/events/${eventId}/documents/${document.id}/files/upload`)
+        .set('Authorization', `Bearer ${customer.token}`)
+        .attach('files', Buffer.from('fake pdf content'), {
+          filename: 'upload-new-contract.pdf',
+          contentType: 'application/pdf',
+        })
+        .attach('files', Buffer.from('fake image content'), {
+          filename: 'upload-new-layout.jpg',
+          contentType: 'image/jpeg',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe(document.id);
+      expect(response.body.data.files).toHaveLength(3);
+      expect(response.body.upload).toHaveLength(2);
+
+      expect(mockedUploadAssets).toHaveBeenCalledTimes(1);
+
+      expect(
+        response.body.data.files.map((file: { filePublicId: string }) => file.filePublicId),
+      ).toEqual(
+        expect.arrayContaining([
+          'event-documents/upload-existing-file',
+          'event-documents/upload-new-contract',
+          'event-documents/upload-new-layout',
+        ]),
+      );
+
+      expect(mockedDeleteCloudinaryAssets).not.toHaveBeenCalled();
+    });
+
+    it('rejects uploaded files when adding them would exceed the document file limit and removes the uploaded assets', async () => {
+      const customer = await registerCustomer();
+      const eventId = await createEvent(customer.token);
+
+      const document = await createDocument(customer.token, eventId, {
+        files: [createPdfFile('upload-limit-existing-1'), createPdfFile('upload-limit-existing-2')],
+      });
+
+      const uploadedFiles = [
+        createUploadedAsset('upload-limit-new-1'),
+        createUploadedAsset('upload-limit-new-2'),
+      ];
+
+      mockedUploadAssets.mockResolvedValue(uploadedFiles);
+
+      const response = await request(app)
+        .post(`/api/v1/event-documents/events/${eventId}/documents/${document.id}/files/upload`)
+        .set('Authorization', `Bearer ${customer.token}`)
+        .attach('files', Buffer.from('fake pdf content one'), {
+          filename: 'upload-limit-new-1.pdf',
+          contentType: 'application/pdf',
+        })
+        .attach('files', Buffer.from('fake pdf content two'), {
+          filename: 'upload-limit-new-2.pdf',
+          contentType: 'application/pdf',
+        });
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('EVENT_DOCUMENT_FILE_LIMIT_EXCEEDED');
+
+      expect(mockedUploadAssets).toHaveBeenCalledTimes(1);
+      expect(mockedDeleteCloudinaryAssets).toHaveBeenCalledWith([
+        'event-documents/upload-limit-new-1',
+        'event-documents/upload-limit-new-2',
+      ]);
+    });
+
+    it('returns 400 when adding uploaded files without attaching a file', async () => {
+      const customer = await registerCustomer();
+      const eventId = await createEvent(customer.token);
+
+      const document = await createDocument(customer.token, eventId, {
+        files: [createPdfFile('upload-no-file-existing')],
+      });
+
+      mockedUploadAssets.mockRejectedValue(
+        new AppError(400, 'At least one file is required', 'FILE_REQUIRED'),
+      );
+
+      const response = await request(app)
+        .post(`/api/v1/event-documents/events/${eventId}/documents/${document.id}/files/upload`)
+        .set('Authorization', `Bearer ${customer.token}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FILE_REQUIRED');
+      expect(mockedUploadAssets).toHaveBeenCalledTimes(1);
+    });
+
     it('rejects adding files when the document would exceed three files', async () => {
       const customer = await registerCustomer();
       const eventId = await createEvent(customer.token);
@@ -945,6 +1094,110 @@ describe('Event document routes', () => {
       });
 
       expect(mockedDeleteCloudinaryAsset).toHaveBeenCalledTimes(1);
+    });
+
+        it('uploads one replacement file and replaces an existing document file', async () => {
+      const customer = await registerCustomer();
+      const eventId = await createEvent(customer.token);
+
+      const document = await createDocument(customer.token, eventId, {
+        files: [createPdfFile('upload-replace-old-file')],
+      });
+
+      const existingFile = document.files[0];
+
+      const uploadedFile = createUploadedAsset('upload-replace-new-file', {
+        fileUrl:
+          'https://res.cloudinary.com/demo/image/upload/event-documents/upload-replace-new-file.png',
+        originalName: 'upload-replace-new-file.png',
+        mimeType: 'image/png',
+        fileSize: 500_000,
+      });
+
+      mockedUploadAsset.mockResolvedValue(uploadedFile);
+
+      const response = await request(app)
+        .patch(
+          `/api/v1/event-documents/events/${eventId}/documents/${document.id}/files/${existingFile.id}/upload`,
+        )
+        .set('Authorization', `Bearer ${customer.token}`)
+        .attach('file', Buffer.from('fake image replacement'), {
+          filename: 'upload-replace-new-file.png',
+          contentType: 'image/png',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toMatchObject({
+        id: existingFile.id,
+        filePublicId: 'event-documents/upload-replace-new-file',
+        originalName: 'upload-replace-new-file.png',
+        mimeType: 'image/png',
+      });
+      expect(response.body.upload).toMatchObject({
+        filePublicId: 'event-documents/upload-replace-new-file',
+      });
+
+      expect(mockedUploadAsset).toHaveBeenCalledTimes(1);
+      expect(mockedDeleteCloudinaryAsset).toHaveBeenCalledWith(
+        'event-documents/upload-replace-old-file',
+      );
+    });
+
+    it('removes the newly uploaded replacement file when the target file does not exist', async () => {
+      const customer = await registerCustomer();
+      const eventId = await createEvent(customer.token);
+
+      const document = await createDocument(customer.token, eventId, {
+        files: [createPdfFile('upload-replace-missing-existing')],
+      });
+
+      const uploadedFile = createUploadedAsset('upload-replace-missing-new');
+
+      mockedUploadAsset.mockResolvedValue(uploadedFile);
+
+      const response = await request(app)
+        .patch(
+          `/api/v1/event-documents/events/${eventId}/documents/${document.id}/files/clx0000000000000000000000/upload`,
+        )
+        .set('Authorization', `Bearer ${customer.token}`)
+        .attach('file', Buffer.from('fake pdf replacement'), {
+          filename: 'upload-replace-missing-new.pdf',
+          contentType: 'application/pdf',
+        });
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('EVENT_DOCUMENT_FILE_NOT_FOUND');
+
+      expect(mockedUploadAsset).toHaveBeenCalledTimes(1);
+      expect(mockedDeleteCloudinaryAsset).toHaveBeenCalledWith(
+        'event-documents/upload-replace-missing-new',
+      );
+    });
+
+    it('returns 400 when replacing a file without attaching a replacement file', async () => {
+      const customer = await registerCustomer();
+      const eventId = await createEvent(customer.token);
+
+      const document = await createDocument(customer.token, eventId, {
+        files: [createPdfFile('upload-replace-no-file-existing')],
+      });
+
+      mockedUploadAsset.mockRejectedValue(
+        new AppError(400, 'A file is required', 'FILE_REQUIRED'),
+      );
+
+      const response = await request(app)
+        .patch(
+          `/api/v1/event-documents/events/${eventId}/documents/${document.id}/files/${document.files[0].id}/upload`,
+        )
+        .set('Authorization', `Bearer ${customer.token}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FILE_REQUIRED');
+      expect(mockedUploadAsset).toHaveBeenCalledTimes(1);
     });
 
     it('rejects replacement with a public ID already used by another file', async () => {

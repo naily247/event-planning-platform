@@ -1,10 +1,18 @@
 import type { RequestHandler } from 'express';
 
 import { asyncHandler } from '../../utils/asyncHandler.js';
+
+import {
+  deleteCloudinaryAsset,
+  deleteCloudinaryAssets,
+} from '../../services/cloudinary.service.js';
+import { uploadAsset, uploadAssets } from '../uploads/upload.service.js';
+
 import type {
   AddEventDocumentFilesInput,
   CreateEventDocumentInput,
   EventDocumentEventParams,
+  EventDocumentFileInput,
   EventDocumentFileParams,
   EventDocumentParams,
   ListEventDocumentsQuery,
@@ -22,6 +30,18 @@ import {
   replaceEventDocumentFile,
   updateEventDocument,
 } from './eventDocument.service.js';
+
+const EVENT_DOCUMENT_UPLOAD_FOLDER = 'event-platform/event-documents';
+
+const mapUploadedAssetToEventDocumentFile = (
+  asset: Awaited<ReturnType<typeof uploadAsset>>,
+): EventDocumentFileInput => ({
+  fileUrl: asset.fileUrl,
+  filePublicId: asset.filePublicId,
+  originalName: asset.originalName,
+  mimeType: asset.mimeType as EventDocumentFileInput['mimeType'],
+  fileSize: asset.fileSize,
+});
 
 export const createEventDocumentHandler: RequestHandler = asyncHandler(async (req, res) => {
   const { eventId } = req.params as EventDocumentEventParams;
@@ -108,6 +128,35 @@ export const addEventDocumentFilesHandler: RequestHandler = asyncHandler(async (
   });
 });
 
+export const addEventDocumentFilesWithUploadHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { eventId, documentId } = req.params as EventDocumentParams;
+
+    const uploadedFiles = await uploadAssets(
+  req.files as Express.Multer.File[] | undefined,
+  EVENT_DOCUMENT_UPLOAD_FOLDER,
+);
+
+    try {
+      const document = await addEventDocumentFiles(req.auth!.userId, eventId, documentId, {
+        files: uploadedFiles.map(mapUploadedAssetToEventDocumentFile),
+      });
+
+      res.status(201).json({
+        success: true,
+        data: document,
+        upload: uploadedFiles,
+        message: 'Event document files uploaded successfully',
+      });
+    } catch (error) {
+      await deleteCloudinaryAssets(uploadedFiles.map((file) => file.filePublicId)).catch(
+        () => undefined,
+      );
+      throw error;
+    }
+  },
+);
+
 export const replaceEventDocumentFileHandler: RequestHandler = asyncHandler(async (req, res) => {
   const { eventId, documentId, fileId } = req.params as EventDocumentFileParams;
 
@@ -125,6 +174,33 @@ export const replaceEventDocumentFileHandler: RequestHandler = asyncHandler(asyn
     message: 'Event document file replaced successfully',
   });
 });
+
+export const replaceEventDocumentFileWithUploadHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { eventId, documentId, fileId } = req.params as EventDocumentFileParams;
+
+    const uploadedFile = await uploadAsset({
+      file: req.file,
+      folder: EVENT_DOCUMENT_UPLOAD_FOLDER,
+    });
+
+    try {
+      const file = await replaceEventDocumentFile(req.auth!.userId, eventId, documentId, fileId, {
+        file: mapUploadedAssetToEventDocumentFile(uploadedFile),
+      });
+
+      res.status(200).json({
+        success: true,
+        data: file,
+        upload: uploadedFile,
+        message: 'Event document file uploaded successfully',
+      });
+    } catch (error) {
+      await deleteCloudinaryAsset(uploadedFile.filePublicId).catch(() => undefined);
+      throw error;
+    }
+  },
+);
 
 export const deleteEventDocumentFileHandler: RequestHandler = asyncHandler(async (req, res) => {
   const { eventId, documentId, fileId } = req.params as EventDocumentFileParams;
