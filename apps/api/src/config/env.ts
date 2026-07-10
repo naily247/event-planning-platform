@@ -19,6 +19,11 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: optionalEnvironmentValue,
   CLOUDINARY_API_KEY: optionalEnvironmentValue,
   CLOUDINARY_API_SECRET: optionalEnvironmentValue,
+
+  STRIPE_SECRET_KEY: optionalEnvironmentValue,
+  STRIPE_WEBHOOK_SECRET: optionalEnvironmentValue,
+  STRIPE_SUCCESS_URL: z.string().url().default('http://localhost:5173/payments/success'),
+  STRIPE_CANCEL_URL: z.string().url().default('http://localhost:5173/payments/cancel'),
 });
 
 export const env = envSchema.parse(process.env);

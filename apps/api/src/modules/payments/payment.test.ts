@@ -13,8 +13,21 @@ import {
 import request from 'supertest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
+import {
+  constructStripeWebhookEvent,
+  getStripeClient,
+} from '../../services/stripe.service.js';
+
+jest.mock('../../services/stripe.service.js', () => ({
+  constructStripeWebhookEvent: jest.fn(),
+  getStripeClient: jest.fn(),
+}));
 
 const app = createApp();
+
+const mockedConstructStripeWebhookEvent = jest.mocked(constructStripeWebhookEvent);
+const mockedGetStripeClient = jest.mocked(getStripeClient);
+const mockedStripeCheckoutSessionCreate = jest.fn();
 
 const customerEmail = 'payment-customer@example.com';
 const secondCustomerEmail = 'payment-second-customer@example.com';
@@ -397,6 +410,20 @@ const getCustomerPaymentsRequest = (accessToken: string, bookingId: string) => {
     .set('Authorization', `Bearer ${accessToken}`);
 };
 
+const createStripeCheckoutSessionRequest = (accessToken: string, bookingId: string) => {
+  return request(app)
+    .post(`/api/v1/payments/bookings/${bookingId}/checkout-session`)
+    .set('Authorization', `Bearer ${accessToken}`);
+};
+
+const sendStripeWebhookRequest = () => {
+  return request(app)
+    .post('/api/v1/payments/stripe/webhook')
+    .set('stripe-signature', 'test_stripe_signature')
+    .set('Content-Type', 'application/json')
+    .send(Buffer.from(JSON.stringify({ id: 'evt_test_checkout_completed' })));
+};
+
 const getPendingAdminPaymentsRequest = (accessToken: string, query = '') => {
   return request(app)
     .get(`/api/v1/admin/payments/pending${query}`)
@@ -429,6 +456,23 @@ const rejectAdminPaymentRequest = (
 };
 
 beforeEach(async () => {
+  mockedConstructStripeWebhookEvent.mockReset();
+  mockedGetStripeClient.mockReset();
+  mockedStripeCheckoutSessionCreate.mockReset();
+
+  mockedGetStripeClient.mockReturnValue({
+    checkout: {
+      sessions: {
+        create: mockedStripeCheckoutSessionCreate,
+      },
+    },
+  } as never);
+
+  mockedStripeCheckoutSessionCreate.mockResolvedValue({
+    id: 'cs_test_deposit_payment',
+    url: 'https://checkout.stripe.com/c/pay/cs_test_deposit_payment',
+  });
+
   await clearTestData();
   await createTestAdmin();
 });
@@ -617,6 +661,244 @@ describe('Booking deposit payment API', () => {
     });
   });
 
+    describe('POST /api/v1/payments/bookings/:bookingId/checkout-session', () => {
+    it('rejects Stripe checkout requests without authentication', async () => {
+      const response = await request(app).post(
+        '/api/v1/payments/bookings/clx0000000000000000000000/checkout-session',
+      );
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('creates a Stripe checkout session for the required deposit', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      const response = await createStripeCheckoutSessionRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Stripe checkout session created successfully');
+
+      expect(response.body.data.checkout).toMatchObject({
+        sessionId: 'cs_test_deposit_payment',
+        checkoutUrl: 'https://checkout.stripe.com/c/pay/cs_test_deposit_payment',
+      });
+
+      expect(response.body.data.payment).toMatchObject({
+        bookingId: preparedBooking.bookingId,
+        submittedById: preparedBooking.customerUserId,
+        status: PaymentStatus.PENDING,
+        method: PaymentMethod.STRIPE_CHECKOUT,
+        referenceNumber: 'cs_test_deposit_payment',
+      });
+
+      expect(Number(response.body.data.payment.amount)).toBe(50000);
+
+      expect(mockedStripeCheckoutSessionCreate).toHaveBeenCalledTimes(1);
+
+      const checkoutInput = mockedStripeCheckoutSessionCreate.mock.calls[0]?.[0];
+
+      expect(checkoutInput).toMatchObject({
+        mode: 'payment',
+        customer_email: customerEmail,
+        client_reference_id: response.body.data.payment.id,
+        success_url:
+          'http://localhost:5173/payments/success?session_id=%7BCHECKOUT_SESSION_ID%7D',
+        cancel_url: `http://localhost:5173/payments/cancel?bookingId=${preparedBooking.bookingId}`,
+
+        metadata: {
+          paymentId: response.body.data.payment.id,
+          bookingId: preparedBooking.bookingId,
+          customerId: preparedBooking.customerUserId,
+        },
+      });
+
+      expect(checkoutInput?.line_items).toHaveLength(1);
+      expect(checkoutInput?.line_items?.[0]).toMatchObject({
+        quantity: 1,
+
+        price_data: {
+          currency: 'lkr',
+          unit_amount: 5000000,
+
+          product_data: {
+            name: 'Deposit payment for Deposit Payment Wedding',
+            description: 'Vendor: Payment Photography Studio',
+          },
+        },
+      });
+
+      const savedPayment = await prisma.payment.findUniqueOrThrow({
+        where: {
+          id: response.body.data.payment.id,
+        },
+      });
+
+      expect(savedPayment.status).toBe(PaymentStatus.PENDING);
+      expect(savedPayment.method).toBe(PaymentMethod.STRIPE_CHECKOUT);
+      expect(savedPayment.referenceNumber).toBe('cs_test_deposit_payment');
+      expect(savedPayment.amount.toFixed(2)).toBe('50000.00');
+    });
+
+    it('removes the pending payment if Stripe checkout creation fails', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      mockedStripeCheckoutSessionCreate.mockRejectedValueOnce(new Error('Stripe is unavailable'));
+
+      const response = await createStripeCheckoutSessionRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(500);
+
+      const payments = await prisma.payment.findMany({
+        where: {
+          bookingId: preparedBooking.bookingId,
+        },
+      });
+
+      expect(payments).toHaveLength(0);
+    });
+
+    it('rejects another Stripe checkout while one payment is pending', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      await createStripeCheckoutSessionRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      const response = await createStripeCheckoutSessionRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('PAYMENT_ALREADY_PENDING');
+    });
+  });
+
+  describe('POST /api/v1/payments/stripe/webhook', () => {
+    it('verifies a completed Stripe checkout session and activates the booking', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      const checkoutResponse = await createStripeCheckoutSessionRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      const paymentId = checkoutResponse.body.data.payment.id as string;
+
+      mockedConstructStripeWebhookEvent.mockReturnValue({
+        id: 'evt_test_checkout_completed',
+        type: 'checkout.session.completed',
+
+        data: {
+          object: {
+            id: 'cs_test_deposit_payment',
+            payment_status: 'paid',
+
+            metadata: {
+              paymentId,
+              bookingId: preparedBooking.bookingId,
+              customerId: preparedBooking.customerUserId,
+            },
+          },
+        },
+      } as never);
+
+      const response = await sendStripeWebhookRequest();
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        received: true,
+        processed: true,
+      });
+
+      expect(mockedConstructStripeWebhookEvent).toHaveBeenCalledTimes(1);
+
+      const savedPayment = await prisma.payment.findUniqueOrThrow({
+        where: {
+          id: paymentId,
+        },
+      });
+
+      expect(savedPayment.status).toBe(PaymentStatus.VERIFIED);
+      expect(savedPayment.reviewedById).toBeNull();
+      expect(savedPayment.reviewedAt).not.toBeNull();
+
+      const booking = await prisma.booking.findUniqueOrThrow({
+        where: {
+          id: preparedBooking.bookingId,
+        },
+      });
+
+      expect(booking.status).toBe(BookingStatus.ACTIVE);
+    });
+
+    it('ignores Stripe checkout sessions that are not paid', async () => {
+      const preparedBooking = await prepareDepositPendingBooking();
+
+      const checkoutResponse = await createStripeCheckoutSessionRequest(
+        preparedBooking.customerAccessToken,
+        preparedBooking.bookingId,
+      );
+
+      const paymentId = checkoutResponse.body.data.payment.id as string;
+
+      mockedConstructStripeWebhookEvent.mockReturnValue({
+        id: 'evt_test_checkout_unpaid',
+        type: 'checkout.session.completed',
+
+        data: {
+          object: {
+            id: 'cs_test_deposit_payment',
+            payment_status: 'unpaid',
+
+            metadata: {
+              paymentId,
+            },
+          },
+        },
+      } as never);
+
+      const response = await sendStripeWebhookRequest();
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        received: true,
+        processed: false,
+        reason: 'CHECKOUT_SESSION_NOT_PAID',
+      });
+
+      const savedPayment = await prisma.payment.findUniqueOrThrow({
+        where: {
+          id: paymentId,
+        },
+      });
+
+      expect(savedPayment.status).toBe(PaymentStatus.PENDING);
+    });
+
+    it('rejects webhook requests with an invalid Stripe signature', async () => {
+      mockedConstructStripeWebhookEvent.mockImplementationOnce(() => {
+        throw new Error('Invalid Stripe webhook signature');
+      });
+
+      const response = await sendStripeWebhookRequest();
+
+      expect(response.status).toBe(500);
+      expect(mockedConstructStripeWebhookEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+  
   describe('Admin payment review API', () => {
     it('returns pending payments to an admin', async () => {
       const preparedBooking = await prepareDepositPendingBooking();

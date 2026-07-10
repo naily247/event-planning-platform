@@ -1,5 +1,9 @@
-import { BookingStatus, PaymentStatus, Prisma } from '@prisma/client';
+import { BookingStatus, PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import type Stripe from 'stripe';
+import { env } from '../../config/env.js';
 import { prisma } from '../../config/prisma.js';
+import { getStripeClient } from '../../services/stripe.service.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   GetPendingPaymentsQuery,
@@ -95,11 +99,23 @@ const getPendingPaymentOrderBy = (
   };
 };
 
-export const submitCustomerPayment = async (
-  customerId: string,
-  bookingId: string,
-  input: SubmitCustomerPaymentInput,
-) => {
+const getStripeAmountInMinorUnits = (amount: Prisma.Decimal) => {
+  return Math.round(amount.toNumber() * 100);
+};
+
+const getStripeSuccessUrl = () => {
+  const url = new URL(env.STRIPE_SUCCESS_URL);
+  url.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
+  return url.toString();
+};
+
+const getStripeCancelUrl = (bookingId: string) => {
+  const url = new URL(env.STRIPE_CANCEL_URL);
+  url.searchParams.set('bookingId', bookingId);
+  return url.toString();
+};
+
+const getCustomerDepositBooking = async (customerId: string, bookingId: string) => {
   const booking = await prisma.booking.findFirst({
     where: {
       id: bookingId,
@@ -112,6 +128,24 @@ export const submitCustomerPayment = async (
     select: {
       id: true,
       status: true,
+
+      vendor: {
+        select: {
+          businessName: true,
+        },
+      },
+
+      event: {
+        select: {
+          name: true,
+
+          owner: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
 
       acceptedQuotation: {
         select: {
@@ -176,11 +210,24 @@ export const submitCustomerPayment = async (
     );
   }
 
+  return {
+    ...booking,
+    depositAmount,
+  };
+};
+
+export const submitCustomerPayment = async (
+  customerId: string,
+  bookingId: string,
+  input: SubmitCustomerPaymentInput,
+) => {
+  const booking = await getCustomerDepositBooking(customerId, bookingId);
+
   return prisma.payment.create({
     data: {
       bookingId,
       submittedById: customerId,
-      amount: depositAmount,
+      amount: booking.depositAmount,
       method: input.method,
       referenceNumber: input.referenceNumber,
       status: PaymentStatus.PENDING,
@@ -188,6 +235,227 @@ export const submitCustomerPayment = async (
 
     select: paymentSelect,
   });
+};
+
+export const createStripeCheckoutSession = async (customerId: string, bookingId: string) => {
+  const stripe = getStripeClient();
+  const booking = await getCustomerDepositBooking(customerId, bookingId);
+
+  const payment = await prisma.payment.create({
+    data: {
+      bookingId,
+      submittedById: customerId,
+      amount: booking.depositAmount,
+      method: PaymentMethod.STRIPE_CHECKOUT,
+      referenceNumber: `stripe_pending_${randomUUID()}`,
+      status: PaymentStatus.PENDING,
+    },
+
+    select: {
+      id: true,
+      amount: true,
+    },
+  });
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      customer_email: booking.event.owner.email,
+      client_reference_id: payment.id,
+      success_url: getStripeSuccessUrl(),
+      cancel_url: getStripeCancelUrl(bookingId),
+
+      line_items: [
+        {
+          quantity: 1,
+
+          price_data: {
+            currency: 'lkr',
+            unit_amount: getStripeAmountInMinorUnits(booking.depositAmount),
+
+            product_data: {
+              name: `Deposit payment for ${booking.event.name}`,
+              description: `Vendor: ${booking.vendor.businessName}`,
+            },
+          },
+        },
+      ],
+
+      metadata: {
+        paymentId: payment.id,
+        bookingId,
+        customerId,
+      },
+    });
+
+    if (!session.url) {
+      throw new AppError(
+        502,
+        'Stripe did not return a checkout URL',
+        'STRIPE_CHECKOUT_URL_MISSING',
+      );
+    }
+
+    const updatedPayment = await prisma.payment.update({
+      where: {
+        id: payment.id,
+      },
+
+      data: {
+        referenceNumber: session.id,
+      },
+
+      select: paymentSelect,
+    });
+
+    return {
+      payment: updatedPayment,
+
+      checkout: {
+        sessionId: session.id,
+        checkoutUrl: session.url,
+      },
+    };
+  } catch (error) {
+    await prisma.payment
+      .delete({
+        where: {
+          id: payment.id,
+        },
+      })
+      .catch(() => undefined);
+
+    throw error;
+  }
+};
+
+export const completeStripeCheckoutPayment = async (session: Stripe.Checkout.Session) => {
+  const paymentId = session.metadata?.paymentId;
+
+  if (!paymentId) {
+    return {
+      processed: false,
+      reason: 'MISSING_PAYMENT_METADATA',
+    };
+  }
+
+  if (session.payment_status !== 'paid') {
+    return {
+      processed: false,
+      reason: 'CHECKOUT_SESSION_NOT_PAID',
+    };
+  }
+
+  const payment = await prisma.payment.findUnique({
+    where: {
+      id: paymentId,
+    },
+
+    select: {
+      id: true,
+      status: true,
+      method: true,
+      bookingId: true,
+
+      booking: {
+        select: {
+          status: true,
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    return {
+      processed: false,
+      reason: 'PAYMENT_NOT_FOUND',
+    };
+  }
+
+  if (payment.method !== PaymentMethod.STRIPE_CHECKOUT) {
+    return {
+      processed: false,
+      reason: 'PAYMENT_METHOD_NOT_STRIPE_CHECKOUT',
+    };
+  }
+
+  if (payment.status === PaymentStatus.VERIFIED) {
+    return {
+      processed: true,
+      payment: await prisma.payment.findUniqueOrThrow({
+        where: {
+          id: payment.id,
+        },
+
+        select: paymentSelect,
+      }),
+    };
+  }
+
+  if (payment.status !== PaymentStatus.PENDING) {
+    return {
+      processed: false,
+      reason: 'PAYMENT_NOT_PENDING',
+    };
+  }
+
+  if (payment.booking.status !== BookingStatus.DEPOSIT_PENDING) {
+    return {
+      processed: false,
+      reason: 'BOOKING_NOT_AWAITING_DEPOSIT',
+    };
+  }
+
+  const verifiedPayment = await prisma.$transaction(async (transaction) => {
+    const reviewedAt = new Date();
+
+    const paymentUpdate = await transaction.payment.updateMany({
+      where: {
+        id: payment.id,
+        status: PaymentStatus.PENDING,
+      },
+
+      data: {
+        status: PaymentStatus.VERIFIED,
+        reviewedAt,
+        rejectionReason: null,
+      },
+    });
+
+    if (paymentUpdate.count === 0) {
+      return transaction.payment.findUniqueOrThrow({
+        where: {
+          id: payment.id,
+        },
+
+        select: paymentSelect,
+      });
+    }
+
+    await transaction.booking.updateMany({
+      where: {
+        id: payment.bookingId,
+        status: BookingStatus.DEPOSIT_PENDING,
+      },
+
+      data: {
+        status: BookingStatus.ACTIVE,
+      },
+    });
+
+    return transaction.payment.findUniqueOrThrow({
+      where: {
+        id: payment.id,
+      },
+
+      select: paymentSelect,
+    });
+  });
+
+  return {
+    processed: true,
+    payment: verifiedPayment,
+  };
 };
 
 export const getCustomerBookingPayments = async (customerId: string, bookingId: string) => {

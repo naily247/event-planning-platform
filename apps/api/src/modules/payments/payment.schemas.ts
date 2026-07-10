@@ -31,6 +31,12 @@ export const submitCustomerPaymentSchema = z.object({
   }),
 });
 
+export const createStripeCheckoutSessionSchema = z.object({
+  params: z.object({
+    bookingId: bookingIdSchema,
+  }),
+});
+
 export const getCustomerPaymentsSchema = z.object({
   params: z.object({
     bookingId: bookingIdSchema,
@@ -72,6 +78,10 @@ export const rejectAdminPaymentSchema = z.object({
 export type SubmitCustomerPaymentInput = z.infer<typeof submitCustomerPaymentSchema>['body'];
 
 export type CustomerPaymentParams = z.infer<typeof getCustomerPaymentsSchema>['params'];
+
+export type CreateStripeCheckoutSessionParams = z.infer<
+  typeof createStripeCheckoutSessionSchema
+>['params'];
 
 export type GetPendingPaymentsQuery = z.infer<typeof getPendingPaymentsSchema>['query'];
 
