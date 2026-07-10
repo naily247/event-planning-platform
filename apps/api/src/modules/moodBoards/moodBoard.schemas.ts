@@ -39,6 +39,39 @@ const colorTagsSchema = z
   .max(20, 'A mood-board item cannot contain more than 20 colour tags')
   .optional();
 
+const multipartColorTagsSchema = z.preprocess((value) => {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return undefined;
+  }
+
+  if (trimmedValue.startsWith('[')) {
+    try {
+      return JSON.parse(trimmedValue);
+    } catch {
+      return value;
+    }
+  }
+
+  return trimmedValue
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}, colorTagsSchema);
+
 const optionalBooleanQuery = z
   .enum(['true', 'false'])
   .transform((value) => value === 'true')
@@ -53,27 +86,29 @@ export const moodBoardItemParamsSchema = z.object({
   itemId: cuidSchema,
 });
 
-export const createMoodBoardItemSchema = z
-  .object({
-    title: z
-      .string()
-      .trim()
-      .min(1, 'Title is required')
-      .max(150, 'Title must not exceed 150 characters'),
+const moodBoardItemBaseSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Title is required')
+    .max(150, 'Title must not exceed 150 characters'),
 
-    description: optionalNullableText('Description', 2000),
+  description: optionalNullableText('Description', 2000),
 
-    category: z.nativeEnum(MoodBoardCategory).optional(),
+  category: z.nativeEnum(MoodBoardCategory).optional(),
 
+  sourceUrl: optionalNullableUrl('Source URL'),
+
+  colorTags: colorTagsSchema,
+
+  vendorId: optionalNullableCuid,
+});
+
+export const createMoodBoardItemSchema = moodBoardItemBaseSchema
+  .extend({
     imageUrl: optionalNullableUrl('Image URL'),
 
     imagePublicId: optionalNullableText('Image public ID', 255),
-
-    sourceUrl: optionalNullableUrl('Source URL'),
-
-    colorTags: colorTagsSchema,
-
-    vendorId: optionalNullableCuid,
   })
   .superRefine((data, context) => {
     if (!data.imageUrl && !data.sourceUrl) {
@@ -92,6 +127,10 @@ export const createMoodBoardItemSchema = z
       });
     }
   });
+
+export const createMoodBoardItemWithUploadSchema = moodBoardItemBaseSchema.extend({
+  colorTags: multipartColorTagsSchema,
+});
 
 export const updateMoodBoardItemSchema = z
   .object({
@@ -173,6 +212,8 @@ export type MoodBoardItemParams = z.infer<typeof moodBoardItemParamsSchema>;
 
 export type CreateMoodBoardItemInput = z.infer<typeof createMoodBoardItemSchema>;
 
+export type CreateMoodBoardItemWithUploadInput = z.infer<typeof createMoodBoardItemWithUploadSchema>;
+
 export type UpdateMoodBoardItemInput = z.infer<typeof updateMoodBoardItemSchema>;
 
 export type ListMoodBoardItemsQuery = z.infer<typeof listMoodBoardItemsQuerySchema>;
@@ -180,6 +221,11 @@ export type ListMoodBoardItemsQuery = z.infer<typeof listMoodBoardItemsQuerySche
 export const createMoodBoardItemRequestSchema = z.object({
   params: moodBoardEventParamsSchema,
   body: createMoodBoardItemSchema,
+});
+
+export const createMoodBoardItemWithUploadRequestSchema = z.object({
+  params: moodBoardEventParamsSchema,
+  body: createMoodBoardItemWithUploadSchema,
 });
 
 export const getMoodBoardItemsRequestSchema = z.object({

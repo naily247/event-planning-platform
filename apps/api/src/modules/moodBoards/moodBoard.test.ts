@@ -1,7 +1,17 @@
 import { MoodBoardCategory } from '@prisma/client';
 import request from 'supertest';
+
 import { createApp } from '../../app.js';
 import { prisma } from '../../config/prisma.js';
+import { AppError } from '../../utils/AppError.js';
+import { uploadAsset } from '../uploads/upload.service.js';
+
+jest.mock('../uploads/upload.service.js', () => ({
+  uploadAsset: jest.fn(),
+  uploadAssets: jest.fn(),
+}));
+
+const mockedUploadAsset = uploadAsset as jest.MockedFunction<typeof uploadAsset>;
 
 const app = createApp();
 
@@ -78,6 +88,21 @@ const createMoodBoardItemRequest = (
     });
 };
 
+const createMoodBoardItemUploadRequest = (accessToken: string, eventId: string) => {
+  return request(app)
+    .post(`/api/v1/mood-boards/events/${eventId}/items/upload`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .field('title', 'Uploaded garden arch')
+    .field('description', 'Uploaded mood-board image inspiration')
+    .field('category', MoodBoardCategory.DECORATION)
+    .field('sourceUrl', 'https://example.com/uploaded-inspiration')
+    .field('colorTags', JSON.stringify(['White', 'Green', 'White']))
+    .attach('file', Buffer.from('fake mood-board image'), {
+      filename: 'garden-arch.jpg',
+      contentType: 'image/jpeg',
+    });
+};
+
 const getVendorProfileId = async () => {
   const vendor = await prisma.vendorProfile.findFirst({
     where: {
@@ -118,6 +143,7 @@ const clearTestData = async () => {
 };
 
 beforeEach(async () => {
+  mockedUploadAsset.mockReset();
   await clearTestData();
 });
 
@@ -439,6 +465,143 @@ describe('Event mood-board and inspiration management API', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
+
+  describe('Creating mood-board items with image uploads', () => {
+    it('uploads an image and creates a mood-board item', async () => {
+      mockedUploadAsset.mockResolvedValueOnce({
+        fileUrl: 'https://res.cloudinary.com/demo/image/upload/mood-board/garden-arch.jpg',
+        filePublicId: 'event-platform/mood-board-images/garden-arch',
+        originalName: 'garden-arch.jpg',
+        mimeType: 'image/jpeg',
+        fileSize: 21,
+        resourceType: 'image',
+        format: 'jpg',
+      });
+
+      const registration = await registerCustomer(customerPayload);
+
+      const accessToken = registration.body.data.accessToken as string;
+
+      const eventResponse = await createEventRequest(accessToken);
+
+      const response = await createMoodBoardItemUploadRequest(
+        accessToken,
+        eventResponse.body.data.id,
+      );
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Mood-board item image uploaded successfully');
+
+      expect(mockedUploadAsset).toHaveBeenCalledTimes(1);
+      expect(mockedUploadAsset).toHaveBeenCalledWith({
+        file: expect.objectContaining({
+          originalname: 'garden-arch.jpg',
+          mimetype: 'image/jpeg',
+        }),
+        folder: 'event-platform/mood-board-images',
+      });
+
+      expect(response.body.data).toMatchObject({
+        eventId: eventResponse.body.data.id,
+        vendorId: null,
+        title: 'Uploaded garden arch',
+        description: 'Uploaded mood-board image inspiration',
+        category: MoodBoardCategory.DECORATION,
+        imageUrl: 'https://res.cloudinary.com/demo/image/upload/mood-board/garden-arch.jpg',
+        imagePublicId: 'event-platform/mood-board-images/garden-arch',
+        sourceUrl: 'https://example.com/uploaded-inspiration',
+        colorTags: ['White', 'Green'],
+      });
+
+      expect(response.body.upload).toMatchObject({
+        fileUrl: 'https://res.cloudinary.com/demo/image/upload/mood-board/garden-arch.jpg',
+        filePublicId: 'event-platform/mood-board-images/garden-arch',
+        originalName: 'garden-arch.jpg',
+        mimeType: 'image/jpeg',
+        fileSize: 21,
+        resourceType: 'image',
+        format: 'jpg',
+      });
+    });
+
+    it('rejects upload creation without a file', async () => {
+      mockedUploadAsset.mockRejectedValueOnce(
+        new AppError(400, 'File is required', 'UPLOAD_FILE_REQUIRED'),
+      );
+
+      const registration = await registerCustomer(customerPayload);
+
+      const accessToken = registration.body.data.accessToken as string;
+
+      const eventResponse = await createEventRequest(accessToken);
+
+      const response = await request(app)
+        .post(`/api/v1/mood-boards/events/${eventResponse.body.data.id}/items/upload`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .field('title', 'Missing file item')
+        .field('category', MoodBoardCategory.DECORATION);
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('UPLOAD_FILE_REQUIRED');
+
+      expect(mockedUploadAsset).toHaveBeenCalledTimes(1);
+      expect(mockedUploadAsset).toHaveBeenCalledWith({
+        file: undefined,
+        folder: 'event-platform/mood-board-images',
+      });
+    });
+
+    it('rejects upload creation for authenticated vendors', async () => {
+      const vendorRegistration = await registerVendor();
+
+      const response = await request(app)
+        .post('/api/v1/mood-boards/events/clx0000000000000000000000/items/upload')
+        .set('Authorization', `Bearer ${vendorRegistration.body.data.accessToken}`)
+        .field('title', 'Vendor upload attempt')
+        .attach('file', Buffer.from('fake mood-board image'), {
+          filename: 'vendor-image.jpg',
+          contentType: 'image/jpeg',
+        });
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('FORBIDDEN');
+      expect(mockedUploadAsset).not.toHaveBeenCalled();
+    });
+
+    it('hides another customer event during upload creation', async () => {
+      const firstRegistration = await registerCustomer(customerPayload);
+      const secondRegistration = await registerCustomer(secondCustomerPayload);
+
+      const firstAccessToken = firstRegistration.body.data.accessToken as string;
+      const secondAccessToken = secondRegistration.body.data.accessToken as string;
+
+      const eventResponse = await createEventRequest(firstAccessToken);
+
+      mockedUploadAsset.mockResolvedValueOnce({
+        fileUrl: 'https://res.cloudinary.com/demo/image/upload/mood-board/private.jpg',
+        filePublicId: 'event-platform/mood-board-images/private',
+        originalName: 'private.jpg',
+        mimeType: 'image/jpeg',
+        fileSize: 21,
+        resourceType: 'image',
+        format: 'jpg',
+      });
+
+      const response = await createMoodBoardItemUploadRequest(
+        secondAccessToken,
+        eventResponse.body.data.id,
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('EVENT_NOT_FOUND');
+
+      expect(mockedUploadAsset).toHaveBeenCalledTimes(1);
     });
   });
 

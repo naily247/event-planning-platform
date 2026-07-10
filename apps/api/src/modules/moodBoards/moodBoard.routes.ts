@@ -1,10 +1,13 @@
 import { UserRole } from '@prisma/client';
 import { Router } from 'express';
+
 import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
+import { uploadSingleImage } from '../../middleware/upload.middleware.js';
 import { validate } from '../../middleware/validate.js';
 import {
   createMoodBoardItemHandler,
+  createMoodBoardItemWithUploadHandler,
   deleteMoodBoardItemHandler,
   getMoodBoardItemByIdHandler,
   getMoodBoardItemsHandler,
@@ -13,6 +16,7 @@ import {
 } from './moodBoard.controller.js';
 import {
   createMoodBoardItemRequestSchema,
+  createMoodBoardItemWithUploadRequestSchema,
   deleteMoodBoardItemRequestSchema,
   getMoodBoardItemByIdRequestSchema,
   getMoodBoardItemsRequestSchema,
@@ -36,6 +40,14 @@ moodBoardRouter.post(
   ...customerOnly,
   validate(createMoodBoardItemRequestSchema),
   createMoodBoardItemHandler,
+);
+
+moodBoardRouter.post(
+  '/events/:eventId/items/upload',
+  ...customerOnly,
+  uploadSingleImage,
+  validate(createMoodBoardItemWithUploadRequestSchema),
+  createMoodBoardItemWithUploadHandler,
 );
 
 moodBoardRouter.get(

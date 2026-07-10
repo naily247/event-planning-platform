@@ -1,7 +1,10 @@
 import type { RequestHandler } from 'express';
+
+import { uploadAsset } from '../uploads/upload.service.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import type {
   CreateMoodBoardItemInput,
+  CreateMoodBoardItemWithUploadInput,
   ListMoodBoardItemsQuery,
   MoodBoardEventParams,
   MoodBoardItemParams,
@@ -15,6 +18,8 @@ import {
   getMoodBoardSummary,
   updateMoodBoardItem,
 } from './moodBoard.service.js';
+
+const MOOD_BOARD_UPLOAD_FOLDER = 'event-platform/mood-board-images';
 
 export const createMoodBoardItemHandler: RequestHandler = asyncHandler(async (req, res) => {
   const { eventId } = req.params as MoodBoardEventParams;
@@ -31,6 +36,31 @@ export const createMoodBoardItemHandler: RequestHandler = asyncHandler(async (re
     message: 'Mood-board item created successfully',
   });
 });
+
+export const createMoodBoardItemWithUploadHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { eventId } = req.params as MoodBoardEventParams;
+    const input = req.body as CreateMoodBoardItemWithUploadInput;
+
+    const uploadedImage = await uploadAsset({
+      file: req.file,
+      folder: MOOD_BOARD_UPLOAD_FOLDER,
+    });
+
+    const item = await createMoodBoardItem(req.auth!.userId, eventId, {
+      ...input,
+      imageUrl: uploadedImage.fileUrl,
+      imagePublicId: uploadedImage.filePublicId,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: item,
+      upload: uploadedImage,
+      message: 'Mood-board item image uploaded successfully',
+    });
+  },
+);
 
 export const getMoodBoardItemsHandler: RequestHandler = asyncHandler(async (req, res) => {
   const { eventId } = req.params as MoodBoardEventParams;
