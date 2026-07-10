@@ -18,6 +18,7 @@ import { eventDocumentRouter } from '../modules/eventDocuments/eventDocument.rou
 import { reviewRouter } from '../modules/reviews/review.routes.js';
 import { complaintRouter } from '../modules/complaints/complaint.routes.js';
 import { dashboardRouter } from '../modules/dashboards/dashboard.routes.js';
+import { uploadRouter } from '../modules/uploads/upload.routes.js';
 
 export const apiRouter = Router();
 
@@ -40,3 +41,4 @@ apiRouter.use('/event-documents', eventDocumentRouter);
 apiRouter.use('/reviews', reviewRouter);
 apiRouter.use('/complaints', complaintRouter);
 apiRouter.use('/dashboard', dashboardRouter);
+apiRouter.use('/uploads', uploadRouter);
