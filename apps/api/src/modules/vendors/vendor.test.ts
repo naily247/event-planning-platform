@@ -1051,6 +1051,201 @@ describe('Vendor onboarding API', () => {
       });
     });
 
+    describe('PATCH /api/v1/vendors/me/portfolio/reorder', () => {
+      it('reorders the authenticated vendor portfolio items', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const firstUploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'First portfolio image',
+          displayOrder: '1',
+        });
+
+        mockedUploadAsset.mockResolvedValueOnce({
+          fileUrl: 'https://res.cloudinary.com/demo/image/upload/second-image.jpg',
+          filePublicId: 'event-platform/vendors/vendor-id/portfolio/second-image',
+          originalName: 'second-image.jpg',
+          mimeType: 'image/jpeg',
+          fileSize: 18,
+          resourceType: 'image',
+          format: 'jpg',
+        });
+
+        const secondUploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Second portfolio image',
+          displayOrder: '2',
+        });
+
+        mockedUploadAsset.mockResolvedValueOnce({
+          fileUrl: 'https://res.cloudinary.com/demo/image/upload/third-image.jpg',
+          filePublicId: 'event-platform/vendors/vendor-id/portfolio/third-image',
+          originalName: 'third-image.jpg',
+          mimeType: 'image/jpeg',
+          fileSize: 22,
+          resourceType: 'image',
+          format: 'jpg',
+        });
+
+        const thirdUploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Third portfolio image',
+          displayOrder: '3',
+        });
+
+        const response = await request(app)
+          .patch('/api/v1/vendors/me/portfolio/reorder')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({
+            items: [
+              {
+                portfolioItemId: thirdUploadResponse.body.data.id,
+                displayOrder: 0,
+              },
+              {
+                portfolioItemId: firstUploadResponse.body.data.id,
+                displayOrder: 1,
+              },
+              {
+                portfolioItemId: secondUploadResponse.body.data.id,
+                displayOrder: 2,
+              },
+            ],
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
+        expect(response.body.message).toBe('Vendor portfolio items reordered successfully');
+
+        expect(response.body.data.map((item: { title: string }) => item.title)).toEqual([
+          'Third portfolio image',
+          'First portfolio image',
+          'Second portfolio image',
+        ]);
+
+        expect(
+          response.body.data.map((item: { displayOrder: number }) => item.displayOrder),
+        ).toEqual([0, 1, 2]);
+
+        const storedItems = await prisma.vendorPortfolioItem.findMany({
+          where: {
+            id: {
+              in: [
+                firstUploadResponse.body.data.id,
+                secondUploadResponse.body.data.id,
+                thirdUploadResponse.body.data.id,
+              ],
+            },
+          },
+          select: {
+            id: true,
+            displayOrder: true,
+          },
+        });
+
+        const displayOrderById = new Map(storedItems.map((item) => [item.id, item.displayOrder]));
+
+        expect(displayOrderById.get(thirdUploadResponse.body.data.id)).toBe(0);
+        expect(displayOrderById.get(firstUploadResponse.body.data.id)).toBe(1);
+        expect(displayOrderById.get(secondUploadResponse.body.data.id)).toBe(2);
+      });
+
+      it('rejects an empty portfolio reorder item list', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const response = await request(app)
+          .patch('/api/v1/vendors/me/portfolio/reorder')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({
+            items: [],
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.success).toBe(false);
+        expect(response.body.error.code).toBe('VALIDATION_ERROR');
+      });
+
+      it('rejects duplicate portfolio item IDs in a reorder request', async () => {
+        const registrationResponse = await registerTestVendor();
+
+        const accessToken = registrationResponse.body.data.accessToken;
+
+        const uploadResponse = await uploadVendorPortfolioImageRequest(accessToken, {
+          title: 'Portfolio image',
+          displayOrder: '1',
+        });
+
+        const response = await request(app)
+          .patch('/api/v1/vendors/me/portfolio/reorder')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({
+            items: [
+              {
+                portfolioItemId: uploadResponse.body.data.id,
+                displayOrder: 0,
+              },
+              {
+                portfolioItemId: uploadResponse.body.data.id,
+                displayOrder: 1,
+              },
+            ],
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.success).toBe(false);
+        expect(response.body.error.code).toBe('VALIDATION_ERROR');
+      });
+
+      it('rejects reordering a portfolio item that does not belong to the authenticated vendor', async () => {
+        const firstVendorResponse = await registerTestVendor();
+        const firstVendorToken = firstVendorResponse.body.data.accessToken;
+
+        const uploadResponse = await uploadVendorPortfolioImageRequest(firstVendorToken, {
+          title: 'First vendor portfolio image',
+          displayOrder: '1',
+        });
+
+        await prisma.user.deleteMany({
+          where: {
+            email: 'second-onboarding-vendor@example.com',
+          },
+        });
+
+        const secondVendorResponse = await request(app).post('/api/v1/auth/register/vendor').send({
+          email: 'second-onboarding-vendor@example.com',
+          password: 'Vendor@2026',
+          firstName: 'Ravi',
+          lastName: 'Silva',
+          businessName: 'Second Vendor Studio',
+        });
+
+        const secondVendorToken = secondVendorResponse.body.data.accessToken;
+
+        const response = await request(app)
+          .patch('/api/v1/vendors/me/portfolio/reorder')
+          .set('Authorization', `Bearer ${secondVendorToken}`)
+          .send({
+            items: [
+              {
+                portfolioItemId: uploadResponse.body.data.id,
+                displayOrder: 0,
+              },
+            ],
+          });
+
+        expect(response.status).toBe(404);
+        expect(response.body.success).toBe(false);
+        expect(response.body.error.code).toBe('VENDOR_PORTFOLIO_ITEM_NOT_FOUND');
+
+        await prisma.user.deleteMany({
+          where: {
+            email: 'second-onboarding-vendor@example.com',
+          },
+        });
+      });
+    });
+
     describe('DELETE /api/v1/vendors/me/portfolio/:portfolioItemId', () => {
       it('deletes the authenticated vendor portfolio item', async () => {
         const registrationResponse = await registerTestVendor();

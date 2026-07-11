@@ -1,4 +1,7 @@
-import { uploadCloudinaryAsset } from '../../services/cloudinary.service.js';
+import {
+  deleteCloudinaryAssets,
+  uploadCloudinaryAsset,
+} from '../../services/cloudinary.service.js';
 import { AppError } from '../../utils/AppError.js';
 
 type UploadAssetInput = {
@@ -34,7 +37,11 @@ export const uploadAsset = async ({
     throw new AppError(400, 'File is required', 'UPLOAD_FILE_REQUIRED');
   }
 
-  const normalizedFolder = normalizeRequiredText(folder, 'Upload folder is required', 'UPLOAD_FOLDER_REQUIRED');
+  const normalizedFolder = normalizeRequiredText(
+    folder,
+    'Upload folder is required',
+    'UPLOAD_FOLDER_REQUIRED',
+  );
 
   const uploadedAsset = await uploadCloudinaryAsset({
     buffer: file.buffer,
@@ -64,14 +71,20 @@ export const uploadAssets = async (
 
   const uploadedAssets: UploadedAssetResponse[] = [];
 
-  for (const file of files) {
-    const uploadedAsset = await uploadAsset({
-      file,
-      folder,
-    });
+  try {
+    for (const file of files) {
+      const uploadedAsset = await uploadAsset({
+        file,
+        folder,
+      });
 
-    uploadedAssets.push(uploadedAsset);
+      uploadedAssets.push(uploadedAsset);
+    }
+
+    return uploadedAssets;
+  } catch (error) {
+    await deleteCloudinaryAssets(uploadedAssets.map((asset) => asset.filePublicId));
+
+    throw error;
   }
-
-  return uploadedAssets;
 };

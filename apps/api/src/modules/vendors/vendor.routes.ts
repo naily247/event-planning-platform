@@ -16,9 +16,10 @@ import {
   getVendorAvailabilityHandler,
   createVendorAvailabilityBlockHandler,
   deleteVendorAvailabilityBlockHandler,
-    uploadVendorPortfolioImageHandler,
+  uploadVendorPortfolioImageHandler,
   getVendorPortfolioHandler,
   updateVendorPortfolioItemHandler,
+  reorderVendorPortfolioItemsHandler,
   deleteVendorPortfolioItemHandler,
   getPublicVendorPortfolioHandler,
 } from './vendor.controller.js';
@@ -32,8 +33,9 @@ import {
   getVendorAvailabilitySchema,
   createVendorAvailabilityBlockSchema,
   deleteVendorAvailabilityBlockSchema,
-    uploadVendorPortfolioImageSchema,
+  uploadVendorPortfolioImageSchema,
   updateVendorPortfolioItemSchema,
+  reorderVendorPortfolioItemsSchema,
   deleteVendorPortfolioItemSchema,
   getPublicVendorPortfolioSchema,
 } from './vendor.schemas.js';
@@ -92,6 +94,13 @@ vendorRouter.post(
 );
 
 vendorRouter.get('/me/portfolio', ...vendorOnly, getVendorPortfolioHandler);
+
+vendorRouter.patch(
+  '/me/portfolio/reorder',
+  ...vendorOnly,
+  validate(reorderVendorPortfolioItemsSchema),
+  reorderVendorPortfolioItemsHandler,
+);
 
 vendorRouter.patch(
   '/me/portfolio/:portfolioItemId',

@@ -13,6 +13,7 @@ import type {
   CreateVendorAvailabilityBlockInput,
   UploadVendorPortfolioImageInput,
   UpdateVendorPortfolioItemInput,
+  ReorderVendorPortfolioItemsInput,
 } from './vendor.schemas.js';
 
 const vendorProfileSelect = {
@@ -586,6 +587,59 @@ export const uploadVendorPortfolioImage = async (
 
 export const getVendorPortfolio = async (vendorUserId: string) => {
   const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  return prisma.vendorPortfolioItem.findMany({
+    where: {
+      vendorId,
+    },
+    select: vendorPortfolioItemSelect,
+    orderBy: [
+      {
+        displayOrder: 'asc',
+      },
+      {
+        createdAt: 'desc',
+      },
+    ],
+  });
+};
+
+export const reorderVendorPortfolioItems = async (
+  vendorUserId: string,
+  input: ReorderVendorPortfolioItemsInput,
+) => {
+  const vendorId = await getVendorProfileIdByUserId(vendorUserId);
+
+  const portfolioItemIds = input.items.map((item) => item.portfolioItemId);
+
+  const existingItems = await prisma.vendorPortfolioItem.findMany({
+    where: {
+      id: {
+        in: portfolioItemIds,
+      },
+      vendorId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingItems.length !== portfolioItemIds.length) {
+    throw new AppError(404, 'Portfolio item not found', 'VENDOR_PORTFOLIO_ITEM_NOT_FOUND');
+  }
+
+  await prisma.$transaction(
+    input.items.map((item) =>
+      prisma.vendorPortfolioItem.update({
+        where: {
+          id: item.portfolioItemId,
+        },
+        data: {
+          displayOrder: item.displayOrder,
+        },
+      }),
+    ),
+  );
 
   return prisma.vendorPortfolioItem.findMany({
     where: {

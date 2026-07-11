@@ -1,5 +1,6 @@
 import { MoodBoardCategory, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
+import { deleteCloudinaryAsset } from '../../services/cloudinary.service.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
   CreateMoodBoardItemInput,
@@ -397,13 +398,17 @@ export const updateMoodBoardItem = async (
 };
 
 export const deleteMoodBoardItem = async (ownerId: string, eventId: string, itemId: string) => {
-  await getOwnedMoodBoardItem(ownerId, eventId, itemId);
+  const existingItem = await getOwnedMoodBoardItem(ownerId, eventId, itemId);
 
   await prisma.moodBoardItem.delete({
     where: {
       id: itemId,
     },
   });
+
+  if (existingItem.imagePublicId) {
+    await deleteCloudinaryAsset(existingItem.imagePublicId).catch(() => undefined);
+  }
 };
 
 export const getMoodBoardSummary = async (ownerId: string, eventId: string) => {

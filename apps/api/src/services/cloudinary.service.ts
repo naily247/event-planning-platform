@@ -76,7 +76,13 @@ const uploadBufferToCloudinary = async (
       }
 
       if (!result) {
-        reject(new AppError(502, 'Cloudinary did not return an upload result', 'CLOUDINARY_UPLOAD_FAILED'));
+        reject(
+          new AppError(
+            502,
+            'Cloudinary did not return an upload result',
+            'CLOUDINARY_UPLOAD_FAILED',
+          ),
+        );
         return;
       }
 
@@ -150,27 +156,30 @@ export const deleteCloudinaryAsset = async (publicId: string): Promise<void> => 
   configureCloudinary();
 
   try {
-    for (const resourceType of ['image', 'raw', 'video'] satisfies CloudinaryDestroyResourceType[]) {
-  const result = await deleteCloudinaryAssetByResourceType(normalizedPublicId, resourceType);
+    for (const resourceType of [
+      'image',
+      'raw',
+      'video',
+    ] satisfies CloudinaryDestroyResourceType[]) {
+      const result = await deleteCloudinaryAssetByResourceType(normalizedPublicId, resourceType);
 
-  if (result.result === 'ok') {
-    return;
-  }
+      if (result.result === 'ok') {
+        return;
+      }
 
-  if (result.result !== 'not found') {
-    throw new AppError(
-      502,
-      'Cloudinary could not delete the requested asset',
-      'CLOUDINARY_DELETE_FAILED',
-      {
-        publicId: normalizedPublicId,
-        resourceType,
-        result: result.result,
-      },
-    );
-  }
-}
-
+      if (result.result !== 'not found') {
+        throw new AppError(
+          502,
+          'Cloudinary could not delete the requested asset',
+          'CLOUDINARY_DELETE_FAILED',
+          {
+            publicId: normalizedPublicId,
+            resourceType,
+            result: result.result,
+          },
+        );
+      }
+    }
   } catch (error) {
     if (error instanceof AppError) {
       throw error;

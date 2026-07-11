@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type Stripe from 'stripe';
 import { env } from '../../config/env.js';
 import { prisma } from '../../config/prisma.js';
+import { deleteCloudinaryAsset } from '../../services/cloudinary.service.js';
 import { getStripeClient } from '../../services/stripe.service.js';
 import { AppError } from '../../utils/AppError.js';
 import { uploadAsset } from '../uploads/upload.service.js';
@@ -261,23 +262,29 @@ export const submitCustomerPaymentWithProof = async (
     folder: getPaymentProofUploadFolder(bookingId),
   });
 
-  return prisma.payment.create({
-    data: {
-      bookingId,
-      submittedById: customerId,
-      amount: booking.depositAmount,
-      method: PaymentMethod.BANK_TRANSFER,
-      referenceNumber: input.referenceNumber,
-      proofFileUrl: uploadedProof.fileUrl,
-      proofFilePublicId: uploadedProof.filePublicId,
-      proofFileOriginalName: uploadedProof.originalName,
-      proofFileMimeType: uploadedProof.mimeType,
-      proofFileSize: uploadedProof.fileSize,
-      status: PaymentStatus.PENDING,
-    },
+  try {
+    return await prisma.payment.create({
+      data: {
+        bookingId,
+        submittedById: customerId,
+        amount: booking.depositAmount,
+        method: PaymentMethod.BANK_TRANSFER,
+        referenceNumber: input.referenceNumber,
+        proofFileUrl: uploadedProof.fileUrl,
+        proofFilePublicId: uploadedProof.filePublicId,
+        proofFileOriginalName: uploadedProof.originalName,
+        proofFileMimeType: uploadedProof.mimeType,
+        proofFileSize: uploadedProof.fileSize,
+        status: PaymentStatus.PENDING,
+      },
 
-    select: paymentSelect,
-  });
+      select: paymentSelect,
+    });
+  } catch (error) {
+    await deleteCloudinaryAsset(uploadedProof.filePublicId).catch(() => undefined);
+
+    throw error;
+  }
 };
 
 export const createStripeCheckoutSession = async (customerId: string, bookingId: string) => {

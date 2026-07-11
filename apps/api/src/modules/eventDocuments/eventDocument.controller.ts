@@ -133,9 +133,9 @@ export const addEventDocumentFilesWithUploadHandler: RequestHandler = asyncHandl
     const { eventId, documentId } = req.params as EventDocumentParams;
 
     const uploadedFiles = await uploadAssets(
-  req.files as Express.Multer.File[] | undefined,
-  EVENT_DOCUMENT_UPLOAD_FOLDER,
-);
+      req.files as Express.Multer.File[] | undefined,
+      EVENT_DOCUMENT_UPLOAD_FOLDER,
+    );
 
     try {
       const document = await addEventDocumentFiles(req.auth!.userId, eventId, documentId, {
@@ -152,6 +152,7 @@ export const addEventDocumentFilesWithUploadHandler: RequestHandler = asyncHandl
       await deleteCloudinaryAssets(uploadedFiles.map((file) => file.filePublicId)).catch(
         () => undefined,
       );
+
       throw error;
     }
   },

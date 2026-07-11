@@ -15,6 +15,7 @@ import type {
   UploadVendorPortfolioImageInput,
   UpdateVendorPortfolioItemInput,
   UpdateVendorPortfolioItemParams,
+  ReorderVendorPortfolioItemsInput,
   DeleteVendorPortfolioItemParams,
   GetPublicVendorPortfolioParams,
 } from './vendor.schemas.js';
@@ -33,6 +34,7 @@ import {
   uploadVendorPortfolioImage,
   getVendorPortfolio,
   updateVendorPortfolioItem,
+  reorderVendorPortfolioItems,
   deleteVendorPortfolioItem,
   getPublicVendorPortfolio,
 } from './vendor.service.js';
@@ -210,6 +212,19 @@ export const updateVendorPortfolioItemHandler: RequestHandler = asyncHandler(asy
     success: true,
     data: portfolioItem,
     message: 'Vendor portfolio item updated successfully',
+  });
+});
+
+export const reorderVendorPortfolioItemsHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const portfolioItems = await reorderVendorPortfolioItems(
+    req.auth!.userId,
+    req.body as ReorderVendorPortfolioItemsInput,
+  );
+
+  res.status(200).json({
+    success: true,
+    data: portfolioItems,
+    message: 'Vendor portfolio items reordered successfully',
   });
 });
 

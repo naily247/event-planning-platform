@@ -1,7 +1,8 @@
 import type { RequestHandler } from 'express';
 
-import { uploadAsset } from '../uploads/upload.service.js';
+import { deleteCloudinaryAsset } from '../../services/cloudinary.service.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
+import { uploadAsset } from '../uploads/upload.service.js';
 import type {
   CreateMoodBoardItemInput,
   CreateMoodBoardItemWithUploadInput,
@@ -47,18 +48,24 @@ export const createMoodBoardItemWithUploadHandler: RequestHandler = asyncHandler
       folder: MOOD_BOARD_UPLOAD_FOLDER,
     });
 
-    const item = await createMoodBoardItem(req.auth!.userId, eventId, {
-      ...input,
-      imageUrl: uploadedImage.fileUrl,
-      imagePublicId: uploadedImage.filePublicId,
-    });
+    try {
+      const item = await createMoodBoardItem(req.auth!.userId, eventId, {
+        ...input,
+        imageUrl: uploadedImage.fileUrl,
+        imagePublicId: uploadedImage.filePublicId,
+      });
 
-    res.status(201).json({
-      success: true,
-      data: item,
-      upload: uploadedImage,
-      message: 'Mood-board item image uploaded successfully',
-    });
+      res.status(201).json({
+        success: true,
+        data: item,
+        upload: uploadedImage,
+        message: 'Mood-board item image uploaded successfully',
+      });
+    } catch (error) {
+      await deleteCloudinaryAsset(uploadedImage.filePublicId).catch(() => undefined);
+
+      throw error;
+    }
   },
 );
 

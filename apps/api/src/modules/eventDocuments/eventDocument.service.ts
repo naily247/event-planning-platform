@@ -451,13 +451,13 @@ export const updateEventDocument = async (
 export const deleteEventDocument = async (ownerId: string, eventId: string, documentId: string) => {
   const document = await getOwnedEventDocument(ownerId, eventId, documentId);
 
-  await deleteCloudinaryAssets(document.files.map((file) => file.filePublicId));
-
   await prisma.eventDocument.delete({
     where: {
       id: documentId,
     },
   });
+
+  await deleteCloudinaryAssets(document.files.map((file) => file.filePublicId));
 };
 
 export const addEventDocumentFiles = async (
@@ -548,13 +548,13 @@ export const deleteEventDocumentFile = async (
     );
   }
 
-  await deleteCloudinaryAsset(file.filePublicId);
-
   await prisma.eventDocumentFile.delete({
     where: {
       id: fileId,
     },
   });
+
+  await deleteCloudinaryAsset(file.filePublicId);
 };
 
 export const getEventDocumentSummary = async (ownerId: string, eventId: string) => {

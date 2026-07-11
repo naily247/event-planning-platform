@@ -156,6 +156,24 @@ export const updateVendorPortfolioItemSchema = z.object({
     }),
 });
 
+export const reorderVendorPortfolioItemsSchema = z.object({
+  body: z.object({
+    items: z
+      .array(
+        z.object({
+          portfolioItemId: portfolioItemIdSchema,
+
+          displayOrder: z.coerce.number().int().min(0).max(1000),
+        }),
+      )
+      .min(1, 'At least one portfolio item must be provided')
+      .max(100, 'A maximum of 100 portfolio items can be reordered at once')
+      .refine((items) => new Set(items.map((item) => item.portfolioItemId)).size === items.length, {
+        message: 'Duplicate portfolio item IDs are not allowed',
+      }),
+  }),
+});
+
 export const deleteVendorPortfolioItemSchema = z.object({
   params: z.object({
     portfolioItemId: portfolioItemIdSchema,
@@ -297,6 +315,10 @@ export type UpdateVendorPortfolioItemInput = z.infer<
 export type UpdateVendorPortfolioItemParams = z.infer<
   typeof updateVendorPortfolioItemSchema
 >['params'];
+
+export type ReorderVendorPortfolioItemsInput = z.infer<
+  typeof reorderVendorPortfolioItemsSchema
+>['body'];
 
 export type DeleteVendorPortfolioItemParams = z.infer<
   typeof deleteVendorPortfolioItemSchema
