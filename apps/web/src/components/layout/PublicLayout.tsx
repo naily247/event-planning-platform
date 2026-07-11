@@ -2,8 +2,12 @@ import { CalendarDays, Sparkles } from 'lucide-react';
 import { Link, Outlet } from 'react-router-dom';
 
 const navLinks = [
-  { to: '/vendors', label: 'Vendors' },
-  { to: '/how-it-works', label: 'How it works' },
+  { to: '/vendors', label: 'Vendors', hint: 'Explore trusted event vendors' },
+  {
+    to: '/planning-guide',
+    label: 'Planning Guide',
+    hint: 'See how Eventure works',
+  },
 ];
 
 export function PublicLayout() {
@@ -31,9 +35,15 @@ export function PublicLayout() {
               <Link
                 key={link.to}
                 to={link.to}
-                className="rounded-full px-4 py-2 text-sm font700 text-[var(--color-charcoal)]/80 transition hover:bg-white/42 hover:text-[var(--color-deep-plum)]"
+                className="group relative rounded-full px-4 py-2 text-sm font-bold text-[var(--color-charcoal)]/80 transition hover:bg-white/40 hover:text-[var(--color-deep-plum)]"
               >
                 {link.label}
+
+                {'hint' in link ? (
+                  <span className="pointer-events-none absolute left-1/2 top-full mt-3 hidden -translate-x-1/2 whitespace-nowrap rounded-full border border-white/50 bg-white/60 px-3 py-1.5 text-xs font-bold text-[var(--color-charcoal)]/70 shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl group-hover:block">
+                    {link.hint}
+                  </span>
+                ) : null}
               </Link>
             ))}
           </nav>
