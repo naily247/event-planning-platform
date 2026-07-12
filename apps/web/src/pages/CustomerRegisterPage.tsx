@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
 import { ArrowLeft, ArrowRight, LockKeyhole, Mail, Phone, Sparkles, UserRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,13 +9,37 @@ import { registerCustomer } from '../features/auth/auth.api';
 import { saveAuthTokens } from '../features/auth/auth.storage';
 
 const customerRegisterSchema = z.object({
-  name: z.string().min(2, 'Full name must be at least 2 characters.'),
-  email: z.string().email('Enter a valid email address.'),
-  phone: z.string().min(7, 'Enter a valid phone number.'),
+  firstName: z.string().trim().min(2, 'First name must be at least 2 characters.'),
+  lastName: z.string().trim().min(2, 'Last name must be at least 2 characters.'),
+  email: z.string().trim().email('Enter a valid email address.'),
+  phone: z.string().trim().min(7, 'Enter a valid phone number.'),
   password: z.string().min(8, 'Password must be at least 8 characters.'),
 });
 
 type CustomerRegisterFormValues = z.infer<typeof customerRegisterSchema>;
+
+type ApiErrorResponse = {
+  success?: false;
+  message?: string;
+  error?: {
+    message?: string;
+    code?: string;
+  };
+};
+
+const getRegistrationErrorMessage = (error: unknown) => {
+  if (!axios.isAxiosError<ApiErrorResponse>(error)) {
+    return 'Registration failed. Please try again.';
+  }
+
+  const responseData = error.response?.data;
+
+  return (
+    responseData?.message ??
+    responseData?.error?.message ??
+    'Registration failed. Please check your details and try again.'
+  );
+};
 
 export function CustomerRegisterPage() {
   const navigate = useNavigate();
@@ -22,7 +47,8 @@ export function CustomerRegisterPage() {
   const form = useForm<CustomerRegisterFormValues>({
     resolver: zodResolver(customerRegisterSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       phone: '',
       password: '',
@@ -34,16 +60,21 @@ export function CustomerRegisterPage() {
     onSuccess: (data) => {
       saveAuthTokens({
         accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
       });
 
-      navigate('/dashboard');
+      navigate('/dashboard', {
+        replace: true,
+      });
     },
   });
 
   const onSubmit = form.handleSubmit((values) => {
     registerMutation.mutate(values);
   });
+
+  const registrationErrorMessage = registerMutation.isError
+    ? getRegistrationErrorMessage(registerMutation.error)
+    : null;
 
   return (
     <div className="glass-card p-6 sm:p-8">
@@ -70,27 +101,57 @@ export function CustomerRegisterPage() {
       </p>
 
       <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
-        <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-            Full name
-          </span>
-
-          <span className="relative block">
-            <UserRound className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
-            <input
-              className="form-field !pl-12"
-              placeholder="Your full name"
-              type="text"
-              {...form.register('name')}
-            />
-          </span>
-
-          {form.formState.errors.name ? (
-            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-              {form.formState.errors.name.message}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+              First name
             </span>
-          ) : null}
-        </label>
+
+            <span className="relative block">
+              <UserRound className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
+              <input
+                className="form-field !pl-12"
+                placeholder="First name"
+                type="text"
+                autoComplete="given-name"
+                disabled={registerMutation.isPending}
+                {...form.register('firstName')}
+              />
+            </span>
+
+            {form.formState.errors.firstName ? (
+              <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                {form.formState.errors.firstName.message}
+              </span>
+            ) : null}
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+              Last name
+            </span>
+
+            <span className="relative block">
+              <UserRound className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
+              <input
+                className="form-field !pl-12"
+                placeholder="Last name"
+                type="text"
+                autoComplete="family-name"
+                disabled={registerMutation.isPending}
+                {...form.register('lastName')}
+              />
+            </span>
+
+            {form.formState.errors.lastName ? (
+              <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                {form.formState.errors.lastName.message}
+              </span>
+            ) : null}
+          </label>
+        </div>
 
         <label className="block">
           <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -99,10 +160,13 @@ export function CustomerRegisterPage() {
 
           <span className="relative block">
             <Mail className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
             <input
               className="form-field !pl-12"
               placeholder="you@example.com"
               type="email"
+              autoComplete="email"
+              disabled={registerMutation.isPending}
               {...form.register('email')}
             />
           </span>
@@ -121,10 +185,13 @@ export function CustomerRegisterPage() {
 
           <span className="relative block">
             <Phone className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
             <input
               className="form-field !pl-12"
               placeholder="+94 77 123 4567"
               type="tel"
+              autoComplete="tel"
+              disabled={registerMutation.isPending}
               {...form.register('phone')}
             />
           </span>
@@ -143,10 +210,13 @@ export function CustomerRegisterPage() {
 
           <span className="relative block">
             <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
             <input
               className="form-field !pl-12"
               placeholder="Create a strong password"
               type="password"
+              autoComplete="new-password"
+              disabled={registerMutation.isPending}
               {...form.register('password')}
             />
           </span>
@@ -158,9 +228,12 @@ export function CustomerRegisterPage() {
           ) : null}
         </label>
 
-        {registerMutation.isError ? (
-          <div className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]">
-            Registration failed. Please check your details and try again.
+        {registrationErrorMessage ? (
+          <div
+            role="alert"
+            className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+          >
+            {registrationErrorMessage}
           </div>
         ) : null}
 
@@ -170,6 +243,7 @@ export function CustomerRegisterPage() {
           disabled={registerMutation.isPending}
         >
           {registerMutation.isPending ? 'Creating account...' : 'Create customer account'}
+
           <ArrowRight className="size-4" />
         </button>
       </form>

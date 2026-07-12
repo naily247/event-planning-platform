@@ -1,9 +1,25 @@
 /// <reference types="node" />
 
-import bcrypt from 'bcryptjs';
 import 'dotenv/config';
+import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { AccountStatus, PrismaClient, UserRole } from '@prisma/client';
+import { seedAdminAccount } from './seed/admin.seed.js';
+import { seedBookings } from './seed/bookings.seed.js';
+import { seedEventBudgetCategories } from './seed/budgets.seed.js';
+import { seedServiceCategories } from './seed/categories.seed.js';
+import { seedDevelopmentEvents } from './seed/events.seed.js';
+import { seedDevelopmentExpenses } from './seed/expenses.seed.js';
+import { seedEventGuests } from './seed/guests.seed.js';
+import { seedHistoricalWorkflows } from './seed/historical.seed.js';
+import { seedMoodBoardItems } from './seed/moodBoards.seed.js';
+import { seedNotifications } from './seed/notifications.seed.js';
+import { seedServicePackages } from './seed/packages.seed.js';
+import { seedPayments } from './seed/payments.seed.js';
+import { seedVendorPortfolioItems } from './seed/portfolios.seed.js';
+import { seedQuotationWorkflows } from './seed/quotations.seed.js';
+import { seedEventTasks } from './seed/tasks.seed.js';
+import { seedDevelopmentUsers } from './seed/users.seed.js';
+import { seedVendorProfiles } from './seed/vendors.seed.js';
 
 const prisma = new PrismaClient();
 
@@ -14,102 +30,48 @@ const seedEnvSchema = z.object({
 
 const seedEnv = seedEnvSchema.parse(process.env);
 
-const PASSWORD_SALT_ROUNDS = 12;
+const seed = async () => {
+  console.log('Starting Eventure development database seed...');
 
-const serviceCategories = [
-  {
-    name: 'Photography',
-    slug: 'photography',
-  },
-  {
-    name: 'Videography',
-    slug: 'videography',
-  },
-  {
-    name: 'Catering',
-    slug: 'catering',
-  },
-  {
-    name: 'Decorations',
-    slug: 'decorations',
-  },
-  {
-    name: 'Music and DJ',
-    slug: 'music-and-dj',
-  },
-  {
-    name: 'Venues',
-    slug: 'venues',
-  },
-  {
-    name: 'Bridal and Beauty',
-    slug: 'bridal-and-beauty',
-  },
-  {
-    name: 'Event Planning',
-    slug: 'event-planning',
-  },
-  {
-    name: 'Invitations and Printing',
-    slug: 'invitations-and-printing',
-  },
-  {
-    name: 'Transport',
-    slug: 'transport',
-  },
-];
+  await seedServiceCategories(prisma);
 
-const seedServiceCategories = async () => {
-  for (const category of serviceCategories) {
-    await prisma.serviceCategory.upsert({
-      where: {
-        slug: category.slug,
-      },
-      update: {
-        name: category.name,
-      },
-      create: category,
-    });
-  }
-
-  console.log(`${serviceCategories.length} service categories seeded successfully.`);
-};
-
-const seedAdminAccount = async () => {
-  const passwordHash = await bcrypt.hash(seedEnv.ADMIN_SEED_PASSWORD, PASSWORD_SALT_ROUNDS);
-
-  await prisma.user.upsert({
-    where: {
-      email: seedEnv.ADMIN_SEED_EMAIL,
-    },
-    update: {
-      passwordHash,
-      firstName: 'Platform',
-      lastName: 'Admin',
-      role: UserRole.ADMIN,
-      status: AccountStatus.ACTIVE,
-    },
-    create: {
-      email: seedEnv.ADMIN_SEED_EMAIL,
-      passwordHash,
-      firstName: 'Platform',
-      lastName: 'Admin',
-      role: UserRole.ADMIN,
-      status: AccountStatus.ACTIVE,
-    },
+  await seedAdminAccount(prisma, {
+    email: seedEnv.ADMIN_SEED_EMAIL,
+    password: seedEnv.ADMIN_SEED_PASSWORD,
   });
 
-  console.log('Development admin account seeded successfully.');
-  console.log(`Admin email: ${seedEnv.ADMIN_SEED_EMAIL}`);
-};
+  await seedDevelopmentUsers(prisma);
+  await seedVendorProfiles(prisma);
+  await seedServicePackages(prisma);
+  await seedVendorPortfolioItems(prisma);
 
-const seed = async () => {
-  await seedServiceCategories();
-  await seedAdminAccount();
+  await seedDevelopmentEvents(prisma);
+  await seedEventBudgetCategories(prisma);
+  await seedDevelopmentExpenses(prisma);
+  await seedEventTasks(prisma);
+  await seedEventGuests(prisma);
+  await seedMoodBoardItems(prisma);
+
+  await seedQuotationWorkflows(prisma);
+  await seedBookings(prisma);
+
+  await seedPayments(prisma, {
+    adminEmail: seedEnv.ADMIN_SEED_EMAIL,
+  });
+
+  await seedHistoricalWorkflows(prisma, {
+    adminEmail: seedEnv.ADMIN_SEED_EMAIL,
+  });
+
+  await seedNotifications(prisma, {
+    adminEmail: seedEnv.ADMIN_SEED_EMAIL,
+  });
+
+  console.log('Eventure development database seeded successfully.');
 };
 
 seed()
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error('Failed to seed application data:', error);
     process.exitCode = 1;
   })

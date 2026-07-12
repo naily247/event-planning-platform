@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { PublicLayout } from '../components/layout/PublicLayout';
+import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { CustomerRegisterPage } from '../pages/CustomerRegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { HomePage } from '../pages/HomePage';
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <DashboardPage />,
+    element: (
+      <ProtectedRoute>
+        <DashboardPage />
+      </ProtectedRoute>
+    ),
   },
 ]);

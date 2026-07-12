@@ -5,12 +5,14 @@ import {
   ClipboardList,
   FileCheck2,
   LayoutDashboard,
+  LogOut,
   Plus,
   Sparkles,
   UsersRound,
   WalletCards,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { clearAuthTokens } from '../features/auth/auth.storage';
 
 const stats = [
   {
@@ -51,6 +53,13 @@ const timeline = [
 ];
 
 export function DashboardPage() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearAuthTokens();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="app-shell px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -78,6 +87,15 @@ export function DashboardPage() {
             <button type="button" className="btn-primary text-sm font-bold">
               <Plus className="size-4" />
               Create event
+            </button>
+
+            <button
+              type="button"
+              className="btn-secondary text-sm font-bold"
+              onClick={handleLogout}
+            >
+              <LogOut className="size-4" />
+              Log out
             </button>
           </div>
         </header>
@@ -208,12 +226,14 @@ export function DashboardPage() {
                 >
                   Create a quotation request
                 </button>
+
                 <button
                   type="button"
                   className="w-full rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20"
                 >
                   Add guest list update
                 </button>
+
                 <button
                   type="button"
                   className="w-full rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20"

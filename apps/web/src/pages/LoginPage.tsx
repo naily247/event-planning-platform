@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
 import { ArrowRight, Eye, LockKeyhole, Mail, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { login } from '../features/auth/auth.api';
+import { login, type AuthUserRole } from '../features/auth/auth.api';
 import { saveAuthTokens } from '../features/auth/auth.storage';
 
 const loginSchema = z.object({
@@ -14,6 +15,39 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
+
+type ApiErrorResponse = {
+  success?: false;
+  message?: string;
+  error?: {
+    message?: string;
+    code?: string;
+  };
+};
+
+const getLoginErrorMessage = (error: unknown) => {
+  if (!axios.isAxiosError<ApiErrorResponse>(error)) {
+    return 'Login failed. Please try again.';
+  }
+
+  const responseData = error.response?.data;
+
+  return (
+    responseData?.message ??
+    responseData?.error?.message ??
+    'Login failed. Please check your email and password.'
+  );
+};
+
+const getLoginRedirectPath = (role: AuthUserRole) => {
+  switch (role) {
+    case 'CUSTOMER':
+    case 'VENDOR':
+    case 'ADMIN':
+    default:
+      return '/dashboard';
+  }
+};
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -32,16 +66,21 @@ export function LoginPage() {
     onSuccess: (data) => {
       saveAuthTokens({
         accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
       });
 
-      navigate('/dashboard');
+      navigate(getLoginRedirectPath(data.user.role), {
+        replace: true,
+      });
     },
   });
 
   const onSubmit = form.handleSubmit((values) => {
     loginMutation.mutate(values);
   });
+
+  const loginErrorMessage = loginMutation.isError
+    ? getLoginErrorMessage(loginMutation.error)
+    : null;
 
   return (
     <div className="glass-card p-6 sm:p-8">
@@ -67,10 +106,13 @@ export function LoginPage() {
 
           <span className="relative block">
             <Mail className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
             <input
               className="form-field !pl-12"
               placeholder="you@example.com"
               type="email"
+              autoComplete="email"
+              disabled={loginMutation.isPending}
               {...form.register('email')}
             />
           </span>
@@ -98,17 +140,23 @@ export function LoginPage() {
 
           <span className="relative block">
             <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
             <input
               className="form-field !pl-12 !pr-12"
               placeholder="Enter your password"
               type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              disabled={loginMutation.isPending}
               {...form.register('password')}
             />
+
             <button
               type="button"
               className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-charcoal)]/46 transition hover:text-[var(--color-deep-plum)]"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
-              onClick={() => setShowPassword((current) => !current)}
+              onClick={() => {
+                setShowPassword((current) => !current);
+              }}
             >
               <Eye className="size-5" />
             </button>
@@ -121,9 +169,12 @@ export function LoginPage() {
           ) : null}
         </label>
 
-        {loginMutation.isError ? (
-          <div className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]">
-            Login failed. Please check your email and password.
+        {loginErrorMessage ? (
+          <div
+            role="alert"
+            className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+          >
+            {loginErrorMessage}
           </div>
         ) : null}
 

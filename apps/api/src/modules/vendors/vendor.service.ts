@@ -357,6 +357,22 @@ const getVendorPortfolioUploadFolder = (vendorId: string) =>
 
 const publicVendorDetailSelect = {
   ...publicVendorSelect,
+
+  portfolioItems: {
+    select: vendorPortfolioItemSelect,
+    orderBy: [
+      {
+        isFeatured: 'desc',
+      },
+      {
+        displayOrder: 'asc',
+      },
+      {
+        createdAt: 'desc',
+      },
+    ],
+  },
+
   packages: {
     where: {
       isActive: true,
@@ -380,7 +396,7 @@ const publicVendorDetailSelect = {
       createdAt: 'desc',
     },
   },
-} as const;
+} satisfies Prisma.VendorProfileSelect;
 
 const getPublicVendorOrderBy = (
   sort: GetPublicVendorsQuery['sort'],
@@ -865,6 +881,8 @@ export const getPublicVendorBySlug = async (slug: string) => {
 
   return {
     ...formatVendorProfile(vendor),
+
+    portfolioItems: vendor.portfolioItems,
 
     packages: vendor.packages.map((servicePackage) => ({
       ...servicePackage,

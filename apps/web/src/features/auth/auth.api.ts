@@ -2,17 +2,29 @@ import { api } from '../../lib/api';
 
 export type AuthUserRole = 'CUSTOMER' | 'VENDOR' | 'ADMIN';
 
+export type AuthAccountStatus =
+  | 'ACTIVE'
+  | 'PENDING_VERIFICATION'
+  | 'SUSPENDED'
+  | 'DEACTIVATED';
+
 export type AuthUser = {
   id: string;
-  name: string;
   email: string;
+  firstName: string;
+  lastName: string;
   role: AuthUserRole;
+  status: AuthAccountStatus;
 };
 
 export type AuthResponse = {
-  user: AuthUser;
   accessToken: string;
-  refreshToken?: string;
+  user: AuthUser;
+};
+
+type ApiSuccessResponse<T> = {
+  success: true;
+  data: T;
 };
 
 export type LoginInput = {
@@ -21,32 +33,46 @@ export type LoginInput = {
 };
 
 export type RegisterCustomerInput = {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   password: string;
 };
 
 export type RegisterVendorInput = {
-  ownerName: string;
+  firstName: string;
+  lastName: string;
   businessName: string;
-  category: string;
   email: string;
-  phone: string;
   password: string;
 };
 
 export async function login(input: LoginInput) {
-  const response = await api.post<AuthResponse>('/auth/login', input);
-  return response.data;
+  const response = await api.post<ApiSuccessResponse<AuthResponse>>(
+    '/auth/login',
+    input,
+  );
+
+  return response.data.data;
 }
 
-export async function registerCustomer(input: RegisterCustomerInput) {
-  const response = await api.post<AuthResponse>('/auth/register/customer', input);
-  return response.data;
+export async function registerCustomer(
+  input: RegisterCustomerInput,
+) {
+  const response = await api.post<ApiSuccessResponse<AuthResponse>>(
+    '/auth/register/customer',
+    input,
+  );
+
+  return response.data.data;
 }
 
 export async function registerVendor(input: RegisterVendorInput) {
-  const response = await api.post<AuthResponse>('/auth/register/vendor', input);
-  return response.data;
+  const response = await api.post<ApiSuccessResponse<AuthResponse>>(
+    '/auth/register/vendor',
+    input,
+  );
+
+  return response.data.data;
 }
