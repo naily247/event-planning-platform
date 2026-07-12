@@ -126,15 +126,15 @@ export function VendorsPage() {
               <label className="relative block">
                 <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
                 <input
-                  className="form-field pl-12"
-                  placeholder="           Search vendors, categories, styles..."
+                  className="form-field !pl-12"
+                  placeholder="Search vendors, categories, styles..."
                   type="search"
                 />
               </label>
 
               <label className="relative block">
                 <MapPin className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
-                <input className="form-field pl-12" placeholder="         Location" type="text" />
+                <input className="form-field !pl-12" placeholder="Location" type="text" />
               </label>
 
               <button type="button" className="btn-primary text-sm font-bold">
@@ -187,9 +187,11 @@ export function VendorsPage() {
                   className={`relative min-h-56 overflow-hidden rounded-[1.5rem] ${vendor.accent}`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.54),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.22),transparent)]" />
+
                   <div className="absolute bottom-5 left-5 grid size-14 place-items-center rounded-2xl border border-white/48 bg-white/30 text-[var(--color-near-black)] shadow-[0_14px_34px_rgba(31,27,29,0.16)] backdrop-blur-xl">
                     <vendor.icon className="size-7" />
                   </div>
+
                   <button
                     type="button"
                     className="absolute right-4 top-4 grid size-10 place-items-center rounded-full border border-white/48 bg-white/28 text-[var(--color-near-black)] backdrop-blur-xl"
@@ -204,6 +206,7 @@ export function VendorsPage() {
                     <span className="status-chip" data-tone="blue">
                       {vendor.category}
                     </span>
+
                     {vendor.verified ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(142,151,115,0.18)] px-3 py-1 text-xs font-black text-[#3d452f]">
                         <BadgeCheck className="size-3.5" />
@@ -221,6 +224,7 @@ export function VendorsPage() {
                       <MapPin className="size-4 text-[var(--color-rosewood)]" />
                       {vendor.location}
                     </span>
+
                     <span className="inline-flex items-center gap-1.5">
                       <Star className="size-4 fill-[var(--color-dusty-olive)] text-[var(--color-dusty-olive)]" />
                       {vendor.rating} · {vendor.reviews}

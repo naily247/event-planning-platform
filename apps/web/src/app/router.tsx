@@ -1,11 +1,15 @@
 import { createBrowserRouter } from 'react-router-dom';
+import { AuthLayout } from '../components/layout/AuthLayout';
 import { PublicLayout } from '../components/layout/PublicLayout';
+import { CustomerRegisterPage } from '../pages/CustomerRegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { HomePage } from '../pages/HomePage';
+import { LoginPage } from '../pages/LoginPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
-import { PlaceholderPage } from '../pages/PlaceholderPage';
 import { PlanningGuidePage } from '../pages/PlanningGuidePage';
+import { RegisterPage } from '../pages/RegisterPage';
 import { VendorDetailPage } from '../pages/VendorDetailPage';
+import { VendorRegisterPage } from '../pages/VendorRegisterPage';
 import { VendorsPage } from '../pages/VendorsPage';
 
 export const router = createBrowserRouter([
@@ -19,12 +23,16 @@ export const router = createBrowserRouter([
         path: '/planning-guide',
         element: <PlanningGuidePage />,
       },
-      { path: '/login', element: <PlaceholderPage title="Log in" /> },
-      {
-        path: '/register',
-        element: <PlaceholderPage title="Create your account" />,
-      },
       { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+  {
+    element: <AuthLayout />,
+    children: [
+      { path: '/login', element: <LoginPage /> },
+      { path: '/register', element: <RegisterPage /> },
+      { path: '/register/customer', element: <CustomerRegisterPage /> },
+      { path: '/register/vendor', element: <VendorRegisterPage /> },
     ],
   },
   {
