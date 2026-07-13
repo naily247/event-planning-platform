@@ -15,6 +15,7 @@ import { VendorDetailPage } from '../pages/VendorDetailPage';
 import { VendorRegisterPage } from '../pages/VendorRegisterPage';
 import { VendorsPage } from '../pages/VendorsPage';
 import { BudgetWorkspacePage } from '../pages/BudgetWorkspacePage';
+import { GuestWorkspacePage } from '../pages/GuestWorkspacePage';
 
 export const router = createBrowserRouter([
   {
@@ -88,11 +89,19 @@ export const router = createBrowserRouter([
     ),
   },
   {
-  path: '/events/:eventId/budget',
-  element: (
-    <ProtectedRoute>
-      <BudgetWorkspacePage />
-    </ProtectedRoute>
-  ),
-},
+    path: '/events/:eventId/budget',
+    element: (
+      <ProtectedRoute>
+        <BudgetWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/guests',
+    element: (
+      <ProtectedRoute>
+        <GuestWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
 ]);
