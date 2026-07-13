@@ -732,26 +732,43 @@ export function EventWorkspacePage() {
             className="glass-card mt-10 flex gap-2 overflow-x-auto p-3"
             aria-label="Event workspace sections"
           >
-            {workspaceSections.map(({ label, icon: Icon, active }) => (
-              <button
-                key={label}
-                type="button"
-                className={
-                  active
-                    ? 'soft-chip shrink-0 bg-[rgba(93,58,85,0.92)] text-[#fffaf5]'
-                    : 'soft-chip shrink-0'
-                }
-                disabled={!active}
-                title={
-                  active
-                    ? `${label} section`
-                    : `${label} will be connected in the next workspace phases`
-                }
-              >
-                <Icon className="size-4" />
-                {label}
-              </button>
-            ))}
+            {workspaceSections.map(({ label, icon: Icon, active }) => {
+              const budgetSection = label === 'Budget';
+
+              if (budgetSection) {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/budget`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  className={
+                    active
+                      ? 'soft-chip shrink-0 bg-[rgba(93,58,85,0.92)] text-[#fffaf5]'
+                      : 'soft-chip shrink-0'
+                  }
+                  disabled={!active}
+                  title={
+                    active
+                      ? `${label} section`
+                      : `${label} will be connected in the next workspace phases`
+                  }
+                >
+                  <Icon className="size-4" />
+                  {label}
+                </button>
+              );
+            })}
           </nav>
 
           <section className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">

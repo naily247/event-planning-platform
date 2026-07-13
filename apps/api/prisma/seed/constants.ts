@@ -4,6 +4,14 @@ export const PASSWORD_SALT_ROUNDS = 12;
 
 export const DEFAULT_PASSWORD = 'Password@123456';
 
+export const PERSONAL_CUSTOMER_ACCOUNT = {
+  firstName: 'Naily',
+  lastName: 'Ashvitha',
+  email: 'naily@gmail.com',
+  phone: '+94771234564',
+  password: 'Naily@2003',
+} as const;
+
 export const DEVELOPMENT_SERVICE_CATEGORIES = [
   {
     name: 'Photography',

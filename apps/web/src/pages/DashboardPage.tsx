@@ -460,10 +460,10 @@ export function DashboardPage() {
               Browse vendors
             </Link>
 
-            <button type="button" className="btn-primary text-sm font-bold">
+            <Link to="/events" className="btn-primary text-sm font-bold">
               <Plus className="size-4" />
-              Create event
-            </button>
+              My events
+            </Link>
 
             <button
               type="button"
