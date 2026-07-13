@@ -4,6 +4,8 @@ import { PublicLayout } from '../components/layout/PublicLayout';
 import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { CustomerRegisterPage } from '../pages/CustomerRegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { EventsPage } from '../pages/EventsPage';
+import { EventWorkspacePage } from '../pages/EventWorkspacePage';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
@@ -17,23 +19,47 @@ export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
     children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/vendors', element: <VendorsPage /> },
-      { path: '/vendors/:vendorSlug', element: <VendorDetailPage /> },
+      {
+        path: '/',
+        element: <HomePage />,
+      },
+      {
+        path: '/vendors',
+        element: <VendorsPage />,
+      },
+      {
+        path: '/vendors/:vendorSlug',
+        element: <VendorDetailPage />,
+      },
       {
         path: '/planning-guide',
         element: <PlanningGuidePage />,
       },
-      { path: '*', element: <NotFoundPage /> },
+      {
+        path: '*',
+        element: <NotFoundPage />,
+      },
     ],
   },
   {
     element: <AuthLayout />,
     children: [
-      { path: '/login', element: <LoginPage /> },
-      { path: '/register', element: <RegisterPage /> },
-      { path: '/register/customer', element: <CustomerRegisterPage /> },
-      { path: '/register/vendor', element: <VendorRegisterPage /> },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+      {
+        path: '/register',
+        element: <RegisterPage />,
+      },
+      {
+        path: '/register/customer',
+        element: <CustomerRegisterPage />,
+      },
+      {
+        path: '/register/vendor',
+        element: <VendorRegisterPage />,
+      },
     ],
   },
   {
@@ -41,6 +67,22 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <DashboardPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events',
+    element: (
+      <ProtectedRoute>
+        <EventsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId',
+    element: (
+      <ProtectedRoute>
+        <EventWorkspacePage />
       </ProtectedRoute>
     ),
   },
