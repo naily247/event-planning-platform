@@ -11,6 +11,7 @@ import {
   FileText,
   Image,
   LoaderCircle,
+  MailCheck,
   MapPin,
   MessageSquareQuote,
   PackageCheck,
@@ -251,6 +252,11 @@ const workspaceSections = [
   {
     label: 'Guests',
     icon: UsersRound,
+    active: false,
+  },
+  {
+    label: 'Invitations',
+    icon: MailCheck,
     active: false,
   },
   {
@@ -751,6 +757,19 @@ export function EventWorkspacePage() {
                   <Link
                     key={label}
                     to={`/events/${event.id}/guests`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
+              if (label === 'Invitations') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/invitations`}
                     className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
                   >
                     <Icon className="size-4" />

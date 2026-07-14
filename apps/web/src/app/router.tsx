@@ -16,6 +16,8 @@ import { VendorRegisterPage } from '../pages/VendorRegisterPage';
 import { VendorsPage } from '../pages/VendorsPage';
 import { BudgetWorkspacePage } from '../pages/BudgetWorkspacePage';
 import { GuestWorkspacePage } from '../pages/GuestWorkspacePage';
+import { InvitationWorkspacePage } from '../pages/InvitationWorkspacePage';
+import { PublicInvitationPage } from '../pages/PublicInvitationPage';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +38,10 @@ export const router = createBrowserRouter([
       {
         path: '/planning-guide',
         element: <PlanningGuidePage />,
+      },
+      {
+        path: '/invitations/respond/:token',
+        element: <PublicInvitationPage />,
       },
       {
         path: '*',
@@ -101,6 +107,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <GuestWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/invitations',
+    element: (
+      <ProtectedRoute>
+        <InvitationWorkspacePage />
       </ProtectedRoute>
     ),
   },
