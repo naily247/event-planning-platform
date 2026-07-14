@@ -128,12 +128,32 @@ export const uploadCloudinaryAsset = async ({
       format: result.format,
     };
   } catch (error) {
-    if (error instanceof AppError) {
-      throw error;
-    }
-
-    throw new AppError(502, 'Cloudinary asset upload failed', 'CLOUDINARY_UPLOAD_FAILED');
+  if (error instanceof AppError) {
+    throw error;
   }
+
+  console.error('Cloudinary upload failed:', error);
+
+  const cloudinaryError =
+    error && typeof error === 'object'
+      ? (error as {
+          message?: string;
+          name?: string;
+          http_code?: number;
+        })
+      : null;
+
+  throw new AppError(
+    502,
+    cloudinaryError?.message ?? 'Cloudinary asset upload failed',
+    'CLOUDINARY_UPLOAD_FAILED',
+    {
+      provider: 'cloudinary',
+      providerErrorName: cloudinaryError?.name,
+      providerHttpCode: cloudinaryError?.http_code,
+    },
+  );
+}
 };
 
 const deleteCloudinaryAssetByResourceType = async (

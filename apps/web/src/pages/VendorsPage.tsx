@@ -20,46 +20,11 @@ import {
 } from 'lucide-react';
 import { type ComponentType, type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../lib/api';
-
-type VendorCategory = {
-  id: string;
-  name: string;
-  slug: string;
-};
-
-type PublicVendor = {
-  id: string;
-  businessName: string;
-  slug: string;
-  description: string | null;
-  contactPhone: string | null;
-  website: string | null;
-  baseLocation: string | null;
-  serviceAreas: string[];
-  categories: VendorCategory[];
-  createdAt: string;
-  updatedAt: string;
-  averageRating: number | null;
-  reviewCount: number;
-};
-
-type VendorPagination = {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-};
-
-type PublicVendorsResponse = {
-  success: boolean;
-  data: PublicVendor[];
-  meta: {
-    pagination: VendorPagination;
-  };
-};
+import {
+  getPublicVendors,
+  type PublicVendor,
+  type VendorPagination,
+} from '../features/vendors/vendor.api';
 
 type CategoryFilter = {
   label: string;
@@ -180,26 +145,21 @@ export function VendorsPage() {
       setErrorMessage(null);
 
       try {
-        const response = await api.get<PublicVendorsResponse>('/vendors', {
-          params: {
-            page: 1,
-            limit: 12,
-            sort: 'name_asc',
-            ...(appliedSearch && {
-              search: appliedSearch,
-            }),
-            ...(appliedLocation && {
-              location: appliedLocation,
-            }),
-            ...(selectedCategory && {
-              category: selectedCategory,
-            }),
-          },
-          signal: controller.signal,
+        const result = await getPublicVendors({
+          page: 1,
+          limit: 12,
+          sort: 'name_asc',
+          search: appliedSearch || undefined,
+          location: appliedLocation || undefined,
+          category: selectedCategory || undefined,
         });
 
-        setVendors(response.data.data);
-        setPagination(response.data.meta.pagination);
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setVendors(result.vendors);
+        setPagination(result.pagination);
       } catch (error) {
         if (controller.signal.aborted) {
           return;

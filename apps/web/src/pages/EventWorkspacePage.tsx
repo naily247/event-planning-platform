@@ -778,6 +778,19 @@ export function EventWorkspacePage() {
                 );
               }
 
+              if (label === 'Mood board') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/mood-board`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
               return (
                 <button
                   key={label}
