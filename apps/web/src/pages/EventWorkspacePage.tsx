@@ -791,6 +791,19 @@ export function EventWorkspacePage() {
                 );
               }
 
+              if (label === 'Quotations') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/quotations`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
               if (label === 'Documents') {
                 return (
                   <Link
@@ -921,8 +934,8 @@ export function EventWorkspacePage() {
               <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">Planning workspace</h2>
 
               <p className="mt-3 leading-7 text-white/68">
-                Budgets, tasks, guests, vendors and documents will connect to this event as we build
-                each workspace section.
+                Budgets, tasks, guests, quotations, vendors and documents all connect together to
+                keep your entire event planning workflow in one place.
               </p>
 
               <div className="mt-8 rounded-[1.5rem] border border-white/16 bg-white/10 p-4 backdrop-blur">
@@ -1010,6 +1023,7 @@ export function EventWorkspacePage() {
                       'Tasks',
                       'Guests',
                       'Invitations',
+                      'Quotations',
                       'Documents',
                       'Mood board',
                     ].includes(label),

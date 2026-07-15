@@ -22,6 +22,7 @@ import { MoodBoardWorkspacePage } from '../pages/MoodBoardWorkspacePage';
 import { EventDocumentsWorkspacePage } from '../pages/EventDocumentsWorkspacePage';
 import { EventTasksWorkspacePage } from '../pages/EventTasksWorkspacePage';
 import { NotificationsPage } from '../pages/NotificationsPage';
+import { QuotationRequestsWorkspacePage } from '../pages/QuotationRequestsWorkspacePage';
 
 export const router = createBrowserRouter([
   {
@@ -151,6 +152,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <EventTasksWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/quotations',
+    element: (
+      <ProtectedRoute>
+        <QuotationRequestsWorkspacePage />
       </ProtectedRoute>
     ),
   },
