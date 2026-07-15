@@ -21,6 +21,7 @@ import { PublicInvitationPage } from '../pages/PublicInvitationPage';
 import { MoodBoardWorkspacePage } from '../pages/MoodBoardWorkspacePage';
 import { EventDocumentsWorkspacePage } from '../pages/EventDocumentsWorkspacePage';
 import { EventTasksWorkspacePage } from '../pages/EventTasksWorkspacePage';
+import { NotificationsPage } from '../pages/NotificationsPage';
 
 export const router = createBrowserRouter([
   {
@@ -78,6 +79,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <DashboardPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/notifications',
+    element: (
+      <ProtectedRoute>
+        <NotificationsPage />
       </ProtectedRoute>
     ),
   },

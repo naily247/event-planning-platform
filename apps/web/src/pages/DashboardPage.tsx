@@ -451,10 +451,13 @@ export function DashboardPage() {
           </Link>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="soft-chip text-sm font-bold">
-              <Bell className="size-4 text-[var(--color-deep-plum)]" />
+            <Link
+              to="/notifications"
+              className="soft-chip text-sm font-bold transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+            >
+              <Bell className="size-4" />
               {dashboard.notifications.unreadCount} unread
-            </div>
+            </Link>
 
             <Link to="/vendors" className="btn-secondary text-sm font-bold">
               Browse vendors
@@ -641,12 +644,12 @@ export function DashboardPage() {
                   Update guest list
                 </button>
 
-                <button
-                  type="button"
-                  className="w-full rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20"
+                <Link
+                  to="/notifications"
+                  className="block w-full rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20"
                 >
-                  Upload event document
-                </button>
+                  Review notifications
+                </Link>
               </div>
 
               <div className="mt-8 grid grid-cols-2 gap-3">
