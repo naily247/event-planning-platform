@@ -19,6 +19,7 @@ import { GuestWorkspacePage } from '../pages/GuestWorkspacePage';
 import { InvitationWorkspacePage } from '../pages/InvitationWorkspacePage';
 import { PublicInvitationPage } from '../pages/PublicInvitationPage';
 import { MoodBoardWorkspacePage } from '../pages/MoodBoardWorkspacePage';
+import { EventDocumentsWorkspacePage } from '../pages/EventDocumentsWorkspacePage';
 
 export const router = createBrowserRouter([
   {
@@ -124,6 +125,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <MoodBoardWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/documents',
+    element: (
+      <ProtectedRoute>
+        <EventDocumentsWorkspacePage />
       </ProtectedRoute>
     ),
   },

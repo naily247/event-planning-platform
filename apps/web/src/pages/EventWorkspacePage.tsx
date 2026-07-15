@@ -778,6 +778,19 @@ export function EventWorkspacePage() {
                 );
               }
 
+              if (label === 'Documents') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/documents`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
               if (label === 'Mood board') {
                 return (
                   <Link
@@ -977,15 +990,19 @@ export function EventWorkspacePage() {
               </div>
 
               <div className="mt-8 space-y-3">
-                {workspaceSections.slice(1, 5).map(({ label, icon: Icon }) => (
-                  <div
-                    key={label}
-                    className="flex items-center gap-3 rounded-2xl bg-white/12 px-4 py-3 text-sm font-bold backdrop-blur"
-                  >
-                    <Icon className="size-4 text-[var(--color-powder-blue)]" />
-                    {label}
-                  </div>
-                ))}
+                {workspaceSections
+                  .filter(({ label }) =>
+                    ['Budget', 'Guests', 'Invitations', 'Documents', 'Mood board'].includes(label),
+                  )
+                  .map(({ label, icon: Icon }) => (
+                    <div
+                      key={label}
+                      className="flex items-center gap-3 rounded-2xl bg-white/12 px-4 py-3 text-sm font-bold backdrop-blur"
+                    >
+                      <Icon className="size-4 text-[var(--color-powder-blue)]" />
+                      {label}
+                    </div>
+                  ))}
               </div>
             </aside>
           </section>
