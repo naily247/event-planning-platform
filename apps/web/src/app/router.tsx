@@ -20,6 +20,7 @@ import { InvitationWorkspacePage } from '../pages/InvitationWorkspacePage';
 import { PublicInvitationPage } from '../pages/PublicInvitationPage';
 import { MoodBoardWorkspacePage } from '../pages/MoodBoardWorkspacePage';
 import { EventDocumentsWorkspacePage } from '../pages/EventDocumentsWorkspacePage';
+import { EventTasksWorkspacePage } from '../pages/EventTasksWorkspacePage';
 
 export const router = createBrowserRouter([
   {
@@ -133,6 +134,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <EventDocumentsWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/tasks',
+    element: (
+      <ProtectedRoute>
+        <EventTasksWorkspacePage />
       </ProtectedRoute>
     ),
   },

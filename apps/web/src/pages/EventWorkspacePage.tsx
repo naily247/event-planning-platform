@@ -752,6 +752,19 @@ export function EventWorkspacePage() {
                 );
               }
 
+              if (label === 'Tasks') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/tasks`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
               if (label === 'Guests') {
                 return (
                   <Link
@@ -992,7 +1005,14 @@ export function EventWorkspacePage() {
               <div className="mt-8 space-y-3">
                 {workspaceSections
                   .filter(({ label }) =>
-                    ['Budget', 'Guests', 'Invitations', 'Documents', 'Mood board'].includes(label),
+                    [
+                      'Budget',
+                      'Tasks',
+                      'Guests',
+                      'Invitations',
+                      'Documents',
+                      'Mood board',
+                    ].includes(label),
                   )
                   .map(({ label, icon: Icon }) => (
                     <div
