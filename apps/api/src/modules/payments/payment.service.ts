@@ -127,7 +127,15 @@ const getPaymentProofUploadFolder = (bookingId: string) => {
   return `event-platform/payments/${bookingId}/proofs`;
 };
 
-const getCustomerDepositBooking = async (customerId: string, bookingId: string) => {
+type GetCustomerDepositBookingOptions = {
+  allowPendingStripeCheckout?: boolean;
+};
+
+const getCustomerDepositBooking = async (
+  customerId: string,
+  bookingId: string,
+  options: GetCustomerDepositBookingOptions = {},
+) => {
   const booking = await prisma.booking.findFirst({
     where: {
       id: bookingId,
@@ -175,6 +183,12 @@ const getCustomerDepositBooking = async (customerId: string, bookingId: string) 
         select: {
           id: true,
           status: true,
+          method: true,
+          referenceNumber: true,
+        },
+
+        orderBy: {
+          createdAt: 'desc',
         },
 
         take: 1,
@@ -207,11 +221,17 @@ const getCustomerDepositBooking = async (customerId: string, bookingId: string) 
   const existingPayment = booking.payments[0];
 
   if (existingPayment?.status === PaymentStatus.PENDING) {
-    throw new AppError(
-      409,
-      'A deposit payment is already pending verification',
-      'PAYMENT_ALREADY_PENDING',
-    );
+    const isReusableStripeCheckout =
+      options.allowPendingStripeCheckout === true &&
+      existingPayment.method === PaymentMethod.STRIPE_CHECKOUT;
+
+    if (!isReusableStripeCheckout) {
+      throw new AppError(
+        409,
+        'A deposit payment is already pending verification',
+        'PAYMENT_ALREADY_PENDING',
+      );
+    }
   }
 
   if (existingPayment?.status === PaymentStatus.VERIFIED) {
@@ -225,6 +245,12 @@ const getCustomerDepositBooking = async (customerId: string, bookingId: string) 
   return {
     ...booking,
     depositAmount,
+
+    existingStripePayment:
+      existingPayment?.status === PaymentStatus.PENDING &&
+      existingPayment.method === PaymentMethod.STRIPE_CHECKOUT
+        ? existingPayment
+        : null,
   };
 };
 
@@ -289,7 +315,51 @@ export const submitCustomerPaymentWithProof = async (
 
 export const createStripeCheckoutSession = async (customerId: string, bookingId: string) => {
   const stripe = getStripeClient();
-  const booking = await getCustomerDepositBooking(customerId, bookingId);
+
+  const booking = await getCustomerDepositBooking(customerId, bookingId, {
+    allowPendingStripeCheckout: true,
+  });
+
+  if (booking.existingStripePayment) {
+    const existingSession = await stripe.checkout.sessions.retrieve(
+      booking.existingStripePayment.referenceNumber,
+    );
+
+    if (existingSession.status === 'open' && existingSession.url) {
+      const existingPayment = await prisma.payment.findUniqueOrThrow({
+        where: {
+          id: booking.existingStripePayment.id,
+        },
+
+        select: paymentSelect,
+      });
+
+      return {
+        payment: existingPayment,
+
+        checkout: {
+          sessionId: existingSession.id,
+          checkoutUrl: existingSession.url,
+        },
+      };
+    }
+
+    if (existingSession.status === 'complete') {
+      throw new AppError(
+        409,
+        'This Stripe checkout has already been completed and is awaiting confirmation',
+        'STRIPE_CHECKOUT_ALREADY_COMPLETED',
+      );
+    }
+
+    if (existingSession.status === 'expired') {
+      await prisma.payment.delete({
+        where: {
+          id: booking.existingStripePayment.id,
+        },
+      });
+    }
+  }
 
   const payment = await prisma.payment.create({
     data: {

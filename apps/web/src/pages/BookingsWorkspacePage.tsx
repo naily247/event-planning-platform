@@ -7,7 +7,10 @@ import {
   CheckCircle2,
   CircleAlert,
   Clock3,
+  CreditCard,
+  Download,
   FileText,
+  Landmark,
   LoaderCircle,
   MapPin,
   PackageCheck,
@@ -16,6 +19,7 @@ import {
   Sparkles,
   Store,
   Tags,
+  Upload,
   WalletCards,
   X,
 } from 'lucide-react';
@@ -31,6 +35,16 @@ import {
   type BookingStatus,
   type CustomerBooking,
 } from '../features/bookings/booking.api';
+
+import {
+  createStripeCheckoutSession,
+  getCustomerBookingPayments,
+  submitManualPayment,
+  submitManualPaymentWithProof,
+  type CustomerPayment,
+  type PaymentStatus,
+} from '../features/payments/payment.api';
+
 import { api } from '../lib/api';
 
 type ApiErrorResponse = {
@@ -74,6 +88,69 @@ const bookingStatusLabels: Record<BookingStatus, string> = {
   CANCELLED: 'Cancelled',
   REJECTED: 'Rejected',
   DISPUTED: 'Disputed',
+};
+
+const paymentStatusLabels: Record<PaymentStatus, string> = {
+  PENDING: 'Pending',
+  VERIFIED: 'Verified',
+  REJECTED: 'Rejected',
+  CANCELLED: 'Cancelled',
+  REFUNDED: 'Refunded',
+  PARTIALLY_REFUNDED: 'Partially refunded',
+};
+
+const paymentMethodLabels = {
+  BANK_TRANSFER: 'Bank transfer',
+  STRIPE_CHECKOUT: 'Stripe checkout',
+} as const;
+
+const getPaymentStatusLabel = (payment: CustomerPayment) => {
+  if (payment.status === 'PENDING' && payment.method === 'STRIPE_CHECKOUT') {
+    return 'Checkout started';
+  }
+
+  if (payment.status === 'PENDING' && payment.method === 'BANK_TRANSFER') {
+    return 'Pending verification';
+  }
+
+  return paymentStatusLabels[payment.status];
+};
+
+const getPaymentTone = (status: PaymentStatus): 'gray' | 'blue' | 'green' | 'plum' | 'rose' => {
+  switch (status) {
+    case 'VERIFIED':
+      return 'green';
+
+    case 'PENDING':
+      return 'plum';
+
+    case 'REFUNDED':
+    case 'PARTIALLY_REFUNDED':
+      return 'blue';
+
+    case 'REJECTED':
+    case 'CANCELLED':
+      return 'rose';
+
+    default:
+      return 'gray';
+  }
+};
+
+const formatFileSize = (size: number | null) => {
+  if (size === null) {
+    return null;
+  }
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 };
 
 const getApiErrorMessage = (error: unknown) => {
@@ -173,6 +250,9 @@ export function BookingsWorkspacePage() {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [bookingToCancel, setBookingToCancel] = useState<CustomerBooking | null>(null);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [paymentBooking, setPaymentBooking] = useState<CustomerBooking | null>(null);
+  const [paymentReferenceNumber, setPaymentReferenceNumber] = useState('');
+  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
 
   const eventQuery = useQuery({
     queryKey: ['customer', 'events', eventId],
@@ -235,6 +315,12 @@ export function BookingsWorkspacePage() {
     queryFn: () => getCustomerBookingById(selectedBookingId!),
   });
 
+  const selectedBookingPaymentsQuery = useQuery({
+    queryKey: ['customer', 'bookings', selectedBookingId, 'payments'],
+    enabled: Boolean(selectedBookingId),
+    queryFn: () => getCustomerBookingPayments(selectedBookingId!),
+  });
+
   const invalidateBookingQueries = async () => {
     await Promise.all([
       queryClient.invalidateQueries({
@@ -242,6 +328,26 @@ export function BookingsWorkspacePage() {
       }),
       queryClient.invalidateQueries({
         queryKey: ['customer', 'bookings'],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['notifications'],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['dashboard', 'customer'],
+      }),
+    ]);
+  };
+
+  const invalidatePaymentQueries = async (bookingId: string) => {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ['customer', 'bookings', bookingId, 'payments'],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['customer', 'bookings', bookingId],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['customer', 'events', eventId, 'bookings'],
       }),
       queryClient.invalidateQueries({
         queryKey: ['notifications'],
@@ -283,6 +389,53 @@ export function BookingsWorkspacePage() {
     },
   });
 
+  const submitPaymentMutation = useMutation({
+    mutationFn: async () => {
+      if (!paymentBooking) {
+        throw new Error('Booking details are missing.');
+      }
+
+      const normalizedReferenceNumber = paymentReferenceNumber.trim();
+
+      if (normalizedReferenceNumber.length < 3) {
+        throw new Error('Payment reference number must contain at least 3 characters.');
+      }
+
+      if (normalizedReferenceNumber.length > 200) {
+        throw new Error('Payment reference number cannot exceed 200 characters.');
+      }
+
+      if (paymentProofFile) {
+        return submitManualPaymentWithProof(paymentBooking.id, {
+          referenceNumber: normalizedReferenceNumber,
+          file: paymentProofFile,
+        });
+      }
+
+      return submitManualPayment(paymentBooking.id, {
+        referenceNumber: normalizedReferenceNumber,
+      });
+    },
+
+    onSuccess: async (payment) => {
+      setPaymentBooking(null);
+      setPaymentReferenceNumber('');
+      setPaymentProofFile(null);
+
+      await invalidatePaymentQueries(payment.bookingId);
+    },
+  });
+
+  const stripeCheckoutMutation = useMutation({
+    mutationFn: async (booking: CustomerBooking) => {
+      return createStripeCheckoutSession(booking.id);
+    },
+
+    onSuccess: (result) => {
+      window.location.assign(result.checkout.checkoutUrl);
+    },
+  });
+
   const closeBookingDetails = () => {
     if (cancelBookingMutation.isPending) {
       return;
@@ -305,6 +458,24 @@ export function BookingsWorkspacePage() {
     cancelBookingMutation.reset();
     setBookingToCancel(null);
     setCancellationReason('');
+  };
+
+  const openPaymentDialog = (booking: CustomerBooking) => {
+    submitPaymentMutation.reset();
+    setPaymentBooking(booking);
+    setPaymentReferenceNumber('');
+    setPaymentProofFile(null);
+  };
+
+  const closePaymentDialog = () => {
+    if (submitPaymentMutation.isPending) {
+      return;
+    }
+
+    submitPaymentMutation.reset();
+    setPaymentBooking(null);
+    setPaymentReferenceNumber('');
+    setPaymentProofFile(null);
   };
 
   const filtersAreActive = Boolean(statusFilter) || sort !== 'newest';
@@ -876,8 +1047,191 @@ export function BookingsWorkspacePage() {
               ) : null}
 
               {selectedBookingQuery.data ? (
-                <BookingDetails booking={selectedBookingQuery.data} onCancel={openCancelDialog} />
+                <BookingDetails
+                  booking={selectedBookingQuery.data}
+                  payments={selectedBookingPaymentsQuery.data?.payments ?? []}
+                  paymentsCount={selectedBookingPaymentsQuery.data?.count ?? 0}
+                  paymentsLoading={selectedBookingPaymentsQuery.isLoading}
+                  paymentsError={
+                    selectedBookingPaymentsQuery.isError
+                      ? getApiErrorMessage(selectedBookingPaymentsQuery.error)
+                      : null
+                  }
+                  stripeCheckoutPending={stripeCheckoutMutation.isPending}
+                  stripeCheckoutError={
+                    stripeCheckoutMutation.isError
+                      ? getApiErrorMessage(stripeCheckoutMutation.error)
+                      : null
+                  }
+                  onRetryPayments={() => {
+                    void selectedBookingPaymentsQuery.refetch();
+                  }}
+                  onOpenPayment={openPaymentDialog}
+                  onStripeCheckout={(booking) => {
+                    stripeCheckoutMutation.reset();
+                    stripeCheckoutMutation.mutate(booking);
+                  }}
+                  onCancel={openCancelDialog}
+                />
               ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {paymentBooking ? (
+        <div
+          className="fixed inset-0 z-[60] grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.56)] px-4 py-8 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="submit-payment-title"
+        >
+          <div className="glass-card w-full max-w-xl p-6 sm:p-8">
+            <div className="flex items-start justify-between gap-5">
+              <div>
+                <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(93,58,85,0.12)] text-[var(--color-deep-plum)]">
+                  <Landmark className="size-7" />
+                </div>
+
+                <h2
+                  id="submit-payment-title"
+                  className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+                >
+                  Submit deposit payment
+                </h2>
+
+                <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
+                  Record your bank-transfer reference for{' '}
+                  <strong>{paymentBooking.vendor.businessName}</strong>.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28"
+                aria-label="Close payment form"
+                disabled={submitPaymentMutation.isPending}
+                onClick={closePaymentDialog}
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="mt-6 rounded-2xl bg-white/24 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
+                Required deposit
+              </p>
+
+              <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
+                {formatCurrency(paymentBooking.acceptedQuotation.depositAmount)}
+              </p>
+            </div>
+
+            <label className="mt-6 block">
+              <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+                Payment reference number
+              </span>
+
+              <input
+                className="form-field"
+                type="text"
+                maxLength={200}
+                value={paymentReferenceNumber}
+                disabled={submitPaymentMutation.isPending}
+                placeholder="Enter the bank transaction reference"
+                onChange={(event) => {
+                  submitPaymentMutation.reset();
+                  setPaymentReferenceNumber(event.target.value);
+                }}
+              />
+
+              <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                Minimum 3 characters. {paymentReferenceNumber.length}/200
+              </p>
+            </label>
+
+            <label className="mt-5 block">
+              <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+                Payment proof
+              </span>
+
+              <div className="rounded-2xl border border-dashed border-white/70 bg-white/20 p-5">
+                <input
+                  className="sr-only"
+                  id="payment-proof-file"
+                  type="file"
+                  accept=".pdf,image/jpeg,image/png,image/webp"
+                  disabled={submitPaymentMutation.isPending}
+                  onChange={(event) => {
+                    submitPaymentMutation.reset();
+                    setPaymentProofFile(event.target.files?.[0] ?? null);
+                  }}
+                />
+
+                <label
+                  htmlFor="payment-proof-file"
+                  className="btn-secondary w-fit cursor-pointer text-sm font-bold"
+                >
+                  <Upload className="size-4" />
+                  Choose proof file
+                </label>
+
+                <p className="mt-3 text-sm font-semibold text-[var(--color-charcoal)]/58">
+                  {paymentProofFile
+                    ? `${paymentProofFile.name} · ${formatFileSize(paymentProofFile.size)}`
+                    : 'Optional PDF, JPEG, PNG or WebP up to 10 MB.'}
+                </p>
+
+                {paymentProofFile ? (
+                  <button
+                    type="button"
+                    className="mt-3 text-sm font-black text-[var(--color-muted-burgundy)]"
+                    disabled={submitPaymentMutation.isPending}
+                    onClick={() => {
+                      setPaymentProofFile(null);
+                    }}
+                  >
+                    Remove file
+                  </button>
+                ) : null}
+              </div>
+            </label>
+
+            {submitPaymentMutation.isError ? (
+              <div
+                role="alert"
+                className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+              >
+                {getApiErrorMessage(submitPaymentMutation.error)}
+              </div>
+            ) : null}
+
+            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                className="btn-secondary justify-center text-sm font-bold"
+                disabled={submitPaymentMutation.isPending}
+                onClick={closePaymentDialog}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="btn-primary justify-center text-sm font-bold"
+                disabled={submitPaymentMutation.isPending}
+                onClick={() => {
+                  submitPaymentMutation.mutate();
+                }}
+              >
+                {submitPaymentMutation.isPending ? (
+                  <LoaderCircle className="size-4 animate-spin" />
+                ) : (
+                  <Landmark className="size-4" />
+                )}
+
+                {submitPaymentMutation.isPending ? 'Submitting payment...' : 'Submit payment'}
+              </button>
             </div>
           </div>
         </div>
@@ -975,13 +1329,54 @@ export function BookingsWorkspacePage() {
 
 function BookingDetails({
   booking,
+  payments,
+  paymentsCount,
+  paymentsLoading,
+  paymentsError,
+  stripeCheckoutPending,
+  stripeCheckoutError,
+  onRetryPayments,
+  onOpenPayment,
+  onStripeCheckout,
   onCancel,
 }: {
   booking: CustomerBooking;
+  payments: CustomerPayment[];
+  paymentsCount: number;
+  paymentsLoading: boolean;
+  paymentsError: string | null;
+  stripeCheckoutPending: boolean;
+  stripeCheckoutError: string | null;
+  onRetryPayments: () => void;
+  onOpenPayment: (booking: CustomerBooking) => void;
+  onStripeCheckout: (booking: CustomerBooking) => void;
   onCancel: (booking: CustomerBooking) => void;
 }) {
   const servicePackage = booking.acceptedQuotation.quotationRequest.package;
   const cancellation = getCancellationReason(booking);
+
+  const pendingStripePayment = payments.find(
+    (payment) => payment.status === 'PENDING' && payment.method === 'STRIPE_CHECKOUT',
+  );
+
+  const hasPendingManualPayment = payments.some(
+    (payment) => payment.status === 'PENDING' && payment.method === 'BANK_TRANSFER',
+  );
+
+  const hasVerifiedPayment = payments.some((payment) => payment.status === 'VERIFIED');
+
+  const canSubmitManualDeposit =
+    booking.status === 'DEPOSIT_PENDING' &&
+    Boolean(booking.acceptedQuotation.depositAmount) &&
+    !hasPendingManualPayment &&
+    !hasVerifiedPayment &&
+    !pendingStripePayment;
+
+  const canStartStripeCheckout =
+    booking.status === 'DEPOSIT_PENDING' &&
+    Boolean(booking.acceptedQuotation.depositAmount) &&
+    !hasPendingManualPayment &&
+    !hasVerifiedPayment;
 
   return (
     <div className="mt-8 space-y-5">
@@ -1139,6 +1534,216 @@ function BookingDetails({
             <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
               {booking.acceptedQuotation.terms}
             </p>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="rounded-[1.65rem] border border-white/55 bg-white/24 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <Landmark className="size-6 text-[var(--color-deep-plum)]" />
+
+            <p className="mt-5 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+              Deposit payments
+            </p>
+
+            <h3 className="mt-3 text-2xl font-black text-[var(--color-near-black)]">
+              Payment history
+            </h3>
+
+            <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
+              {paymentsCount} {paymentsCount === 1 ? 'payment' : 'payments'} submitted for this
+              booking
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-white/28 px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] opacity-50">
+              Required deposit
+            </p>
+
+            <p className="mt-2 text-lg font-black text-[var(--color-near-black)]">
+              {booking.acceptedQuotation.depositAmount
+                ? formatCurrency(booking.acceptedQuotation.depositAmount)
+                : 'No deposit'}
+            </p>
+          </div>
+        </div>
+
+        {paymentsLoading ? (
+          <div className="mt-6 grid min-h-36 place-items-center rounded-2xl bg-white/18">
+            <div className="text-center">
+              <LoaderCircle className="mx-auto size-7 animate-spin text-[var(--color-deep-plum)]" />
+
+              <p className="mt-3 text-sm font-bold text-[var(--color-charcoal)]/58">
+                Loading payment history
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {paymentsError ? (
+          <div
+            role="alert"
+            className="mt-6 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+          >
+            <p className="text-sm font-bold text-[var(--color-muted-burgundy)]">{paymentsError}</p>
+
+            <button
+              type="button"
+              className="btn-secondary mt-4 text-sm font-bold"
+              onClick={onRetryPayments}
+            >
+              Try again
+            </button>
+          </div>
+        ) : null}
+
+        {!paymentsLoading && !paymentsError && payments.length > 0 ? (
+          <div className="mt-6 space-y-4">
+            {payments.map((payment) => (
+              <article
+                key={payment.id}
+                className="rounded-[1.35rem] border border-white/55 bg-white/26 p-4 sm:p-5"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="status-chip" data-tone={getPaymentTone(payment.status)}>
+                        {getPaymentStatusLabel(payment)}
+                      </span>
+
+                      <span className="status-chip" data-tone="gray">
+                        {paymentMethodLabels[payment.method]}
+                      </span>
+                    </div>
+
+                    <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
+                      {formatCurrency(payment.amount)}
+                    </p>
+
+                    <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
+                      Reference: {payment.referenceNumber}
+                    </p>
+                  </div>
+
+                  <p className="text-sm font-bold text-[var(--color-charcoal)]/48">
+                    {formatDateTime(payment.createdAt)}
+                  </p>
+                </div>
+
+                {payment.proofFileUrl ? (
+                  <a
+                    href={payment.proofFileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-secondary mt-4 w-fit text-sm font-bold"
+                  >
+                    <Download className="size-4" />
+                    View payment proof
+                  </a>
+                ) : null}
+
+                {payment.proofFileOriginalName ? (
+                  <p className="mt-3 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                    {payment.proofFileOriginalName}
+                    {payment.proofFileSize ? ` · ${formatFileSize(payment.proofFileSize)}` : ''}
+                  </p>
+                ) : null}
+
+                {payment.reviewedAt ? (
+                  <p className="mt-4 text-xs font-bold text-[var(--color-charcoal)]/46">
+                    Reviewed {formatDateTime(payment.reviewedAt)}
+                  </p>
+                ) : null}
+
+                {payment.rejectionReason ? (
+                  <div className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.08)] px-4 py-3">
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-muted-burgundy)]">
+                      Rejection reason
+                    </p>
+
+                    <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
+                      {payment.rejectionReason}
+                    </p>
+                  </div>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {!paymentsLoading && !paymentsError && payments.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-dashed border-white/70 bg-white/18 p-6 text-center">
+            <WalletCards className="mx-auto size-8 text-[var(--color-deep-plum)]" />
+
+            <p className="mt-3 font-black text-[var(--color-near-black)]">No payments submitted</p>
+
+            <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+              Deposit-payment actions will become available after the vendor confirms this booking
+              and a deposit is required.
+            </p>
+          </div>
+        ) : null}
+
+        {canSubmitManualDeposit || canStartStripeCheckout ? (
+          <div className="mt-6 rounded-[1.35rem] border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.07)] p-5">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+              Deposit required
+            </p>
+
+            <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
+              {pendingStripePayment
+                ? 'Your Stripe checkout has started but has not been completed yet.'
+                : 'Submit your bank-transfer reference with an optional receipt, or continue to Stripe Checkout.'}
+            </p>
+
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              {canSubmitManualDeposit ? (
+                <button
+                  type="button"
+                  className="btn-primary justify-center text-sm font-bold"
+                  onClick={() => {
+                    onOpenPayment(booking);
+                  }}
+                >
+                  <Landmark className="size-4" />
+                  Submit bank transfer
+                </button>
+              ) : null}
+
+              {canStartStripeCheckout ? (
+                <button
+                  type="button"
+                  className="btn-secondary justify-center text-sm font-bold"
+                  disabled={stripeCheckoutPending}
+                  onClick={() => {
+                    onStripeCheckout(booking);
+                  }}
+                >
+                  {stripeCheckoutPending ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="size-4" />
+                  )}
+
+                  {stripeCheckoutPending
+                    ? 'Opening Stripe...'
+                    : pendingStripePayment
+                      ? 'Continue Stripe checkout'
+                      : 'Pay with Stripe'}
+                </button>
+              ) : null}
+            </div>
+
+            {stripeCheckoutError ? (
+              <div
+                role="alert"
+                className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+              >
+                {stripeCheckoutError}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </section>
