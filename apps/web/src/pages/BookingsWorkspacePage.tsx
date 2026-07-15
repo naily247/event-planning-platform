@@ -17,6 +17,7 @@ import {
   Phone,
   ReceiptText,
   Sparkles,
+  Star,
   Store,
   Tags,
   Upload,
@@ -29,10 +30,12 @@ import { Link, useParams } from 'react-router-dom';
 import {
   bookingStatuses,
   cancelCustomerBooking,
+  createCustomerBookingReview,
   getCustomerBookingById,
   getCustomerBookings,
   type BookingSort,
   type BookingStatus,
+  type CreateCustomerBookingReviewInput,
   type CustomerBooking,
 } from '../features/bookings/booking.api';
 
@@ -44,6 +47,9 @@ import {
   type CustomerPayment,
   type PaymentStatus,
 } from '../features/payments/payment.api';
+
+import { ReviewFormDialog } from '../features/reviews/ReviewFormDialog';
+import { getCustomerReviews } from '../features/reviews/review.api';
 
 import { api } from '../lib/api';
 
@@ -253,6 +259,7 @@ export function BookingsWorkspacePage() {
   const [paymentBooking, setPaymentBooking] = useState<CustomerBooking | null>(null);
   const [paymentReferenceNumber, setPaymentReferenceNumber] = useState('');
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+  const [reviewBooking, setReviewBooking] = useState<CustomerBooking | null>(null);
 
   const eventQuery = useQuery({
     queryKey: ['customer', 'events', eventId],
@@ -285,6 +292,40 @@ export function BookingsWorkspacePage() {
         status: statusFilter || undefined,
         sort,
       }),
+  });
+
+  const eventReviewsQuery = useQuery({
+    queryKey: ['customer', 'events', eventId, 'reviews', 'booking-actions'],
+    enabled: Boolean(eventId),
+    queryFn: async () => {
+      const firstPage = await getCustomerReviews({
+        eventId: eventId!,
+        page: 1,
+        limit: 100,
+        sort: 'newest',
+      });
+
+      if (firstPage.pagination.totalPages <= 1) {
+        return firstPage.reviews;
+      }
+
+      const remainingPages = await Promise.all(
+        Array.from(
+          {
+            length: firstPage.pagination.totalPages - 1,
+          },
+          (_, index) =>
+            getCustomerReviews({
+              eventId: eventId!,
+              page: index + 2,
+              limit: 100,
+              sort: 'newest',
+            }),
+        ),
+      );
+
+      return [...firstPage.reviews, ...remainingPages.flatMap((result) => result.reviews)];
+    },
   });
 
   const summaryQuery = useQuery({
@@ -436,6 +477,37 @@ export function BookingsWorkspacePage() {
     },
   });
 
+  const createReviewMutation = useMutation({
+    mutationFn: async ({
+      booking,
+      input,
+    }: {
+      booking: CustomerBooking;
+      input: CreateCustomerBookingReviewInput;
+    }) => {
+      return createCustomerBookingReview(booking.id, input);
+    },
+
+    onSuccess: async () => {
+      setReviewBooking(null);
+
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'events', eventId, 'reviews'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'reviews'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'bookings'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['dashboard', 'customer'],
+        }),
+      ]);
+    },
+  });
+
   const closeBookingDetails = () => {
     if (cancelBookingMutation.isPending) {
       return;
@@ -478,6 +550,21 @@ export function BookingsWorkspacePage() {
     setPaymentProofFile(null);
   };
 
+  const openReviewDialog = (booking: CustomerBooking) => {
+    createReviewMutation.reset();
+    setSelectedBookingId(null);
+    setReviewBooking(booking);
+  };
+
+  const closeReviewDialog = () => {
+    if (createReviewMutation.isPending) {
+      return;
+    }
+
+    createReviewMutation.reset();
+    setReviewBooking(null);
+  };
+
   const filtersAreActive = Boolean(statusFilter) || sort !== 'newest';
 
   const clearFilters = () => {
@@ -486,13 +573,26 @@ export function BookingsWorkspacePage() {
     setPage(1);
   };
 
-  const isLoading = eventQuery.isLoading || bookingsQuery.isLoading || summaryQuery.isLoading;
+  const isLoading =
+    eventQuery.isLoading ||
+    bookingsQuery.isLoading ||
+    summaryQuery.isLoading ||
+    eventReviewsQuery.isLoading;
 
-  const isError = eventQuery.isError || bookingsQuery.isError || summaryQuery.isError;
+  const isError =
+    eventQuery.isError ||
+    bookingsQuery.isError ||
+    summaryQuery.isError ||
+    eventReviewsQuery.isError;
 
-  const firstError = eventQuery.error ?? bookingsQuery.error ?? summaryQuery.error;
+  const firstError =
+    eventQuery.error ?? bookingsQuery.error ?? summaryQuery.error ?? eventReviewsQuery.error;
 
   const bookingCounts = summaryQuery.data;
+
+  const reviewsByBookingId = useMemo(() => {
+    return new Map((eventReviewsQuery.data ?? []).map((review) => [review.bookingId, review]));
+  }, [eventReviewsQuery.data]);
 
   const totalBookings = useMemo(() => {
     if (!bookingCounts) {
@@ -549,6 +649,7 @@ export function BookingsWorkspacePage() {
                       eventQuery.refetch(),
                       bookingsQuery.refetch(),
                       summaryQuery.refetch(),
+                      eventReviewsQuery.refetch(),
                     ]);
                   }}
                 >
@@ -751,6 +852,7 @@ export function BookingsWorkspacePage() {
                 <div className="mt-8 space-y-4">
                   {bookings.map((booking) => {
                     const servicePackage = booking.acceptedQuotation.quotationRequest.package;
+                    const existingReview = reviewsByBookingId.get(booking.id);
 
                     return (
                       <article
@@ -843,6 +945,29 @@ export function BookingsWorkspacePage() {
                               <FileText className="size-4" />
                               View details
                             </button>
+
+                            {booking.status === 'COMPLETED' ? (
+                              existingReview ? (
+                                <Link
+                                  to={`/events/${eventId}/reviews`}
+                                  className="btn-secondary justify-center text-sm font-bold"
+                                >
+                                  <Star className="size-4 fill-current" />
+                                  View review
+                                </Link>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn-primary justify-center text-sm font-bold"
+                                  onClick={() => {
+                                    openReviewDialog(booking);
+                                  }}
+                                >
+                                  <Star className="size-4 fill-current" />
+                                  Write review
+                                </button>
+                              )
+                            ) : null}
 
                             {isCustomerCancellable(booking.status) ? (
                               <button
@@ -1049,6 +1174,8 @@ export function BookingsWorkspacePage() {
               {selectedBookingQuery.data ? (
                 <BookingDetails
                   booking={selectedBookingQuery.data}
+                  hasReview={reviewsByBookingId.has(selectedBookingQuery.data.id)}
+                  onOpenReview={openReviewDialog}
                   payments={selectedBookingPaymentsQuery.data?.payments ?? []}
                   paymentsCount={selectedBookingPaymentsQuery.data?.count ?? 0}
                   paymentsLoading={selectedBookingPaymentsQuery.isLoading}
@@ -1077,6 +1204,34 @@ export function BookingsWorkspacePage() {
             </div>
           </div>
         </div>
+      ) : null}
+
+      {reviewBooking ? (
+        <ReviewFormDialog
+          mode="create"
+          vendorName={reviewBooking.vendor.businessName}
+          packageTitle={reviewBooking.acceptedQuotation.quotationRequest.package?.title}
+          isPending={createReviewMutation.isPending}
+          errorMessage={
+            createReviewMutation.isError ? getApiErrorMessage(createReviewMutation.error) : null
+          }
+          onClose={closeReviewDialog}
+          onSubmit={(input) => {
+            if (input.overallRating === undefined) {
+              return;
+            }
+
+            createReviewMutation.mutate({
+              booking: reviewBooking,
+              input: {
+                overallRating: input.overallRating,
+                serviceRating: input.serviceRating,
+                communicationRating: input.communicationRating,
+                comment: input.comment,
+              },
+            });
+          }}
+        />
       ) : null}
 
       {paymentBooking ? (
@@ -1329,6 +1484,8 @@ export function BookingsWorkspacePage() {
 
 function BookingDetails({
   booking,
+  hasReview,
+  onOpenReview,
   payments,
   paymentsCount,
   paymentsLoading,
@@ -1341,6 +1498,8 @@ function BookingDetails({
   onCancel,
 }: {
   booking: CustomerBooking;
+  hasReview: boolean;
+  onOpenReview: (booking: CustomerBooking) => void;
   payments: CustomerPayment[];
   paymentsCount: number;
   paymentsLoading: boolean;
@@ -1798,6 +1957,47 @@ function BookingDetails({
             The vendor marked this booking as completed on{' '}
             {formatDateTime(booking.vendorCompletedAt)}.
           </p>
+        </section>
+      ) : null}
+
+      {booking.status === 'COMPLETED' ? (
+        <section className="rounded-[1.65rem] border border-[rgba(130,72,77,0.20)] bg-[rgba(130,72,77,0.07)] p-5 sm:p-6">
+          <Star className="size-6 fill-current text-[var(--color-rosewood)]" />
+
+          <p className="mt-5 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+            Vendor review
+          </p>
+
+          <h3 className="mt-3 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+            {hasReview ? 'You reviewed this completed service.' : 'How was your experience?'}
+          </h3>
+
+          <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
+            {hasReview
+              ? 'Your verified review is available in this event’s Reviews workspace.'
+              : 'Share an overall rating and optional feedback about the service and communication.'}
+          </p>
+
+          {hasReview ? (
+            <Link
+              to={`/events/${booking.event.id}/reviews`}
+              className="btn-secondary mt-5 w-fit text-sm font-bold"
+            >
+              <Star className="size-4 fill-current" />
+              View review
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="btn-primary mt-5 justify-center text-sm font-bold"
+              onClick={() => {
+                onOpenReview(booking);
+              }}
+            >
+              <Star className="size-4 fill-current" />
+              Write review
+            </button>
+          )}
         </section>
       ) : null}
 

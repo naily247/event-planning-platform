@@ -4,6 +4,8 @@ const reviewIdSchema = z.string().trim().cuid('Review ID must be a valid CUID');
 
 const vendorIdSchema = z.string().trim().cuid('Vendor ID must be a valid CUID');
 
+const eventIdSchema = z.string().trim().cuid('Event ID must be a valid CUID');
+
 const reviewRatingSchema = z
   .number()
   .int('Rating must be a whole number')
@@ -32,6 +34,8 @@ export const getCustomerReviewsSchema = z.object({
       .min(1, 'Limit must be at least 1')
       .max(100, 'Limit must not exceed 100')
       .default(20),
+
+    eventId: eventIdSchema.optional(),
 
     vendorId: vendorIdSchema.optional(),
 

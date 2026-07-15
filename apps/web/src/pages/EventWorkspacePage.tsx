@@ -24,6 +24,7 @@ import {
   WalletCards,
   X,
   Trash2,
+  Star,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -267,6 +268,11 @@ const workspaceSections = [
   {
     label: 'Bookings',
     icon: PackageCheck,
+    active: false,
+  },
+  {
+    label: 'Reviews',
+    icon: Star,
     active: false,
   },
   {
@@ -817,6 +823,19 @@ export function EventWorkspacePage() {
                 );
               }
 
+              if (label === 'Reviews') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/reviews`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
               if (label === 'Documents') {
                 return (
                   <Link
@@ -1038,6 +1057,7 @@ export function EventWorkspacePage() {
                       'Invitations',
                       'Quotations',
                       'Bookings',
+                      'Reviews',
                       'Documents',
                       'Mood board',
                     ].includes(label),

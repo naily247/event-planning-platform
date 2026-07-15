@@ -24,6 +24,7 @@ import { EventTasksWorkspacePage } from '../pages/EventTasksWorkspacePage';
 import { NotificationsPage } from '../pages/NotificationsPage';
 import { QuotationRequestsWorkspacePage } from '../pages/QuotationRequestsWorkspacePage';
 import { BookingsWorkspacePage } from '../pages/BookingsWorkspacePage';
+import { ReviewsWorkspacePage } from '../pages/ReviewsWorkspacePage';
 
 export const router = createBrowserRouter([
   {
@@ -169,6 +170,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <BookingsWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/reviews',
+    element: (
+      <ProtectedRoute>
+        <ReviewsWorkspacePage />
       </ProtectedRoute>
     ),
   },

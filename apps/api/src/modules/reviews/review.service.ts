@@ -18,6 +18,18 @@ const reviewSelect = {
   moderationReason: true,
   moderatedAt: true,
 
+  booking: {
+    select: {
+      event: {
+        select: {
+          id: true,
+          name: true,
+          eventDate: true,
+        },
+      },
+    },
+  },
+
   customer: {
     select: {
       id: true,
@@ -73,10 +85,16 @@ const getReviewOrderBy = (
 };
 
 export const getCustomerReviews = async (customerId: string, query: GetCustomerReviewsQuery) => {
-  const { page, limit, vendorId, overallRating, sort } = query;
+  const { page, limit, eventId, vendorId, overallRating, sort } = query;
 
   const where: Prisma.ReviewWhereInput = {
     customerId,
+
+    ...(eventId && {
+      booking: {
+        eventId,
+      },
+    }),
 
     ...(vendorId && {
       vendorId,
