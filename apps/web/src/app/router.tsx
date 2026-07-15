@@ -23,6 +23,7 @@ import { EventDocumentsWorkspacePage } from '../pages/EventDocumentsWorkspacePag
 import { EventTasksWorkspacePage } from '../pages/EventTasksWorkspacePage';
 import { NotificationsPage } from '../pages/NotificationsPage';
 import { QuotationRequestsWorkspacePage } from '../pages/QuotationRequestsWorkspacePage';
+import { BookingsWorkspacePage } from '../pages/BookingsWorkspacePage';
 
 export const router = createBrowserRouter([
   {
@@ -160,6 +161,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <QuotationRequestsWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/bookings',
+    element: (
+      <ProtectedRoute>
+        <BookingsWorkspacePage />
       </ProtectedRoute>
     ),
   },

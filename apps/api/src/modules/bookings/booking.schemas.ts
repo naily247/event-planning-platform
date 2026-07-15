@@ -27,19 +27,13 @@ const vendorResponseNoteSchema = z.string().trim().min(3).max(2000);
 const customerCancellationReasonSchema = z
   .string()
   .trim()
-  .min(
-    10,
-    'Cancellation reason must contain at least 10 characters',
-  )
+  .min(10, 'Cancellation reason must contain at least 10 characters')
   .max(2000);
 
 const vendorCancellationReasonSchema = z
   .string()
   .trim()
-  .min(
-    10,
-    'Cancellation reason must contain at least 10 characters',
-  )
+  .min(10, 'Cancellation reason must contain at least 10 characters')
   .max(2000);
 
 const reviewRatingSchema = z
@@ -64,6 +58,8 @@ export const bookingSortOptions = [
 const bookingListQuerySchema = z.object({
   status: z.nativeEnum(BookingStatus).optional(),
 
+  eventId: z.string().cuid('Event ID must be valid').optional(),
+
   page: z.coerce.number().int().min(1).default(1),
 
   limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -84,8 +80,7 @@ export const createCustomerBookingSchema = z.object({
       if (
         data.serviceEnd !== undefined &&
         data.serviceEnd !== null &&
-        new Date(data.serviceEnd).getTime() <=
-          new Date(data.serviceStart).getTime()
+        new Date(data.serviceEnd).getTime() <= new Date(data.serviceStart).getTime()
       ) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
@@ -145,10 +140,7 @@ export const rejectVendorBookingSchema = z.object({
     reason: z
       .string()
       .trim()
-      .min(
-        10,
-        'Rejection reason must contain at least 10 characters',
-      )
+      .min(10, 'Rejection reason must contain at least 10 characters')
       .max(2000),
   }),
 });
@@ -179,49 +171,29 @@ export const createCustomerBookingReviewSchema = z.object({
 
     serviceRating: reviewRatingSchema.nullable().optional(),
 
-    communicationRating: reviewRatingSchema
-      .nullable()
-      .optional(),
+    communicationRating: reviewRatingSchema.nullable().optional(),
 
     comment: reviewCommentSchema.nullable().optional(),
   }),
 });
 
-export type CreateCustomerBookingInput = z.infer<
-  typeof createCustomerBookingSchema
->['body'];
+export type CreateCustomerBookingInput = z.infer<typeof createCustomerBookingSchema>['body'];
 
-export type GetCustomerBookingsQuery = z.infer<
-  typeof getCustomerBookingsSchema
->['query'];
+export type GetCustomerBookingsQuery = z.infer<typeof getCustomerBookingsSchema>['query'];
 
-export type CustomerBookingParams = z.infer<
-  typeof getCustomerBookingSchema
->['params'];
+export type CustomerBookingParams = z.infer<typeof getCustomerBookingSchema>['params'];
 
-export type CancelCustomerBookingInput = z.infer<
-  typeof cancelCustomerBookingSchema
->['body'];
+export type CancelCustomerBookingInput = z.infer<typeof cancelCustomerBookingSchema>['body'];
 
-export type GetVendorBookingsQuery = z.infer<
-  typeof getVendorBookingsSchema
->['query'];
+export type GetVendorBookingsQuery = z.infer<typeof getVendorBookingsSchema>['query'];
 
-export type VendorBookingParams = z.infer<
-  typeof getVendorBookingSchema
->['params'];
+export type VendorBookingParams = z.infer<typeof getVendorBookingSchema>['params'];
 
-export type ConfirmVendorBookingInput = z.infer<
-  typeof confirmVendorBookingSchema
->['body'];
+export type ConfirmVendorBookingInput = z.infer<typeof confirmVendorBookingSchema>['body'];
 
-export type RejectVendorBookingInput = z.infer<
-  typeof rejectVendorBookingSchema
->['body'];
+export type RejectVendorBookingInput = z.infer<typeof rejectVendorBookingSchema>['body'];
 
-export type CancelVendorBookingInput = z.infer<
-  typeof cancelVendorBookingSchema
->['body'];
+export type CancelVendorBookingInput = z.infer<typeof cancelVendorBookingSchema>['body'];
 
 export type CreateCustomerBookingReviewInput = z.infer<
   typeof createCustomerBookingReviewSchema

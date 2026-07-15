@@ -3,6 +3,7 @@ import axios from 'axios';
 import {
   ArrowLeft,
   CalendarClock,
+  CalendarRange,
   CheckCircle2,
   ChevronDown,
   CircleAlert,
@@ -36,6 +37,9 @@ import {
   type QuotationRequestStatus,
   type QuotationStatus,
 } from '../features/quotationRequests/quotationRequest.api';
+
+import { createCustomerBooking, type CustomerBooking } from '../features/bookings/booking.api';
+
 import { api } from '../lib/api';
 
 type ApiErrorResponse = {
@@ -172,6 +176,49 @@ const toIsoDateTimeOrNull = (value: string) => {
   return date.toISOString();
 };
 
+const toIsoServiceDateTime = (value: string, fieldLabel: string) => {
+  const normalizedValue = value.trim();
+
+  if (!normalizedValue) {
+    throw new Error(`${fieldLabel} is required.`);
+  }
+
+  const date = new Date(normalizedValue);
+
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error(`Choose a valid ${fieldLabel.toLowerCase()}.`);
+  }
+
+  if (date.getTime() <= Date.now()) {
+    throw new Error(`${fieldLabel} must be in the future.`);
+  }
+
+  return date.toISOString();
+};
+
+const toOptionalIsoServiceDateTime = (value: string) => {
+  const normalizedValue = value.trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  const date = new Date(normalizedValue);
+
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error('Choose a valid service end time.');
+  }
+
+  return date.toISOString();
+};
+
+const toLocalDateTimeInput = (value: string) => {
+  const date = new Date(value);
+  const timezoneOffset = date.getTimezoneOffset() * 60_000;
+
+  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
+};
+
 const getRequestTone = (
   status: QuotationRequestStatus,
 ): 'gray' | 'blue' | 'green' | 'plum' | 'rose' => {
@@ -234,6 +281,10 @@ export function QuotationRequestsWorkspacePage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<CustomerQuotationRequest | null>(null);
   const [quotationToAccept, setQuotationToAccept] = useState<CustomerQuotation | null>(null);
+  const [quotationToBook, setQuotationToBook] = useState<CustomerQuotation | null>(null);
+  const [createdBooking, setCreatedBooking] = useState<CustomerBooking | null>(null);
+  const [serviceStart, setServiceStart] = useState('');
+  const [serviceEnd, setServiceEnd] = useState('');
 
   const [packageSearchInput, setPackageSearchInput] = useState('');
   const [packageSearch, setPackageSearch] = useState('');
@@ -401,6 +452,53 @@ export function QuotationRequestsWorkspacePage() {
     },
   });
 
+  const createBookingMutation = useMutation({
+    mutationFn: async () => {
+      if (!quotationToBook) {
+        throw new Error('Accepted quotation details are missing.');
+      }
+
+      const normalizedServiceStart = toIsoServiceDateTime(serviceStart, 'Service start');
+
+      const normalizedServiceEnd = toOptionalIsoServiceDateTime(serviceEnd);
+
+      if (
+        normalizedServiceEnd &&
+        new Date(normalizedServiceEnd).getTime() <= new Date(normalizedServiceStart).getTime()
+      ) {
+        throw new Error('Service end must be after the service start.');
+      }
+
+      return createCustomerBooking({
+        quotationId: quotationToBook.id,
+        serviceStart: normalizedServiceStart,
+        serviceEnd: normalizedServiceEnd,
+      });
+    },
+
+    onSuccess: async (booking) => {
+      setCreatedBooking(booking);
+      setQuotationToBook(null);
+      setServiceStart('');
+      setServiceEnd('');
+
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'events', eventId, 'bookings'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'bookings'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['notifications'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['dashboard', 'customer'],
+        }),
+      ]);
+    },
+  });
+
   const openCreateDialog = () => {
     createRequestMutation.reset();
     setSelectedPackage(null);
@@ -433,6 +531,25 @@ export function QuotationRequestsWorkspacePage() {
     setSelectedRequest(null);
     setQuotationToAccept(null);
     acceptQuotationMutation.reset();
+  };
+
+  const openCreateBookingDialog = (quotation: CustomerQuotation) => {
+    createBookingMutation.reset();
+    setCreatedBooking(null);
+    setQuotationToBook(quotation);
+    setServiceStart(selectedRequest ? toLocalDateTimeInput(selectedRequest.event.eventDate) : '');
+    setServiceEnd('');
+  };
+
+  const closeCreateBookingDialog = () => {
+    if (createBookingMutation.isPending) {
+      return;
+    }
+
+    createBookingMutation.reset();
+    setQuotationToBook(null);
+    setServiceStart('');
+    setServiceEnd('');
   };
 
   const filtersAreActive = Boolean(statusFilter) || sort !== 'newest';
@@ -1370,6 +1487,18 @@ export function QuotationRequestsWorkspacePage() {
                             Accept quotation
                           </button>
                         ) : null}
+                        {quotation.status === 'ACCEPTED' ? (
+                          <button
+                            type="button"
+                            className="btn-primary mt-6 w-full justify-center text-sm font-bold"
+                            onClick={() => {
+                              openCreateBookingDialog(quotation);
+                            }}
+                          >
+                            <CalendarRange className="size-4" />
+                            Create booking
+                          </button>
+                        ) : null}
                       </article>
                     );
                   })}
@@ -1459,6 +1588,146 @@ export function QuotationRequestsWorkspacePage() {
                   ? 'Accepting quotation...'
                   : 'Confirm acceptance'}
               </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {/* Create Booking Dialog */}
+      {quotationToBook ? (
+        <div
+          className="fixed inset-0 z-[60] grid place-items-center bg-[rgba(31,27,29,0.55)] px-4 py-8 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-booking-title"
+        >
+          <div className="glass-card w-full max-w-xl p-6 sm:p-8">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="soft-chip mb-4 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                  <CalendarRange className="size-4" />
+                  Create booking
+                </div>
+
+                <h2
+                  id="create-booking-title"
+                  className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+                >
+                  Schedule this vendor
+                </h2>
+
+                <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/66">
+                  Choose when this service should begin. The booking will be created from the
+                  accepted quotation.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="grid size-11 place-items-center rounded-full border border-white/55 bg-white/28"
+                onClick={closeCreateBookingDialog}
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="mt-8 space-y-5">
+              <label className="block">
+                <span className="mb-2 block text-sm font-black">Service start</span>
+
+                <input
+                  type="datetime-local"
+                  className="form-field min-h-12"
+                  value={serviceStart}
+                  disabled={createBookingMutation.isPending}
+                  onChange={(event) => {
+                    createBookingMutation.reset();
+                    setServiceStart(event.target.value);
+                  }}
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-black">Service end (optional)</span>
+
+                <input
+                  type="datetime-local"
+                  className="form-field min-h-12"
+                  value={serviceEnd}
+                  disabled={createBookingMutation.isPending}
+                  onChange={(event) => {
+                    createBookingMutation.reset();
+                    setServiceEnd(event.target.value);
+                  }}
+                />
+              </label>
+
+              {createBookingMutation.isError ? (
+                <div className="rounded-2xl border border-[rgba(124,74,90,0.24)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]">
+                  {getApiErrorMessage(createBookingMutation.error)}
+                </div>
+              ) : null}
+
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="btn-secondary justify-center text-sm font-bold"
+                  disabled={createBookingMutation.isPending}
+                  onClick={closeCreateBookingDialog}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-primary justify-center text-sm font-bold"
+                  disabled={createBookingMutation.isPending}
+                  onClick={() => {
+                    createBookingMutation.mutate();
+                  }}
+                >
+                  {createBookingMutation.isPending ? (
+                    <>
+                      <LoaderCircle className="size-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <CalendarRange className="size-4" />
+                      Create booking
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Booking Success Dialog */}
+      {createdBooking ? (
+        <div
+          className="fixed inset-0 z-[60] grid place-items-center bg-[rgba(31,27,29,0.55)] px-4 py-8 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="glass-card w-full max-w-lg p-8 text-center">
+            <div className="mx-auto grid size-16 place-items-center rounded-full bg-[rgba(89,133,113,0.12)] text-[#3f735d]">
+              <CheckCircle2 className="size-8" />
+            </div>
+
+            <h2 className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+              Booking created
+            </h2>
+
+            <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
+              Your booking has been created successfully. The vendor will now receive the booking
+              request for confirmation.
+            </p>
+
+            <div className="mt-8 flex justify-center">
+              <Link to={`/events/${eventId}/bookings`} className="btn-primary text-sm font-bold">
+                Open bookings
+              </Link>
             </div>
           </div>
         </div>

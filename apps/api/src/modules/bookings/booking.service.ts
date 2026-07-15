@@ -526,11 +526,15 @@ const getUpdatedVendorBooking = async (vendorId: string, bookingId: string) => {
 };
 
 export const getCustomerBookings = async (customerId: string, query: GetCustomerBookingsQuery) => {
-  const { status, page, limit, sort } = query;
+  const { status, eventId, page, limit, sort } = query;
 
   const where: Prisma.BookingWhereInput = {
     event: {
       ownerId: customerId,
+
+      ...(eventId && {
+        id: eventId,
+      }),
     },
 
     ...(status && {

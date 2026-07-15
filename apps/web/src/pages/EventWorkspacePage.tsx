@@ -804,6 +804,19 @@ export function EventWorkspacePage() {
                 );
               }
 
+              if (label === 'Bookings') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/bookings`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
               if (label === 'Documents') {
                 return (
                   <Link
@@ -1024,6 +1037,7 @@ export function EventWorkspacePage() {
                       'Guests',
                       'Invitations',
                       'Quotations',
+                      'Bookings',
                       'Documents',
                       'Mood board',
                     ].includes(label),
