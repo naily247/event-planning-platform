@@ -293,6 +293,68 @@ const adminComplaintDetailSelect = {
   },
 } as const;
 
+const customerVisibleComplaintActionTypes: ComplaintActionType[] = [
+  ComplaintActionType.CREATED,
+  ComplaintActionType.STATUS_CHANGED,
+  ComplaintActionType.RESOLVED,
+  ComplaintActionType.DISMISSED,
+  ComplaintActionType.CLOSED,
+  ComplaintActionType.REOPENED,
+];
+
+const customerComplaintDetailSelect = {
+  ...complaintSelect,
+
+  messages: {
+    where: {
+      isInternal: false,
+    },
+
+    select: {
+      id: true,
+      complaintId: true,
+      authorId: true,
+      body: true,
+      isInternal: true,
+      createdAt: true,
+
+      author: {
+        select: complaintPartySelect,
+      },
+    },
+
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
+
+  actions: {
+    where: {
+      action: {
+        in: customerVisibleComplaintActionTypes,
+      },
+    },
+
+    select: {
+      id: true,
+      complaintId: true,
+      performedById: true,
+      action: true,
+      reason: true,
+      metadata: true,
+      createdAt: true,
+
+      performedBy: {
+        select: complaintPartySelect,
+      },
+    },
+
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
+} as const;
+
 const complaintMessageSelect = {
   id: true,
   complaintId: true,
@@ -792,16 +854,53 @@ export const createComplaint = async (complainantId: string, input: CreateCompla
 };
 
 export const getMyComplaints = async (userId: string, query: GetMyComplaintsQuery) => {
-  const { page, limit, status, type, sort } = query;
+  const { page, limit, eventId, status, type, sort } = query;
 
   const where: Prisma.ComplaintWhereInput = {
-    OR: [
+    AND: [
       {
-        complainantId: userId,
+        OR: [
+          {
+            complainantId: userId,
+          },
+          {
+            respondentId: userId,
+          },
+        ],
       },
-      {
-        respondentId: userId,
-      },
+
+      ...(eventId
+        ? [
+            {
+              OR: [
+                {
+                  booking: {
+                    eventId,
+                  },
+                },
+                {
+                  payment: {
+                    booking: {
+                      eventId,
+                    },
+                  },
+                },
+                {
+                  review: {
+                    booking: {
+                      eventId,
+                    },
+                  },
+                },
+                {
+                  quotationRequest: {
+                    eventId,
+                  },
+                },
+              ],
+            } satisfies Prisma.ComplaintWhereInput,
+          ]
+        : []),
     ],
 
     ...(status && {
@@ -1315,7 +1414,7 @@ export const getComplaintById = async (userId: string, complaintId: string) => {
       ],
     },
 
-    select: complaintSelect,
+    select: customerComplaintDetailSelect,
   });
 
   if (!complaint) {

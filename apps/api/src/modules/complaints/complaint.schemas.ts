@@ -9,6 +9,8 @@ const paymentIdSchema = z.string().trim().cuid('Payment ID must be a valid CUID'
 
 const reviewIdSchema = z.string().trim().cuid('Review ID must be a valid CUID');
 
+const eventIdSchema = z.string().trim().cuid('Event ID must be a valid CUID');
+
 const quotationRequestIdSchema = z
   .string()
   .trim()
@@ -165,6 +167,8 @@ export const getMyComplaintsSchema = z.object({
       .min(1, 'Limit must be at least 1')
       .max(100, 'Limit must not exceed 100')
       .default(20),
+
+    eventId: eventIdSchema.optional(),
 
     status: z.nativeEnum(ComplaintStatus).optional(),
 
@@ -361,10 +365,16 @@ export type GetAdminComplaintsQuery = z.infer<typeof getAdminComplaintsSchema>['
 
 export type AdminComplaintParams = z.infer<typeof getAdminComplaintSchema>['params'];
 
-export type UpdateAdminComplaintStatusInput = z.infer<typeof updateAdminComplaintStatusSchema>['body'];
+export type UpdateAdminComplaintStatusInput = z.infer<
+  typeof updateAdminComplaintStatusSchema
+>['body'];
 
-export type UpdateAdminComplaintAssignmentInput = z.infer<typeof updateAdminComplaintAssignmentSchema>['body'];
+export type UpdateAdminComplaintAssignmentInput = z.infer<
+  typeof updateAdminComplaintAssignmentSchema
+>['body'];
 
-export type UpdateAdminComplaintPriorityInput = z.infer<typeof updateAdminComplaintPrioritySchema>['body'];
+export type UpdateAdminComplaintPriorityInput = z.infer<
+  typeof updateAdminComplaintPrioritySchema
+>['body'];
 
 export type ReopenAdminComplaintInput = z.infer<typeof reopenAdminComplaintSchema>['body'];

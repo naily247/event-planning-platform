@@ -25,6 +25,7 @@ import {
   X,
   Trash2,
   Star,
+  ShieldAlert,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -273,6 +274,11 @@ const workspaceSections = [
   {
     label: 'Reviews',
     icon: Star,
+    active: false,
+  },
+  {
+    label: 'Complaints',
+    icon: ShieldAlert,
     active: false,
   },
   {
@@ -836,6 +842,19 @@ export function EventWorkspacePage() {
                 );
               }
 
+              if (label === 'Complaints') {
+                return (
+                  <Link
+                    key={label}
+                    to={`/events/${event.id}/complaints`}
+                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+                  >
+                    <Icon className="size-4" />
+                    {label}
+                  </Link>
+                );
+              }
+
               if (label === 'Documents') {
                 return (
                   <Link
@@ -1058,6 +1077,7 @@ export function EventWorkspacePage() {
                       'Quotations',
                       'Bookings',
                       'Reviews',
+                      'Complaints',
                       'Documents',
                       'Mood board',
                     ].includes(label),

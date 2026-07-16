@@ -25,6 +25,7 @@ import { NotificationsPage } from '../pages/NotificationsPage';
 import { QuotationRequestsWorkspacePage } from '../pages/QuotationRequestsWorkspacePage';
 import { BookingsWorkspacePage } from '../pages/BookingsWorkspacePage';
 import { ReviewsWorkspacePage } from '../pages/ReviewsWorkspacePage';
+import { ComplaintsWorkspacePage } from '../pages/ComplaintsWorkspacePage';
 
 export const router = createBrowserRouter([
   {
@@ -178,6 +179,22 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <ReviewsWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/reviews',
+    element: (
+      <ProtectedRoute>
+        <ReviewsWorkspacePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/events/:eventId/complaints',
+    element: (
+      <ProtectedRoute>
+        <ComplaintsWorkspacePage />
       </ProtectedRoute>
     ),
   },
