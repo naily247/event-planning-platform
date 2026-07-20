@@ -239,57 +239,57 @@ const workspaceSections = [
   {
     label: 'Overview',
     icon: Sparkles,
-    active: true,
+    path: (eventId: string) => `/events/${eventId}`,
   },
   {
     label: 'Budget',
     icon: WalletCards,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/budget`,
   },
   {
     label: 'Tasks',
     icon: ClipboardList,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/tasks`,
   },
   {
     label: 'Guests',
     icon: UsersRound,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/guests`,
   },
   {
     label: 'Invitations',
     icon: MailCheck,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/invitations`,
   },
   {
     label: 'Quotations',
     icon: MessageSquareQuote,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/quotations`,
   },
   {
     label: 'Bookings',
     icon: PackageCheck,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/bookings`,
   },
   {
     label: 'Reviews',
     icon: Star,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/reviews`,
   },
   {
     label: 'Complaints',
     icon: ShieldAlert,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/complaints`,
   },
   {
     label: 'Documents',
     icon: FileText,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/documents`,
   },
   {
     label: 'Mood board',
     icon: Image,
-    active: false,
+    path: (eventId: string) => `/events/${eventId}/mood-board`,
   },
 ];
 
@@ -435,6 +435,7 @@ export function EventWorkspacePage() {
   const navigate = useNavigate();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [pendingStatusAction, setPendingStatusAction] = useState<EventStatusAction | null>(null);
 
   const form = useForm<EditEventFormValues>({
     resolver: zodResolver(editEventSchema),
@@ -508,6 +509,7 @@ export function EventWorkspacePage() {
 
     onSuccess: async (updatedEvent) => {
       queryClient.setQueryData(['customer', 'events', eventId], updatedEvent);
+      setPendingStatusAction(null);
 
       await Promise.all([
         queryClient.invalidateQueries({
@@ -650,6 +652,7 @@ export function EventWorkspacePage() {
   const availableStatusActions = eventStatusActions[event.status];
 
   const canDeleteEvent = event.status === 'DRAFT' || event.status === 'CANCELLED';
+  const PendingStatusIcon = pendingStatusAction?.icon;
 
   const getStatusButtonClassName = (tone: EventStatusAction['tone']) => {
     if (tone === 'primary') {
@@ -750,156 +753,23 @@ export function EventWorkspacePage() {
             className="glass-card mt-10 flex gap-2 overflow-x-auto p-3"
             aria-label="Event workspace sections"
           >
-            {workspaceSections.map(({ label, icon: Icon, active }) => {
-              if (label === 'Budget') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/budget`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Tasks') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/tasks`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Guests') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/guests`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Invitations') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/invitations`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Quotations') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/quotations`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Bookings') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/bookings`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Reviews') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/reviews`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Complaints') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/complaints`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Documents') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/documents`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
-
-              if (label === 'Mood board') {
-                return (
-                  <Link
-                    key={label}
-                    to={`/events/${event.id}/mood-board`}
-                    className="soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Link>
-                );
-              }
+            {workspaceSections.map(({ label, icon: Icon, path }) => {
+              const isActive = label === 'Overview';
 
               return (
-                <button
+                <Link
                   key={label}
-                  type="button"
+                  to={path(event.id)}
+                  aria-current={isActive ? 'page' : undefined}
                   className={
-                    active
+                    isActive
                       ? 'soft-chip shrink-0 bg-[rgba(93,58,85,0.92)] text-[#fffaf5]'
-                      : 'soft-chip shrink-0'
-                  }
-                  disabled={!active}
-                  title={
-                    active
-                      ? `${label} section`
-                      : `${label} will be connected in the next workspace phases`
+                      : 'soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]'
                   }
                 >
-                  <Icon className="size-4" />
+                  <Icon aria-hidden="true" className="size-4" />
                   {label}
-                </button>
+                </Link>
               );
             })}
           </nav>
@@ -1006,15 +876,18 @@ export function EventWorkspacePage() {
                             className={getStatusButtonClassName(tone)}
                             disabled={updateEventStatusMutation.isPending}
                             onClick={() => {
-                              updateEventStatusMutation.mutate(status);
+                              updateEventStatusMutation.reset();
+
+                              setPendingStatusAction({
+                                status,
+                                label,
+                                description,
+                                icon: Icon,
+                                tone,
+                              });
                             }}
                           >
-                            {updateEventStatusMutation.isPending ? (
-                              <LoaderCircle className="size-4 animate-spin" />
-                            ) : (
-                              <Icon className="size-4" />
-                            )}
-
+                            <Icon aria-hidden="true" className="size-4" />
                             {label}
                           </button>
 
@@ -1068,28 +941,16 @@ export function EventWorkspacePage() {
 
               <div className="mt-8 space-y-3">
                 {workspaceSections
-                  .filter(({ label }) =>
-                    [
-                      'Budget',
-                      'Tasks',
-                      'Guests',
-                      'Invitations',
-                      'Quotations',
-                      'Bookings',
-                      'Reviews',
-                      'Complaints',
-                      'Documents',
-                      'Mood board',
-                    ].includes(label),
-                  )
-                  .map(({ label, icon: Icon }) => (
-                    <div
+                  .filter(({ label }) => label !== 'Overview')
+                  .map(({ label, icon: Icon, path }) => (
+                    <Link
                       key={label}
-                      className="flex items-center gap-3 rounded-2xl bg-white/12 px-4 py-3 text-sm font-bold backdrop-blur"
+                      to={path(event.id)}
+                      className="flex items-center gap-3 rounded-2xl bg-white/12 px-4 py-3 text-sm font-bold backdrop-blur transition hover:bg-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                     >
-                      <Icon className="size-4 text-[var(--color-powder-blue)]" />
+                      <Icon aria-hidden="true" className="size-4 text-[var(--color-powder-blue)]" />
                       {label}
-                    </div>
+                    </Link>
                   ))}
               </div>
             </aside>
@@ -1342,6 +1203,98 @@ export function EventWorkspacePage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {pendingStatusAction && PendingStatusIcon ? (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="status-confirmation-title"
+          onMouseDown={(mouseEvent) => {
+            if (
+              mouseEvent.target === mouseEvent.currentTarget &&
+              !updateEventStatusMutation.isPending
+            ) {
+              setPendingStatusAction(null);
+              updateEventStatusMutation.reset();
+            }
+          }}
+        >
+          <div className="glass-card w-full max-w-lg p-6 sm:p-8">
+            <div
+              className={
+                pendingStatusAction.tone === 'danger'
+                  ? 'grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]'
+                  : 'grid size-14 place-items-center rounded-2xl bg-[rgba(93,58,85,0.12)] text-[var(--color-deep-plum)]'
+              }
+            >
+              <PendingStatusIcon aria-hidden="true" className="size-7" />
+            </div>
+
+            <h2
+              id="status-confirmation-title"
+              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+            >
+              {pendingStatusAction.label}?
+            </h2>
+
+            <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
+              {pendingStatusAction.description}
+            </p>
+
+            {pendingStatusAction.status === 'COMPLETED' ? (
+              <p className="mt-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]">
+                Completed events can no longer be edited.
+              </p>
+            ) : null}
+
+            {updateEventStatusMutation.isError ? (
+              <div
+                role="alert"
+                className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+              >
+                {getApiErrorMessage(updateEventStatusMutation.error)}
+              </div>
+            ) : null}
+
+            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                className="btn-secondary justify-center text-sm font-bold"
+                disabled={updateEventStatusMutation.isPending}
+                onClick={() => {
+                  setPendingStatusAction(null);
+                  updateEventStatusMutation.reset();
+                }}
+              >
+                Keep current status
+              </button>
+
+              <button
+                type="button"
+                className={
+                  pendingStatusAction.tone === 'danger'
+                    ? 'flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60'
+                    : 'btn-primary justify-center text-sm font-bold'
+                }
+                disabled={updateEventStatusMutation.isPending}
+                onClick={() => {
+                  updateEventStatusMutation.mutate(pendingStatusAction.status);
+                }}
+              >
+                {updateEventStatusMutation.isPending ? (
+                  <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                ) : (
+                  <PendingStatusIcon aria-hidden="true" className="size-4" />
+                )}
+
+                {updateEventStatusMutation.isPending
+                  ? 'Updating status...'
+                  : pendingStatusAction.label}
+              </button>
             </div>
           </div>
         </div>

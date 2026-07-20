@@ -14,9 +14,9 @@ import {
   WalletCards,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../lib/api';
 
@@ -232,7 +232,6 @@ const getMinimumDateTime = () => {
 export function EventsPage() {
   const queryClient = useQueryClient();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-  const navigate = useNavigate();
 
   const form = useForm<CreateEventFormValues>({
     resolver: zodResolver(createEventFormSchema),
@@ -288,6 +287,51 @@ export function EventsPage() {
     },
   });
 
+  const openCreateForm = () => {
+    createEventMutation.reset();
+    setIsCreateFormOpen(true);
+  };
+
+  const closeCreateForm = () => {
+    if (createEventMutation.isPending) {
+      return;
+    }
+
+    form.reset();
+    createEventMutation.reset();
+    setIsCreateFormOpen(false);
+  };
+
+  useEffect(() => {
+    if (!isCreateFormOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+
+    const focusTimer = window.setTimeout(() => {
+      form.setFocus('name');
+    }, 0);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !createEventMutation.isPending) {
+        form.reset();
+        createEventMutation.reset();
+        setIsCreateFormOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [createEventMutation.isPending, form, isCreateFormOpen]);
+
   const onSubmit = form.handleSubmit((values) => {
     createEventMutation.mutate({
       name: values.name.trim(),
@@ -313,16 +357,6 @@ export function EventsPage() {
     });
   });
 
-  const closeCreateForm = () => {
-    if (createEventMutation.isPending) {
-      return;
-    }
-
-    form.reset();
-    createEventMutation.reset();
-    setIsCreateFormOpen(false);
-  };
-
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -330,10 +364,10 @@ export function EventsPage() {
           <div className="flex items-center gap-4">
             <Link
               to="/dashboard"
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl"
+              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl transition hover:bg-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
               aria-label="Back to dashboard"
             >
-              <ArrowLeft className="size-5" />
+              <ArrowLeft aria-hidden="true" className="size-5" />
             </Link>
 
             <div>
@@ -347,32 +381,29 @@ export function EventsPage() {
             </div>
           </div>
 
-          <button
-            type="button"
-            className="btn-primary text-sm font-bold"
-            onClick={() => {
-              setIsCreateFormOpen(true);
-            }}
-          >
-            <Plus className="size-4" />
+          <button type="button" className="btn-primary text-sm font-bold" onClick={openCreateForm}>
+            <Plus aria-hidden="true" className="size-4" />
             Create event
           </button>
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden">
+          <section className="relative overflow-hidden" aria-labelledby="events-page-title">
             <div className="pointer-events-none absolute left-[8%] top-8 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
             <div className="pointer-events-none absolute right-[8%] top-14 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
 
             <div className="relative">
               <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                <Sparkles className="size-4" />
+                <Sparkles aria-hidden="true" className="size-4" />
                 Event planning
               </div>
 
               <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                 <div>
-                  <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
+                  <h2
+                    id="events-page-title"
+                    className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl"
+                  >
                     Every celebration, organised in one calm place.
                   </h2>
 
@@ -397,11 +428,14 @@ export function EventsPage() {
             </div>
           </section>
 
-          <section className="mt-10">
+          <section className="mt-10" aria-label="Event list">
             {eventsQuery.isLoading ? (
               <div className="glass-card grid min-h-80 place-items-center p-10 text-center">
                 <div>
-                  <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]"
+                  />
 
                   <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
                     Loading your events
@@ -418,7 +452,7 @@ export function EventsPage() {
               <div className="glass-card grid min-h-80 place-items-center p-10 text-center">
                 <div className="max-w-lg">
                   <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(130,72,77,0.12)] text-[var(--color-rosewood)]">
-                    <CircleAlert className="size-7" />
+                    <CircleAlert aria-hidden="true" className="size-7" />
                   </div>
 
                   <p className="mt-5 text-2xl font-black text-[var(--color-near-black)]">
@@ -448,7 +482,7 @@ export function EventsPage() {
               <div className="glass-card grid min-h-80 place-items-center p-10 text-center">
                 <div className="max-w-lg">
                   <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                    <CalendarDays className="size-7" />
+                    <CalendarDays aria-hidden="true" className="size-7" />
                   </div>
 
                   <p className="mt-5 text-2xl font-black text-[var(--color-near-black)]">
@@ -463,11 +497,9 @@ export function EventsPage() {
                   <button
                     type="button"
                     className="btn-primary mt-6 text-sm font-bold"
-                    onClick={() => {
-                      setIsCreateFormOpen(true);
-                    }}
+                    onClick={openCreateForm}
                   >
-                    <Plus className="size-4" />
+                    <Plus aria-hidden="true" className="size-4" />
                     Create event
                   </button>
                 </div>
@@ -480,92 +512,106 @@ export function EventsPage() {
             eventsQuery.data.events.length > 0 ? (
               <div className="grid gap-5 lg:grid-cols-2">
                 {eventsQuery.data.events.map((event) => (
-                  <article key={event.id} className="luxe-card flex flex-col p-6">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                        <CalendarDays className="size-6" />
+                  <article key={event.id}>
+                    <Link
+                      to={`/events/${event.id}`}
+                      className="luxe-card flex h-full cursor-pointer flex-col p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(31,27,29,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
+                      aria-label={`Open ${event.name} event workspace`}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                          <CalendarDays aria-hidden="true" className="size-6" />
+                        </div>
+
+                        <span className="status-chip" data-tone={getStatusTone(event.status)}>
+                          {event.status.replaceAll('_', ' ')}
+                        </span>
                       </div>
 
-                      <span className="status-chip" data-tone={getStatusTone(event.status)}>
-                        {event.status.replaceAll('_', ' ')}
-                      </span>
-                    </div>
-
-                    <p className="mt-7 text-sm font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                      {event.eventType}
-                    </p>
-
-                    <h3 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                      {event.name}
-                    </h3>
-
-                    {event.theme ? (
-                      <p className="mt-3 text-sm font-semibold text-[var(--color-deep-plum)]">
-                        {event.theme}
+                      <p className="mt-7 text-sm font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                        {event.eventType}
                       </p>
-                    ) : null}
 
-                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                        <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                          <Clock3 className="size-4 text-[var(--color-rosewood)]" />
-                          Event date
+                      <h3 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                        {event.name}
+                      </h3>
+
+                      {event.theme ? (
+                        <p className="mt-3 text-sm font-semibold text-[var(--color-deep-plum)]">
+                          {event.theme}
+                        </p>
+                      ) : null}
+
+                      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
+                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
+                            <Clock3
+                              aria-hidden="true"
+                              className="size-4 text-[var(--color-rosewood)]"
+                            />
+                            Event date
+                          </div>
+
+                          <p className="mt-3 font-black text-[var(--color-near-black)]">
+                            {formatEventDate(event.eventDate)}
+                          </p>
                         </div>
 
-                        <p className="mt-3 font-black text-[var(--color-near-black)]">
-                          {formatEventDate(event.eventDate)}
-                        </p>
-                      </div>
+                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
+                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
+                            <MapPin
+                              aria-hidden="true"
+                              className="size-4 text-[var(--color-rosewood)]"
+                            />
+                            Location
+                          </div>
 
-                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                        <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                          <MapPin className="size-4 text-[var(--color-rosewood)]" />
-                          Location
+                          <p className="mt-3 font-black text-[var(--color-near-black)]">
+                            {event.location}
+                          </p>
                         </div>
 
-                        <p className="mt-3 font-black text-[var(--color-near-black)]">
-                          {event.location}
-                        </p>
-                      </div>
+                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
+                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
+                            <UsersRound
+                              aria-hidden="true"
+                              className="size-4 text-[var(--color-rosewood)]"
+                            />
+                            Guests
+                          </div>
 
-                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                        <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                          <UsersRound className="size-4 text-[var(--color-rosewood)]" />
-                          Guests
+                          <p className="mt-3 font-black text-[var(--color-near-black)]">
+                            {event.guestCount ?? 'Not set'}
+                          </p>
                         </div>
 
-                        <p className="mt-3 font-black text-[var(--color-near-black)]">
-                          {event.guestCount ?? 'Not set'}
-                        </p>
-                      </div>
+                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
+                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
+                            <WalletCards
+                              aria-hidden="true"
+                              className="size-4 text-[var(--color-rosewood)]"
+                            />
+                            Planned budget
+                          </div>
 
-                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                        <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                          <WalletCards className="size-4 text-[var(--color-rosewood)]" />
-                          Planned budget
+                          <p className="mt-3 font-black text-[var(--color-near-black)]">
+                            {formatCurrency(event.plannedBudget)}
+                          </p>
                         </div>
-
-                        <p className="mt-3 font-black text-[var(--color-near-black)]">
-                          {formatCurrency(event.plannedBudget)}
-                        </p>
                       </div>
-                    </div>
 
-                    {event.requirements ? (
-                      <p className="mt-5 line-clamp-3 leading-7 text-[var(--color-charcoal)]/66">
-                        {event.requirements}
-                      </p>
-                    ) : null}
+                      {event.requirements ? (
+                        <p className="mt-5 line-clamp-3 leading-7 text-[var(--color-charcoal)]/66">
+                          {event.requirements}
+                        </p>
+                      ) : null}
 
-                    <div className="mt-auto pt-7">
-                      <button
-                        type="button"
-                        className="btn-secondary w-full justify-center text-sm font-bold"
-                        onClick={() => navigate(`/events/${event.id}`)}
-                      >
-                        Open event workspace
-                      </button>
-                    </div>
+                      <div className="mt-auto pt-7">
+                        <span className="btn-secondary w-full justify-center text-sm font-bold">
+                          Open event workspace
+                        </span>
+                      </div>
+                    </Link>
                   </article>
                 ))}
               </div>
@@ -580,13 +626,18 @@ export function EventsPage() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-event-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeCreateForm();
+            }
+          }}
         >
           <div className="mx-auto max-w-3xl">
             <div className="glass-card p-6 sm:p-8">
               <div className="flex items-start justify-between gap-5">
                 <div>
                   <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                    <Sparkles className="size-4" />
+                    <Sparkles aria-hidden="true" className="size-4" />
                     New event
                   </div>
 
@@ -605,15 +656,16 @@ export function EventsPage() {
 
                 <button
                   type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
+                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
                   aria-label="Close create event form"
+                  disabled={createEventMutation.isPending}
                   onClick={closeCreateForm}
                 >
-                  <X className="size-5" />
+                  <X aria-hidden="true" className="size-5" />
                 </button>
               </div>
 
-              <form className="mt-8 grid gap-5" onSubmit={onSubmit}>
+              <form className="mt-8 grid gap-5" noValidate onSubmit={onSubmit}>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label className="block">
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -624,12 +676,20 @@ export function EventsPage() {
                       className="form-field"
                       placeholder="Emma and Daniel Wedding"
                       type="text"
+                      autoComplete="off"
                       disabled={createEventMutation.isPending}
+                      aria-invalid={Boolean(form.formState.errors.name)}
+                      aria-describedby={
+                        form.formState.errors.name ? 'create-event-name-error' : undefined
+                      }
                       {...form.register('name')}
                     />
 
                     {form.formState.errors.name ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                      <span
+                        id="create-event-name-error"
+                        className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                      >
                         {form.formState.errors.name.message}
                       </span>
                     ) : null}
@@ -644,12 +704,20 @@ export function EventsPage() {
                       className="form-field"
                       placeholder="Wedding"
                       type="text"
+                      autoComplete="off"
                       disabled={createEventMutation.isPending}
+                      aria-invalid={Boolean(form.formState.errors.eventType)}
+                      aria-describedby={
+                        form.formState.errors.eventType ? 'create-event-type-error' : undefined
+                      }
                       {...form.register('eventType')}
                     />
 
                     {form.formState.errors.eventType ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                      <span
+                        id="create-event-type-error"
+                        className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                      >
                         {form.formState.errors.eventType.message}
                       </span>
                     ) : null}
@@ -667,11 +735,18 @@ export function EventsPage() {
                       type="datetime-local"
                       min={getMinimumDateTime()}
                       disabled={createEventMutation.isPending}
+                      aria-invalid={Boolean(form.formState.errors.eventDate)}
+                      aria-describedby={
+                        form.formState.errors.eventDate ? 'create-event-date-error' : undefined
+                      }
                       {...form.register('eventDate')}
                     />
 
                     {form.formState.errors.eventDate ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                      <span
+                        id="create-event-date-error"
+                        className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                      >
                         {form.formState.errors.eventDate.message}
                       </span>
                     ) : null}
@@ -686,12 +761,20 @@ export function EventsPage() {
                       className="form-field"
                       placeholder="Colombo"
                       type="text"
+                      autoComplete="off"
                       disabled={createEventMutation.isPending}
+                      aria-invalid={Boolean(form.formState.errors.location)}
+                      aria-describedby={
+                        form.formState.errors.location ? 'create-event-location-error' : undefined
+                      }
                       {...form.register('location')}
                     />
 
                     {form.formState.errors.location ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                      <span
+                        id="create-event-location-error"
+                        className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                      >
                         {form.formState.errors.location.message}
                       </span>
                     ) : null}
@@ -709,13 +792,24 @@ export function EventsPage() {
                       placeholder="150"
                       type="number"
                       min="1"
+                      max="1000000"
                       step="1"
+                      inputMode="numeric"
                       disabled={createEventMutation.isPending}
+                      aria-invalid={Boolean(form.formState.errors.guestCount)}
+                      aria-describedby={
+                        form.formState.errors.guestCount
+                          ? 'create-event-guest-count-error'
+                          : undefined
+                      }
                       {...form.register('guestCount')}
                     />
 
                     {form.formState.errors.guestCount ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                      <span
+                        id="create-event-guest-count-error"
+                        className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                      >
                         {form.formState.errors.guestCount.message}
                       </span>
                     ) : null}
@@ -731,13 +825,24 @@ export function EventsPage() {
                       placeholder="1500000"
                       type="number"
                       min="0.01"
+                      max="9999999999.99"
                       step="0.01"
+                      inputMode="decimal"
                       disabled={createEventMutation.isPending}
+                      aria-invalid={Boolean(form.formState.errors.plannedBudget)}
+                      aria-describedby={
+                        form.formState.errors.plannedBudget
+                          ? 'create-event-budget-error'
+                          : undefined
+                      }
                       {...form.register('plannedBudget')}
                     />
 
                     {form.formState.errors.plannedBudget ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                      <span
+                        id="create-event-budget-error"
+                        className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                      >
                         {form.formState.errors.plannedBudget.message}
                       </span>
                     ) : null}
@@ -753,12 +858,20 @@ export function EventsPage() {
                     className="form-field"
                     placeholder="Modern ivory and plum"
                     type="text"
+                    autoComplete="off"
                     disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.theme)}
+                    aria-describedby={
+                      form.formState.errors.theme ? 'create-event-theme-error' : undefined
+                    }
                     {...form.register('theme')}
                   />
 
                   {form.formState.errors.theme ? (
-                    <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                    <span
+                      id="create-event-theme-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
                       {form.formState.errors.theme.message}
                     </span>
                   ) : null}
@@ -773,11 +886,20 @@ export function EventsPage() {
                     className="form-field min-h-32 resize-y"
                     placeholder="Describe the event style, services and important details..."
                     disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.requirements)}
+                    aria-describedby={
+                      form.formState.errors.requirements
+                        ? 'create-event-requirements-error'
+                        : undefined
+                    }
                     {...form.register('requirements')}
                   />
 
                   {form.formState.errors.requirements ? (
-                    <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                    <span
+                      id="create-event-requirements-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
                       {form.formState.errors.requirements.message}
                     </span>
                   ) : null}
@@ -808,9 +930,9 @@ export function EventsPage() {
                     disabled={createEventMutation.isPending}
                   >
                     {createEventMutation.isPending ? (
-                      <LoaderCircle className="size-4 animate-spin" />
+                      <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
                     ) : (
-                      <Plus className="size-4" />
+                      <Plus aria-hidden="true" className="size-4" />
                     )}
 
                     {createEventMutation.isPending ? 'Creating event...' : 'Create event'}

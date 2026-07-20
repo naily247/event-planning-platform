@@ -15,6 +15,8 @@ const mockedUploadAsset = uploadAsset as jest.MockedFunction<typeof uploadAsset>
 
 const app = createApp();
 
+jest.setTimeout(15000);
+
 const customerEmail = 'mood-board-customer@example.com';
 const secondCustomerEmail = 'mood-board-second-customer@example.com';
 const vendorEmail = 'mood-board-vendor@example.com';

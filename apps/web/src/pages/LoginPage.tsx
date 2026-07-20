@@ -1,7 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { ArrowRight, Eye, LockKeyhole, Mail, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LoaderCircle,
+  LockKeyhole,
+  Mail,
+  Sparkles,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -42,8 +50,14 @@ const getLoginErrorMessage = (error: unknown) => {
 const getLoginRedirectPath = (role: AuthUserRole) => {
   switch (role) {
     case 'CUSTOMER':
+      return '/dashboard';
+
     case 'VENDOR':
+      return '/vendor/dashboard';
+
     case 'ADMIN':
+      return '/admin/dashboard';
+
     default:
       return '/dashboard';
   }
@@ -78,6 +92,9 @@ export function LoginPage() {
     loginMutation.mutate(values);
   });
 
+  const emailError = form.formState.errors.email?.message;
+  const passwordError = form.formState.errors.password?.message;
+
   const loginErrorMessage = loginMutation.isError
     ? getLoginErrorMessage(loginMutation.error)
     : null;
@@ -85,7 +102,7 @@ export function LoginPage() {
   return (
     <div className="glass-card p-6 sm:p-8">
       <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-        <Sparkles className="size-4" />
+        <Sparkles aria-hidden="true" className="size-4" />
         Welcome back
       </div>
 
@@ -98,14 +115,17 @@ export function LoginPage() {
         beautifully organised.
       </p>
 
-      <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
+      <form className="mt-8 grid gap-4" onSubmit={onSubmit} noValidate>
         <label className="block">
           <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
             Email address
           </span>
 
           <span className="relative block">
-            <Mail className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+            <Mail
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42"
+            />
 
             <input
               className="form-field !pl-12"
@@ -113,33 +133,32 @@ export function LoginPage() {
               type="email"
               autoComplete="email"
               disabled={loginMutation.isPending}
+              aria-invalid={Boolean(emailError)}
+              aria-describedby={emailError ? 'login-email-error' : undefined}
               {...form.register('email')}
             />
           </span>
 
-          {form.formState.errors.email ? (
-            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-              {form.formState.errors.email.message}
+          {emailError ? (
+            <span
+              id="login-email-error"
+              className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+            >
+              {emailError}
             </span>
           ) : null}
         </label>
 
         <label className="block">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <span className="block text-sm font-black text-[var(--color-charcoal)]/72">
-              Password
-            </span>
-
-            <button
-              type="button"
-              className="text-sm font-bold text-[var(--color-rosewood)] transition hover:text-[var(--color-deep-plum)]"
-            >
-              Forgot?
-            </button>
-          </div>
+          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+            Password
+          </span>
 
           <span className="relative block">
-            <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+            <LockKeyhole
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42"
+            />
 
             <input
               className="form-field !pl-12 !pr-12"
@@ -147,24 +166,35 @@ export function LoginPage() {
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               disabled={loginMutation.isPending}
+              aria-invalid={Boolean(passwordError)}
+              aria-describedby={passwordError ? 'login-password-error' : undefined}
               {...form.register('password')}
             />
 
             <button
               type="button"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-charcoal)]/46 transition hover:text-[var(--color-deep-plum)]"
+              className="absolute right-4 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--color-charcoal)]/46 transition hover:bg-white/36 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
+              disabled={loginMutation.isPending}
               onClick={() => {
                 setShowPassword((current) => !current);
               }}
             >
-              <Eye className="size-5" />
+              {showPassword ? (
+                <EyeOff aria-hidden="true" className="size-5" />
+              ) : (
+                <Eye aria-hidden="true" className="size-5" />
+              )}
             </button>
           </span>
 
-          {form.formState.errors.password ? (
-            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-              {form.formState.errors.password.message}
+          {passwordError ? (
+            <span
+              id="login-password-error"
+              className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+            >
+              {passwordError}
             </span>
           ) : null}
         </label>
@@ -183,8 +213,17 @@ export function LoginPage() {
           className="btn-primary mt-2 w-full justify-center font-bold"
           disabled={loginMutation.isPending}
         >
-          {loginMutation.isPending ? 'Logging in...' : 'Log in'}
-          <ArrowRight className="size-4" />
+          {loginMutation.isPending ? (
+            <>
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+              Logging in...
+            </>
+          ) : (
+            <>
+              Log in
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </>
+          )}
         </button>
       </form>
 
@@ -192,7 +231,7 @@ export function LoginPage() {
         New to Eventure?{' '}
         <Link
           to="/register"
-          className="font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)]"
+          className="font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
         >
           Create an account
         </Link>

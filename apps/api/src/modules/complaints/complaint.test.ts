@@ -1914,8 +1914,29 @@ describe('Complaint management API', () => {
       const participantResponse = await getComplaintByIdRequest(customer.accessToken, complaintId);
 
       expect(participantResponse.status).toBe(200);
-      expect(participantResponse.body.data.messages).toBeUndefined();
-      expect(participantResponse.body.data.actions).toBeUndefined();
+
+      expect(participantResponse.body.data.messages).toEqual([]);
+
+      expect(participantResponse.body.data.actions).toHaveLength(1);
+      expect(participantResponse.body.data.actions[0]).toMatchObject({
+        complaintId,
+        performedById: customer.userId,
+        action: ComplaintActionType.CREATED,
+        reason: 'Complaint submitted',
+      });
+
+      expect(
+        participantResponse.body.data.messages.some(
+          (message: { isInternal: boolean }) => message.isInternal,
+        ),
+      ).toBe(false);
+
+      expect(
+        participantResponse.body.data.messages.some(
+          (message: { body: string }) =>
+            message.body === 'Administrator-only internal investigation note.',
+        ),
+      ).toBe(false);
     });
 
     it('returns not found when the complaint does not exist', async () => {

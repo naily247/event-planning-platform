@@ -2,11 +2,7 @@ import { api } from '../../lib/api';
 
 export type AuthUserRole = 'CUSTOMER' | 'VENDOR' | 'ADMIN';
 
-export type AuthAccountStatus =
-  | 'ACTIVE'
-  | 'PENDING_VERIFICATION'
-  | 'SUSPENDED'
-  | 'DEACTIVATED';
+export type AuthAccountStatus = 'ACTIVE' | 'PENDING_VERIFICATION' | 'SUSPENDED' | 'DEACTIVATED';
 
 export type AuthUser = {
   id: string;
@@ -49,17 +45,12 @@ export type RegisterVendorInput = {
 };
 
 export async function login(input: LoginInput) {
-  const response = await api.post<ApiSuccessResponse<AuthResponse>>(
-    '/auth/login',
-    input,
-  );
+  const response = await api.post<ApiSuccessResponse<AuthResponse>>('/auth/login', input);
 
   return response.data.data;
 }
 
-export async function registerCustomer(
-  input: RegisterCustomerInput,
-) {
+export async function registerCustomer(input: RegisterCustomerInput) {
   const response = await api.post<ApiSuccessResponse<AuthResponse>>(
     '/auth/register/customer',
     input,
@@ -69,10 +60,13 @@ export async function registerCustomer(
 }
 
 export async function registerVendor(input: RegisterVendorInput) {
-  const response = await api.post<ApiSuccessResponse<AuthResponse>>(
-    '/auth/register/vendor',
-    input,
-  );
+  const response = await api.post<ApiSuccessResponse<AuthResponse>>('/auth/register/vendor', input);
+
+  return response.data.data;
+}
+
+export async function getCurrentUser() {
+  const response = await api.get<ApiSuccessResponse<AuthUser>>('/auth/me');
 
   return response.data.data;
 }

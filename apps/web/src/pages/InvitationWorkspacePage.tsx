@@ -718,6 +718,13 @@ export function InvitationWorkspacePage() {
                         </p>
 
                         <p className="font-semibold text-[var(--color-charcoal)]/62">
+                          Created:{' '}
+                          <span className="font-black text-[var(--color-near-black)]">
+                            {formatEventDate(invitation.createdAt)}
+                          </span>
+                        </p>
+
+                        <p className="font-semibold text-[var(--color-charcoal)]/62">
                           Last sent:{' '}
                           <span className="font-black text-[var(--color-near-black)]">
                             {invitation.lastSentAt
@@ -815,8 +822,8 @@ export function InvitationWorkspacePage() {
                 <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">Invitation tools</h2>
 
                 <p className="mt-3 leading-7 text-white/68">
-                  Creation, regeneration, revocation, sharing and filtering controls will be
-                  connected in the next steps.
+                  Create secure links, share them with guests, replace compromised invitations and
+                  revoke access whenever needed.
                 </p>
               </article>
             </aside>
@@ -1218,8 +1225,18 @@ export function InvitationWorkspacePage() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="revoke-invitation-title"
+          onClick={() => {
+            if (!revokeInvitationMutation.isPending) {
+              closeRevokeInvitationDialog();
+            }
+          }}
         >
-          <div className="glass-card w-full max-w-lg p-6 sm:p-8">
+          <div
+            className="glass-card w-full max-w-lg p-6 sm:p-8"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
             <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
               <Ban className="size-7" />
             </div>
@@ -1228,7 +1245,8 @@ export function InvitationWorkspacePage() {
               id="revoke-invitation-title"
               className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
             >
-              Revoke this invitation?
+              Revoke invitation for {invitationToRevoke.guest.firstName}{' '}
+              {invitationToRevoke.guest.lastName}?
             </h2>
 
             <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">

@@ -5,11 +5,15 @@ import {
   ArrowLeft,
   ArrowRight,
   Building2,
+  Eye,
+  EyeOff,
+  LoaderCircle,
   LockKeyhole,
   Mail,
   Sparkles,
   UserRound,
 } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -51,6 +55,7 @@ const getRegistrationErrorMessage = (error: unknown) => {
 
 export function VendorRegisterPage() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<VendorRegisterFormValues>({
     resolver: zodResolver(vendorRegisterSchema),
@@ -70,7 +75,7 @@ export function VendorRegisterPage() {
         accessToken: data.accessToken,
       });
 
-      navigate('/dashboard', {
+      navigate('/vendor/dashboard', {
         replace: true,
       });
     },
@@ -80,6 +85,12 @@ export function VendorRegisterPage() {
     registerMutation.mutate(values);
   });
 
+  const firstNameError = form.formState.errors.firstName?.message;
+  const lastNameError = form.formState.errors.lastName?.message;
+  const businessNameError = form.formState.errors.businessName?.message;
+  const emailError = form.formState.errors.email?.message;
+  const passwordError = form.formState.errors.password?.message;
+
   const registrationErrorMessage = registerMutation.isError
     ? getRegistrationErrorMessage(registerMutation.error)
     : null;
@@ -88,14 +99,14 @@ export function VendorRegisterPage() {
     <div className="glass-card p-6 sm:p-8">
       <Link
         to="/register"
-        className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/64 transition hover:text-[var(--color-deep-plum)]"
+        className="mb-6 inline-flex items-center gap-2 rounded-lg text-sm font-bold text-[var(--color-charcoal)]/64 transition hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 focus-visible:ring-offset-2"
       >
-        <ArrowLeft className="size-4" />
+        <ArrowLeft aria-hidden="true" className="size-4" />
         Choose account type
       </Link>
 
       <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-        <Sparkles className="size-4" />
+        <Sparkles aria-hidden="true" className="size-4" />
         Vendor workspace
       </div>
 
@@ -108,7 +119,7 @@ export function VendorRegisterPage() {
         portfolio and build trust with verified customers.
       </p>
 
-      <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
+      <form className="mt-8 grid gap-4" onSubmit={onSubmit} noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -116,7 +127,10 @@ export function VendorRegisterPage() {
             </span>
 
             <span className="relative block">
-              <UserRound className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+              <UserRound
+                aria-hidden="true"
+                className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42"
+              />
 
               <input
                 className="form-field !pl-12"
@@ -124,13 +138,18 @@ export function VendorRegisterPage() {
                 type="text"
                 autoComplete="given-name"
                 disabled={registerMutation.isPending}
+                aria-invalid={Boolean(firstNameError)}
+                aria-describedby={firstNameError ? 'vendor-register-first-name-error' : undefined}
                 {...form.register('firstName')}
               />
             </span>
 
-            {form.formState.errors.firstName ? (
-              <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                {form.formState.errors.firstName.message}
+            {firstNameError ? (
+              <span
+                id="vendor-register-first-name-error"
+                className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+              >
+                {firstNameError}
               </span>
             ) : null}
           </label>
@@ -141,7 +160,10 @@ export function VendorRegisterPage() {
             </span>
 
             <span className="relative block">
-              <UserRound className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+              <UserRound
+                aria-hidden="true"
+                className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42"
+              />
 
               <input
                 className="form-field !pl-12"
@@ -149,13 +171,18 @@ export function VendorRegisterPage() {
                 type="text"
                 autoComplete="family-name"
                 disabled={registerMutation.isPending}
+                aria-invalid={Boolean(lastNameError)}
+                aria-describedby={lastNameError ? 'vendor-register-last-name-error' : undefined}
                 {...form.register('lastName')}
               />
             </span>
 
-            {form.formState.errors.lastName ? (
-              <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                {form.formState.errors.lastName.message}
+            {lastNameError ? (
+              <span
+                id="vendor-register-last-name-error"
+                className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+              >
+                {lastNameError}
               </span>
             ) : null}
           </label>
@@ -167,7 +194,10 @@ export function VendorRegisterPage() {
           </span>
 
           <span className="relative block">
-            <Building2 className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+            <Building2
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42"
+            />
 
             <input
               className="form-field !pl-12"
@@ -175,13 +205,20 @@ export function VendorRegisterPage() {
               type="text"
               autoComplete="organization"
               disabled={registerMutation.isPending}
+              aria-invalid={Boolean(businessNameError)}
+              aria-describedby={
+                businessNameError ? 'vendor-register-business-name-error' : undefined
+              }
               {...form.register('businessName')}
             />
           </span>
 
-          {form.formState.errors.businessName ? (
-            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-              {form.formState.errors.businessName.message}
+          {businessNameError ? (
+            <span
+              id="vendor-register-business-name-error"
+              className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+            >
+              {businessNameError}
             </span>
           ) : null}
         </label>
@@ -192,7 +229,10 @@ export function VendorRegisterPage() {
           </span>
 
           <span className="relative block">
-            <Mail className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+            <Mail
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42"
+            />
 
             <input
               className="form-field !pl-12"
@@ -200,13 +240,18 @@ export function VendorRegisterPage() {
               type="email"
               autoComplete="email"
               disabled={registerMutation.isPending}
+              aria-invalid={Boolean(emailError)}
+              aria-describedby={emailError ? 'vendor-register-email-error' : undefined}
               {...form.register('email')}
             />
           </span>
 
-          {form.formState.errors.email ? (
-            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-              {form.formState.errors.email.message}
+          {emailError ? (
+            <span
+              id="vendor-register-email-error"
+              className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+            >
+              {emailError}
             </span>
           ) : null}
         </label>
@@ -217,21 +262,57 @@ export function VendorRegisterPage() {
           </span>
 
           <span className="relative block">
-            <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+            <LockKeyhole
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42"
+            />
 
             <input
-              className="form-field !pl-12"
+              className="form-field !pl-12 !pr-12"
               placeholder="Create a strong password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               disabled={registerMutation.isPending}
+              aria-invalid={Boolean(passwordError)}
+              aria-describedby={
+                passwordError
+                  ? 'vendor-register-password-error vendor-register-password-help'
+                  : 'vendor-register-password-help'
+              }
               {...form.register('password')}
             />
+
+            <button
+              type="button"
+              className="absolute right-4 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--color-charcoal)]/46 transition hover:bg-white/36 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
+              disabled={registerMutation.isPending}
+              onClick={() => {
+                setShowPassword((current) => !current);
+              }}
+            >
+              {showPassword ? (
+                <EyeOff aria-hidden="true" className="size-5" />
+              ) : (
+                <Eye aria-hidden="true" className="size-5" />
+              )}
+            </button>
           </span>
 
-          {form.formState.errors.password ? (
-            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-              {form.formState.errors.password.message}
+          <span
+            id="vendor-register-password-help"
+            className="mt-2 block text-sm font-semibold text-[var(--color-charcoal)]/54"
+          >
+            Use at least 8 characters.
+          </span>
+
+          {passwordError ? (
+            <span
+              id="vendor-register-password-error"
+              className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+            >
+              {passwordError}
             </span>
           ) : null}
         </label>
@@ -255,9 +336,17 @@ export function VendorRegisterPage() {
           className="btn-primary mt-2 w-full justify-center font-bold"
           disabled={registerMutation.isPending}
         >
-          {registerMutation.isPending ? 'Creating account...' : 'Create vendor account'}
-
-          <ArrowRight className="size-4" />
+          {registerMutation.isPending ? (
+            <>
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+              Creating account...
+            </>
+          ) : (
+            <>
+              Create vendor account
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </>
+          )}
         </button>
       </form>
 
@@ -265,7 +354,7 @@ export function VendorRegisterPage() {
         Already have an account?{' '}
         <Link
           to="/login"
-          className="font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)]"
+          className="rounded-md font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 focus-visible:ring-offset-2"
         >
           Log in
         </Link>

@@ -456,7 +456,8 @@ export function DashboardPage() {
               className="soft-chip text-sm font-bold transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
             >
               <Bell className="size-4" />
-              {dashboard.notifications.unreadCount} unread
+              {dashboard.notifications.unreadCount}{' '}
+              {dashboard.notifications.unreadCount === 1 ? 'unread update' : 'unread updates'}
             </Link>
 
             <Link to="/vendors" className="btn-secondary text-sm font-bold">
@@ -532,6 +533,11 @@ export function DashboardPage() {
                   <p className="mt-2 text-sm font-semibold text-[var(--color-rosewood)]">
                     Create an event to begin planning.
                   </p>
+
+                  <Link to="/events" className="btn-primary mt-6 w-fit text-sm font-bold">
+                    Create your first event
+                    <ArrowRight aria-hidden="true" className="size-4" />
+                  </Link>
                 </>
               )}
             </div>
@@ -539,7 +545,10 @@ export function DashboardPage() {
 
           <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map(({ label, value, helper, icon: Icon, tone }) => (
-              <article key={label} className="luxe-card p-6">
+              <article
+                key={label}
+                className="luxe-card p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(31,27,29,0.12)]"
+              >
                 <div className={`grid size-11 place-items-center rounded-2xl ${tone}`}>
                   <Icon className="size-5" />
                 </div>
@@ -607,14 +616,23 @@ export function DashboardPage() {
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    className="btn-secondary text-sm font-bold"
-                    disabled={!nextTask}
-                  >
-                    Review details
-                    <ArrowRight className="size-4" />
-                  </button>
+                  {nextTask ? (
+                    <Link
+                      to={`/events/${nextTask.event.id}/tasks`}
+                      className="btn-secondary text-sm font-bold"
+                    >
+                      Review details
+                      <ArrowRight aria-hidden="true" className="size-4" />
+                    </Link>
+                  ) : (
+                    <span
+                      aria-disabled="true"
+                      className="btn-secondary cursor-not-allowed text-sm font-bold opacity-50"
+                    >
+                      Review details
+                      <ArrowRight aria-hidden="true" className="size-4" />
+                    </span>
+                  )}
                 </div>
               </div>
             </article>
@@ -630,25 +648,40 @@ export function DashboardPage() {
               </p>
 
               <div className="mt-8 space-y-3">
-                <button
-                  type="button"
-                  className="w-full rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20"
-                >
-                  Create a quotation request
-                </button>
+                {activeEvent ? (
+                  <>
+                    <Link
+                      to={`/events/${activeEvent.id}/quotation-requests`}
+                      className="flex w-full items-center justify-between rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      Create a quotation request
+                      <ArrowRight aria-hidden="true" className="size-4" />
+                    </Link>
 
-                <button
-                  type="button"
-                  className="w-full rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20"
-                >
-                  Update guest list
-                </button>
+                    <Link
+                      to={`/events/${activeEvent.id}/guests`}
+                      className="flex w-full items-center justify-between rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      Update guest list
+                      <ArrowRight aria-hidden="true" className="size-4" />
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="/events"
+                    className="flex w-full items-center justify-between rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >
+                    Create an event to unlock planning tools
+                    <ArrowRight aria-hidden="true" className="size-4" />
+                  </Link>
+                )}
 
                 <Link
                   to="/notifications"
-                  className="block w-full rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20"
+                  className="flex w-full items-center justify-between rounded-2xl bg-white/14 px-4 py-3 text-left text-sm font-bold backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 >
                   Review notifications
+                  <ArrowRight aria-hidden="true" className="size-4" />
                 </Link>
               </div>
 

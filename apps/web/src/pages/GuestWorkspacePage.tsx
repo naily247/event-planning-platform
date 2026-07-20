@@ -909,17 +909,31 @@ export function GuestWorkspacePage() {
                         </p>
                       </div>
 
-                      {guest.dietaryRequirements ? (
-                        <div className="mt-5 rounded-2xl bg-white/28 p-4">
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Dietary requirements
-                          </p>
+                      <>
+                        {guest.dietaryRequirements ? (
+                          <div className="mt-5 rounded-2xl bg-white/28 p-4">
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                              Dietary requirements
+                            </p>
 
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
-                            {guest.dietaryRequirements}
-                          </p>
-                        </div>
-                      ) : null}
+                            <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
+                              {guest.dietaryRequirements}
+                            </p>
+                          </div>
+                        ) : null}
+
+                        {guest.notes ? (
+                          <div className="mt-4 rounded-2xl bg-white/28 p-4">
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
+                              Notes
+                            </p>
+
+                            <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
+                              {guest.notes}
+                            </p>
+                          </div>
+                        ) : null}
+                      </>
                     </article>
                   ))}
                 </div>
@@ -1301,7 +1315,7 @@ export function GuestWorkspacePage() {
                     disabled={isGuestMutationPending}
                     onClick={closeGuestForm}
                   >
-                    Cancel
+                    Keep guest
                   </button>
 
                   <button
@@ -1331,15 +1345,36 @@ export function GuestWorkspacePage() {
       ) : null}
 
       {isDeleteDialogOpen && guestToDelete ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(31,27,29,0.48)] px-4 backdrop-blur-md">
-          <div className="glass-card w-full max-w-md p-8">
-            <h2 className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-              Delete guest?
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-[rgba(31,27,29,0.48)] px-4 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-guest-title"
+          onClick={() => {
+            if (!deleteGuestMutation.isPending) {
+              closeDeleteGuestDialog();
+            }
+          }}
+        >
+          <div
+            className="glass-card w-full max-w-md p-8"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
+              <Trash2 className="size-7" />
+            </div>
+
+            <h2
+              id="delete-guest-title"
+              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+            >
+              Delete {formatGuestName(guestToDelete)}?
             </h2>
 
             <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
-              <strong>{formatGuestName(guestToDelete)}</strong> will be permanently removed from
-              this guest list.
+              This permanently removes the guest from your event. This action cannot be undone.
             </p>
 
             {deleteGuestMutation.isError ? (
@@ -1358,7 +1393,7 @@ export function GuestWorkspacePage() {
                 disabled={deleteGuestMutation.isPending}
                 onClick={closeDeleteGuestDialog}
               >
-                Cancel
+                Keep guest
               </button>
 
               <button

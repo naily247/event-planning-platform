@@ -17,12 +17,12 @@ import type {
   ComplaintPriority,
   ComplaintStatus,
   ComplaintType,
-  CustomerComplaint,
+  Complaint,
 } from './complaint.api';
 
 type ComplaintCardProps = {
-  complaint: CustomerComplaint;
-  onView: (complaint: CustomerComplaint) => void;
+  complaint: Complaint;
+  onView: (complaint: Complaint) => void;
 };
 
 const complaintTypeLabels: Record<ComplaintType, string> = {
@@ -123,7 +123,7 @@ const formatDateTime = (value: string) =>
     timeStyle: 'short',
   }).format(new Date(value));
 
-const getParticipantName = (complaint: CustomerComplaint) => {
+const getParticipantName = (complaint: Complaint) => {
   if (!complaint.respondent) {
     return 'Platform support';
   }
@@ -135,7 +135,7 @@ const getParticipantName = (complaint: CustomerComplaint) => {
   return `${complaint.respondent.firstName} ${complaint.respondent.lastName}`;
 };
 
-const getRelatedContext = (complaint: CustomerComplaint) => {
+const getRelatedContext = (complaint: Complaint) => {
   if (complaint.booking) {
     return {
       label: complaint.booking.event.name,

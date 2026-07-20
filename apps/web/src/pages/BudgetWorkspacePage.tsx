@@ -158,6 +158,26 @@ const toLocalDateTimeInput = (value: string | null) => {
   return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
 };
 
+const formatDateTime = (value: string | null) => {
+  if (!value) {
+    return 'Not scheduled';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Not scheduled';
+  }
+
+  return new Intl.DateTimeFormat('en-LK', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
+
 const getBudgetUsagePercentage = (summary: BudgetSummary) => {
   const plannedBudget = Number(summary.summary.plannedBudget ?? 0);
   const totalCommitted = Number(summary.summary.totalCommitted);
@@ -708,6 +728,10 @@ export function BudgetWorkspacePage() {
   const expenses = expensesQuery.data;
   const isExpenseMutationPending =
     createExpenseMutation.isPending || updateExpenseMutation.isPending;
+
+  const isCategoryMutationPending =
+    createCategoryMutation.isPending || updateCategoryMutation.isPending;
+
   const budgetUsagePercentage = getBudgetUsagePercentage(summary);
 
   const summaryCards = [
@@ -1115,6 +1139,28 @@ export function BudgetWorkspacePage() {
                       {formatCurrency(expense.amount)}
                     </p>
 
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
+                          Expense date
+                        </p>
+
+                        <p className="mt-2 text-sm font-bold leading-6 text-[var(--color-near-black)]">
+                          {formatDateTime(expense.expenseDate)}
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
+                          Due date
+                        </p>
+
+                        <p className="mt-2 text-sm font-bold leading-6 text-[var(--color-near-black)]">
+                          {formatDateTime(expense.dueDate)}
+                        </p>
+                      </div>
+                    </div>
+
                     {expense.notes ? (
                       <p className="mt-4 line-clamp-3 leading-7 text-[var(--color-charcoal)]/64">
                         {expense.notes}
@@ -1158,11 +1204,13 @@ export function BudgetWorkspacePage() {
                   id="create-budget-category-title"
                   className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
                 >
-                  Add a new allocation.
+                  {categoryToEdit ? 'Edit budget allocation.' : 'Add a new allocation.'}
                 </h2>
 
                 <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-                  Create a category such as venue, catering, photography or decoration.
+                  {categoryToEdit
+                    ? 'Update the category name or allocated budget.'
+                    : 'Create a category such as venue, catering, photography or decoration.'}
                 </p>
               </div>
 
@@ -1170,7 +1218,7 @@ export function BudgetWorkspacePage() {
                 type="button"
                 className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
                 aria-label="Close category form"
-                disabled={createCategoryMutation.isPending}
+                disabled={isCategoryMutationPending}
                 onClick={closeCategoryForm}
               >
                 <X className="size-5" />
@@ -1187,7 +1235,7 @@ export function BudgetWorkspacePage() {
                   className="form-field"
                   type="text"
                   placeholder="Photography"
-                  disabled={createCategoryMutation.isPending}
+                  disabled={isCategoryMutationPending}
                   {...categoryForm.register('name')}
                 />
 
@@ -1209,7 +1257,7 @@ export function BudgetWorkspacePage() {
                   min="0.01"
                   step="0.01"
                   placeholder="350000"
-                  disabled={createCategoryMutation.isPending}
+                  disabled={isCategoryMutationPending}
                   {...categoryForm.register('allocatedAmount')}
                 />
 
@@ -1228,12 +1276,14 @@ export function BudgetWorkspacePage() {
                 </div>
               ) : null}
 
-              {createCategoryMutation.isError ? (
+              {createCategoryMutation.isError || updateCategoryMutation.isError ? (
                 <div
                   role="alert"
                   className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
                 >
-                  {getApiErrorMessage(createCategoryMutation.error)}
+                  {getApiErrorMessage(
+                    categoryToEdit ? updateCategoryMutation.error : createCategoryMutation.error,
+                  )}
                 </div>
               ) : null}
 
@@ -1241,7 +1291,7 @@ export function BudgetWorkspacePage() {
                 <button
                   type="button"
                   className="btn-secondary justify-center text-sm font-bold"
-                  disabled={createCategoryMutation.isPending}
+                  disabled={isCategoryMutationPending}
                   onClick={closeCategoryForm}
                 >
                   Cancel
@@ -1250,9 +1300,9 @@ export function BudgetWorkspacePage() {
                 <button
                   type="submit"
                   className="btn-primary justify-center text-sm font-bold"
-                  disabled={createCategoryMutation.isPending}
+                  disabled={isCategoryMutationPending}
                 >
-                  {createCategoryMutation.isPending || updateCategoryMutation.isPending ? (
+                  {isCategoryMutationPending ? (
                     <LoaderCircle className="size-4 animate-spin" />
                   ) : (
                     <Save className="size-4" />

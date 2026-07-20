@@ -166,7 +166,7 @@ export type ComplaintQuotationRequest = {
   };
 };
 
-export type CustomerComplaint = {
+export type Complaint = {
   id: string;
   complainantId: string;
   respondentId: string | null;
@@ -221,7 +221,7 @@ export type ComplaintAction = {
   performedBy: ComplaintParty | null;
 };
 
-export type CustomerComplaintDetail = CustomerComplaint & {
+export type ComplaintDetail = Complaint & {
   messages: ComplaintMessage[];
   actions: ComplaintAction[];
 };
@@ -305,14 +305,14 @@ type ApiSuccessResponse<T> = {
   data: T;
 };
 
-type ComplaintListResponse = ApiSuccessResponse<CustomerComplaint[]> & {
+type ComplaintListResponse = ApiSuccessResponse<Complaint[]> & {
   meta: {
     pagination: ComplaintPagination;
   };
 };
 
 export async function createComplaint(input: CreateComplaintInput) {
-  const response = await api.post<ApiSuccessResponse<CustomerComplaint>>('/complaints', input);
+  const response = await api.post<ApiSuccessResponse<Complaint>>('/complaints', input);
 
   return response.data.data;
 }
@@ -345,9 +345,7 @@ export async function getMyComplaints(params: GetMyComplaintsParams = {}) {
 }
 
 export async function getComplaintById(complaintId: string) {
-  const response = await api.get<ApiSuccessResponse<CustomerComplaintDetail>>(
-    `/complaints/${complaintId}`,
-  );
+  const response = await api.get<ApiSuccessResponse<ComplaintDetail>>(`/complaints/${complaintId}`);
 
   return response.data.data;
 }
@@ -362,7 +360,7 @@ export async function addComplaintMessage(complaintId: string, input: AddComplai
 }
 
 export async function closeComplaint(complaintId: string, input: CloseComplaintInput) {
-  const response = await api.patch<ApiSuccessResponse<CustomerComplaint>>(
+  const response = await api.patch<ApiSuccessResponse<Complaint>>(
     `/complaints/${complaintId}/close`,
     input,
   );

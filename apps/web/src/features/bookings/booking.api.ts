@@ -131,6 +131,8 @@ export type CustomerBooking = {
   updatedAt: string;
 };
 
+export type VendorBooking = CustomerBooking;
+
 export type CustomerBookingReview = {
   id: string;
   bookingId: string;
@@ -181,6 +183,13 @@ export type GetCustomerBookingsParams = {
   sort?: BookingSort;
 };
 
+export type GetVendorBookingsParams = {
+  status?: BookingStatus;
+  page?: number;
+  limit?: number;
+  sort?: BookingSort;
+};
+
 export type CreateCustomerBookingInput = {
   quotationId: string;
   serviceStart: string;
@@ -188,6 +197,18 @@ export type CreateCustomerBookingInput = {
 };
 
 export type CancelCustomerBookingInput = {
+  reason: string;
+};
+
+export type ConfirmVendorBookingInput = {
+  note?: string | null;
+};
+
+export type RejectVendorBookingInput = {
+  reason: string;
+};
+
+export type CancelVendorBookingInput = {
   reason: string;
 };
 
@@ -203,14 +224,14 @@ type ApiSuccessResponse<T> = {
   data: T;
 };
 
-type CustomerBookingListResponse = ApiSuccessResponse<CustomerBooking[]> & {
+type BookingListResponse<TBooking> = ApiSuccessResponse<TBooking[]> & {
   meta: {
     pagination: Pagination;
   };
 };
 
 export async function getCustomerBookings(params: GetCustomerBookingsParams = {}) {
-  const response = await api.get<CustomerBookingListResponse>('/bookings/customer', {
+  const response = await api.get<BookingListResponse<CustomerBooking>>('/bookings/customer', {
     params: {
       page: params.page ?? 1,
       limit: params.limit ?? 20,
@@ -262,6 +283,71 @@ export async function createCustomerBookingReview(
   const response = await api.post<ApiSuccessResponse<CustomerBookingReview>>(
     `/bookings/customer/${bookingId}/review`,
     input,
+  );
+
+  return response.data.data;
+}
+
+export async function getVendorBookings(params: GetVendorBookingsParams = {}) {
+  const response = await api.get<BookingListResponse<VendorBooking>>('/bookings/vendor/incoming', {
+    params: {
+      page: params.page ?? 1,
+      limit: params.limit ?? 20,
+      sort: params.sort ?? 'newest',
+
+      ...(params.status && {
+        status: params.status,
+      }),
+    },
+  });
+
+  return {
+    bookings: response.data.data,
+    pagination: response.data.meta.pagination,
+  };
+}
+
+export async function getVendorBookingById(bookingId: string) {
+  const response = await api.get<ApiSuccessResponse<VendorBooking>>(
+    `/bookings/vendor/incoming/${bookingId}`,
+  );
+
+  return response.data.data;
+}
+
+export async function confirmVendorBooking(
+  bookingId: string,
+  input: ConfirmVendorBookingInput = {},
+) {
+  const response = await api.patch<ApiSuccessResponse<VendorBooking>>(
+    `/bookings/vendor/incoming/${bookingId}/confirm`,
+    input,
+  );
+
+  return response.data.data;
+}
+
+export async function rejectVendorBooking(bookingId: string, input: RejectVendorBookingInput) {
+  const response = await api.patch<ApiSuccessResponse<VendorBooking>>(
+    `/bookings/vendor/incoming/${bookingId}/reject`,
+    input,
+  );
+
+  return response.data.data;
+}
+
+export async function cancelVendorBooking(bookingId: string, input: CancelVendorBookingInput) {
+  const response = await api.patch<ApiSuccessResponse<VendorBooking>>(
+    `/bookings/vendor/incoming/${bookingId}/cancel`,
+    input,
+  );
+
+  return response.data.data;
+}
+
+export async function completeVendorBooking(bookingId: string) {
+  const response = await api.patch<ApiSuccessResponse<VendorBooking>>(
+    `/bookings/vendor/incoming/${bookingId}/complete`,
   );
 
   return response.data.data;

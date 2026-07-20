@@ -1529,8 +1529,19 @@ export function QuotationRequestsWorkspacePage() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="accept-quotation-title"
+          onClick={() => {
+            if (!acceptQuotationMutation.isPending) {
+              setQuotationToAccept(null);
+              acceptQuotationMutation.reset();
+            }
+          }}
         >
-          <div className="glass-card w-full max-w-lg p-6 sm:p-8">
+          <div
+            className="glass-card w-full max-w-lg p-6 sm:p-8"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
             <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(89,133,113,0.14)] text-[#3f735d]">
               <CheckCircle2 className="size-7" />
             </div>
@@ -1599,8 +1610,18 @@ export function QuotationRequestsWorkspacePage() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-booking-title"
+          onClick={() => {
+            if (!createBookingMutation.isPending) {
+              closeCreateBookingDialog();
+            }
+          }}
         >
-          <div className="glass-card w-full max-w-xl p-6 sm:p-8">
+          <div
+            className="glass-card w-full max-w-xl p-6 sm:p-8"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="soft-chip mb-4 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -1623,7 +1644,9 @@ export function QuotationRequestsWorkspacePage() {
 
               <button
                 type="button"
-                className="grid size-11 place-items-center rounded-full border border-white/55 bg-white/28"
+                className="grid size-11 place-items-center rounded-full border border-white/55 bg-white/28 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Close create booking dialog"
+                disabled={createBookingMutation.isPending}
                 onClick={closeCreateBookingDialog}
               >
                 <X className="size-5" />
@@ -1709,13 +1732,25 @@ export function QuotationRequestsWorkspacePage() {
           className="fixed inset-0 z-[60] grid place-items-center bg-[rgba(31,27,29,0.55)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="booking-created-title"
+          onClick={() => {
+            setCreatedBooking(null);
+          }}
         >
-          <div className="glass-card w-full max-w-lg p-8 text-center">
+          <div
+            className="glass-card w-full max-w-lg p-8 text-center"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
             <div className="mx-auto grid size-16 place-items-center rounded-full bg-[rgba(89,133,113,0.12)] text-[#3f735d]">
               <CheckCircle2 className="size-8" />
             </div>
 
-            <h2 className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+            <h2
+              id="booking-created-title"
+              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+            >
               Booking created
             </h2>
 
@@ -1724,8 +1759,21 @@ export function QuotationRequestsWorkspacePage() {
               request for confirmation.
             </p>
 
-            <div className="mt-8 flex justify-center">
-              <Link to={`/events/${eventId}/bookings`} className="btn-primary text-sm font-bold">
+            <div className="mt-8 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+              <button
+                type="button"
+                className="btn-secondary justify-center text-sm font-bold"
+                onClick={() => {
+                  setCreatedBooking(null);
+                }}
+              >
+                Close
+              </button>
+
+              <Link
+                to={`/events/${eventId}/bookings`}
+                className="btn-primary justify-center text-sm font-bold"
+              >
                 Open bookings
               </Link>
             </div>

@@ -14,7 +14,7 @@ import {
   getMyComplaints,
   type ComplaintStatus,
   type ComplaintType,
-  type CustomerComplaint,
+  type Complaint,
 } from '../features/complaints/complaint.api';
 
 import { ComplaintCard } from '../features/complaints/ComplaintCard';
@@ -290,7 +290,7 @@ export function ComplaintsWorkspacePage() {
 
   const filtersAreActive = statusFilter !== 'ALL' || typeFilter !== 'ALL';
 
-  const openComplaintDetails = (complaint: CustomerComplaint) => {
+  const openComplaintDetails = (complaint: Complaint) => {
     replyMutation.reset();
     closeMutation.reset();
     setSelectedComplaintId(complaint.id);

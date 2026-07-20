@@ -24,11 +24,11 @@ import type {
   ComplaintPriority,
   ComplaintStatus,
   ComplaintType,
-  CustomerComplaintDetail,
+  ComplaintDetail,
 } from './complaint.api';
 
 type ComplaintDetailsDialogProps = {
-  complaint: CustomerComplaintDetail;
+  complaint: ComplaintDetail;
   currentUserId: string;
   isReplyPending: boolean;
   isClosePending: boolean;
@@ -153,7 +153,7 @@ const formatCurrency = (value: string) => {
   }).format(amount);
 };
 
-const getPartyName = (party: CustomerComplaintDetail['complainant'] | null) => {
+const getPartyName = (party: ComplaintDetail['complainant'] | null) => {
   if (!party) {
     return 'Platform support';
   }
