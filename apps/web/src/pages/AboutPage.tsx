@@ -161,23 +161,26 @@ export function AboutPage() {
               </p>
 
               <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row">
-                <Link to="/register" className="btn-primary min-h-12 px-6">
+                <Link
+                  to="/register"
+                  className="btn-primary group min-h-12 px-6 transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(93,58,85,0.22)]"
+                >
                   Start planning
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-4 transition duration-300 group-hover:translate-x-1" />
                 </Link>
 
                 <Link
                   to="/planning-guide"
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/55 bg-white/35 px-6 text-sm font-bold text-[var(--color-charcoal)] shadow-[0_12px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/55 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/55 bg-white/35 px-6 text-sm font-bold text-[var(--color-charcoal)] shadow-[0_12px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-1 hover:border-white/80 hover:bg-white/60 hover:text-[var(--color-deep-plum)] hover:shadow-[0_18px_42px_rgba(31,27,29,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
                 >
                   See how Eventure works
                 </Link>
               </div>
             </div>
 
-            <div aria-hidden="true" className="relative hidden min-h-[500px] lg:block">
+            <div aria-hidden="true" className="group relative hidden min-h-[500px] lg:block">
               <div
-                className="absolute -inset-y-8 -right-20 left-0 bg-cover bg-center brightness-[0.96] saturate-[0.7]"
+                className="absolute -inset-y-8 -right-20 left-0 bg-cover bg-center brightness-[0.96] saturate-[0.7] transition duration-700 ease-out group-hover:scale-[1.025] group-hover:brightness-[1]"
                 style={{
                   backgroundImage: "url('/images/eventure-about-hero-workspace.jpg')",
                 }}
@@ -189,7 +192,7 @@ export function AboutPage() {
 
               <div className="absolute -inset-y-8 -right-20 left-0 bg-[linear-gradient(180deg,rgba(233,221,207,0.52)_0%,transparent_28%,transparent_72%,rgba(233,221,207,0.48)_100%)]" />
 
-              <div className="absolute inset-12 rounded-[3rem] border border-white/10 bg-white/[0.015] backdrop-blur-[0.25px]" />
+              <div className="absolute inset-12 rounded-[3rem] border border-white/10 bg-white/[0.015] backdrop-blur-[0.25px] transition duration-500 ease-out group-hover:-translate-y-1 group-hover:border-white/20 group-hover:bg-white/[0.025] group-hover:shadow-[0_28px_80px_rgba(31,27,29,0.16)]" />
             </div>
           </div>
         </div>
@@ -226,11 +229,13 @@ export function AboutPage() {
             return (
               <article
                 key={challenge.title}
-                className="group rounded-[2rem] border border-white/55 bg-white/30 p-7 shadow-[0_20px_60px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/42 sm:p-8"
+                className="group relative overflow-hidden rounded-[2rem] border border-white/55 bg-white/30 p-7 shadow-[0_20px_60px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-1 hover:border-[rgba(93,58,85,0.18)] hover:bg-white/45 hover:shadow-[0_26px_68px_rgba(31,27,29,0.13)] sm:p-8"
               >
+                <span className="absolute bottom-0 left-7 right-7 h-0.5 origin-left scale-x-0 rounded-full bg-[var(--color-deep-plum)] transition duration-300 group-hover:scale-x-100" />
+
                 <div className="flex items-start justify-between gap-5">
-                  <span className="grid size-12 place-items-center rounded-2xl border border-white/55 bg-white/45 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.08)]">
-                    <Icon className="size-5" />
+                  <span className="grid size-12 place-items-center rounded-2xl border border-white/55 bg-white/45 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.08)] transition duration-300 group-hover:-rotate-3 group-hover:scale-105 group-hover:border-white/80 group-hover:bg-white/60">
+                    <Icon className="size-5 transition duration-300 group-hover:scale-110" />
                   </span>
 
                   <span className="text-xs font-black tracking-[0.18em] text-[var(--color-charcoal)]/30">
@@ -238,7 +243,7 @@ export function AboutPage() {
                   </span>
                 </div>
 
-                <h3 className="mt-8 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                <h3 className="mt-8 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover:text-[var(--color-deep-plum)]">
                   {challenge.title}
                 </h3>
 
@@ -312,10 +317,10 @@ export function AboutPage() {
                     return (
                       <div
                         key={capability.label}
-                        className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-4"
+                        className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-4 transition duration-300 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.1] hover:shadow-[0_14px_34px_rgba(0,0,0,0.16)]"
                       >
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/[0.08] text-[var(--color-light-champagne)]">
-                          <Icon className="size-4" />
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/[0.08] text-[var(--color-light-champagne)] transition duration-300 group-hover:scale-105 group-hover:bg-white/[0.13]">
+                          <Icon className="size-4 transition duration-300 group-hover:scale-110" />
                         </span>
 
                         <span className="text-sm font-bold text-white/75">{capability.label}</span>
@@ -352,11 +357,11 @@ export function AboutPage() {
             return (
               <article
                 key={audience.title}
-                className="flex h-full flex-col rounded-[2.25rem] border border-white/55 bg-white/30 p-7 shadow-[0_22px_70px_rgba(31,27,29,0.08)] backdrop-blur-xl sm:p-8"
+                className="group flex h-full flex-col rounded-[2.25rem] border border-white/55 bg-white/30 p-7 shadow-[0_22px_70px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-1 hover:border-[rgba(93,58,85,0.18)] hover:bg-white/43 hover:shadow-[0_28px_76px_rgba(31,27,29,0.13)] sm:p-8"
               >
                 <div className="flex items-center justify-between gap-4">
-                  <span className="grid size-13 place-items-center rounded-2xl border border-white/60 bg-white/45 text-[var(--color-deep-plum)] shadow-[0_14px_36px_rgba(31,27,29,0.08)]">
-                    <Icon className="size-5" />
+                  <span className="grid size-13 place-items-center rounded-2xl border border-white/60 bg-white/45 text-[var(--color-deep-plum)] shadow-[0_14px_36px_rgba(31,27,29,0.08)] transition duration-300 group-hover:scale-105 group-hover:border-white/85 group-hover:bg-white/60">
+                    <Icon className="size-5 transition duration-300 group-hover:scale-110" />
                   </span>
 
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
@@ -364,7 +369,7 @@ export function AboutPage() {
                   </p>
                 </div>
 
-                <h3 className="mt-8 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                <h3 className="mt-8 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)] transition duration-300 group-hover:text-[var(--color-deep-plum)]">
                   {audience.title}
                 </h3>
 
@@ -417,13 +422,15 @@ export function AboutPage() {
                 return (
                   <article
                     key={principle.title}
-                    className="rounded-[1.75rem] border border-white/60 bg-white/35 p-6 shadow-[0_18px_50px_rgba(31,27,29,0.07)] backdrop-blur-xl"
+                    className="group relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/35 p-6 shadow-[0_18px_50px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-1 hover:border-[rgba(93,58,85,0.2)] hover:bg-white/50 hover:shadow-[0_24px_58px_rgba(31,27,29,0.12)]"
                   >
-                    <span className="grid size-11 place-items-center rounded-2xl border border-white/60 bg-white/45 text-[var(--color-deep-plum)]">
-                      <Icon className="size-5" />
+                    <span className="absolute bottom-0 left-6 right-6 h-0.5 origin-left scale-x-0 rounded-full bg-[var(--color-deep-plum)] transition duration-300 group-hover:scale-x-100" />
+
+                    <span className="grid size-11 place-items-center rounded-2xl border border-white/60 bg-white/45 text-[var(--color-deep-plum)] transition duration-300 group-hover:-rotate-3 group-hover:scale-105 group-hover:bg-white/65">
+                      <Icon className="size-5 transition duration-300 group-hover:scale-110" />
                     </span>
 
-                    <h3 className="mt-6 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                    <h3 className="mt-6 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)] transition duration-300 group-hover:text-[var(--color-deep-plum)]">
                       {principle.title}
                     </h3>
 
@@ -467,15 +474,16 @@ export function AboutPage() {
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 to="/register"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-black !text-[var(--color-deep-plum)] shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-[var(--color-light-champagne)] hover:!text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-black text-[#5D3A55] shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition duration-300 ease-out hover:-translate-y-1 hover:bg-[var(--color-light-champagne)] hover:shadow-[0_22px_48px_rgba(0,0,0,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
-                Start planning today
-                <ArrowRight className="size-4" />
+                <span className="text-[#5D3A55]">Start planning today</span>
+
+                <ArrowRight className="size-4 text-[#5D3A55] transition duration-300 group-hover:translate-x-1" />
               </Link>
 
               <Link
                 to="/vendors"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 text-sm font-bold text-white transition duration-300 ease-out hover:-translate-y-1 hover:border-white/35 hover:bg-white/16 hover:shadow-[0_18px_40px_rgba(0,0,0,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
                 Explore vendors
               </Link>

@@ -120,6 +120,10 @@ const vendorLogoMap: Record<string, string> = {
   'velvet-moments': '/images/vendors/logos/velvet-moments.png',
   'aroma-catering': '/images/vendors/logos/aroma-catering.png',
   'bloom-atelier': '/images/vendors/logos/bloom-atelier.png',
+  'sweet-layers': '/images/vendors/logos/sweet-layers.png',
+  'echo-entertainment': '/images/vendors/logos/echo-entertainment.png',
+  'elite-transport': '/images/vendors/logos/elite-transport.png',
+  'grand-horizon-ballroom': '/images/vendors/logos/grand-horizon-ballroom.png',
 };
 
 const formatCurrency = (value: string | null) => {
@@ -168,6 +172,16 @@ const getPrimaryCategory = (vendor: PublicVendorDetail) => vendor.categories[0] 
 const getLocationLabel = (vendor: PublicVendorDetail) =>
   vendor.baseLocation ?? vendor.serviceAreas[0] ?? 'Sri Lanka';
 
+const getPortfolioCardClassName = (index: number) => {
+  const patternIndex = index % 6;
+
+  if (patternIndex === 0 || patternIndex === 4) {
+    return 'sm:col-span-2 lg:col-span-2 lg:row-span-2';
+  }
+
+  return '';
+};
+
 export function VendorDetailPage() {
   const { vendorSlug } = useParams<{ vendorSlug: string }>();
 
@@ -175,6 +189,8 @@ export function VendorDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activePortfolioIndex, setActivePortfolioIndex] = useState<number | null>(null);
+  const [heroPortfolioIndex, setHeroPortfolioIndex] = useState(0);
+  const [isHeroSlideshowPaused, setIsHeroSlideshowPaused] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -190,6 +206,8 @@ export function VendorDetailPage() {
       setIsLoading(true);
       setErrorMessage(null);
       setActivePortfolioIndex(null);
+      setHeroPortfolioIndex(0);
+      setIsHeroSlideshowPaused(false);
 
       try {
         const response = await api.get<PublicVendorDetailResponse>(`/vendors/${vendorSlug}`, {
@@ -221,6 +239,28 @@ export function VendorDetailPage() {
       controller.abort();
     };
   }, [vendorSlug]);
+
+  useEffect(() => {
+    if (!vendor || vendor.portfolioItems.length <= 1 || isHeroSlideshowPaused) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setHeroPortfolioIndex((currentIndex) => {
+        return (currentIndex + 1) % vendor.portfolioItems.length;
+      });
+    }, 3500);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isHeroSlideshowPaused, vendor]);
 
   const primaryCategory = vendor ? getPrimaryCategory(vendor) : null;
 
@@ -289,11 +329,12 @@ export function VendorDetailPage() {
   const startingPrice = getStartingPrice(vendor.packages);
   const ratingLabel = getRatingLabel(vendor.ratingSummary);
   const locationLabel = getLocationLabel(vendor);
-  const featuredPortfolioItem = vendor.portfolioItems[0] ?? null;
+  const heroPortfolioItems = vendor.portfolioItems;
+  const activeHeroPortfolioItem = heroPortfolioItems[heroPortfolioIndex] ?? null;
 
   return (
     <>
-      <section className="relative overflow-hidden py-12 lg:py-18">
+      <section className="relative overflow-hidden py-14 lg:py-20">
         <div className="pointer-events-none absolute left-[8%] top-16 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.28)] blur-3xl" />
         <div className="pointer-events-none absolute right-[8%] top-20 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl" />
 
@@ -303,32 +344,81 @@ export function VendorDetailPage() {
             Back to vendors
           </Link>
 
-          <div className="glass-card overflow-hidden p-5 sm:p-7">
-            <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
+          <div className="glass-card overflow-hidden p-4 sm:p-6 lg:p-7">
+            <div className="grid gap-7 lg:grid-cols-[0.88fr_1.12fr] lg:gap-9">
               <div
-                className={`relative min-h-[420px] overflow-hidden rounded-[2rem] ${accentClass} shadow-[0_24px_70px_rgba(31,27,29,0.16)]`}
+                className={`relative min-h-[460px] overflow-hidden rounded-[2rem] ${accentClass} shadow-[0_26px_74px_rgba(31,27,29,0.17)] sm:min-h-[500px] lg:min-h-[570px]`}
+                onMouseEnter={() => {
+                  setIsHeroSlideshowPaused(true);
+                }}
+                onMouseLeave={() => {
+                  setIsHeroSlideshowPaused(false);
+                }}
+                onFocusCapture={() => {
+                  setIsHeroSlideshowPaused(true);
+                }}
+                onBlurCapture={() => {
+                  setIsHeroSlideshowPaused(false);
+                }}
               >
-                {featuredPortfolioItem?.imageUrl ? (
+                {heroPortfolioItems.map((portfolioItem, index) => {
+                  const isActive = index === heroPortfolioIndex;
+
+                  return (
+                    <img
+                      key={portfolioItem.id}
+                      src={portfolioItem.imageUrl}
+                      alt={
+                        portfolioItem.title ?? `${vendor.businessName} portfolio image ${index + 1}`
+                      }
+                      className="pointer-events-none absolute inset-0 h-full w-full object-cover will-change-transform motion-reduce:transform-none motion-reduce:transition-none"
+                      style={{
+                        opacity: isActive ? 1 : 0,
+                        transform: isActive
+                          ? index % 2 === 0
+                            ? 'scale(1.065) translate3d(-0.7%, -0.45%, 0)'
+                            : 'scale(1.065) translate3d(0.7%, -0.35%, 0)'
+                          : 'scale(1.015) translate3d(0, 0, 0)',
+                        transition:
+                          'opacity 750ms ease-in-out, transform 3500ms cubic-bezier(0.2, 0.65, 0.3, 1)',
+                      }}
+                    />
+                  );
+                })}
+
+                {activeHeroPortfolioItem ? (
                   <button
                     type="button"
-                    onClick={() => setActivePortfolioIndex(0)}
-                    className="absolute inset-0 h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
+                    onClick={() => {
+                      setActivePortfolioIndex(heroPortfolioIndex);
+                    }}
+                    className="absolute inset-0 z-[1] h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
                     aria-label={`Open ${
-                      featuredPortfolioItem.title ??
-                      `${vendor.businessName} featured portfolio image`
+                      activeHeroPortfolioItem.title ??
+                      `${vendor.businessName} portfolio image ${heroPortfolioIndex + 1}`
                     }`}
-                  >
-                    <img
-                      src={featuredPortfolioItem.imageUrl}
-                      alt={
-                        featuredPortfolioItem.title ?? `${vendor.businessName} featured portfolio`
-                      }
-                      className="h-full w-full object-cover transition duration-500 hover:scale-[1.02]"
-                    />
-                  </button>
+                  />
                 ) : null}
 
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_18%,rgba(255,255,255,0.62),transparent_30%),linear-gradient(135deg,rgba(93,58,85,0.18),rgba(255,255,255,0.08))]" />
+                <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_25%_16%,rgba(255,255,255,0.46),transparent_31%),linear-gradient(180deg,rgba(31,27,29,0.02)_0%,rgba(31,27,29,0.05)_48%,rgba(31,27,29,0.24)_100%)]" />
+
+                {heroPortfolioItems.length > 1 ? (
+                  <div
+                    className="pointer-events-none absolute left-5 top-5 z-10 flex items-center gap-1.5 rounded-full border border-white/45 bg-black/15 px-3 py-2 backdrop-blur-xl"
+                    aria-hidden="true"
+                  >
+                    {heroPortfolioItems.map((portfolioItem, index) => (
+                      <span
+                        key={portfolioItem.id}
+                        className={
+                          index === heroPortfolioIndex
+                            ? 'h-1.5 w-5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-all duration-500'
+                            : 'size-1.5 rounded-full bg-white/52 transition-all duration-500'
+                        }
+                      />
+                    ))}
+                  </div>
+                ) : null}
 
                 <button
                   type="button"
@@ -338,14 +428,14 @@ export function VendorDetailPage() {
                   <Heart className="size-5" />
                 </button>
 
-                <div className="pointer-events-none absolute bottom-5 left-5 right-5 z-10 rounded-[1.6rem] border border-white/55 bg-white/36 p-5 shadow-[0_20px_52px_rgba(31,27,29,0.16)] backdrop-blur-2xl sm:bottom-6 sm:left-6 sm:right-6">
+                <div className="pointer-events-none absolute bottom-4 left-4 right-4 z-10 rounded-[1.7rem] border border-white/60 bg-white/40 p-5 shadow-[0_22px_58px_rgba(31,27,29,0.18)] backdrop-blur-2xl sm:bottom-6 sm:left-6 sm:right-6 sm:p-6">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-16 place-items-center overflow-hidden rounded-2xl border border-white/50 bg-white/65 shadow-[0_10px_30px_rgba(31,27,29,0.12)] backdrop-blur-xl">
+                    <div className="grid size-[4.5rem] place-items-center overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/72 p-1.5 shadow-[0_12px_34px_rgba(31,27,29,0.15)] backdrop-blur-xl">
                       {vendorLogoUrl ? (
                         <img
                           src={vendorLogoUrl}
                           alt={`${vendor.businessName} logo`}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       ) : (
                         <VendorIcon className="size-7 text-[var(--color-deep-plum)]" />
@@ -385,7 +475,7 @@ export function VendorDetailPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between gap-8 p-1 lg:p-4">
+              <div className="flex flex-col justify-between gap-9 p-1 sm:p-2 lg:px-4 lg:py-5">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="status-chip" data-tone="blue">
@@ -398,16 +488,16 @@ export function VendorDetailPage() {
                     </span>
                   </div>
 
-                  <h1 className="mt-6 max-w-3xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
+                  <h1 className="mt-7 max-w-3xl text-balance text-5xl font-black leading-[0.96] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
                     {vendor.businessName}
                   </h1>
 
-                  <p className="mt-5 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
+                  <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
                     {vendor.description ??
                       'Explore this verified Eventure vendor and request a tailored quotation for your event.'}
                   </p>
 
-                  <div className="mt-7 flex flex-wrap gap-3">
+                  <div className="mt-8 flex flex-wrap gap-3">
                     <span className="soft-chip text-sm font-bold">
                       <MapPin className="size-4 text-[var(--color-rosewood)]" />
                       {locationLabel}
@@ -431,8 +521,8 @@ export function VendorDetailPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-[1.5rem] border border-white/55 bg-white/28 p-5 backdrop-blur-2xl">
+                <div className="grid gap-3.5 sm:grid-cols-3">
+                  <div className="rounded-[1.55rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/40">
                     <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
                       Starting price
                     </p>
@@ -442,7 +532,7 @@ export function VendorDetailPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-white/55 bg-white/28 p-5 backdrop-blur-2xl">
+                  <div className="rounded-[1.55rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/40">
                     <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Packages</p>
 
                     <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
@@ -450,7 +540,7 @@ export function VendorDetailPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-white/55 bg-white/28 p-5 backdrop-blur-2xl">
+                  <div className="rounded-[1.55rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/40">
                     <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
                       Service areas
                     </p>
@@ -496,13 +586,15 @@ export function VendorDetailPage() {
         </div>
 
         {vendor.portfolioItems.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid auto-rows-[15rem] gap-4 sm:grid-cols-2 sm:auto-rows-[17rem] lg:grid-cols-3 lg:auto-rows-[15rem]">
             {vendor.portfolioItems.map((portfolioItem, index) => (
               <button
                 key={portfolioItem.id}
                 type="button"
                 onClick={() => setActivePortfolioIndex(index)}
-                className="group relative min-h-72 cursor-zoom-in overflow-hidden rounded-[1.75rem] bg-[var(--color-light-champagne)] text-left shadow-[0_18px_48px_rgba(31,27,29,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(31,27,29,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)] focus-visible:ring-offset-4"
+                className={`group relative min-h-0 cursor-zoom-in overflow-hidden rounded-[1.85rem] bg-[var(--color-light-champagne)] text-left shadow-[0_18px_48px_rgba(31,27,29,0.12)] transition duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_28px_68px_rgba(31,27,29,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)] focus-visible:ring-offset-4 ${getPortfolioCardClassName(
+                  index,
+                )}`}
                 aria-label={`Open ${
                   portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`
                 }`}
@@ -510,23 +602,23 @@ export function VendorDetailPage() {
                 <img
                   src={portfolioItem.imageUrl}
                   alt={portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`}
-                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                  className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.055]"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.76)] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.82)] via-[rgba(31,27,29,0.08)] to-transparent transition duration-500 group-hover:from-[rgba(31,27,29,0.88)]" />
 
-                <div className="absolute right-4 top-4 translate-y-2 rounded-full border border-white/35 bg-black/24 px-3 py-2 text-xs font-black text-white opacity-0 backdrop-blur-xl transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                <div className="absolute right-4 top-4 translate-y-2 rounded-full border border-white/40 bg-black/28 px-3.5 py-2 text-xs font-black text-white opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-xl transition duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
                   View image
                 </div>
 
-                <div className="absolute bottom-5 left-5 right-5">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/24 px-3 py-2 text-xs font-black text-white backdrop-blur-xl">
+                <div className="absolute bottom-5 left-5 right-5 translate-y-1 transition duration-500 ease-out group-hover:translate-y-0 sm:bottom-6 sm:left-6 sm:right-6">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/26 px-3 py-2 text-xs font-black text-white shadow-[0_8px_22px_rgba(0,0,0,0.1)] backdrop-blur-xl">
                     <Image className="size-4" />
                     {portfolioItem.isFeatured ? 'Featured work' : `Portfolio ${index + 1}`}
                   </div>
 
                   {portfolioItem.title ? (
-                    <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-white">
+                    <h3 className="mt-3 max-w-xl text-xl font-black tracking-[-0.035em] text-white sm:text-2xl">
                       {portfolioItem.title}
                     </h3>
                   ) : null}
@@ -573,33 +665,36 @@ export function VendorDetailPage() {
             </div>
 
             {vendor.packages.length > 0 ? (
-              <div className="grid gap-5 lg:grid-cols-2">
+              <div className="grid gap-5 lg:grid-cols-2 lg:items-stretch">
                 {vendor.packages.map((servicePackage) => (
-                  <article key={servicePackage.id} className="luxe-card p-6">
-                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                  <article
+                    key={servicePackage.id}
+                    className="luxe-card group flex h-full flex-col overflow-hidden p-6 transition duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_28px_68px_rgba(31,27,29,0.14)] sm:p-7"
+                  >
+                    <div className="grid size-12 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] transition duration-500 group-hover:scale-[1.04] group-hover:bg-[rgba(183,167,200,0.32)]">
                       <PackageCheck className="size-6" />
                     </div>
 
-                    <span className="status-chip mt-8 inline-flex" data-tone="blue">
+                    <span className="status-chip mt-7 inline-flex w-fit" data-tone="blue">
                       {servicePackage.category.name}
                     </span>
 
-                    <h3 className="mt-4 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    <h3 className="mt-4 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                       {servicePackage.title}
                     </h3>
 
-                    <p className="mt-3 text-lg font-black tracking-[-0.035em] text-[var(--color-rosewood)]">
+                    <p className="mt-4 text-2xl font-black tracking-[-0.045em] text-[var(--color-rosewood)]">
                       {servicePackage.basePrice
                         ? `From ${formatCurrency(servicePackage.basePrice)}`
                         : 'Tailored pricing'}
                     </p>
 
-                    <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
+                    <p className="mt-5 flex-1 leading-7 text-[var(--color-charcoal)]/68">
                       {servicePackage.description ??
                         'Request a structured quotation for detailed inclusions, pricing and terms.'}
                     </p>
 
-                    <div className="mt-8 flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/66">
+                    <div className="mt-8 flex items-center gap-2 border-t border-[rgba(46,42,44,0.08)] pt-5 text-sm font-bold text-[var(--color-charcoal)]/66">
                       <CheckCircle2 className="size-4 text-[var(--color-dusty-olive)]" />
                       Structured quotation available
                     </div>

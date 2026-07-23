@@ -33,9 +33,9 @@ export function HeroFloatingCards() {
       <div aria-hidden="true" className="absolute inset-0 z-20 hidden md:block">
         {floatingCards.map(({ title, detail, icon: Icon, position, animationClass, iconClass }) => (
           <div key={title} className={`absolute ${position} ${animationClass}`}>
-            <div className="group flex min-w-[12.5rem] items-center gap-3 rounded-[1.3rem] border border-white/65 bg-white/58 px-3.5 py-3 shadow-[0_18px_44px_rgba(31,27,29,0.16)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/80 hover:bg-white/68 hover:shadow-[0_24px_54px_rgba(31,27,29,0.22)]">
+            <div className="group flex min-w-[12.5rem] items-center gap-3 rounded-[1.3rem] border border-white/65 bg-white/58 px-3.5 py-3 shadow-[0_18px_44px_rgba(31,27,29,0.16)] backdrop-blur-2xl transition duration-500 ease-out hover:-translate-y-0.5 hover:border-white/80 hover:bg-white/68 hover:shadow-[0_24px_54px_rgba(31,27,29,0.22)]">
               <span
-                className={`grid size-10 shrink-0 place-items-center rounded-xl transition duration-300 group-hover:scale-105 ${iconClass}`}
+                className={`grid size-10 shrink-0 place-items-center rounded-xl transition duration-500 ease-out group-hover:scale-[1.04] ${iconClass}`}
               >
                 <Icon className="size-[1.1rem]" />
               </span>
@@ -56,64 +56,64 @@ export function HeroFloatingCards() {
       </div>
 
       <style>{`
-  @keyframes heroFloatCardA {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0);
-    }
+        @keyframes heroFloatCardA {
+          0%,
+          100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
 
-    50% {
-      transform: translate3d(0, -7px, 0);
-    }
-  }
+          50% {
+            transform: translate3d(0, -7px, 0) rotate(-0.2deg);
+          }
+        }
 
-  @keyframes heroFloatCardB {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0);
-    }
+        @keyframes heroFloatCardB {
+          0%,
+          100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
 
-    50% {
-      transform: translate3d(4px, -6px, 0);
-    }
-  }
+          50% {
+            transform: translate3d(2px, -7px, 0) rotate(0.18deg);
+          }
+        }
 
-  @keyframes heroFloatCardC {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0);
-    }
+        @keyframes heroFloatCardC {
+          0%,
+          100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
 
-    50% {
-      transform: translate3d(-4px, 7px, 0);
-    }
-  }
+          50% {
+            transform: translate3d(-2px, 7px, 0) rotate(-0.16deg);
+          }
+        }
 
-  .hero-float-card-a {
-    animation: heroFloatCardA 4.8s ease-in-out infinite;
-    will-change: transform;
-  }
+        .hero-float-card-a {
+          animation: heroFloatCardA 7.2s ease-in-out infinite;
+          will-change: transform;
+        }
 
-  .hero-float-card-b {
-    animation: heroFloatCardB 5.6s ease-in-out infinite;
-    animation-delay: -1.2s;
-    will-change: transform;
-  }
+        .hero-float-card-b {
+          animation: heroFloatCardB 8.1s ease-in-out infinite;
+          animation-delay: -2.4s;
+          will-change: transform;
+        }
 
-  .hero-float-card-c {
-    animation: heroFloatCardC 5.2s ease-in-out infinite;
-    animation-delay: -2s;
-    will-change: transform;
-  }
+        .hero-float-card-c {
+          animation: heroFloatCardC 7.6s ease-in-out infinite;
+          animation-delay: -4.1s;
+          will-change: transform;
+        }
 
-  @media (prefers-reduced-motion: reduce) {
-    .hero-float-card-a,
-    .hero-float-card-b,
-    .hero-float-card-c {
-      animation: none;
-    }
-  }
-`}</style>
+        @media (prefers-reduced-motion: reduce) {
+          .hero-float-card-a,
+          .hero-float-card-b,
+          .hero-float-card-c {
+            animation: none;
+          }
+        }
+      `}</style>
     </>
   );
 }
