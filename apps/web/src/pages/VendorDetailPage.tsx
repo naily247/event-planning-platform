@@ -15,6 +15,7 @@ import {
   Image,
   LoaderCircle,
   MapPin,
+  MessageSquareQuote,
   Music2,
   PackageCheck,
   Sparkles,
@@ -23,6 +24,8 @@ import {
 } from 'lucide-react';
 import { type ComponentType, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { PortfolioLightbox } from '../components/vendors/PortfolioLightbox';
+import { StickyVendorCta } from '../components/vendors/StickyVendorCta';
 import { api } from '../lib/api';
 
 type VendorCategory = {
@@ -112,6 +115,13 @@ const categoryAccentMap: Record<string, string> = {
   transport: 'bg-[rgba(190,176,203,0.88)]',
 };
 
+const vendorLogoMap: Record<string, string> = {
+  'luna-frame-studio': '/images/vendors/logos/luna-frame-studio.png',
+  'velvet-moments': '/images/vendors/logos/velvet-moments.png',
+  'aroma-catering': '/images/vendors/logos/aroma-catering.png',
+  'bloom-atelier': '/images/vendors/logos/bloom-atelier.png',
+};
+
 const formatCurrency = (value: string | null) => {
   if (!value) {
     return 'Tailored pricing';
@@ -164,6 +174,7 @@ export function VendorDetailPage() {
   const [vendor, setVendor] = useState<PublicVendorDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activePortfolioIndex, setActivePortfolioIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -178,6 +189,7 @@ export function VendorDetailPage() {
 
       setIsLoading(true);
       setErrorMessage(null);
+      setActivePortfolioIndex(null);
 
       try {
         const response = await api.get<PublicVendorDetailResponse>(`/vendors/${vendorSlug}`, {
@@ -223,6 +235,8 @@ export function VendorDetailPage() {
   const accentClass = primaryCategory
     ? (categoryAccentMap[primaryCategory.slug] ?? 'bg-[var(--color-valendor-lilac)]')
     : 'bg-[var(--color-valendor-lilac)]';
+
+  const vendorLogoUrl = vendor ? vendorLogoMap[vendor.slug] : undefined;
 
   if (isLoading) {
     return (
@@ -272,9 +286,10 @@ export function VendorDetailPage() {
   }
 
   const categoryLabel = primaryCategory?.name ?? 'Professional event services';
-
   const startingPrice = getStartingPrice(vendor.packages);
   const ratingLabel = getRatingLabel(vendor.ratingSummary);
+  const locationLabel = getLocationLabel(vendor);
+  const featuredPortfolioItem = vendor.portfolioItems[0] ?? null;
 
   return (
     <>
@@ -293,38 +308,80 @@ export function VendorDetailPage() {
               <div
                 className={`relative min-h-[420px] overflow-hidden rounded-[2rem] ${accentClass} shadow-[0_24px_70px_rgba(31,27,29,0.16)]`}
               >
-                {vendor.portfolioItems[0]?.imageUrl ? (
-                  <img
-                    src={vendor.portfolioItems[0].imageUrl}
-                    alt={
-                      vendor.portfolioItems[0].title ?? `${vendor.businessName} featured portfolio`
-                    }
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
+                {featuredPortfolioItem?.imageUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => setActivePortfolioIndex(0)}
+                    className="absolute inset-0 h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
+                    aria-label={`Open ${
+                      featuredPortfolioItem.title ??
+                      `${vendor.businessName} featured portfolio image`
+                    }`}
+                  >
+                    <img
+                      src={featuredPortfolioItem.imageUrl}
+                      alt={
+                        featuredPortfolioItem.title ?? `${vendor.businessName} featured portfolio`
+                      }
+                      className="h-full w-full object-cover transition duration-500 hover:scale-[1.02]"
+                    />
+                  </button>
                 ) : null}
 
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_18%,rgba(255,255,255,0.62),transparent_30%),linear-gradient(135deg,rgba(93,58,85,0.18),rgba(255,255,255,0.08))]" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_18%,rgba(255,255,255,0.62),transparent_30%),linear-gradient(135deg,rgba(93,58,85,0.18),rgba(255,255,255,0.08))]" />
 
                 <button
                   type="button"
-                  className="absolute right-5 top-5 grid size-11 place-items-center rounded-full border border-white/50 bg-white/30 text-[var(--color-near-black)] backdrop-blur-xl"
+                  className="absolute right-5 top-5 z-10 grid size-11 place-items-center rounded-full border border-white/50 bg-white/30 text-[var(--color-near-black)] backdrop-blur-xl transition hover:scale-105 hover:bg-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                   aria-label={`Save ${vendor.businessName}`}
                 >
                   <Heart className="size-5" />
                 </button>
 
-                <div className="absolute bottom-6 left-6 right-6 rounded-[1.5rem] border border-white/50 bg-white/32 p-5 shadow-[0_18px_48px_rgba(31,27,29,0.13)] backdrop-blur-2xl">
-                  <div className="grid size-14 place-items-center rounded-2xl bg-white/34 text-[var(--color-deep-plum)]">
-                    <VendorIcon className="size-7" />
+                <div className="pointer-events-none absolute bottom-5 left-5 right-5 z-10 rounded-[1.6rem] border border-white/55 bg-white/36 p-5 shadow-[0_20px_52px_rgba(31,27,29,0.16)] backdrop-blur-2xl sm:bottom-6 sm:left-6 sm:right-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-16 place-items-center overflow-hidden rounded-2xl border border-white/50 bg-white/65 shadow-[0_10px_30px_rgba(31,27,29,0.12)] backdrop-blur-xl">
+                      {vendorLogoUrl ? (
+                        <img
+                          src={vendorLogoUrl}
+                          alt={`${vendor.businessName} logo`}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <VendorIcon className="size-7 text-[var(--color-deep-plum)]" />
+                      )}
+                    </div>
+
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/55 bg-white/44 px-3 py-2 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[#3d452f]">
+                      <BadgeCheck className="size-3.5" />
+                      Verified
+                    </span>
                   </div>
 
-                  <p className="mt-5 text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                     Featured vendor
                   </p>
 
                   <p className="mt-2 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                     {vendor.businessName}
                   </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/38 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/72">
+                      <Image className="size-3.5 text-[var(--color-deep-plum)]" />
+
+                      {vendor.portfolioItems.length > 0
+                        ? `${vendor.portfolioItems.length} portfolio ${
+                            vendor.portfolioItems.length === 1 ? 'image' : 'images'
+                          }`
+                        : 'Portfolio coming soon'}
+                    </span>
+
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/38 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/72">
+                      <MessageSquareQuote className="size-3.5 text-[var(--color-deep-plum)]" />
+                      Quotations available
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -353,7 +410,7 @@ export function VendorDetailPage() {
                   <div className="mt-7 flex flex-wrap gap-3">
                     <span className="soft-chip text-sm font-bold">
                       <MapPin className="size-4 text-[var(--color-rosewood)]" />
-                      {getLocationLabel(vendor)}
+                      {locationLabel}
                     </span>
 
                     <span className="soft-chip text-sm font-bold">
@@ -441,17 +498,26 @@ export function VendorDetailPage() {
         {vendor.portfolioItems.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {vendor.portfolioItems.map((portfolioItem, index) => (
-              <article
+              <button
                 key={portfolioItem.id}
-                className="group relative min-h-72 overflow-hidden rounded-[1.75rem] bg-[var(--color-light-champagne)] shadow-[0_18px_48px_rgba(31,27,29,0.12)]"
+                type="button"
+                onClick={() => setActivePortfolioIndex(index)}
+                className="group relative min-h-72 cursor-zoom-in overflow-hidden rounded-[1.75rem] bg-[var(--color-light-champagne)] text-left shadow-[0_18px_48px_rgba(31,27,29,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(31,27,29,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)] focus-visible:ring-offset-4"
+                aria-label={`Open ${
+                  portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`
+                }`}
               >
                 <img
                   src={portfolioItem.imageUrl}
                   alt={portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`}
-                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.72)] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.76)] via-transparent to-transparent" />
+
+                <div className="absolute right-4 top-4 translate-y-2 rounded-full border border-white/35 bg-black/24 px-3 py-2 text-xs font-black text-white opacity-0 backdrop-blur-xl transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                  View image
+                </div>
 
                 <div className="absolute bottom-5 left-5 right-5">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/24 px-3 py-2 text-xs font-black text-white backdrop-blur-xl">
@@ -471,7 +537,7 @@ export function VendorDetailPage() {
                     </p>
                   ) : null}
                 </div>
-              </article>
+              </button>
             ))}
           </div>
         ) : (
@@ -492,68 +558,88 @@ export function VendorDetailPage() {
       </section>
 
       <section className="page-container pb-24">
-        <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--color-rosewood)]">
-              Packages
-            </p>
-
-            <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-              Clear service options before requesting a quotation.
-            </h2>
-          </div>
-        </div>
-
-        {vendor.packages.length > 0 ? (
-          <div className="grid gap-5 lg:grid-cols-3">
-            {vendor.packages.map((servicePackage) => (
-              <article key={servicePackage.id} className="luxe-card p-6">
-                <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                  <PackageCheck className="size-6" />
-                </div>
-
-                <span className="status-chip mt-8 inline-flex" data-tone="blue">
-                  {servicePackage.category.name}
-                </span>
-
-                <h3 className="mt-4 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  {servicePackage.title}
-                </h3>
-
-                <p className="mt-3 text-lg font-black tracking-[-0.035em] text-[var(--color-rosewood)]">
-                  {servicePackage.basePrice
-                    ? `From ${formatCurrency(servicePackage.basePrice)}`
-                    : 'Tailored pricing'}
+            <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--color-rosewood)]">
+                  Packages
                 </p>
 
-                <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
-                  {servicePackage.description ??
-                    'Request a structured quotation for detailed inclusions, pricing and terms.'}
-                </p>
-
-                <div className="mt-8 flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/66">
-                  <CheckCircle2 className="size-4 text-[var(--color-dusty-olive)]" />
-                  Structured quotation available
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="glass-card grid min-h-64 place-items-center p-10 text-center">
-            <div>
-              <PackageCheck className="mx-auto size-9 text-[var(--color-deep-plum)]" />
-
-              <p className="mt-4 text-lg font-black text-[var(--color-near-black)]">
-                Custom quotations available
-              </p>
-
-              <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
-                This vendor has not published fixed packages yet.
-              </p>
+                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
+                  Clear service options before requesting a quotation.
+                </h2>
+              </div>
             </div>
+
+            {vendor.packages.length > 0 ? (
+              <div className="grid gap-5 lg:grid-cols-2">
+                {vendor.packages.map((servicePackage) => (
+                  <article key={servicePackage.id} className="luxe-card p-6">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                      <PackageCheck className="size-6" />
+                    </div>
+
+                    <span className="status-chip mt-8 inline-flex" data-tone="blue">
+                      {servicePackage.category.name}
+                    </span>
+
+                    <h3 className="mt-4 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      {servicePackage.title}
+                    </h3>
+
+                    <p className="mt-3 text-lg font-black tracking-[-0.035em] text-[var(--color-rosewood)]">
+                      {servicePackage.basePrice
+                        ? `From ${formatCurrency(servicePackage.basePrice)}`
+                        : 'Tailored pricing'}
+                    </p>
+
+                    <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
+                      {servicePackage.description ??
+                        'Request a structured quotation for detailed inclusions, pricing and terms.'}
+                    </p>
+
+                    <div className="mt-8 flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/66">
+                      <CheckCircle2 className="size-4 text-[var(--color-dusty-olive)]" />
+                      Structured quotation available
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="glass-card grid min-h-64 place-items-center p-10 text-center">
+                <div>
+                  <PackageCheck className="mx-auto size-9 text-[var(--color-deep-plum)]" />
+
+                  <p className="mt-4 text-lg font-black text-[var(--color-near-black)]">
+                    Custom quotations available
+                  </p>
+
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
+                    This vendor has not published fixed packages yet.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+
+          <StickyVendorCta
+            vendorName={vendor.businessName}
+            location={locationLabel}
+            startingPrice={startingPrice}
+            rating={vendor.ratingSummary.overallAverage}
+            reviewCount={vendor.ratingSummary.reviewCount}
+          />
+        </div>
       </section>
+
+      <PortfolioLightbox
+        items={vendor.portfolioItems}
+        activeIndex={activePortfolioIndex}
+        vendorName={vendor.businessName}
+        onClose={() => setActivePortfolioIndex(null)}
+        onChange={setActivePortfolioIndex}
+      />
     </>
   );
 }

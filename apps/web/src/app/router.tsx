@@ -46,6 +46,10 @@ import { VendorRegisterPage } from '../pages/VendorRegisterPage';
 import { VendorReviewsPage } from '../pages/VendorReviewsPage';
 import { VendorSettingsPage } from '../pages/VendorSettingsPage';
 import { VendorsPage } from '../pages/VendorsPage';
+import { AboutPage } from '../pages/AboutPage';
+import { ContactPage } from '../pages/ContactPage';
+import { PrivacyPolicyPage } from '../pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from '../pages/TermsOfServicePage';
 
 export const router = createBrowserRouter([
   {
@@ -74,6 +78,22 @@ export const router = createBrowserRouter([
       {
         path: '*',
         element: <NotFoundPage />,
+      },
+      {
+        path: '/about',
+        element: <AboutPage />,
+      },
+      {
+        path: '/contact',
+        element: <ContactPage />,
+      },
+      {
+        path: '/privacy',
+        element: <PrivacyPolicyPage />,
+      },
+      {
+        path: '/terms',
+        element: <TermsOfServicePage />,
       },
     ],
   },
