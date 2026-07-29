@@ -27,6 +27,7 @@ import {
   type VendorAvailabilityBlock,
   type VendorAvailabilityBooking,
 } from '../features/vendors/vendor.api';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const availabilityBlockSchema = z
   .object({
@@ -325,7 +326,7 @@ export function VendorAvailabilityPage() {
 
   if (availabilityQuery.isLoading) {
     return (
-      <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
+      <div className="workspace-shell grid min-h-screen place-items-center px-4 py-10">
         <div className="glass-card grid min-h-80 w-full max-w-3xl place-items-center p-10 text-center">
           <div>
             <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
@@ -345,7 +346,7 @@ export function VendorAvailabilityPage() {
 
   if (availabilityQuery.isError || !availabilityQuery.data) {
     return (
-      <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
+      <div className="workspace-shell grid min-h-screen place-items-center px-4 py-10">
         <div className="glass-card grid min-h-80 w-full max-w-3xl place-items-center p-10 text-center">
           <div className="max-w-lg">
             <CircleAlert className="mx-auto size-10 text-[var(--color-rosewood)]" />
@@ -379,17 +380,11 @@ export function VendorAvailabilityPage() {
   const availability = availabilityQuery.data;
 
   return (
-    <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="workspace-shell">
+      <div className="workspace-container max-w-7xl">
         <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              to="/dashboard"
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl"
-              aria-label="Back to dashboard"
-            >
-              <ArrowLeft className="size-5" />
-            </Link>
+            <PageBackButton fallback="/dashboard" label="Dashboard" className="shrink-0" />
 
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">

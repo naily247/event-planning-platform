@@ -19,7 +19,6 @@ import {
   Users,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AdminWorkspaceNav } from '../features/admin/components/AdminWorkspaceNav';
 import {
   getAdminDashboardSummary,
   type AdminAccountStatus,
@@ -29,6 +28,7 @@ import {
   type AdminPaymentStatus,
   type AdminUserRole,
 } from '../features/admin/admin.api';
+import { AdminWorkspaceNav } from '../features/admin/components/AdminWorkspaceNav';
 import { getCurrentUser } from '../features/auth/auth.api';
 import { clearAuthTokens } from '../features/auth/auth.storage';
 
@@ -91,6 +91,15 @@ const complaintPriorityLabels: Record<AdminComplaintPriority, string> = {
   URGENT: 'Urgent',
 };
 
+const panelClassName =
+  'rounded-3xl border border-violet-100/90 bg-white/88 shadow-[0_18px_50px_rgba(109,94,245,0.09)] backdrop-blur-xl';
+
+const secondaryButtonClassName =
+  'inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200/80 bg-white/90 px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-violet-300 hover:bg-violet-50/80 hover:text-violet-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30';
+
+const primaryButtonClassName =
+  'inline-flex items-center justify-center gap-2 rounded-xl border border-violet-600 bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(109,94,245,0.24)] transition hover:-translate-y-0.5 hover:from-violet-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-violet-400/40';
+
 function getErrorMessage(error: unknown) {
   if (!axios.isAxiosError<ApiErrorResponse>(error)) {
     return 'We could not load the admin dashboard. Please try again.';
@@ -104,7 +113,7 @@ function getErrorMessage(error: unknown) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -112,7 +121,7 @@ function formatDate(value: string) {
 }
 
 function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -163,7 +172,7 @@ function getStatusTone(
     return 'danger';
   }
 
-  return 'plum';
+  return 'blue';
 }
 
 function AdminStatCard({
@@ -172,28 +181,42 @@ function AdminStatCard({
   helper,
   icon: Icon,
   tone,
+  surface,
 }: {
   label: string;
   value: string | number;
   helper: string;
   icon: typeof Users;
   tone: string;
+  surface: string;
 }) {
   return (
-    <article className="workspace-card p-5">
-      <div className={`grid size-11 place-items-center rounded-2xl ${tone}`}>
-        <Icon className="size-5" aria-hidden="true" />
+    <article
+      className={`${panelClassName} relative overflow-hidden p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_48px_rgba(30,41,59,0.11)]`}
+    >
+      <div
+        className={`pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${surface}`}
+      />
+
+      <div className="relative flex items-start justify-between gap-4">
+        <div className={`grid size-11 shrink-0 place-items-center rounded-2xl ${tone}`}>
+          <Icon className="size-5" aria-hidden="true" />
+        </div>
+
+        <span className="rounded-full border border-violet-100/80 bg-white/80 px-2.5 py-1 text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-slate-500 shadow-sm">
+          Live
+        </span>
       </div>
 
-      <p className="mt-6 text-sm font-bold text-[var(--color-charcoal)]/58">{label}</p>
+      <div className="relative">
+        <p className="mt-4 text-sm font-bold text-slate-500">{label}</p>
 
-      <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-        {value}
-      </p>
+        <p className="mt-1 break-words text-3xl font-black tracking-[-0.045em] text-slate-950">
+          {value}
+        </p>
 
-      <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/54">
-        {helper}
-      </p>
+        <p className="mt-2 text-sm font-medium leading-6 text-slate-500">{helper}</p>
+      </div>
     </article>
   );
 }
@@ -203,30 +226,30 @@ function QuickAction({
   icon: Icon,
   title,
   description,
+  tone,
 }: {
   to: string;
   icon: typeof Users;
   title: string;
   description: string;
+  tone: string;
 }) {
   return (
     <Link
       to={to}
-      className="group flex items-start gap-4 rounded-2xl border border-white/70 bg-white/48 p-4 transition hover:-translate-y-0.5 hover:bg-white/72"
+      className="group flex items-start gap-4 rounded-2xl border border-violet-100/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
     >
-      <div className="icon-tile shrink-0">
+      <div className={`grid size-10 shrink-0 place-items-center rounded-xl transition ${tone}`}>
         <Icon className="size-5" aria-hidden="true" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="font-black text-[var(--color-near-black)]">{title}</p>
+        <p className="font-extrabold text-slate-900">{title}</p>
 
-        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-          {description}
-        </p>
+        <p className="mt-1 text-sm font-medium leading-6 text-slate-500">{description}</p>
       </div>
 
-      <ArrowRight className="mt-1 size-4 shrink-0 text-[var(--color-charcoal)]/34 transition group-hover:translate-x-1 group-hover:text-[var(--color-deep-plum)]" />
+      <ArrowRight className="mt-1 size-4 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-violet-600" />
     </Link>
   );
 }
@@ -262,16 +285,14 @@ export function AdminDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="workspace-shell grid place-items-center px-4 py-10">
-        <div className="state-surface w-full max-w-3xl">
-          <div>
-            <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+      <div className="min-h-screen bg-[linear-gradient(135deg,#fbfaff_0%,#f6f2ff_46%,#effbf6_100%)] px-4 py-10">
+        <div className="mx-auto grid min-h-[70vh] w-full max-w-3xl place-items-center">
+          <div className={`${panelClassName} w-full p-10 text-center`}>
+            <LoaderCircle className="mx-auto size-10 animate-spin text-violet-600" />
 
-            <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
-              Preparing the admin workspace
-            </p>
+            <p className="mt-5 text-xl font-black text-slate-950">Preparing the admin workspace</p>
 
-            <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
               Loading platform totals, financial activity, moderation queues, and recent records.
             </p>
           </div>
@@ -282,25 +303,23 @@ export function AdminDashboardPage() {
 
   if (loadError || !currentUserQuery.data || !summaryQuery.data) {
     return (
-      <div className="workspace-shell grid place-items-center px-4 py-10">
-        <div className="state-surface w-full max-w-3xl">
-          <div className="max-w-lg">
-            <div className="icon-tile mx-auto">
+      <div className="min-h-screen bg-[linear-gradient(135deg,#fbfaff_0%,#f6f2ff_46%,#effbf6_100%)] px-4 py-10">
+        <div className="mx-auto grid min-h-[70vh] w-full max-w-3xl place-items-center">
+          <div className={`${panelClassName} w-full p-10 text-center`}>
+            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-rose-100 text-rose-700">
               <CircleAlert className="size-6" />
             </div>
 
-            <h1 className="mt-5 text-2xl font-black text-[var(--color-near-black)]">
-              Admin dashboard unavailable
-            </h1>
+            <h1 className="mt-5 text-2xl font-black text-slate-950">Admin dashboard unavailable</h1>
 
-            <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
+            <p className="mx-auto mt-3 max-w-lg leading-7 text-slate-600">
               {getErrorMessage(loadError)}
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <button
                 type="button"
-                className="btn-primary text-sm"
+                className={primaryButtonClassName}
                 onClick={() => {
                   void Promise.all([currentUserQuery.refetch(), summaryQuery.refetch()]);
                 }}
@@ -308,7 +327,7 @@ export function AdminDashboardPage() {
                 Try again
               </button>
 
-              <button type="button" className="btn-secondary text-sm" onClick={handleLogout}>
+              <button type="button" className={secondaryButtonClassName} onClick={handleLogout}>
                 <LogOut className="size-4" />
                 Log out
               </button>
@@ -328,49 +347,56 @@ export function AdminDashboardPage() {
       value: summary.users.total,
       helper: `${summary.users.newThisMonth} joined this month`,
       icon: Users,
-      tone: 'bg-[rgba(183,167,200,0.26)] text-[var(--color-deep-plum)]',
+      tone: 'bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700',
+      surface: 'from-violet-100/90 via-violet-50/50 to-transparent',
     },
     {
       label: 'Pending vendors',
       value: summary.vendors.pending,
       helper: `${summary.vendors.approved} approved vendor profiles`,
       icon: Store,
-      tone: 'bg-[rgba(184,145,87,0.18)] text-[#6f5328]',
+      tone: 'bg-amber-100 text-amber-700',
+      surface: 'from-amber-100/85 via-amber-50/45 to-transparent',
     },
     {
       label: 'Pending payments',
       value: summary.payments.pending,
       helper: `${summary.payments.verified} payments verified`,
       icon: CreditCard,
-      tone: 'bg-[rgba(175,201,216,0.34)] text-[#334954]',
+      tone: 'bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700',
+      surface: 'from-sky-100/85 via-cyan-50/45 to-transparent',
     },
     {
       label: 'Open complaints',
       value: summary.complaints.open,
       helper: `${summary.complaints.unassigned} active cases unassigned`,
       icon: MessageSquareWarning,
-      tone: 'bg-[rgba(142,92,103,0.18)] text-[var(--color-rosewood)]',
+      tone: 'bg-rose-100 text-rose-700',
+      surface: 'from-rose-100/85 via-rose-50/45 to-transparent',
     },
     {
       label: 'Active events',
       value: summary.events.active,
       helper: `${summary.events.total} events created overall`,
       icon: CalendarDays,
-      tone: 'bg-[rgba(142,151,115,0.24)] text-[#3d452f]',
+      tone: 'bg-emerald-100 text-emerald-700',
+      surface: 'from-emerald-100/90 via-emerald-50/45 to-transparent',
     },
     {
       label: 'Active bookings',
       value: summary.bookings.active,
       helper: `${summary.bookings.awaitingVendorConfirmation} awaiting vendor response`,
       icon: BriefcaseBusiness,
-      tone: 'bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]',
+      tone: 'bg-violet-100 text-violet-700',
+      surface: 'from-violet-100/90 via-fuchsia-50/45 to-transparent',
     },
     {
       label: 'Verified revenue',
       value: formatCurrency(summary.payments.totalVerifiedAmount),
       helper: `${summary.payments.total} payment records`,
       icon: BarChart3,
-      tone: 'bg-[rgba(142,151,115,0.22)] text-[#3d452f]',
+      tone: 'bg-teal-100 text-teal-700',
+      surface: 'from-teal-100/90 via-emerald-50/45 to-transparent',
     },
     {
       label: 'Average review',
@@ -378,117 +404,169 @@ export function AdminDashboardPage() {
         summary.reviews.averageRating === null ? '—' : summary.reviews.averageRating.toFixed(1),
       helper: `${summary.reviews.hidden} hidden of ${summary.reviews.total} reviews`,
       icon: Star,
-      tone: 'bg-[rgba(244,211,152,0.28)] text-[#795116]',
+      tone: 'bg-orange-100 text-orange-700',
+      surface: 'from-orange-100/85 via-amber-50/45 to-transparent',
     },
   ];
 
   return (
-    <div className="workspace-shell">
-      <div className="workspace-container">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl">
-              <ShieldCheck className="size-5 text-[var(--color-deep-plum)]" />
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#fbfaff_0%,#f5f0ff_44%,#eefaf5_100%)] text-slate-900">
+      <div className="pointer-events-none absolute -left-32 top-56 size-[30rem] rounded-full bg-violet-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 top-[44rem] size-[34rem] rounded-full bg-emerald-200/30 blur-3xl" />
+
+      <div className="relative mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
+        <header
+          className={`${panelClassName} flex flex-col gap-5 bg-white/75 p-4 backdrop-blur-2xl sm:p-5 lg:flex-row lg:items-center lg:justify-between`}
+        >
+          <Link to="/" className="flex w-fit items-center gap-3">
+            <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-emerald-400 text-white shadow-[0_10px_28px_rgba(109,94,245,0.28)]">
+              <ShieldCheck className="size-5" />
             </span>
 
             <span className="flex flex-col leading-none">
-              <span className="text-base font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+              <span className="text-base font-black tracking-[-0.03em] text-slate-950">
                 Eventure
               </span>
 
-              <span className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+              <span className="mt-1 text-[0.68rem] font-extrabold uppercase tracking-[0.2em] text-violet-600">
                 Admin workspace
               </span>
             </span>
           </Link>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Link to="/notifications" className="btn-secondary text-sm">
-              <Bell className="size-4" />
-              Notifications
-            </Link>
-
-            <Link to="/admin/reports" className="btn-primary text-sm">
-              <BarChart3 className="size-4" />
-              Reports
-            </Link>
-
-            <button type="button" className="btn-secondary text-sm" onClick={handleLogout}>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button type="button" className={secondaryButtonClassName} onClick={handleLogout}>
               <LogOut className="size-4" />
               Log out
             </button>
           </div>
         </header>
 
-        <div className="mt-5">
+        <div className="mt-4">
           <AdminWorkspaceNav />
         </div>
 
-        <main className="py-10">
-          <section className="workspace-hero grid gap-6 lg:grid-cols-[1fr_0.38fr] lg:items-end">
-            <div>
-              <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                <LayoutDashboard className="size-4" />
-                Platform operations
+        <main className="py-6">
+          <section className={`${panelClassName} overflow-hidden`}>
+            <div className="grid xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="relative isolate overflow-hidden bg-[linear-gradient(135deg,#faf7ff_0%,#f3edff_42%,#e8fbf3_100%)] px-6 py-8 text-slate-900 sm:px-8 sm:py-10">
+                <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_18%_20%,rgba(167,139,250,0.26),transparent_32%),radial-gradient(circle_at_82%_22%,rgba(110,231,183,0.28),transparent_34%),radial-gradient(circle_at_64%_82%,rgba(196,181,253,0.34),transparent_38%),linear-gradient(135deg,#fbf9ff_0%,#f4efff_48%,#eafbf3_100%)]" />
+                <div className="pointer-events-none absolute -right-20 -top-24 -z-10 size-80 rounded-full border border-violet-300/25" />
+                <div className="pointer-events-none absolute -right-6 -top-10 -z-10 size-56 rounded-full border border-violet-300/25" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-28 bg-gradient-to-t from-violet-200/35 to-transparent" />
+
+                <div className="flex w-fit items-center gap-2 rounded-full border border-violet-200/80 bg-white/65 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-violet-700 backdrop-blur">
+                  <LayoutDashboard className="size-4" />
+                  Platform operations
+                </div>
+
+                <h1 className="mt-6 max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] sm:text-5xl">
+                  Welcome back, {user.firstName}. Keep Eventure healthy and moving.
+                </h1>
+
+                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-slate-600 sm:text-lg">
+                  Monitor marketplace activity, clear operational queues, moderate records, and
+                  maintain visibility across the platform.
+                </p>
+
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-violet-100 bg-white/75 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Users
+                    </p>
+                    <p className="mt-2 text-2xl font-black">{summary.users.total}</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">Registered accounts</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-violet-100 bg-white/75 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Active events
+                    </p>
+                    <p className="mt-2 text-2xl font-black">{summary.events.active}</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">Currently operating</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-violet-100 bg-white/75 px-4 py-4 backdrop-blur-sm">
+                    <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Open complaints
+                    </p>
+                    <p className="mt-2 text-2xl font-black">{summary.complaints.open}</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">Need attention</p>
+                  </div>
+                </div>
               </div>
 
-              <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
-                Welcome back, {user.firstName}. Keep the platform healthy and moving.
-              </h1>
+              <aside className="border-t border-violet-100/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8f9ff_100%)] p-5 sm:p-6 xl:border-l xl:border-t-0">
+                <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-violet-600">
+                  Current snapshot
+                </p>
 
-              <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                Review operational queues, monitor marketplace health, moderate activity, and
-                understand what is happening across Eventure.
-              </p>
+                <h2 className="mt-2 text-xl font-black tracking-[-0.03em] text-slate-950">
+                  Dashboard generated
+                </h2>
+
+                <p className="mt-2 text-sm font-semibold text-slate-500">
+                  {formatDateTime(summary.generatedAt)}
+                </p>
+
+                <div className="mt-6 grid gap-3">
+                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-indigo-700">
+                        Active accounts
+                      </p>
+                      <Users className="size-4 text-violet-600" />
+                    </div>
+
+                    <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
+                      {summary.users.byStatus.active}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-rose-700">
+                        Urgent complaints
+                      </p>
+                      <FileWarning className="size-4 text-rose-700" />
+                    </div>
+
+                    <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-rose-950">
+                      {summary.complaints.urgent}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-violet-100/80 bg-white p-4 shadow-sm">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
+                    Control centre
+                  </p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                    Review priority queues first, then use reports for the wider platform picture.
+                  </p>
+                </div>
+              </aside>
             </div>
-
-            <article className="glass-card p-5">
-              <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                Dashboard generated
-              </p>
-
-              <p className="mt-2 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                {formatDateTime(summary.generatedAt)}
-              </p>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <div className="rounded-2xl bg-white/30 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
-                    Active accounts
-                  </p>
-
-                  <p className="mt-2 text-2xl font-black text-[var(--color-near-black)]">
-                    {summary.users.byStatus.active}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/30 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
-                    Urgent complaints
-                  </p>
-
-                  <p className="mt-2 text-2xl font-black text-[var(--color-near-black)]">
-                    {summary.complaints.urgent}
-                  </p>
-                </div>
-              </div>
-            </article>
           </section>
 
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((stat) => (
               <AdminStatCard key={stat.label} {...stat} />
             ))}
           </section>
 
-          <section className="mt-6 grid gap-6 xl:grid-cols-[0.7fr_1.3fr]">
-            <aside className="workspace-panel">
-              <p className="section-eyebrow">Quick actions</p>
+          <section className="mt-6 grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+            <aside className={`${panelClassName} bg-[#f8f9fd] p-5 sm:p-6`}>
+              <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-violet-600">
+                Quick actions
+              </p>
 
-              <h2 className="section-title">Operational queues</h2>
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-slate-950">
+                Operational queues
+              </h2>
 
-              <p className="section-description">
-                Jump directly into the areas most likely to require administrator attention.
+              <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+                Open the areas most likely to need administrator attention.
               </p>
 
               <div className="mt-6 grid gap-3">
@@ -496,6 +574,7 @@ export function AdminDashboardPage() {
                   to="/admin/vendors"
                   icon={Store}
                   title="Review vendor applications"
+                  tone="bg-amber-100 text-amber-700"
                   description={`${summary.vendors.pending} applications are currently pending.`}
                 />
 
@@ -503,6 +582,7 @@ export function AdminDashboardPage() {
                   to="/admin/payments"
                   icon={CreditCard}
                   title="Verify pending payments"
+                  tone="bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700"
                   description={`${summary.payments.pending} payments are waiting for review.`}
                 />
 
@@ -510,6 +590,7 @@ export function AdminDashboardPage() {
                   to="/admin/complaints"
                   icon={MessageSquareWarning}
                   title="Manage complaints"
+                  tone="bg-rose-100 text-rose-700"
                   description={`${summary.complaints.unassigned} unresolved cases are unassigned.`}
                 />
 
@@ -517,6 +598,7 @@ export function AdminDashboardPage() {
                   to="/admin/reviews"
                   icon={Star}
                   title="Moderate reviews"
+                  tone="bg-violet-100 text-violet-700"
                   description={`${summary.reviews.hidden} reviews are currently hidden.`}
                 />
 
@@ -524,6 +606,7 @@ export function AdminDashboardPage() {
                   to="/admin/users"
                   icon={Users}
                   title="Manage users"
+                  tone="bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700"
                   description={`${summary.users.byStatus.suspended} accounts are suspended.`}
                 />
 
@@ -531,47 +614,54 @@ export function AdminDashboardPage() {
                   to="/admin/reports"
                   icon={BarChart3}
                   title="Open reports"
-                  description="Explore platform growth, activity, and revenue reporting."
+                  tone="bg-emerald-100 text-emerald-700"
+                  description="Explore growth, marketplace activity, and revenue."
                 />
               </div>
             </aside>
 
-            <section className="workspace-panel">
+            <section
+              className={`${panelClassName} min-w-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(240,249,255,0.72))] p-5 sm:p-6`}
+            >
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
-                  <p className="section-eyebrow">Recent activity</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-violet-600">
+                    Recent activity
+                  </p>
 
-                  <h2 className="section-title">Newest platform users</h2>
+                  <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-slate-950">
+                    Newest platform users
+                  </h2>
 
-                  <p className="section-description">
-                    The most recently registered customer, vendor, and administrator accounts.
+                  <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+                    Recently registered customer, vendor, and administrator accounts.
                   </p>
                 </div>
 
-                <Link to="/admin/users" className="btn-secondary text-sm">
+                <Link to="/admin/users" className={secondaryButtonClassName}>
                   View all users
                 </Link>
               </div>
 
               {summary.activity.recentUsers.length > 0 ? (
-                <div className="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/46">
+                <div className="mt-6 overflow-hidden rounded-xl border border-violet-100">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full border-collapse">
-                      <thead>
-                        <tr className="border-b border-[var(--border-soft)] text-left">
-                          <th className="px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+                    <table className="min-w-full border-collapse bg-white">
+                      <thead className="bg-indigo-50/60">
+                        <tr className="border-b border-violet-100 text-left">
+                          <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
                             User
                           </th>
 
-                          <th className="px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+                          <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
                             Role
                           </th>
 
-                          <th className="px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+                          <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
                             Status
                           </th>
 
-                          <th className="px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+                          <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
                             Joined
                           </th>
                         </tr>
@@ -581,19 +671,19 @@ export function AdminDashboardPage() {
                         {summary.activity.recentUsers.map((recentUser) => (
                           <tr
                             key={recentUser.id}
-                            className="border-b border-[var(--border-soft)] last:border-b-0"
+                            className="border-b border-slate-100 last:border-b-0 transition hover:bg-indigo-50/45"
                           >
                             <td className="px-4 py-4">
-                              <p className="text-sm font-black text-[var(--color-near-black)]">
+                              <p className="text-sm font-extrabold text-slate-900">
                                 {recentUser.firstName} {recentUser.lastName}
                               </p>
 
-                              <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/52">
+                              <p className="mt-1 text-xs font-medium text-slate-500">
                                 {recentUser.email}
                               </p>
                             </td>
 
-                            <td className="px-4 py-4 text-sm font-bold text-[var(--color-charcoal)]/68">
+                            <td className="px-4 py-4 text-sm font-semibold text-slate-600">
                               {userRoleLabels[recentUser.role]}
                             </td>
 
@@ -606,7 +696,7 @@ export function AdminDashboardPage() {
                               </span>
                             </td>
 
-                            <td className="px-4 py-4 text-sm font-semibold text-[var(--color-charcoal)]/58">
+                            <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-slate-500">
                               {formatDate(recentUser.createdAt)}
                             </td>
                           </tr>
@@ -616,14 +706,12 @@ export function AdminDashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="empty-surface mt-7">
-                  <Users className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+                <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-violet-50/45 px-6 py-10 text-center">
+                  <Users className="mx-auto size-8 text-slate-400" />
 
-                  <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                    No users yet
-                  </h3>
+                  <h3 className="mt-4 text-lg font-black text-slate-900">No users yet</h3>
 
-                  <p className="mx-auto mt-2 max-w-md text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                  <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
                     Newly registered users will appear here.
                   </p>
                 </div>
@@ -632,31 +720,34 @@ export function AdminDashboardPage() {
           </section>
 
           <section className="mt-6 grid gap-6 xl:grid-cols-2">
-            <article className="workspace-panel">
+            <article
+              className={`${panelClassName} border-l-4 border-l-violet-400 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(245,243,255,0.72))] p-5 sm:p-6`}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="section-eyebrow">Recent bookings</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-violet-600">
+                    Recent bookings
+                  </p>
 
-                  <h2 className="section-title">Marketplace commitments</h2>
+                  <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-slate-950">
+                    Marketplace commitments
+                  </h2>
                 </div>
 
-                <BriefcaseBusiness className="size-6 text-[var(--color-deep-plum)]" />
+                <div className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700">
+                  <BriefcaseBusiness className="size-5" />
+                </div>
               </div>
 
               {summary.activity.recentBookings.length > 0 ? (
                 <div className="mt-6 space-y-3">
                   {summary.activity.recentBookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="rounded-2xl border border-white/70 bg-white/46 p-4"
-                    >
+                    <div key={booking.id} className="rounded-xl border border-violet-100 p-4">
                       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                         <div>
-                          <p className="font-black text-[var(--color-near-black)]">
-                            {booking.event.name}
-                          </p>
+                          <p className="font-extrabold text-slate-900">{booking.event.name}</p>
 
-                          <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                          <p className="mt-1 text-sm font-medium text-slate-500">
                             {booking.vendor.businessName}
                           </p>
                         </div>
@@ -666,7 +757,7 @@ export function AdminDashboardPage() {
                         </span>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-[var(--color-charcoal)]/52">
+                      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-slate-500">
                         <span>{formatCurrency(booking.agreedCost)}</span>
                         <span>Service: {formatDate(booking.serviceStart)}</span>
                         <span>Created: {formatDate(booking.createdAt)}</span>
@@ -675,41 +766,46 @@ export function AdminDashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="empty-surface mt-6">
-                  <BriefcaseBusiness className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+                <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-violet-50/45 px-6 py-10 text-center">
+                  <BriefcaseBusiness className="mx-auto size-8 text-slate-400" />
 
-                  <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                  <p className="mt-4 text-sm font-medium text-slate-500">
                     No booking activity is available yet.
                   </p>
                 </div>
               )}
             </article>
 
-            <article className="workspace-panel">
+            <article
+              className={`${panelClassName} border-l-4 border-l-sky-400 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(240,249,255,0.78))] p-5 sm:p-6`}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="section-eyebrow">Recent payments</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-violet-600">
+                    Recent payments
+                  </p>
 
-                  <h2 className="section-title">Financial activity</h2>
+                  <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-slate-950">
+                    Financial activity
+                  </h2>
                 </div>
 
-                <CreditCard className="size-6 text-[var(--color-deep-plum)]" />
+                <div className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700">
+                  <CreditCard className="size-5" />
+                </div>
               </div>
 
               {summary.activity.recentPayments.length > 0 ? (
                 <div className="mt-6 space-y-3">
                   {summary.activity.recentPayments.map((payment) => (
-                    <div
-                      key={payment.id}
-                      className="rounded-2xl border border-white/70 bg-white/46 p-4"
-                    >
+                    <div key={payment.id} className="rounded-xl border border-violet-100 p-4">
                       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                         <div>
-                          <p className="font-black text-[var(--color-near-black)]">
+                          <p className="font-extrabold text-slate-900">
                             {formatCurrency(payment.amount)}
                           </p>
 
-                          <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                          <p className="mt-1 text-sm font-medium text-slate-500">
                             {payment.booking.event.name} · {payment.booking.vendor.businessName}
                           </p>
                         </div>
@@ -719,7 +815,7 @@ export function AdminDashboardPage() {
                         </span>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-[var(--color-charcoal)]/52">
+                      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-slate-500">
                         <span>{payment.method.replaceAll('_', ' ')}</span>
                         <span>Reference: {payment.referenceNumber}</span>
                         <span>{formatDate(payment.createdAt)}</span>
@@ -728,10 +824,10 @@ export function AdminDashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="empty-surface mt-6">
-                  <CreditCard className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+                <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-violet-50/45 px-6 py-10 text-center">
+                  <CreditCard className="mx-auto size-8 text-slate-400" />
 
-                  <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                  <p className="mt-4 text-sm font-medium text-slate-500">
                     No payment activity is available yet.
                   </p>
                 </div>
@@ -739,43 +835,49 @@ export function AdminDashboardPage() {
             </article>
           </section>
 
-          <section className="workspace-panel mt-6">
+          <section
+            className={`${panelClassName} mt-6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(255,241,242,0.68))] p-5 sm:p-6`}
+          >
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
-                <p className="section-eyebrow">Recent complaints</p>
+                <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-violet-600">
+                  Recent complaints
+                </p>
 
-                <h2 className="section-title">Latest support cases</h2>
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-slate-950">
+                  Latest support cases
+                </h2>
 
-                <p className="section-description">
-                  Review newly created complaints and identify urgent or unassigned cases quickly.
+                <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+                  Identify urgent, newly created, and unassigned complaint cases quickly.
                 </p>
               </div>
 
-              <Link to="/admin/complaints" className="btn-secondary text-sm">
+              <Link to="/admin/complaints" className={secondaryButtonClassName}>
                 View all complaints
               </Link>
             </div>
 
             {summary.activity.recentComplaints.length > 0 ? (
-              <div className="mt-7 grid gap-4 lg:grid-cols-2">
+              <div className="mt-6 grid gap-4 lg:grid-cols-2">
                 {summary.activity.recentComplaints.map((complaint) => (
                   <article
                     key={complaint.id}
-                    className="rounded-2xl border border-white/70 bg-white/46 p-5"
+                    className="rounded-2xl border border-violet-100 border-l-4 border-l-rose-400 bg-white p-5 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-black text-[var(--color-near-black)]">
-                          {complaint.subject}
-                        </p>
+                        <p className="font-extrabold text-slate-900">{complaint.subject}</p>
 
-                        <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                        <p className="mt-1 text-sm font-medium text-slate-500">
                           Submitted by {complaint.complainant.firstName}{' '}
                           {complaint.complainant.lastName}
                         </p>
                       </div>
 
-                      <FileWarning className="size-5 shrink-0 text-[var(--color-rosewood)]" />
+                      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-rose-100 text-rose-700">
+                        <FileWarning className="size-5" />
+                      </div>
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -797,7 +899,7 @@ export function AdminDashboardPage() {
                       </span>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-[var(--color-charcoal)]/52">
+                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-slate-500">
                       <span>{complaint.type.replaceAll('_', ' ')}</span>
                       <span>{formatDate(complaint.createdAt)}</span>
                       <span>
@@ -810,14 +912,12 @@ export function AdminDashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="empty-surface mt-7">
-                <MessageSquareWarning className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+              <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-violet-50/45 px-6 py-10 text-center">
+                <MessageSquareWarning className="mx-auto size-8 text-slate-400" />
 
-                <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                  No complaints yet
-                </h3>
+                <h3 className="mt-4 text-lg font-black text-slate-900">No complaints yet</h3>
 
-                <p className="mx-auto mt-2 max-w-md text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
                   New complaint cases will appear here.
                 </p>
               </div>

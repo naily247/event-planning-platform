@@ -31,6 +31,7 @@ import {
   type VendorBooking,
 } from '../features/bookings/booking.api';
 import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 type ActionDialog = 'CONFIRM' | 'REJECT' | 'CANCEL' | 'COMPLETE' | null;
 
@@ -371,7 +372,7 @@ export function VendorBookingDetailPage() {
 
   if (!bookingId) {
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(190,137,154,0.18),_transparent_34%),linear-gradient(180deg,_#f8f5f4_0%,_#f3efee_100%)] px-4 py-8">
+      <main className="workspace-shell grid min-h-screen place-items-center px-4 py-8">
         <div className="glass-card relative mx-auto max-w-3xl overflow-hidden p-8 text-center sm:p-10">
           <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-red-100/70 blur-3xl" />
           <div className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600">
@@ -382,13 +383,7 @@ export function VendorBookingDetailPage() {
             Invalid booking
           </h1>
 
-          <Link
-            to="/vendor/bookings"
-            className="relative mt-6 inline-flex items-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to bookings
-          </Link>
+          <PageBackButton fallback="/vendor/bookings" label="Bookings" className="w-fit" />
         </div>
       </main>
     );
@@ -422,8 +417,8 @@ export function VendorBookingDetailPage() {
   }, [booking]);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(190,137,154,0.18),_transparent_34%),linear-gradient(180deg,_#f8f5f4_0%,_#f3efee_100%)] text-[#2e2529]">
-      <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8">
+    <main className="workspace-shell">
+      <div className="workspace-container w-full max-w-[1500px]">
         <VendorWorkspaceNav />
 
         <div className="mt-6">
@@ -525,7 +520,7 @@ export function VendorBookingDetailPage() {
               <div className="glass-card mt-6 flex items-start gap-3 border-red-200/70 bg-red-50/75 p-5">
                 <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-700" />
 
-                <p className="text-sm font-semibold leading-6 text-red-800">operationError</p>
+                <p className="text-sm font-semibold leading-6 text-red-800">{operationError}</p>
               </div>
             )}
 
@@ -914,7 +909,7 @@ export function VendorBookingDetailPage() {
                     </div>
 
                     <div>
-                      <dt className="font-semibold text-[var(--color-charcoal)]/42"> version</dt>
+                      <dt className="font-semibold text-[var(--color-charcoal)]/42">Version</dt>
 
                       <dd className="mt-1.5 font-semibold text-[var(--color-near-black)]">
                         Version {booking.acceptedQuotation.version}
@@ -1008,7 +1003,7 @@ export function VendorBookingDetailPage() {
                 />
 
                 <p className="mt-2 text-right text-xs font-semibold text-[var(--color-charcoal)]/40">
-                  confirmNote.length/2000
+                  {confirmNote.length}/2000
                 </p>
               </label>
             )}

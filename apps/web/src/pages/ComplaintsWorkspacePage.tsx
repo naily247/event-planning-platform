@@ -31,6 +31,7 @@ import { getCustomerBookingPayments } from '../features/payments/payment.api';
 import { getCustomerReviews } from '../features/reviews/review.api';
 import { getQuotationRequests } from '../features/quotationRequests/quotationRequest.api';
 import { api } from '../lib/api';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 type ComplaintWorkspaceEvent = {
   id: string;
@@ -395,19 +396,27 @@ export function ComplaintsWorkspacePage() {
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-              Customer support
-            </p>
+          <div className="flex items-start gap-4">
+            <PageBackButton
+              fallback={`/events/${eventId}`}
+              label="Event workspace"
+              className="shrink-0"
+            />
 
-            <h1 className="mt-2 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-              Complaints workspace
-            </h1>
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                Customer support
+              </p>
 
-            <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-              Raise concerns, follow administrator updates and keep every support conversation in
-              one place.
-            </p>
+              <h1 className="mt-2 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                Complaints workspace
+              </h1>
+
+              <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                Raise concerns, follow administrator updates and keep every support conversation in
+                one place.
+              </p>
+            </div>
           </div>
 
           <button

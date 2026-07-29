@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../lib/api';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
@@ -363,13 +364,7 @@ export function EventsPage() {
       <div className="mx-auto max-w-7xl">
         <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              to="/dashboard"
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl transition hover:bg-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
-              aria-label="Back to dashboard"
-            >
-              <ArrowLeft aria-hidden="true" className="size-5" />
-            </Link>
+            <PageBackButton fallback="/dashboard" label="Dashboard" className="shrink-0" />
 
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">

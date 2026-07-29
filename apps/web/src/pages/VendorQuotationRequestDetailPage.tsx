@@ -22,6 +22,7 @@ import {
   type QuotationRequestStatus,
 } from '../features/quotationRequests/quotationRequest.api';
 import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const statusLabels: Record<QuotationRequestStatus, string> = {
   SENT: 'New request',
@@ -223,8 +224,8 @@ export function VendorQuotationRequestDetailPage() {
 
   if (!quotationRequestId) {
     return (
-      <main className="min-h-screen bg-[#f5f1f0] px-4 py-8">
-        <div className="mx-auto max-w-3xl rounded-[28px] border border-red-200 bg-red-50 p-8 text-center">
+      <main className="workspace-shell grid min-h-screen place-items-center px-4 py-8">
+        <div className="w-full max-w-3xl rounded-[28px] border border-red-200 bg-red-50 p-8 text-center">
           <AlertCircle className="mx-auto h-10 w-10 text-red-500" />
 
           <h1 className="mt-4 text-xl font-semibold text-red-900">Invalid quotation request</h1>
@@ -250,18 +251,16 @@ export function VendorQuotationRequestDetailPage() {
     request && !['ACCEPTED', 'DECLINED', 'CLOSED'].includes(request.status) && !deadlinePassed;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(190,137,154,0.18),_transparent_34%),linear-gradient(180deg,_#f8f5f4_0%,_#f3efee_100%)] text-[#2e2529]">
-      <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8">
+    <main className="workspace-shell">
+      <div className="workspace-container w-full max-w-[1500px]">
         <VendorWorkspaceNav />
 
         <div className="mt-6">
-          <Link
-            to="/vendor/quotation-requests"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-600 transition hover:text-rose-800"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to quotation requests
-          </Link>
+          <PageBackButton
+            fallback="/vendor/quotation-requests"
+            label="Quotation requests"
+            className="w-fit"
+          />
         </div>
 
         {requestQuery.isLoading ? (

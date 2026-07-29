@@ -24,6 +24,7 @@ import {
   type VendorQuotationRequest,
 } from '../features/quotationRequests/quotationRequest.api';
 import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const PAGE_LIMIT = 9;
 
@@ -352,17 +353,11 @@ export function VendorQuotationRequestsPage() {
   }
 
   return (
-    <main className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl">
+    <main className="workspace-shell">
+      <div className="workspace-container w-full max-w-7xl">
         <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              to="/dashboard"
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl"
-              aria-label="Back to dashboard"
-            >
-              <ArrowLeft className="size-5" />
-            </Link>
+            <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
 
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">

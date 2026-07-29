@@ -122,9 +122,9 @@ function ReadOnlyDetail({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/80 bg-white/60 p-4">
+    <div className="rounded-2xl border border-sky-100/90 bg-white/72 p-4 shadow-[0_10px_28px_rgba(14,165,233,0.05)]">
       <div className="flex items-start gap-3">
-        <div className="icon-tile shrink-0">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-100 text-sky-700">
           <Icon className="size-4" />
         </div>
 
@@ -150,10 +150,10 @@ function PaymentCard({
   onView: (paymentId: string) => void;
 }) {
   return (
-    <article className="workspace-card p-5">
+    <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
         <div className="flex min-w-0 items-start gap-4">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.3)] text-[#334954]">
+          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700 shadow-[0_8px_20px_rgba(14,165,233,0.10)]">
             <CreditCard className="size-5" />
           </div>
 
@@ -211,7 +211,7 @@ function PaymentCard({
 
       <button
         type="button"
-        className="btn-secondary mt-6 w-full text-sm"
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-5 text-sm font-black text-sky-800 transition hover:border-sky-300 hover:bg-sky-100"
         onClick={() => onView(payment.id)}
       >
         Review payment
@@ -343,37 +343,41 @@ export function AdminPaymentsPage() {
   }
 
   return (
-    <div className="workspace-shell">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(186,230,253,0.24),transparent_32%),radial-gradient(circle_at_top_right,rgba(165,243,252,0.18),transparent_28%),linear-gradient(180deg,#f9fdff_0%,#f7fcff_48%,#fbfeff_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
         <main className="py-8">
-          <section className="workspace-hero">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div>
-                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <ReceiptText className="size-4" />
-                  Payment verification
+          <section className="relative overflow-hidden rounded-[2rem] border border-sky-200/80 bg-gradient-to-br from-sky-100 via-cyan-50 to-white p-6 shadow-[0_24px_70px_rgba(14,165,233,0.10)] sm:p-8">
+            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-sky-300/24 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-cyan-300/18 blur-3xl" />
+            <div className="relative">
+              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                <div>
+                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-sky-200/80 bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-sky-700 shadow-sm">
+                    <ReceiptText className="size-4" />
+                    Payment verification
+                  </div>
+
+                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
+                    Review pending deposit payments carefully.
+                  </h1>
+
+                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
+                    Confirm submitted references, inspect proof files, validate booking details, and
+                    approve or reject pending deposits.
+                  </p>
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                  Review pending deposit payments carefully.
-                </h1>
+                <div className="rounded-2xl border border-sky-200/70 bg-white/72 px-5 py-4 shadow-[0_12px_30px_rgba(14,165,233,0.09)] backdrop-blur">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                    Pending payments
+                  </p>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                  Confirm submitted references, inspect proof files, validate booking details, and
-                  approve or reject pending deposits.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/80 bg-white/72 px-5 py-4 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                  Pending payments
-                </p>
-
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {paymentsQuery.isLoading ? '—' : summary.total}
-                </p>
+                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {paymentsQuery.isLoading ? '—' : summary.total}
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -381,7 +385,7 @@ export function AdminPaymentsPage() {
           {paymentsQuery.isLoading ? (
             <section className="state-surface mt-6">
               <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+                <LoaderCircle className="mx-auto size-10 animate-spin text-sky-700" />
 
                 <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
                   Loading pending payments
@@ -419,8 +423,8 @@ export function AdminPaymentsPage() {
           ) : (
             <>
               <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-sky-100 text-sky-700">
                     <CreditCard className="size-5" />
                   </div>
 
@@ -433,8 +437,8 @@ export function AdminPaymentsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-teal-100 text-teal-700">
                     <Banknote className="size-5" />
                   </div>
 
@@ -447,8 +451,8 @@ export function AdminPaymentsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-cyan-100 text-cyan-700">
                     <CreditCard className="size-5" />
                   </div>
 
@@ -461,8 +465,8 @@ export function AdminPaymentsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-indigo-100 text-indigo-700">
                     <FileCheck2 className="size-5" />
                   </div>
 
@@ -476,7 +480,7 @@ export function AdminPaymentsPage() {
                 </article>
               </section>
 
-              <section className="workspace-panel mt-6">
+              <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                   <div>
                     <p className="section-eyebrow">Verification queue</p>
@@ -512,7 +516,7 @@ export function AdminPaymentsPage() {
                   </div>
                 ) : (
                   <div className="empty-surface mt-7">
-                    <BadgeCheck className="mx-auto size-9 text-[var(--color-deep-plum)]/64" />
+                    <BadgeCheck className="mx-auto size-9 text-sky-700/64" />
 
                     <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
                       The payment queue is clear
@@ -525,7 +529,7 @@ export function AdminPaymentsPage() {
                 )}
 
                 {pagination && pagination.totalPages > 1 ? (
-                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/70 bg-white/48 px-5 py-4 sm:flex-row">
+                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-sky-100 bg-gradient-to-r from-sky-50/70 to-cyan-50/60 px-5 py-4 sm:flex-row">
                     <p className="text-sm font-semibold text-[var(--color-charcoal)]/58">
                       Page{' '}
                       <span className="font-black text-[var(--color-near-black)]">
@@ -580,7 +584,7 @@ export function AdminPaymentsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-payment-detail-title"
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl sm:p-7"
+            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-sky-100 bg-[#f9fdff] p-6 shadow-[0_28px_90px_rgba(12,74,110,0.18)] sm:p-7"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -604,7 +608,7 @@ export function AdminPaymentsPage() {
             {paymentDetailQuery.isLoading ? (
               <div className="state-surface mt-6 min-h-72">
                 <div>
-                  <LoaderCircle className="mx-auto size-9 animate-spin text-[var(--color-deep-plum)]" />
+                  <LoaderCircle className="mx-auto size-9 animate-spin text-sky-700" />
 
                   <p className="mt-4 font-black text-[var(--color-near-black)]">
                     Loading payment details
@@ -622,7 +626,7 @@ export function AdminPaymentsPage() {
               <>
                 <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
                   <div className="flex items-start gap-4">
-                    <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.3)] text-[#334954]">
+                    <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700 shadow-[0_10px_24px_rgba(14,165,233,0.10)]">
                       <CreditCard className="size-6" />
                     </div>
 
@@ -642,7 +646,7 @@ export function AdminPaymentsPage() {
                   </span>
                 </div>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
                   <p className="section-eyebrow">Payment information</p>
 
                   <h3 className="section-title">Submission details</h3>
@@ -686,7 +690,7 @@ export function AdminPaymentsPage() {
                   </div>
                 </section>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
                   <p className="section-eyebrow">Booking context</p>
 
                   <h3 className="section-title">Related booking</h3>
@@ -754,16 +758,16 @@ export function AdminPaymentsPage() {
                   </div>
                 </section>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
                   <p className="section-eyebrow">Proof file</p>
 
                   <h3 className="section-title">Payment evidence</h3>
 
                   {selectedPayment.proofFileUrl ? (
-                    <div className="mt-6 rounded-2xl border border-white/80 bg-white/60 p-5">
+                    <div className="mt-6 rounded-2xl border border-cyan-100 bg-gradient-to-br from-cyan-50/70 via-white to-white p-5 shadow-[0_14px_34px_rgba(6,182,212,0.07)]">
                       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
                         <div className="flex items-start gap-4">
-                          <div className="icon-tile shrink-0">
+                          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-100 text-sky-700">
                             <FileText className="size-5" />
                           </div>
 
@@ -783,7 +787,7 @@ export function AdminPaymentsPage() {
                           href={selectedPayment.proofFileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="btn-secondary text-sm"
+                          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-5 text-sm font-black text-sky-800 transition hover:border-sky-300 hover:bg-sky-100"
                         >
                           <ExternalLink className="size-4" />
                           Open proof
@@ -834,7 +838,7 @@ export function AdminPaymentsPage() {
 
                     <button
                       type="button"
-                      className="btn-primary text-sm"
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-sky-600 bg-gradient-to-r from-sky-500 to-cyan-500 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(14,165,233,0.22)] transition hover:from-sky-600 hover:to-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
                       disabled={isDecisionPending}
                       onClick={handleVerify}
                     >
@@ -868,7 +872,7 @@ export function AdminPaymentsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-payment-reject-title"
-            className="w-full max-w-lg rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-[2rem] border border-rose-100 bg-[#fffafb] p-6 shadow-[0_28px_90px_rgba(127,29,29,0.18)]"
           >
             <div className="grid size-12 place-items-center rounded-2xl bg-red-50 text-red-700">
               <XCircle className="size-5" />

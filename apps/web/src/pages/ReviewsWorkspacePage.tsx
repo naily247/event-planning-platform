@@ -29,6 +29,7 @@ import {
   type UpdateCustomerReviewInput,
 } from '../features/reviews/review.api';
 import { api } from '../lib/api';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 type ApiErrorResponse = {
   success?: false;
@@ -394,13 +395,11 @@ export function ReviewsWorkspacePage() {
       <div className="mx-auto max-w-7xl">
         <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              to={`/events/${eventId}`}
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl"
-              aria-label="Back to event workspace"
-            >
-              <ArrowLeft className="size-5" />
-            </Link>
+            <PageBackButton
+              fallback={`/events/${eventId}`}
+              label="Event workspace"
+              className="shrink-0"
+            />
 
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">

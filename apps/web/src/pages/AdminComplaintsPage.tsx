@@ -185,7 +185,7 @@ function ComplaintCard({
   onView: (complaintId: string) => void;
 }) {
   return (
-    <article className="workspace-card p-5">
+    <article className="rounded-[1.6rem] border border-rose-100/90 bg-gradient-to-br from-rose-50/85 via-white to-orange-50/35 p-5 shadow-[0_18px_45px_rgba(244,63,94,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-[0_22px_55px_rgba(244,63,94,0.11)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
@@ -219,7 +219,7 @@ function ComplaintCard({
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-white/48 p-4">
+        <div className="rounded-2xl border border-rose-100/80 bg-white/68 p-4">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
             Assignment
           </p>
@@ -231,7 +231,7 @@ function ComplaintCard({
           </p>
         </div>
 
-        <div className="rounded-2xl bg-white/48 p-4">
+        <div className="rounded-2xl border border-rose-100/80 bg-white/68 p-4">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
             Created
           </p>
@@ -244,7 +244,7 @@ function ComplaintCard({
 
       <button
         type="button"
-        className="btn-secondary mt-6 w-full text-sm"
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-5 text-sm font-black text-rose-800 transition hover:border-rose-300 hover:bg-rose-100"
         onClick={() => onView(complaint.id)}
       >
         Open complaint
@@ -263,9 +263,9 @@ function DetailCard({
   icon: typeof Clock3;
 }) {
   return (
-    <div className="rounded-2xl border border-white/80 bg-white/60 p-4">
+    <div className="rounded-2xl border border-rose-100/90 bg-white/74 p-4 shadow-[0_10px_28px_rgba(244,63,94,0.05)]">
       <div className="flex items-start gap-3">
-        <div className="icon-tile shrink-0">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-rose-100 text-rose-700">
           <Icon className="size-4" />
         </div>
 
@@ -605,37 +605,41 @@ export function AdminComplaintsPage() {
     selectedComplaint && ['RESOLVED', 'DISMISSED', 'CLOSED'].includes(selectedComplaint.status);
 
   return (
-    <div className="workspace-shell">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(254,205,211,0.28),transparent_34%),radial-gradient(circle_at_top_right,rgba(254,215,170,0.18),transparent_30%),linear-gradient(180deg,#fffafa_0%,#fffdfb_48%,#ffffff_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
         <main className="py-8">
-          <section className="workspace-hero">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div>
-                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <ShieldAlert className="size-4" />
-                  Complaint operations
+          <section className="relative overflow-hidden rounded-[2rem] border border-rose-200/80 bg-gradient-to-br from-rose-100 via-orange-50 to-white p-6 shadow-[0_24px_70px_rgba(244,63,94,0.10)] sm:p-8">
+            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-rose-300/24 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-orange-300/18 blur-3xl" />
+            <div className="relative">
+              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                <div>
+                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-rose-200/80 bg-white/76 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-rose-700 shadow-sm">
+                    <ShieldAlert className="size-4" />
+                    Complaint operations
+                  </div>
+
+                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
+                    Investigate and resolve platform complaints.
+                  </h1>
+
+                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
+                    Review submitted cases, manage priority and assignment, guide response states,
+                    and preserve a clear administrative history.
+                  </p>
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                  Investigate and resolve platform complaints.
-                </h1>
+                <div className="rounded-2xl border border-rose-200/70 bg-white/74 px-5 py-4 shadow-[0_12px_30px_rgba(244,63,94,0.09)] backdrop-blur">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                    Matching complaints
+                  </p>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                  Review submitted cases, manage priority and assignment, guide response states, and
-                  preserve a clear administrative history.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/80 bg-white/72 px-5 py-4 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                  Matching complaints
-                </p>
-
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {complaintsQuery.isLoading ? '—' : summary.total}
-                </p>
+                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {complaintsQuery.isLoading ? '—' : summary.total}
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -643,7 +647,7 @@ export function AdminComplaintsPage() {
           {complaintsQuery.isLoading ? (
             <section className="state-surface mt-6">
               <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+                <LoaderCircle className="mx-auto size-10 animate-spin text-rose-700" />
 
                 <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
                   Loading complaint cases
@@ -674,7 +678,7 @@ export function AdminComplaintsPage() {
 
                 <button
                   type="button"
-                  className="btn-primary mt-6 text-sm"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-600 bg-gradient-to-r from-rose-500 to-orange-400 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(244,63,94,0.20)] transition hover:-translate-y-0.5 mt-6"
                   onClick={() => complaintsQuery.refetch()}
                 >
                   Try again
@@ -684,8 +688,8 @@ export function AdminComplaintsPage() {
           ) : (
             <>
               <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-rose-100/90 bg-gradient-to-br from-rose-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(244,63,94,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-rose-100 text-rose-700">
                     <MessageSquareText className="size-5" />
                   </div>
 
@@ -698,8 +702,8 @@ export function AdminComplaintsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-red-100/90 bg-gradient-to-br from-red-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(239,68,68,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-red-100 text-red-700">
                     <BadgeAlert className="size-5" />
                   </div>
 
@@ -712,8 +716,8 @@ export function AdminComplaintsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-orange-100/90 bg-gradient-to-br from-orange-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(249,115,22,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-orange-100 text-orange-700">
                     <UserMinus className="size-5" />
                   </div>
 
@@ -726,8 +730,8 @@ export function AdminComplaintsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-amber-100/90 bg-gradient-to-br from-amber-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(245,158,11,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-amber-100 text-amber-700">
                     <Clock3 className="size-5" />
                   </div>
 
@@ -741,7 +745,7 @@ export function AdminComplaintsPage() {
                 </article>
               </section>
 
-              <section className="workspace-panel mt-6">
+              <section className="mt-6 rounded-[2rem] border border-rose-100/90 bg-white/84 p-6 shadow-[0_24px_60px_rgba(244,63,94,0.08)] backdrop-blur sm:p-7">
                 <div>
                   <p className="section-eyebrow">Complaint directory</p>
 
@@ -771,7 +775,10 @@ export function AdminComplaintsPage() {
                       />
                     </div>
 
-                    <button type="submit" className="btn-primary shrink-0 px-5 text-sm">
+                    <button
+                      type="submit"
+                      className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-rose-600 bg-gradient-to-r from-rose-500 to-orange-400 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(244,63,94,0.20)] transition hover:-translate-y-0.5"
+                    >
                       Search
                     </button>
                   </form>
@@ -865,7 +872,7 @@ export function AdminComplaintsPage() {
                   </div>
                 ) : (
                   <div className="empty-surface mt-7">
-                    <ShieldCheck className="mx-auto size-9 text-[var(--color-deep-plum)]/64" />
+                    <ShieldCheck className="mx-auto size-9 text-rose-700/64" />
 
                     <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
                       No complaints match these filters
@@ -888,7 +895,7 @@ export function AdminComplaintsPage() {
                 )}
 
                 {pagination && pagination.totalPages > 1 ? (
-                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/70 bg-white/48 px-5 py-4 sm:flex-row">
+                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-rose-100 bg-gradient-to-r from-rose-50/70 to-orange-50/60 px-5 py-4 sm:flex-row">
                     <p className="text-sm font-semibold text-[var(--color-charcoal)]/58">
                       Page{' '}
                       <span className="font-black text-[var(--color-near-black)]">
@@ -943,7 +950,7 @@ export function AdminComplaintsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-complaint-detail-title"
-            className="max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl sm:p-7"
+            className="max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[2rem] border border-rose-100 bg-[#fffafa] p-6 shadow-[0_28px_90px_rgba(136,19,55,0.18)] sm:p-7"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -956,7 +963,7 @@ export function AdminComplaintsPage() {
 
               <button
                 type="button"
-                className="grid size-10 place-items-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50"
+                className="grid size-10 place-items-center rounded-xl border border-rose-100 bg-white text-rose-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50"
                 onClick={closeComplaint}
                 aria-label="Close complaint details"
               >
@@ -967,7 +974,7 @@ export function AdminComplaintsPage() {
             {complaintDetailQuery.isLoading ? (
               <div className="state-surface mt-6 min-h-72">
                 <div>
-                  <LoaderCircle className="mx-auto size-9 animate-spin text-[var(--color-deep-plum)]" />
+                  <LoaderCircle className="mx-auto size-9 animate-spin text-rose-700" />
 
                   <p className="mt-4 font-black text-[var(--color-near-black)]">
                     Loading complaint details
@@ -983,7 +990,7 @@ export function AdminComplaintsPage() {
               </div>
             ) : selectedComplaint ? (
               <>
-                <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
+                <div className="mt-6 flex flex-col justify-between gap-5 rounded-[1.6rem] border border-rose-100 bg-gradient-to-br from-rose-50/75 via-white to-orange-50/35 p-5 shadow-[0_18px_42px_rgba(244,63,94,0.08)] sm:flex-row sm:items-start">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
                       {selectedComplaint.type.replaceAll('_', ' ')}
@@ -1016,12 +1023,12 @@ export function AdminComplaintsPage() {
                   </div>
                 </div>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[1.6rem] border border-rose-100 bg-gradient-to-br from-rose-50/55 via-white to-orange-50/25 p-6 shadow-[0_18px_42px_rgba(244,63,94,0.07)]">
                   <p className="section-eyebrow">Case description</p>
 
                   <h3 className="section-title">Complaint details</h3>
 
-                  <div className="mt-6 rounded-2xl border border-white/80 bg-white/60 p-5">
+                  <div className="mt-6 rounded-[1.4rem] border border-rose-100 bg-white/76 p-5 shadow-[0_14px_34px_rgba(244,63,94,0.05)]">
                     <p className="whitespace-pre-wrap text-sm leading-7 text-[var(--color-charcoal)]/70">
                       {selectedComplaint.description}
                     </p>
@@ -1063,7 +1070,7 @@ export function AdminComplaintsPage() {
                 </section>
 
                 {selectedComplaint.resolutionSummary ? (
-                  <div className="feedback-surface mt-6" data-tone="success">
+                  <div className="mt-6 rounded-[1.5rem] border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/45 p-5 text-emerald-900 shadow-[0_14px_34px_rgba(16,185,129,0.08)]">
                     <div>
                       <p className="font-black">Resolution summary</p>
 
@@ -1073,7 +1080,7 @@ export function AdminComplaintsPage() {
                 ) : null}
 
                 <section className="mt-6 grid gap-6 lg:grid-cols-2">
-                  <article className="workspace-panel">
+                  <article className="rounded-[1.6rem] border border-rose-100 bg-gradient-to-br from-rose-50/55 via-white to-orange-50/25 p-6 shadow-[0_18px_42px_rgba(244,63,94,0.07)]">
                     <p className="section-eyebrow">Case conversation</p>
 
                     <h3 className="section-title">Messages</h3>
@@ -1083,7 +1090,7 @@ export function AdminComplaintsPage() {
                         {selectedComplaint.messages.map((message) => (
                           <article
                             key={message.id}
-                            className="rounded-2xl border border-white/80 bg-white/60 p-5"
+                            className="rounded-[1.35rem] border border-rose-100 bg-white/76 p-5 shadow-[0_12px_30px_rgba(244,63,94,0.05)]"
                           >
                             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
                               <div>
@@ -1110,7 +1117,7 @@ export function AdminComplaintsPage() {
                       </div>
                     ) : (
                       <div className="empty-surface mt-6">
-                        <MessageSquareText className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+                        <MessageSquareText className="mx-auto size-8 text-rose-700/64" />
 
                         <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/56">
                           No messages have been added to this case.
@@ -1119,7 +1126,7 @@ export function AdminComplaintsPage() {
                     )}
                   </article>
 
-                  <article className="workspace-panel">
+                  <article className="rounded-[1.6rem] border border-rose-100 bg-gradient-to-br from-rose-50/55 via-white to-orange-50/25 p-6 shadow-[0_18px_42px_rgba(244,63,94,0.07)]">
                     <p className="section-eyebrow">Audit history</p>
 
                     <h3 className="section-title">Administrative actions</h3>
@@ -1129,7 +1136,7 @@ export function AdminComplaintsPage() {
                         {selectedComplaint.actions.map((action) => (
                           <article
                             key={action.id}
-                            className="rounded-2xl border border-white/80 bg-white/60 p-5"
+                            className="rounded-[1.35rem] border border-rose-100 bg-white/76 p-5 shadow-[0_12px_30px_rgba(244,63,94,0.05)]"
                           >
                             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
                               <div>
@@ -1159,7 +1166,7 @@ export function AdminComplaintsPage() {
                       </div>
                     ) : (
                       <div className="empty-surface mt-6">
-                        <History className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+                        <History className="mx-auto size-8 text-rose-700/64" />
 
                         <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/56">
                           No administrative actions have been recorded.
@@ -1175,7 +1182,7 @@ export function AdminComplaintsPage() {
                   </div>
                 ) : null}
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[1.6rem] border border-rose-200/80 bg-gradient-to-br from-rose-100/70 via-white to-orange-50/55 p-6 shadow-[0_18px_42px_rgba(244,63,94,0.09)]">
                   <p className="section-eyebrow">Case controls</p>
 
                   <h3 className="section-title">Administrative actions</h3>
@@ -1216,7 +1223,7 @@ export function AdminComplaintsPage() {
                         ) : (
                           <button
                             type="button"
-                            className="btn-primary text-sm"
+                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-600 bg-gradient-to-r from-rose-500 to-orange-400 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(244,63,94,0.20)] transition hover:-translate-y-0.5"
                             disabled={isMutationPending || !currentUserQuery.data}
                             onClick={() => openActionDialog('ASSIGN')}
                           >
@@ -1228,7 +1235,7 @@ export function AdminComplaintsPage() {
                     ) : (
                       <button
                         type="button"
-                        className="btn-primary text-sm"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-600 bg-gradient-to-r from-rose-500 to-orange-400 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(244,63,94,0.20)] transition hover:-translate-y-0.5"
                         disabled={isMutationPending}
                         onClick={() => openActionDialog('REOPEN')}
                       >
@@ -1258,9 +1265,9 @@ export function AdminComplaintsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-complaint-action-title"
-            className="w-full max-w-xl rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl"
+            className="w-full max-w-xl rounded-[2rem] border border-rose-100 bg-[#fffafa] p-6 shadow-[0_28px_90px_rgba(136,19,55,0.18)]"
           >
-            <div className="icon-tile">
+            <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-rose-100 to-orange-100 text-rose-700 shadow-[0_10px_26px_rgba(244,63,94,0.10)]">
               {actionMode === 'REOPEN' ? (
                 <RotateCcw className="size-5" />
               ) : actionMode === 'PRIORITY' ? (
@@ -1398,7 +1405,7 @@ export function AdminComplaintsPage() {
 
               <button
                 type="button"
-                className="btn-primary text-sm"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-600 bg-gradient-to-r from-rose-500 to-orange-400 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(244,63,94,0.20)] transition hover:-translate-y-0.5"
                 disabled={
                   isMutationPending ||
                   actionReason.trim().length < 10 ||

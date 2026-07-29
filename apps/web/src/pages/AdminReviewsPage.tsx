@@ -114,7 +114,7 @@ function ReviewCard({
   onView: (reviewId: string) => void;
 }) {
   return (
-    <article className="workspace-card p-5">
+    <article className="rounded-[1.6rem] border border-violet-100/90 bg-gradient-to-br from-violet-50/85 via-white to-fuchsia-50/40 p-5 shadow-[0_18px_45px_rgba(139,92,246,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-[0_22px_55px_rgba(139,92,246,0.11)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <StarRating value={review.overallRating} />
@@ -133,14 +133,14 @@ function ReviewCard({
         </span>
       </div>
 
-      <div className="mt-5 rounded-2xl bg-white/48 p-4">
+      <div className="mt-5 rounded-2xl border border-violet-100/80 bg-white/68 p-4">
         <p className="line-clamp-4 text-sm leading-7 text-[var(--color-charcoal)]/68">
           {review.comment ?? 'No written review was provided.'}
         </p>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-white/48 p-4">
+        <div className="rounded-2xl border border-violet-100/80 bg-white/68 p-4">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
             Package
           </p>
@@ -150,7 +150,7 @@ function ReviewCard({
           </p>
         </div>
 
-        <div className="rounded-2xl bg-white/48 p-4">
+        <div className="rounded-2xl border border-violet-100/80 bg-white/68 p-4">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
             Submitted
           </p>
@@ -163,7 +163,7 @@ function ReviewCard({
 
       <button
         type="button"
-        className="btn-secondary mt-6 w-full text-sm"
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-violet-200 bg-violet-50 px-5 text-sm font-black text-violet-800 transition hover:border-violet-300 hover:bg-violet-100"
         onClick={() => onView(review.id)}
       >
         Review moderation
@@ -182,9 +182,9 @@ function DetailCard({
   icon: typeof Star;
 }) {
   return (
-    <div className="rounded-2xl border border-white/80 bg-white/60 p-4">
+    <div className="rounded-2xl border border-violet-100/90 bg-white/72 p-4 shadow-[0_10px_28px_rgba(139,92,246,0.06)]">
       <div className="flex items-start gap-3">
-        <div className="icon-tile shrink-0">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-700">
           <Icon className="size-4" />
         </div>
 
@@ -331,37 +331,41 @@ export function AdminReviewsPage() {
   const filtersAreActive = visibility !== 'all' || rating !== 'ALL' || sort !== 'newest';
 
   return (
-    <div className="workspace-shell">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(233,213,255,0.28),transparent_34%),radial-gradient(circle_at_top_right,rgba(251,207,232,0.20),transparent_30%),linear-gradient(180deg,#fdfaff_0%,#fffafd_48%,#ffffff_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
         <main className="py-8">
-          <section className="workspace-hero">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div>
-                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <Star className="size-4" />
-                  Review moderation
+          <section className="relative overflow-hidden rounded-[2rem] border border-violet-200/80 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-white p-6 shadow-[0_24px_70px_rgba(139,92,246,0.10)] sm:p-8">
+            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-violet-300/24 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-fuchsia-300/18 blur-3xl" />
+            <div className="relative">
+              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                <div>
+                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-violet-200/80 bg-white/76 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-violet-700 shadow-sm">
+                    <Star className="size-4" />
+                    Review moderation
+                  </div>
+
+                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
+                    Keep marketplace reviews fair and useful.
+                  </h1>
+
+                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
+                    Inspect customer feedback, ratings, moderation history, and linked booking
+                    details before hiding or restoring a review.
+                  </p>
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                  Keep marketplace reviews fair and useful.
-                </h1>
+                <div className="rounded-2xl border border-violet-200/70 bg-white/74 px-5 py-4 shadow-[0_12px_30px_rgba(139,92,246,0.09)] backdrop-blur">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                    Matching reviews
+                  </p>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                  Inspect customer feedback, ratings, moderation history, and linked booking details
-                  before hiding or restoring a review.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/80 bg-white/72 px-5 py-4 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                  Matching reviews
-                </p>
-
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {reviewsQuery.isLoading ? '—' : summary.total}
-                </p>
+                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {reviewsQuery.isLoading ? '—' : summary.total}
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -369,7 +373,7 @@ export function AdminReviewsPage() {
           {reviewsQuery.isLoading ? (
             <section className="state-surface mt-6">
               <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+                <LoaderCircle className="mx-auto size-10 animate-spin text-violet-700" />
 
                 <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
                   Loading review records
@@ -407,8 +411,8 @@ export function AdminReviewsPage() {
           ) : (
             <>
               <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-violet-100/90 bg-gradient-to-br from-violet-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(139,92,246,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-violet-100 text-violet-700">
                     <MessageSquareText className="size-5" />
                   </div>
 
@@ -421,8 +425,8 @@ export function AdminReviewsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-emerald-100/90 bg-gradient-to-br from-emerald-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
                     <Eye className="size-5" />
                   </div>
 
@@ -435,8 +439,8 @@ export function AdminReviewsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-rose-100/90 bg-gradient-to-br from-rose-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(244,63,94,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-rose-100 text-rose-700">
                     <EyeOff className="size-5" />
                   </div>
 
@@ -449,8 +453,8 @@ export function AdminReviewsPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-amber-100/90 bg-gradient-to-br from-amber-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(245,158,11,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-amber-100 text-amber-700">
                     <Star className="size-5" />
                   </div>
 
@@ -464,7 +468,7 @@ export function AdminReviewsPage() {
                 </article>
               </section>
 
-              <section className="workspace-panel mt-6">
+              <section className="mt-6 rounded-[2rem] border border-violet-100/90 bg-white/84 p-6 shadow-[0_24px_60px_rgba(139,92,246,0.08)] backdrop-blur sm:p-7">
                 <div>
                   <p className="section-eyebrow">Review directory</p>
 
@@ -543,7 +547,7 @@ export function AdminReviewsPage() {
                   </div>
                 ) : (
                   <div className="empty-surface mt-7">
-                    <Star className="mx-auto size-9 text-[var(--color-deep-plum)]/64" />
+                    <Star className="mx-auto size-9 text-violet-700/64" />
 
                     <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
                       No reviews match these filters
@@ -566,7 +570,7 @@ export function AdminReviewsPage() {
                 )}
 
                 {pagination && pagination.totalPages > 1 ? (
-                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/70 bg-white/48 px-5 py-4 sm:flex-row">
+                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-50/70 to-fuchsia-50/60 px-5 py-4 sm:flex-row">
                     <p className="text-sm font-semibold text-[var(--color-charcoal)]/58">
                       Page{' '}
                       <span className="font-black text-[var(--color-near-black)]">
@@ -621,7 +625,7 @@ export function AdminReviewsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-review-detail-title"
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl sm:p-7"
+            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-violet-100 bg-[#fdfaff] p-6 shadow-[0_28px_90px_rgba(88,28,135,0.18)] sm:p-7"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -645,7 +649,7 @@ export function AdminReviewsPage() {
             {reviewDetailQuery.isLoading ? (
               <div className="state-surface mt-6 min-h-72">
                 <div>
-                  <LoaderCircle className="mx-auto size-9 animate-spin text-[var(--color-deep-plum)]" />
+                  <LoaderCircle className="mx-auto size-9 animate-spin text-violet-700" />
 
                   <p className="mt-4 font-black text-[var(--color-near-black)]">
                     Loading review details
@@ -658,7 +662,7 @@ export function AdminReviewsPage() {
               </div>
             ) : selectedReview ? (
               <>
-                <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
+                <div className="mt-6 flex flex-col justify-between gap-5 rounded-[1.6rem] border border-violet-100 bg-gradient-to-br from-violet-50/70 via-white to-white p-5 shadow-[0_18px_40px_rgba(139,92,246,0.08)] sm:flex-row sm:items-start">
                   <div>
                     <StarRating value={selectedReview.overallRating} />
 
@@ -680,12 +684,12 @@ export function AdminReviewsPage() {
                   </span>
                 </div>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[1.6rem] border border-violet-100 bg-gradient-to-br from-violet-50/60 via-white to-white p-6 shadow-[0_18px_40px_rgba(139,92,246,0.07)]">
                   <p className="section-eyebrow">Customer feedback</p>
 
                   <h3 className="section-title">Review content</h3>
 
-                  <div className="mt-6 rounded-2xl border border-white/80 bg-white/60 p-5">
+                  <div className="mt-6 rounded-[1.4rem] border border-violet-100 bg-gradient-to-br from-violet-50/50 via-white to-white p-5 shadow-[0_14px_34px_rgba(139,92,246,0.05)]">
                     <p className="whitespace-pre-wrap text-sm leading-7 text-[var(--color-charcoal)]/70">
                       {selectedReview.comment ?? 'No written review was provided.'}
                     </p>
@@ -738,7 +742,7 @@ export function AdminReviewsPage() {
                   </div>
                 </section>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[1.6rem] border border-violet-100 bg-gradient-to-br from-violet-50/60 via-white to-white p-6 shadow-[0_18px_40px_rgba(139,92,246,0.07)]">
                   <p className="section-eyebrow">Booking context</p>
 
                   <h3 className="section-title">Linked service</h3>
@@ -795,7 +799,7 @@ export function AdminReviewsPage() {
                   </div>
                 ) : null}
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[1.6rem] border border-violet-100 bg-gradient-to-br from-violet-50/60 via-white to-white p-6 shadow-[0_18px_40px_rgba(139,92,246,0.07)]">
                   <p className="section-eyebrow">Moderation history</p>
 
                   <h3 className="section-title">Previous actions</h3>
@@ -805,7 +809,7 @@ export function AdminReviewsPage() {
                       {selectedReview.moderationActions.map((action) => (
                         <article
                           key={action.id}
-                          className="rounded-2xl border border-white/80 bg-white/60 p-5"
+                          className="rounded-[1.4rem] border border-violet-100 bg-white/72 p-5 shadow-[0_12px_30px_rgba(139,92,246,0.05)]"
                         >
                           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                             <div>
@@ -831,7 +835,7 @@ export function AdminReviewsPage() {
                     </div>
                   ) : (
                     <div className="empty-surface mt-6">
-                      <History className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+                      <History className="mx-auto size-8 text-violet-700/64" />
 
                       <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/56">
                         This review has no previous moderation actions.
@@ -863,7 +867,9 @@ export function AdminReviewsPage() {
                   <button
                     type="button"
                     className={
-                      selectedReview.isHidden ? 'btn-primary text-sm' : 'btn-danger text-sm'
+                      selectedReview.isHidden
+                        ? 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-violet-600 bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(139,92,246,0.22)]'
+                        : 'btn-danger text-sm'
                     }
                     disabled={moderationMutation.isPending}
                     onClick={openModerationDialog}
@@ -901,7 +907,7 @@ export function AdminReviewsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-review-moderation-title"
-            className="w-full max-w-lg rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-[2rem] border border-violet-100 bg-[#fdfaff] p-6 shadow-[0_28px_90px_rgba(88,28,135,0.18)]"
           >
             <div
               className={
@@ -974,7 +980,11 @@ export function AdminReviewsPage() {
 
               <button
                 type="button"
-                className={selectedReview.isHidden ? 'btn-primary text-sm' : 'btn-danger text-sm'}
+                className={
+                  selectedReview.isHidden
+                    ? 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-violet-600 bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(139,92,246,0.22)]'
+                    : 'btn-danger text-sm'
+                }
                 disabled={moderationMutation.isPending || moderationReason.trim().length < 10}
                 onClick={submitModeration}
               >

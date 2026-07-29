@@ -96,7 +96,7 @@ export function VendorRegisterPage() {
     : null;
 
   return (
-    <div className="glass-card p-6 sm:p-8">
+    <div className="rounded-[32px] border border-white/80 bg-white/75 p-6 shadow-[0_24px_80px_rgba(64,42,51,0.08)] backdrop-blur-2xl sm:p-8">
       <Link
         to="/register"
         className="mb-6 inline-flex items-center gap-2 rounded-lg text-sm font-bold text-[var(--color-charcoal)]/64 transition hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 focus-visible:ring-offset-2"
@@ -105,16 +105,16 @@ export function VendorRegisterPage() {
         Choose account type
       </Link>
 
-      <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+      <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#7a5063]">
         <Sparkles aria-hidden="true" className="size-4" />
         Vendor workspace
       </div>
 
-      <h1 className="text-4xl font-black leading-[1] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+      <h1 className="text-4xl font-black leading-[1] tracking-[-0.055em] text-[#2e2529] sm:text-5xl">
         Bring your event services to the right clients.
       </h1>
 
-      <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
+      <p className="mt-4 leading-7 text-zinc-600">
         Create a vendor account to receive quotation requests, manage bookings, showcase your
         portfolio and build trust with verified customers.
       </p>
@@ -317,7 +317,7 @@ export function VendorRegisterPage() {
           ) : null}
         </label>
 
-        <div className="rounded-2xl border border-[rgba(93,58,85,0.14)] bg-white/24 px-4 py-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
+        <div className="rounded-2xl border border-rose-100 bg-rose-50/70 px-4 py-3 text-sm font-medium leading-6 text-zinc-600">
           You’ll complete your service categories, contact details and portfolio during vendor
           onboarding after registration.
         </div>
@@ -325,7 +325,8 @@ export function VendorRegisterPage() {
         {registrationErrorMessage ? (
           <div
             role="alert"
-            className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+            className="rounded-2xl border border-red-200
+bg-red-50 px-4 py-3 text-sm font-bold leading-6 text-red-700"
           >
             {registrationErrorMessage}
           </div>
@@ -333,7 +334,7 @@ export function VendorRegisterPage() {
 
         <button
           type="submit"
-          className="btn-primary mt-2 w-full justify-center font-bold"
+          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#7a5063] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#684354] disabled:cursor-not-allowed disabled:opacity-60"
           disabled={registerMutation.isPending}
         >
           {registerMutation.isPending ? (
@@ -354,7 +355,7 @@ export function VendorRegisterPage() {
         Already have an account?{' '}
         <Link
           to="/login"
-          className="rounded-md font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 focus-visible:ring-offset-2"
+          className="rounded-md font-black text-[#7a5063] transition hover:text-[#684354] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 focus-visible:ring-offset-2"
         >
           Log in
         </Link>

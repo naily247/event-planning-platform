@@ -82,9 +82,9 @@ function ReadOnlyDetail({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/80 bg-white/60 p-4">
+    <div className="rounded-2xl border border-amber-100/90 bg-white/72 p-4 shadow-[0_10px_28px_rgba(245,158,11,0.05)]">
       <div className="flex items-start gap-3">
-        <div className="icon-tile shrink-0">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700">
           <Icon className="size-4" />
         </div>
 
@@ -110,10 +110,10 @@ function VendorApplicationCard({
   onView: (applicationId: string) => void;
 }) {
   return (
-    <article className="workspace-card p-5">
+    <article className="rounded-[1.6rem] border border-amber-100/90 bg-gradient-to-br from-amber-50/85 via-white to-orange-50/45 p-5 shadow-[0_18px_45px_rgba(245,158,11,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-[0_22px_55px_rgba(245,158,11,0.11)]">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
         <div className="flex min-w-0 items-start gap-4">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 shadow-[0_8px_20px_rgba(245,158,11,0.10)]">
             <Store className="size-5" />
           </div>
 
@@ -162,18 +162,23 @@ function VendorApplicationCard({
       <div className="mt-5 flex flex-wrap gap-2">
         {application.categories.length > 0 ? (
           application.categories.map((category) => (
-            <span key={category.id} className="soft-chip text-xs font-bold">
+            <span
+              key={category.id}
+              className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800"
+            >
               {category.name}
             </span>
           ))
         ) : (
-          <span className="soft-chip text-xs font-bold">No categories selected</span>
+          <span className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
+            No categories selected
+          </span>
         )}
       </div>
 
       <button
         type="button"
-        className="btn-secondary mt-6 w-full text-sm"
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-5 text-sm font-black text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
         onClick={() => onView(application.id)}
       >
         Review application
@@ -288,37 +293,41 @@ export function AdminVendorApplicationsPage() {
   }
 
   return (
-    <div className="workspace-shell">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(254,215,170,0.22),transparent_32%),radial-gradient(circle_at_top_right,rgba(253,230,138,0.16),transparent_28%),linear-gradient(180deg,#fffdf8_0%,#fffaf5_48%,#fffdfb_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
         <main className="py-8">
-          <section className="workspace-hero">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div>
-                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <ShieldCheck className="size-4" />
-                  Vendor verification
+          <section className="relative overflow-hidden rounded-[2rem] border border-amber-200/80 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-50 p-6 shadow-[0_24px_70px_rgba(245,158,11,0.10)] sm:p-8">
+            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-amber-300/24 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-orange-300/18 blur-3xl" />
+            <div className="relative">
+              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                <div>
+                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-amber-200/80 bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-amber-700 shadow-sm">
+                    <ShieldCheck className="size-4" />
+                    Vendor verification
+                  </div>
+
+                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
+                    Review vendor applications with confidence.
+                  </h1>
+
+                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
+                    Inspect business information, service categories, locations, contact details,
+                    and submission history before approving or rejecting marketplace access.
+                  </p>
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                  Review vendor applications with confidence.
-                </h1>
+                <div className="rounded-2xl border border-amber-200/70 bg-white/72 px-5 py-4 shadow-[0_12px_30px_rgba(245,158,11,0.09)] backdrop-blur">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                    Pending applications
+                  </p>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                  Inspect business information, service categories, locations, contact details, and
-                  submission history before approving or rejecting marketplace access.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/80 bg-white/72 px-5 py-4 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                  Pending applications
-                </p>
-
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {applicationsQuery.isLoading ? '—' : (applicationsQuery.data?.count ?? 0)}
-                </p>
+                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {applicationsQuery.isLoading ? '—' : (applicationsQuery.data?.count ?? 0)}
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -326,7 +335,7 @@ export function AdminVendorApplicationsPage() {
           {applicationsQuery.isLoading ? (
             <section className="state-surface mt-6">
               <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+                <LoaderCircle className="mx-auto size-10 animate-spin text-amber-700" />
 
                 <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
                   Loading vendor applications
@@ -365,7 +374,7 @@ export function AdminVendorApplicationsPage() {
               </div>
             </section>
           ) : (
-            <section className="workspace-panel mt-6">
+            <section className="mt-6 rounded-[2rem] border border-amber-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(245,158,11,0.08)] backdrop-blur sm:p-7">
               <div>
                 <p className="section-eyebrow">Verification queue</p>
 
@@ -389,7 +398,7 @@ export function AdminVendorApplicationsPage() {
                 </div>
               ) : (
                 <div className="empty-surface mt-7">
-                  <BadgeCheck className="mx-auto size-9 text-[var(--color-deep-plum)]/64" />
+                  <BadgeCheck className="mx-auto size-9 text-amber-700/64" />
 
                   <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
                     The verification queue is clear
@@ -420,7 +429,7 @@ export function AdminVendorApplicationsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-vendor-application-title"
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl sm:p-7"
+            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-amber-100 bg-[#fffdf8] p-6 shadow-[0_28px_90px_rgba(120,53,15,0.18)] sm:p-7"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -444,7 +453,7 @@ export function AdminVendorApplicationsPage() {
             {applicationDetailQuery.isLoading ? (
               <div className="state-surface mt-6 min-h-72">
                 <div>
-                  <LoaderCircle className="mx-auto size-9 animate-spin text-[var(--color-deep-plum)]" />
+                  <LoaderCircle className="mx-auto size-9 animate-spin text-amber-700" />
 
                   <p className="mt-4 font-black text-[var(--color-near-black)]">
                     Loading application details
@@ -462,7 +471,7 @@ export function AdminVendorApplicationsPage() {
               <>
                 <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
                   <div className="flex items-start gap-4">
-                    <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                    <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 shadow-[0_10px_24px_rgba(245,158,11,0.10)]">
                       <Building2 className="size-6" />
                     </div>
 
@@ -483,7 +492,7 @@ export function AdminVendorApplicationsPage() {
                   </span>
                 </div>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[2rem] border border-amber-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(245,158,11,0.08)] backdrop-blur sm:p-7">
                   <p className="section-eyebrow">Business information</p>
 
                   <h3 className="section-title">Vendor details</h3>
@@ -544,12 +553,15 @@ export function AdminVendorApplicationsPage() {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {selectedApplication.serviceAreas.length > 0 ? (
                         selectedApplication.serviceAreas.map((area) => (
-                          <span key={area} className="soft-chip text-xs font-bold">
+                          <span
+                            key={area}
+                            className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800"
+                          >
                             {area}
                           </span>
                         ))
                       ) : (
-                        <span className="soft-chip text-xs font-bold">
+                        <span className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
                           No service areas provided
                         </span>
                       )}
@@ -564,18 +576,23 @@ export function AdminVendorApplicationsPage() {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {selectedApplication.categories.length > 0 ? (
                         selectedApplication.categories.map((category) => (
-                          <span key={category.id} className="soft-chip text-xs font-bold">
+                          <span
+                            key={category.id}
+                            className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800"
+                          >
                             {category.name}
                           </span>
                         ))
                       ) : (
-                        <span className="soft-chip text-xs font-bold">No categories selected</span>
+                        <span className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
+                          No categories selected
+                        </span>
                       )}
                     </div>
                   </div>
                 </section>
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[2rem] border border-amber-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(245,158,11,0.08)] backdrop-blur sm:p-7">
                   <p className="section-eyebrow">Account owner</p>
 
                   <h3 className="section-title">Vendor account</h3>
@@ -685,7 +702,7 @@ export function AdminVendorApplicationsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-vendor-reject-title"
-            className="w-full max-w-lg rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-[2rem] border border-rose-100 bg-[#fffafb] p-6 shadow-[0_28px_90px_rgba(127,29,29,0.18)]"
           >
             <div className="grid size-12 place-items-center rounded-2xl bg-red-50 text-red-700">
               <XCircle className="size-5" />

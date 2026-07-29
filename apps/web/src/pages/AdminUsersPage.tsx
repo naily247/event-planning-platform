@@ -101,21 +101,21 @@ function getStatusTone(status: AdminAccountStatus) {
       return 'danger';
 
     default:
-      return 'plum';
+      return 'violet';
   }
 }
 
 function getRoleTone(role: AdminUserRole) {
   switch (role) {
     case 'ADMIN':
-      return 'plum';
+      return 'violet';
 
     case 'VENDOR':
-      return 'olive';
+      return 'amber';
 
     case 'CUSTOMER':
     default:
-      return 'blue';
+      return 'sky';
   }
 }
 
@@ -123,7 +123,7 @@ function UserAvatar({ user }: { user: AdminUser }) {
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
 
   return (
-    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)]">
+    <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-100 to-indigo-100 text-sm font-black text-violet-700 shadow-[0_8px_20px_rgba(124,58,237,0.10)]">
       {initials}
     </div>
   );
@@ -281,15 +281,18 @@ export function AdminUsersPage() {
   }
 
   return (
-    <div className="workspace-shell">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(196,181,253,0.22),transparent_32%),radial-gradient(circle_at_top_right,rgba(167,243,208,0.18),transparent_28%),linear-gradient(180deg,#fbfaff_0%,#f8fbff_48%,#fbfdfb_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
         <main className="py-8">
-          <section className="workspace-hero">
+          <section className="relative overflow-hidden rounded-[2rem] border border-violet-200/80 bg-gradient-to-br from-violet-100 via-indigo-50 to-fuchsia-50 p-6 shadow-[0_24px_70px_rgba(109,94,245,0.10)] sm:p-8">
+            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-violet-300/25 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 left-1/3 size-72 rounded-full bg-indigo-300/18 blur-3xl" />
+            <div className="relative">
             <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
               <div>
-                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-violet-200/80 bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-violet-700 shadow-sm">
                   <Users className="size-4" />
                   Account administration
                 </div>
@@ -304,7 +307,7 @@ export function AdminUsersPage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/80 bg-white/72 px-5 py-4 shadow-sm">
+              <div className="rounded-2xl border border-violet-100/90 bg-white/78 px-5 py-4 shadow-[0_12px_30px_rgba(109,94,245,0.09)] backdrop-blur">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
                   Matching users
                 </p>
@@ -314,12 +317,13 @@ export function AdminUsersPage() {
                 </p>
               </div>
             </div>
+            </div>
           </section>
 
           {usersQuery.isLoading ? (
             <section className="state-surface mt-6">
               <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+                <LoaderCircle className="mx-auto size-10 animate-spin text-violet-700" />
 
                 <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
                   Loading user accounts
@@ -357,8 +361,8 @@ export function AdminUsersPage() {
           ) : (
             <>
               <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-emerald-100/90 bg-gradient-to-br from-emerald-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
                     <UserRoundCheck className="size-5" />
                   </div>
 
@@ -371,8 +375,8 @@ export function AdminUsersPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-rose-100/90 bg-gradient-to-br from-rose-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(244,63,94,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-rose-100 text-rose-700">
                     <Ban className="size-5" />
                   </div>
 
@@ -385,8 +389,8 @@ export function AdminUsersPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-amber-100/90 bg-gradient-to-br from-amber-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(245,158,11,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-amber-100 text-amber-700">
                     <Store className="size-5" />
                   </div>
 
@@ -399,8 +403,8 @@ export function AdminUsersPage() {
                   </p>
                 </article>
 
-                <article className="workspace-card p-5">
-                  <div className="icon-tile">
+                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)]">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-sky-100 text-sky-700">
                     <CircleUserRound className="size-5" />
                   </div>
 
@@ -414,7 +418,7 @@ export function AdminUsersPage() {
                 </article>
               </section>
 
-              <section className="workspace-panel mt-6">
+              <section className="mt-6 rounded-[2rem] border border-violet-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(109,94,245,0.09)] backdrop-blur sm:p-7">
                 <div>
                   <p className="section-eyebrow">User directory</p>
 
@@ -510,11 +514,11 @@ export function AdminUsersPage() {
                 ) : null}
 
                 {users.length > 0 ? (
-                  <div className="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/46">
+                  <div className="mt-7 overflow-hidden rounded-[1.5rem] border border-violet-100/90 bg-white">
                     <div className="overflow-x-auto">
                       <table className="min-w-full border-collapse">
                         <thead>
-                          <tr className="border-b border-[var(--border-soft)] text-left">
+                          <tr className="border-b border-violet-100 bg-gradient-to-r from-violet-50/90 via-indigo-50/65 to-sky-50/70 text-left">
                             <th className="px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
                               User
                             </th>
@@ -545,7 +549,7 @@ export function AdminUsersPage() {
                           {users.map((user) => (
                             <tr
                               key={user.id}
-                              className="border-b border-[var(--border-soft)] last:border-b-0"
+                              className="border-b border-violet-50 transition hover:bg-violet-50/45 last:border-b-0"
                             >
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
@@ -603,7 +607,7 @@ export function AdminUsersPage() {
                               <td className="px-5 py-4 text-right">
                                 <button
                                   type="button"
-                                  className="btn-secondary min-h-0 px-4 py-2 text-xs"
+                                  className="min-h-0 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-xs font-black text-violet-700 transition hover:border-violet-300 hover:bg-violet-100"
                                   onClick={() => openUser(user.id)}
                                 >
                                   View
@@ -617,7 +621,7 @@ export function AdminUsersPage() {
                   </div>
                 ) : (
                   <div className="empty-surface mt-7">
-                    <Users className="mx-auto size-8 text-[var(--color-deep-plum)]/64" />
+                    <Users className="mx-auto size-8 text-violet-700/64" />
 
                     <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
                       No users match these filters
@@ -640,7 +644,7 @@ export function AdminUsersPage() {
                 )}
 
                 {pagination && pagination.totalPages > 1 ? (
-                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/70 bg-white/48 px-5 py-4 sm:flex-row">
+                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-50/70 to-sky-50/60 px-5 py-4 sm:flex-row">
                     <p className="text-sm font-semibold text-[var(--color-charcoal)]/58">
                       Page{' '}
                       <span className="font-black text-[var(--color-near-black)]">
@@ -695,7 +699,7 @@ export function AdminUsersPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-user-detail-title"
-            className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl sm:p-7"
+            className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/80 bg-[#fbfaff] p-6 shadow-2xl sm:p-7"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -719,7 +723,7 @@ export function AdminUsersPage() {
             {userDetailQuery.isLoading ? (
               <div className="state-surface mt-6 min-h-72">
                 <div>
-                  <LoaderCircle className="mx-auto size-9 animate-spin text-[var(--color-deep-plum)]" />
+                  <LoaderCircle className="mx-auto size-9 animate-spin text-violet-700" />
 
                   <p className="mt-4 font-black text-[var(--color-near-black)]">
                     Loading user details
@@ -734,7 +738,7 @@ export function AdminUsersPage() {
               <>
                 <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
                   <div className="flex items-center gap-4">
-                    <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-lg font-black text-[var(--color-deep-plum)]">
+                    <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-lg font-black text-violet-700">
                       {selectedUser.firstName.charAt(0)}
                       {selectedUser.lastName.charAt(0)}
                     </div>
@@ -784,7 +788,7 @@ export function AdminUsersPage() {
                 </div>
 
                 {selectedUser.customer ? (
-                  <section className="workspace-panel mt-6">
+                  <section className="mt-6 rounded-[1.6rem] border border-sky-100 bg-gradient-to-br from-sky-50/75 via-white to-white p-5 shadow-[0_16px_40px_rgba(14,165,233,0.07)]">
                     <p className="section-eyebrow">Customer profile</p>
 
                     <h3 className="section-title">Customer information</h3>
@@ -802,7 +806,7 @@ export function AdminUsersPage() {
                 ) : null}
 
                 {selectedUser.vendorProfile ? (
-                  <section className="workspace-panel mt-6">
+                  <section className="mt-6 rounded-[1.6rem] border border-amber-100 bg-gradient-to-br from-amber-50/75 via-white to-white p-5 shadow-[0_16px_40px_rgba(245,158,11,0.07)]">
                     <p className="section-eyebrow">Vendor profile</p>
 
                     <h3 className="section-title">{selectedUser.vendorProfile.businessName}</h3>
@@ -845,7 +849,7 @@ export function AdminUsersPage() {
                   </section>
                 ) : null}
 
-                <section className="workspace-panel mt-6">
+                <section className="mt-6 rounded-[1.6rem] border border-violet-100 bg-gradient-to-br from-violet-50/75 via-white to-white p-5 shadow-[0_16px_40px_rgba(109,94,245,0.07)]">
                   <p className="section-eyebrow">Platform activity</p>
 
                   <h3 className="section-title">Account usage</h3>
@@ -953,7 +957,7 @@ export function AdminUsersPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-user-status-title"
-            className="w-full max-w-lg rounded-[2rem] border border-white/80 bg-[#fbf8f5] p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-[2rem] border border-white/80 bg-[#fbfaff] p-6 shadow-2xl"
           >
             <div className="icon-tile">
               {selectedUser.status === 'SUSPENDED' ? (

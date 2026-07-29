@@ -35,6 +35,7 @@ import {
   updateVendorOnboardingProfile,
   type VendorOnboarding,
 } from '../features/vendors/vendor.api';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const optionalDescriptionSchema = z
   .string()
@@ -429,13 +430,7 @@ export function VendorProfilePage() {
       <div className="workspace-container max-w-7xl">
         <header className="glass-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <Link
-              to="/dashboard"
-              className="inline-flex items-center gap-2 text-sm font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)]"
-            >
-              <ArrowLeft className="size-4" />
-              Back to dashboard
-            </Link>
+            <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="w-fit" />
 
             <p className="mt-3 text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
               Vendor workspace

@@ -28,6 +28,7 @@ import {
 } from '../features/packages/package.api';
 import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
 import { getVendorOnboardingProfile } from '../features/vendors/vendor.api';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const packageFormSchema = z.object({
   categoryId: z.string().trim().min(1, 'Choose a service category.'),
@@ -252,7 +253,7 @@ export function VendorPackagesPage() {
 
   if (packagesQuery.isLoading || onboardingQuery.isLoading) {
     return (
-      <div className="app-shell relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
+      <div className="workspace-shell relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
         <div className="pointer-events-none absolute left-[8%] top-16 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
         <div className="pointer-events-none absolute right-[8%] top-20 size-80 rounded-full bg-[rgba(175,201,216,0.2)] blur-3xl" />
 
@@ -293,7 +294,7 @@ export function VendorPackagesPage() {
     !onboardingQuery.data
   ) {
     return (
-      <div className="app-shell relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
+      <div className="workspace-shell relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
         <div className="pointer-events-none absolute left-[8%] top-16 size-72 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl" />
         <div className="pointer-events-none absolute right-[8%] top-20 size-80 rounded-full bg-[rgba(214,190,177,0.18)] blur-3xl" />
 
@@ -343,21 +344,15 @@ export function VendorPackagesPage() {
     );
   }
   return (
-    <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="workspace-shell">
+      <div className="workspace-container max-w-7xl">
         <header className="glass-card relative overflow-hidden p-5 sm:p-6">
           <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(175,201,216,0.11)] blur-3xl" />
 
           <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                to="/vendor/dashboard"
-                className="grid size-11 place-items-center rounded-2xl border border-white/55 bg-white/38 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.1)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/50"
-                aria-label="Back to vendor dashboard"
-              >
-                <ArrowLeft className="size-5" />
-              </Link>
+              <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
 
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">

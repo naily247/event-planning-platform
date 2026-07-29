@@ -1,5 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import axios from 'axios';
 import {
   AlertCircle,
@@ -156,7 +165,7 @@ function formatDecimal(value: number | null) {
 
 function MetricCard({ metric }: { metric: ReportMetric }) {
   return (
-    <article className="workspace-card p-5">
+    <article className="rounded-[1.6rem] border border-emerald-100/90 bg-gradient-to-br from-emerald-50/85 via-white to-teal-50/35 p-5 shadow-[0_18px_45px_rgba(5,150,105,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_22px_55px_rgba(5,150,105,0.11)]">
       <p className="text-sm font-bold text-[var(--color-charcoal)]/56">{metric.label}</p>
 
       <p className="mt-3 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
@@ -183,51 +192,121 @@ function GrowthBars({
   valueKey?: string;
   valueFormatter?: (value: number) => string;
 }) {
-  const maximum = Math.max(1, ...points.map((point) => Number(point[valueKey] ?? 0)));
+  const chartData = points.map((point) => ({
+    ...point,
+    period: String(point.period),
+    [valueKey]: Number(point[valueKey] ?? 0),
+  }));
+
+  const formatValue = (value: number) =>
+    valueFormatter ? valueFormatter(value) : new Intl.NumberFormat('en-GB').format(value);
 
   return (
-    <section className="workspace-panel">
-      <p className="section-eyebrow">Trend</p>
+    <section className="relative overflow-hidden rounded-[1.6rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur">
+      <div className="pointer-events-none absolute -right-20 -top-20 size-52 rounded-full bg-emerald-200/28 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 left-1/4 size-48 rounded-full bg-teal-200/20 blur-3xl" />
 
-      <h2 className="section-title">{title}</h2>
+      <div className="relative">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <p className="section-eyebrow">Trend</p>
+            <h2 className="section-title">{title}</h2>
+          </div>
 
-      {points.length > 0 ? (
-        <div className="mt-7 space-y-4">
-          {points.map((point) => {
-            const value = Number(point[valueKey] ?? 0);
-            const width = Math.max(4, (value / maximum) * 100);
-
-            return (
-              <div key={String(point.period)}>
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="font-bold text-[var(--color-charcoal)]/62">
-                    {String(point.period)}
-                  </span>
-
-                  <span className="font-black text-[var(--color-near-black)]">
-                    {valueFormatter ? valueFormatter(value) : value}
-                  </span>
-                </div>
-
-                <div className="mt-2 h-3 overflow-hidden rounded-full bg-white/55">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy))]"
-                    style={{ width: `${width}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+          {chartData.length > 0 ? (
+            <div className="w-fit rounded-full border border-emerald-100 bg-emerald-50/72 px-3 py-1.5 text-xs font-black text-emerald-700">
+              {chartData.length} {chartData.length === 1 ? 'period' : 'periods'}
+            </div>
+          ) : null}
         </div>
-      ) : (
-        <div className="empty-surface mt-7">
-          <TrendingUp className="mx-auto size-8 text-[var(--color-deep-plum)]/60" />
 
-          <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/54">
-            No growth data is available for this range.
-          </p>
-        </div>
-      )}
+        {chartData.length > 0 ? (
+          <div className="mt-7 h-[290px] w-full sm:h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 12, right: 6, left: -12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id={`trend-fill-${valueKey}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.34} />
+                    <stop offset="62%" stopColor="#14b8a6" stopOpacity={0.12} />
+                    <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid vertical={false} stroke="#d1fae5" strokeDasharray="4 7" />
+
+                <XAxis
+                  dataKey="period"
+                  axisLine={false}
+                  tickLine={false}
+                  minTickGap={24}
+                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
+                  tickMargin={14}
+                />
+
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={valueKey === 'revenue'}
+                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
+                  tickFormatter={(value: number) =>
+                    valueKey === 'revenue'
+                      ? new Intl.NumberFormat('en-GB', {
+                          notation: 'compact',
+                          maximumFractionDigits: 1,
+                        }).format(value)
+                      : new Intl.NumberFormat('en-GB').format(value)
+                  }
+                  width={64}
+                />
+
+                <Tooltip
+                  cursor={{ stroke: '#6ee7b7', strokeWidth: 1.5, strokeDasharray: '4 5' }}
+                  contentStyle={{
+                    border: '1px solid rgba(167, 243, 208, 0.95)',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.96)',
+                    boxShadow: '0 18px 45px rgba(5, 150, 105, 0.14)',
+                    padding: '12px 14px',
+                  }}
+                  labelStyle={{
+                    color: '#334155',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    marginBottom: '6px',
+                  }}
+                  itemStyle={{
+                    color: '#064e3b',
+                    fontSize: '13px',
+                    fontWeight: 900,
+                  }}
+                  formatter={(value) => [formatValue(Number(value)), title]}
+                />
+
+                <Area
+                  type="monotone"
+                  dataKey={valueKey}
+                  stroke="#059669"
+                  strokeWidth={3}
+                  fill={`url(#trend-fill-${valueKey})`}
+                  activeDot={{ r: 6, fill: '#ffffff', stroke: '#059669', strokeWidth: 3 }}
+                  dot={{ r: 3.5, fill: '#ffffff', stroke: '#10b981', strokeWidth: 2 }}
+                  animationBegin={80}
+                  animationDuration={760}
+                  animationEasing="ease-out"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="empty-surface mt-7">
+            <TrendingUp className="mx-auto size-8 text-emerald-700/60" />
+
+            <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/54">
+              No growth data is available for this range.
+            </p>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
@@ -247,7 +326,7 @@ function RankedList({
   }>;
 }) {
   return (
-    <section className="workspace-panel">
+    <section className="rounded-[1.6rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur">
       <p className="section-eyebrow">{eyebrow}</p>
 
       <h2 className="section-title">{title}</h2>
@@ -257,10 +336,10 @@ function RankedList({
           {items.map((item, index) => (
             <article
               key={item.id}
-              className="flex items-center justify-between gap-4 rounded-2xl border border-white/70 bg-white/52 p-4"
+              className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-100/90 bg-gradient-to-r from-emerald-50/55 to-white p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]"
             >
               <div className="flex min-w-0 items-center gap-4">
-                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)]">
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-100 text-sm font-black text-emerald-700">
                   {index + 1}
                 </div>
 
@@ -283,7 +362,7 @@ function RankedList({
         </div>
       ) : (
         <div className="empty-surface mt-6">
-          <BarChart3 className="mx-auto size-8 text-[var(--color-deep-plum)]/60" />
+          <BarChart3 className="mx-auto size-8 text-emerald-700/60" />
 
           <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/54">
             No ranking data is available.
@@ -380,42 +459,46 @@ export function AdminReportsPage() {
   }
 
   return (
-    <div className="workspace-shell">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(167,243,208,0.26),transparent_34%),radial-gradient(circle_at_top_right,rgba(153,246,228,0.20),transparent_30%),linear-gradient(180deg,#f7fffb_0%,#fbfffd_46%,#ffffff_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
         <main className="py-8">
-          <section className="workspace-hero">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div>
-                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <BarChart3 className="size-4" />
-                  Platform intelligence
+          <section className="relative overflow-hidden rounded-[2rem] border border-emerald-200/80 bg-gradient-to-br from-emerald-100 via-teal-50 to-white p-6 shadow-[0_24px_70px_rgba(5,150,105,0.10)] sm:p-8">
+            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-emerald-300/24 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-teal-300/18 blur-3xl" />
+            <div className="relative">
+              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                <div>
+                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200/80 bg-white/76 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-emerald-700 shadow-sm">
+                    <BarChart3 className="size-4" />
+                    Platform intelligence
+                  </div>
+
+                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
+                    Understand how Eventure is growing and performing.
+                  </h1>
+
+                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
+                    Explore account growth, marketplace activity, event planning, financial
+                    performance, booking health, and complaint trends from one reporting workspace.
+                  </p>
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                  Understand how Eventure is growing and performing.
-                </h1>
+                <div className="rounded-2xl border border-emerald-200/70 bg-white/74 px-5 py-4 shadow-[0_12px_30px_rgba(5,150,105,0.09)] backdrop-blur">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                    Active report
+                  </p>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                  Explore account growth, marketplace activity, event planning, financial
-                  performance, booking health, and complaint trends from one reporting workspace.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/80 bg-white/72 px-5 py-4 shadow-sm">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                  Active report
-                </p>
-
-                <p className="mt-2 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                  {reportTabs.find((tab) => tab.id === activeTab)?.label}
-                </p>
+                  <p className="mt-2 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {reportTabs.find((tab) => tab.id === activeTab)?.label}
+                  </p>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="workspace-panel mt-6">
+          <section className="mt-6 rounded-[2rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_24px_60px_rgba(5,150,105,0.08)] backdrop-blur sm:p-7">
             <p className="section-eyebrow">Report navigation</p>
 
             <h2 className="section-title">Choose a report</h2>
@@ -431,15 +514,15 @@ export function AdminReportsPage() {
                     type="button"
                     className={
                       isActive
-                        ? 'rounded-2xl border border-[rgba(93,58,85,0.28)] bg-[rgba(183,167,200,0.25)] p-4 text-left shadow-sm'
-                        : 'rounded-2xl border border-white/70 bg-white/48 p-4 text-left transition hover:-translate-y-0.5 hover:bg-white/72'
+                        ? 'rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-100 to-teal-50 p-4 text-left shadow-[0_12px_30px_rgba(5,150,105,0.10)]'
+                        : 'rounded-2xl border border-emerald-100/80 bg-white/58 p-4 text-left transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50/55'
                     }
                     onClick={() => setActiveTab(tab.id)}
                   >
                     <Icon
                       className={
                         isActive
-                          ? 'size-5 text-[var(--color-deep-plum)]'
+                          ? 'size-5 text-emerald-700'
                           : 'size-5 text-[var(--color-charcoal)]/50'
                       }
                     />
@@ -457,7 +540,7 @@ export function AdminReportsPage() {
             </div>
           </section>
 
-          <section className="workspace-panel mt-6">
+          <section className="mt-6 rounded-[2rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_24px_60px_rgba(5,150,105,0.08)] backdrop-blur sm:p-7">
             <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
               <div>
                 <p className="section-eyebrow">Report controls</p>
@@ -542,7 +625,7 @@ export function AdminReportsPage() {
           {activeQuery.isLoading ? (
             <section className="state-surface mt-6">
               <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+                <LoaderCircle className="mx-auto size-10 animate-spin text-emerald-700" />
 
                 <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
                   Generating report
@@ -570,7 +653,7 @@ export function AdminReportsPage() {
 
                 <button
                   type="button"
-                  className="btn-primary mt-6 text-sm"
+                  className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-600 bg-gradient-to-r from-emerald-500 to-teal-400 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(5,150,105,0.20)] transition hover:-translate-y-0.5"
                   onClick={() => activeQuery.refetch()}
                 >
                   Try again
@@ -635,7 +718,7 @@ export function AdminReportsPage() {
                     />
                   </section>
 
-                  <section className="workspace-panel mt-6">
+                  <section className="mt-6 rounded-[1.8rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur sm:p-7">
                     <p className="section-eyebrow">Recent activity</p>
 
                     <h2 className="section-title">Newest users</h2>
@@ -644,7 +727,7 @@ export function AdminReportsPage() {
                       {usersQuery.data.recentUsers.map((user) => (
                         <article
                           key={user.id}
-                          className="rounded-2xl border border-white/70 bg-white/52 p-4"
+                          className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]"
                         >
                           <p className="font-black text-[var(--color-near-black)]">
                             {user.firstName} {user.lastName}
@@ -722,7 +805,7 @@ export function AdminReportsPage() {
                     />
                   </section>
 
-                  <section className="workspace-panel mt-6">
+                  <section className="mt-6 rounded-[1.8rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur sm:p-7">
                     <p className="section-eyebrow">Recent activity</p>
 
                     <h2 className="section-title">Newest vendors</h2>
@@ -731,7 +814,7 @@ export function AdminReportsPage() {
                       {vendorsQuery.data.recentVendors.map((vendor) => (
                         <article
                           key={vendor.id}
-                          className="rounded-2xl border border-white/70 bg-white/52 p-4"
+                          className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]"
                         >
                           <p className="font-black text-[var(--color-near-black)]">
                             {vendor.businessName}
@@ -1124,7 +1207,7 @@ export function AdminReportsPage() {
                 </>
               ) : null}
 
-              <section className="workspace-panel mt-6">
+              <section className="mt-6 rounded-[1.8rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur sm:p-7">
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                   <div>
                     <p className="section-eyebrow">Report metadata</p>
@@ -1148,7 +1231,7 @@ export function AdminReportsPage() {
                 </div>
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-white/70 bg-white/52 p-4">
+                  <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]">
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                       Generated
                     </p>
@@ -1162,7 +1245,7 @@ export function AdminReportsPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/70 bg-white/52 p-4">
+                  <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]">
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                       Grouped by
                     </p>
@@ -1172,7 +1255,7 @@ export function AdminReportsPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/70 bg-white/52 p-4">
+                  <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]">
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                       Date range
                     </p>

@@ -32,6 +32,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../lib/api';
+import { PageBackButton } from '../components/navigation/PageBackButton';
 
 type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
@@ -671,13 +672,7 @@ export function EventWorkspacePage() {
       <div className="mx-auto max-w-7xl">
         <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              to="/events"
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl"
-              aria-label="Back to events"
-            >
-              <ArrowLeft className="size-5" />
-            </Link>
+            <PageBackButton fallback="/events" label="Events" className="shrink-0" />
 
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
