@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
   ArrowLeft,
+  ArrowRight,
   CalendarDays,
   CircleAlert,
   Clock3,
@@ -515,101 +516,133 @@ export function EventsPage() {
                   <article key={event.id}>
                     <Link
                       to={`/events/${event.id}`}
-                      className="luxe-card flex h-full cursor-pointer flex-col p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(31,27,29,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
+                      className="group luxe-card relative flex h-full cursor-pointer flex-col overflow-hidden p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(31,27,29,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 sm:p-7"
                       aria-label={`Open ${event.name} event workspace`}
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                          <CalendarDays aria-hidden="true" className="size-6" />
-                        </div>
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl transition duration-500 group-hover:bg-[rgba(183,167,200,0.24)]"
+                      />
 
-                        <span className="status-chip" data-tone={getStatusTone(event.status)}>
-                          {event.status.replaceAll('_', ' ')}
-                        </span>
-                      </div>
+                      <div className="relative flex h-full flex-col">
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                              {event.eventType}
+                            </p>
 
-                      <p className="mt-7 text-sm font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                        {event.eventType}
-                      </p>
-
-                      <h3 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                        {event.name}
-                      </h3>
-
-                      {event.theme ? (
-                        <p className="mt-3 text-sm font-semibold text-[var(--color-deep-plum)]">
-                          {event.theme}
-                        </p>
-                      ) : null}
-
-                      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                            <Clock3
-                              aria-hidden="true"
-                              className="size-4 text-[var(--color-rosewood)]"
-                            />
-                            Event date
+                            <h3 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[2rem]">
+                              {event.name}
+                            </h3>
                           </div>
 
-                          <p className="mt-3 font-black text-[var(--color-near-black)]">
-                            {formatEventDate(event.eventDate)}
-                          </p>
+                          <span
+                            className="status-chip shrink-0 px-3 py-1.5 text-xs"
+                            data-tone={getStatusTone(event.status)}
+                          >
+                            {event.status.replaceAll('_', ' ')}
+                          </span>
                         </div>
 
-                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                            <MapPin
-                              aria-hidden="true"
-                              className="size-4 text-[var(--color-rosewood)]"
-                            />
-                            Location
+                        <div className="mt-6 border-y border-white/55 py-5">
+                          <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
+                            <div className="flex items-start gap-3">
+                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                                <Clock3 aria-hidden="true" className="size-4" />
+                              </span>
+
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/46">
+                                  Event date
+                                </p>
+
+                                <p className="mt-1 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                                  {formatEventDate(event.eventDate)}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[var(--color-deep-plum)]">
+                                <MapPin aria-hidden="true" className="size-4" />
+                              </span>
+
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/46">
+                                  Location
+                                </p>
+
+                                <p className="mt-1 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                                  {event.location}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.16)] text-[#586047]">
+                                <UsersRound aria-hidden="true" className="size-4" />
+                              </span>
+
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/46">
+                                  Guests
+                                </p>
+
+                                <p className="mt-1 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                                  {event.guestCount
+                                    ? `${event.guestCount.toLocaleString('en-LK')} guests`
+                                    : 'Not set'}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
+                                <WalletCards aria-hidden="true" className="size-4" />
+                              </span>
+
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/46">
+                                  Planned budget
+                                </p>
+
+                                <p className="mt-1 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                                  {formatCurrency(event.plannedBudget)}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-
-                          <p className="mt-3 font-black text-[var(--color-near-black)]">
-                            {event.location}
-                          </p>
                         </div>
 
-                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                            <UsersRound
-                              aria-hidden="true"
-                              className="size-4 text-[var(--color-rosewood)]"
-                            />
-                            Guests
+                        {event.theme ? (
+                          <div className="mt-5">
+                            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+                              Event theme
+                            </p>
+
+                            <p className="mt-2 font-black text-[var(--color-deep-plum)]">
+                              {event.theme}
+                            </p>
                           </div>
+                        ) : null}
 
-                          <p className="mt-3 font-black text-[var(--color-near-black)]">
-                            {event.guestCount ?? 'Not set'}
+                        {event.requirements ? (
+                          <p className="mt-4 line-clamp-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
+                            {event.requirements}
                           </p>
-                        </div>
+                        ) : null}
 
-                        <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                            <WalletCards
-                              aria-hidden="true"
-                              className="size-4 text-[var(--color-rosewood)]"
-                            />
-                            Planned budget
+                        <div className="mt-auto pt-7">
+                          <div className="flex items-center justify-between border-t border-white/55 pt-5">
+                            <span className="text-sm font-black text-[var(--color-near-black)] transition group-hover:text-[var(--color-deep-plum)]">
+                              Continue planning
+                            </span>
+
+                            <span className="grid size-10 place-items-center rounded-full bg-[var(--color-deep-plum)] text-white shadow-[0_10px_24px_rgba(93,58,85,0.22)] transition duration-300 group-hover:translate-x-1 group-hover:shadow-[0_14px_30px_rgba(93,58,85,0.30)]">
+                              <ArrowRight aria-hidden="true" className="size-4" />
+                            </span>
                           </div>
-
-                          <p className="mt-3 font-black text-[var(--color-near-black)]">
-                            {formatCurrency(event.plannedBudget)}
-                          </p>
                         </div>
-                      </div>
-
-                      {event.requirements ? (
-                        <p className="mt-5 line-clamp-3 leading-7 text-[var(--color-charcoal)]/66">
-                          {event.requirements}
-                        </p>
-                      ) : null}
-
-                      <div className="mt-auto pt-7">
-                        <span className="btn-secondary w-full justify-center text-sm font-bold">
-                          Open event workspace
-                        </span>
                       </div>
                     </Link>
                   </article>

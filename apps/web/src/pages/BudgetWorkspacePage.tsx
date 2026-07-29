@@ -802,65 +802,198 @@ export function BudgetWorkspacePage() {
 
         <main className="py-10">
           <section className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-[8%] top-8 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
-            <div className="pointer-events-none absolute right-[8%] top-14 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
+            <div className="pointer-events-none absolute left-[4%] top-10 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.25)] blur-3xl" />
+            <div className="pointer-events-none absolute right-[7%] top-8 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
 
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.42fr] lg:items-end">
-              <div>
+            <div className="relative grid gap-7 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch">
+              <div className="flex flex-col justify-center">
                 <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
                   <Sparkles className="size-4" />
                   Financial planning
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
+                <h2 className="max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl sm:leading-[0.98] lg:text-6xl">
                   Keep every event cost clear and under control.
                 </h2>
 
-                <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                  Track category allocations, planned expenses, paid costs, bookings and verified
-                  vendor payments from one budget workspace.
-                </p>
-              </div>
-
-              <div className="glass-card p-5">
-                <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Budget usage</p>
-
-                <p className="mt-2 text-4xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {Math.round(budgetUsagePercentage)}%
+                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/70 sm:mt-6 sm:text-lg sm:leading-8">
+                  Track allocations, expenses, paid costs and vendor commitments from one organised
+                  financial workspace.
                 </p>
 
-                <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/40">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))]"
-                    style={{
-                      width: `${budgetUsagePercentage}%`,
-                    }}
-                  />
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <div className="soft-chip">
+                    <CircleDollarSign className="size-4 text-[var(--color-deep-plum)]" />
+                    {summary.counts.budgetCategories} categories
+                  </div>
+
+                  <div className="soft-chip">
+                    <ReceiptText className="size-4 text-[var(--color-deep-plum)]" />
+                    {summary.counts.plannedExpenses + summary.counts.paidExpenses} expenses
+                  </div>
+
+                  <div className="soft-chip">
+                    <CreditCard className="size-4 text-[var(--color-deep-plum)]" />
+                    {formatCurrency(summary.summary.totalCommitted)} committed
+                  </div>
                 </div>
-
-                <p className="mt-3 text-sm font-semibold text-[var(--color-rosewood)]">
-                  {formatCurrency(summary.summary.totalCommitted)} committed
-                </p>
               </div>
+
+              <aside className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] sm:p-7">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-white/10 blur-3xl"
+                />
+
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/50">
+                        Budget health
+                      </p>
+
+                      <p className="mt-3 text-4xl font-black tracking-[-0.055em] sm:text-5xl">
+                        {Math.round(budgetUsagePercentage)}%
+                      </p>
+
+                      <p className="mt-2 text-sm font-semibold text-white/58">
+                        of the planned budget committed
+                      </p>
+                    </div>
+
+                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] backdrop-blur">
+                      <PiggyBank className="size-5" />
+                    </span>
+                  </div>
+
+                  <div className="mt-7 h-2.5 overflow-hidden rounded-full bg-white/12">
+                    <div
+                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] transition-[width] duration-700"
+                      style={{
+                        width: `${budgetUsagePercentage}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Planned
+                      </p>
+
+                      <p className="mt-2 text-lg font-black">
+                        {formatCurrency(summary.summary.plannedBudget)}
+                      </p>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Committed
+                      </p>
+
+                      <p className="mt-2 text-lg font-black">
+                        {formatCurrency(summary.summary.totalCommitted)}
+                      </p>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Paid
+                      </p>
+
+                      <p className="mt-2 text-lg font-black">
+                        {formatCurrency(summary.summary.totalPaid)}
+                      </p>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        {summary.summary.isOverBudget ? 'Over budget' : 'Remaining'}
+                      </p>
+
+                      <p className="mt-2 text-lg font-black">
+                        {summary.summary.isOverBudget
+                          ? formatCurrency(summary.summary.overBudgetAmount)
+                          : formatCurrency(summary.summary.remainingBudget)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-5">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/42">
+                        Financial position
+                      </p>
+
+                      <p className="mt-1 text-sm font-black text-white/82">
+                        {summary.summary.isOverBudget
+                          ? 'Budget needs attention'
+                          : 'Budget remains within plan'}
+                      </p>
+                    </div>
+
+                    <span
+                      className={
+                        summary.summary.isOverBudget
+                          ? 'status-chip shrink-0 border-white/14 bg-white/10 text-white'
+                          : 'status-chip shrink-0 border-white/14 bg-[rgba(142,151,115,0.22)] text-[#e7efd5]'
+                      }
+                    >
+                      {summary.summary.isOverBudget ? 'Over plan' : 'On track'}
+                    </span>
+                  </div>
+                </div>
+              </aside>
             </div>
           </section>
 
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-10 grid gap-5 lg:grid-cols-[1.2fr_repeat(3,1fr)]">
             {summaryCards.map(({ label, value, helper, icon: Icon, tone }) => (
-              <article key={label} className="luxe-card p-6">
-                <div className={`grid size-11 place-items-center rounded-2xl ${tone}`}>
+              <article
+                key={label}
+                className={`luxe-card relative overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)]
+    ${
+      label === 'Planned budget'
+        ? 'lg:row-span-2 bg-[linear-gradient(145deg,rgba(255,255,255,0.9),rgba(247,241,249,0.94))]'
+        : ''
+    }`}
+              >
+                <div className={`grid size-12 place-items-center rounded-2xl ${tone}`}>
                   <Icon className="size-5" />
                 </div>
 
-                <p className="mt-8 text-sm font-bold text-[var(--color-charcoal)]/58">{label}</p>
+                <p className="mt-7 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/48">
+                  {label}
+                </p>
 
-                <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                <p
+                  className={`mt-3 font-black tracking-[-0.055em] text-[var(--color-near-black)]
+    ${label === 'Planned budget' ? 'text-4xl sm:text-[2.8rem]' : 'text-3xl'}`}
+                >
                   {value}
                 </p>
 
-                <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/55">
+                <p className="mt-3 text-sm leading-6 font-semibold text-[var(--color-charcoal)]/58">
                   {helper}
                 </p>
+
+                {label === 'Planned budget' ? (
+                  <div className="mt-7">
+                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/45">
+                      <span>Budget usage</span>
+                      <span>{Math.round(budgetUsagePercentage)}%</span>
+                    </div>
+
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))]"
+                        style={{
+                          width: `${budgetUsagePercentage}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : null}
               </article>
             ))}
           </section>
@@ -906,81 +1039,151 @@ export function BudgetWorkspacePage() {
                         : 0;
 
                     return (
-                      <div
+                      <article
                         key={category.id}
-                        className="rounded-[1.5rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl"
+                        className="group relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/36 hover:shadow-[0_24px_55px_rgba(31,27,29,0.08)] sm:p-6"
                       >
-                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-                          <div>
-                            <p className="text-lg font-black text-[var(--color-near-black)]">
-                              {category.name}
-                            </p>
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition-opacity duration-300 group-hover:opacity-80"
+                        />
 
-                            <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                              {formatCurrency(category.totalExpenses)} used from{' '}
-                              {formatCurrency(category.allocatedAmount)}
+                        <div className="relative">
+                          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-3">
+                                <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                                  <WalletCards className="size-5" />
+                                </div>
+
+                                <div>
+                                  <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)] sm:text-xl">
+                                    {category.name}
+                                  </p>
+
+                                  <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
+                                    Category allocation
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex shrink-0 flex-wrap items-center gap-2">
+                              <span
+                                className="status-chip w-fit"
+                                data-tone={category.isOverAllocated ? 'rose' : 'green'}
+                              >
+                                {category.isOverAllocated
+                                  ? `Over by ${formatCurrency(category.overAllocatedAmount)}`
+                                  : `${formatCurrency(category.remainingAmount)} left`}
+                              </span>
+
+                              <button
+                                type="button"
+                                className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                                aria-label={`Edit ${category.name}`}
+                                onClick={() => {
+                                  openEditCategoryForm(category);
+                                }}
+                              >
+                                <Pencil className="size-4" />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                                aria-label={`Delete ${category.name}`}
+                                onClick={() => {
+                                  openDeleteCategoryDialog(category);
+                                }}
+                              >
+                                <Trash2 className="size-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="mt-6 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                            <div>
+                              <p className="text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/42">
+                                Amount used
+                              </p>
+
+                              <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <p className="text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl">
+                                  {formatCurrency(category.totalExpenses)}
+                                </p>
+
+                                <p className="text-sm font-bold text-[var(--color-charcoal)]/46">
+                                  of {formatCurrency(category.allocatedAmount)}
+                                </p>
+                              </div>
+                            </div>
+
+                            <p
+                              className={`text-sm font-black ${
+                                category.isOverAllocated
+                                  ? 'text-[var(--color-muted-burgundy)]'
+                                  : 'text-[var(--color-deep-plum)]'
+                              }`}
+                            >
+                              {Math.round(usagePercentage)}% used
                             </p>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className="status-chip w-fit"
-                              data-tone={category.isOverAllocated ? 'rose' : 'green'}
-                            >
-                              {category.isOverAllocated
-                                ? `Over by ${formatCurrency(category.overAllocatedAmount)}`
-                                : `${formatCurrency(category.remainingAmount)} left`}
-                            </span>
-
-                            <button
-                              type="button"
-                              className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.16)]"
-                              aria-label={`Edit ${category.name}`}
-                              onClick={() => {
-                                openEditCategoryForm(category);
+                          <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
+                            <div
+                              className={`h-full rounded-full transition-[width] duration-700 ${
+                                category.isOverAllocated
+                                  ? 'bg-[linear-gradient(90deg,var(--color-muted-burgundy),#c28c98)]'
+                                  : 'bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy))]'
+                              }`}
+                              style={{
+                                width: `${usagePercentage}%`,
                               }}
-                            >
-                              <Pencil className="size-4" />
-                            </button>
+                            />
+                          </div>
 
-                            <button
-                              type="button"
-                              className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
-                              aria-label={`Delete ${category.name}`}
-                              onClick={() => {
-                                openDeleteCategoryDialog(category);
-                              }}
-                            >
-                              <Trash2 className="size-4" />
-                            </button>
+                          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4">
+                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                                Planned
+                              </p>
+
+                              <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                                {formatCurrency(category.plannedExpenses)}
+                              </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4">
+                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                                Paid
+                              </p>
+
+                              <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                                {formatCurrency(category.paidExpenses)}
+                              </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4">
+                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                                Balance
+                              </p>
+
+                              <p
+                                className={`mt-2 text-base font-black ${
+                                  category.isOverAllocated
+                                    ? 'text-[var(--color-muted-burgundy)]'
+                                    : 'text-[var(--color-near-black)]'
+                                }`}
+                              >
+                                {category.isOverAllocated
+                                  ? `-${formatCurrency(category.overAllocatedAmount)}`
+                                  : formatCurrency(category.remainingAmount)}
+                              </p>
+                            </div>
                           </div>
                         </div>
-
-                        <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/48">
-                          <div
-                            className="h-full rounded-full bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))]"
-                            style={{
-                              width: `${usagePercentage}%`,
-                            }}
-                          />
-                        </div>
-
-                        <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                          <p className="font-semibold text-[var(--color-charcoal)]/62">
-                            Planned:{' '}
-                            <span className="font-black text-[var(--color-near-black)]">
-                              {formatCurrency(category.plannedExpenses)}
-                            </span>
-                          </p>
-
-                          <p className="font-semibold text-[var(--color-charcoal)]/62">
-                            Paid:{' '}
-                            <span className="font-black text-[var(--color-near-black)]">
-                              {formatCurrency(category.paidExpenses)}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
+                      </article>
                     );
                   })}
                 </div>
@@ -1000,54 +1203,130 @@ export function BudgetWorkspacePage() {
               )}
             </article>
 
-            <aside className="glass-card p-6 sm:p-7">
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Budget snapshot
-              </p>
+            <aside className="relative self-start overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(244,238,246,0.82))] p-6 shadow-[0_24px_70px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-7 lg:sticky lg:top-6">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+              />
 
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                Current financial activity.
-              </h2>
+              <div className="relative">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                      Budget snapshot
+                    </p>
 
-              <div className="mt-8 space-y-3">
-                <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                    Total allocated
-                  </p>
+                    <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                      Financial health at a glance.
+                    </h2>
+                  </div>
 
-                  <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                    {formatCurrency(summary.summary.totalAllocated)}
+                  <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                    <PiggyBank className="size-5" />
+                  </div>
+                </div>
+
+                <div className="mt-8 rounded-[1.6rem] border border-white/60 bg-white/34 p-5 backdrop-blur-xl">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/42">
+                        Total allocated
+                      </p>
+
+                      <p className="mt-3 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                        {formatCurrency(summary.summary.totalAllocated)}
+                      </p>
+                    </div>
+
+                    <span
+                      className="status-chip shrink-0"
+                      data-tone={summary.summary.isOverBudget ? 'rose' : 'green'}
+                    >
+                      {summary.summary.isOverBudget ? 'Needs attention' : 'Healthy'}
+                    </span>
+                  </div>
+
+                  <div className="mt-5 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
+                    <div
+                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy))]"
+                      style={{
+                        width: `${budgetUsagePercentage}%`,
+                      }}
+                    />
+                  </div>
+
+                  <p className="mt-3 text-sm font-semibold text-[var(--color-charcoal)]/55">
+                    {Math.round(budgetUsagePercentage)}% of the planned budget is currently
+                    committed.
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                    Unallocated budget
-                  </p>
+                <div className="mt-5 divide-y divide-[rgba(93,58,85,0.10)] rounded-[1.6rem] border border-white/55 bg-white/24 px-5 backdrop-blur-xl">
+                  <div className="flex items-center justify-between gap-4 py-5">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954]">
+                        <WalletCards className="size-4" />
+                      </span>
 
-                  <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                    {formatCurrency(summary.summary.unallocatedBudget)}
-                  </p>
-                </div>
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Unallocated budget
+                        </p>
 
-                <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                    Outstanding committed
-                  </p>
+                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                          Still available to assign
+                        </p>
+                      </div>
+                    </div>
 
-                  <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                    {formatCurrency(summary.summary.outstandingCommitted)}
-                  </p>
-                </div>
+                    <p className="text-right text-sm font-black text-[var(--color-near-black)]">
+                      {formatCurrency(summary.summary.unallocatedBudget)}
+                    </p>
+                  </div>
 
-                <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                    Manual expenses
-                  </p>
+                  <div className="flex items-center justify-between gap-4 py-5">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]">
+                        <CreditCard className="size-4" />
+                      </span>
 
-                  <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                    {summary.counts.plannedExpenses + summary.counts.paidExpenses}
-                  </p>
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Outstanding committed
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                          Confirmed but not yet paid
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="text-right text-sm font-black text-[var(--color-near-black)]">
+                      {formatCurrency(summary.summary.outstandingCommitted)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 py-5">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.22)] text-[#3d452f]">
+                        <ReceiptText className="size-4" />
+                      </span>
+
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Manual expenses
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                          Planned and paid records
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="text-right text-sm font-black text-[var(--color-near-black)]">
+                      {summary.counts.plannedExpenses + summary.counts.paidExpenses}
+                    </p>
+                  </div>
                 </div>
               </div>
             </aside>
@@ -1080,26 +1359,39 @@ export function BudgetWorkspacePage() {
             </div>
 
             {expenses.length > 0 ? (
-              <div className="mt-8 grid gap-4 lg:grid-cols-2">
+              <div className="mt-8 grid gap-5 xl:grid-cols-2">
                 {expenses.map((expense) => (
                   <article
                     key={expense.id}
-                    className="rounded-[1.5rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl"
+                    className="group relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/38 hover:shadow-[0_24px_60px_rgba(31,27,29,0.08)] sm:p-6"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                          {expense.title}
-                        </p>
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl transition-opacity duration-300 group-hover:opacity-90"
+                    />
 
-                        <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                          {expense.budgetCategory?.name ?? 'Uncategorised'}
-                        </p>
-                      </div>
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-3">
+                            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]">
+                              <ReceiptText className="size-5" />
+                            </span>
 
-                      <div className="flex items-center gap-2">
+                            <div className="min-w-0">
+                              <p className="truncate text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)] sm:text-xl">
+                                {expense.title}
+                              </p>
+
+                              <p className="mt-1 truncate text-sm font-semibold text-[var(--color-charcoal)]/52">
+                                {expense.budgetCategory?.name ?? 'Uncategorised'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
                         <span
-                          className="status-chip"
+                          className="status-chip shrink-0"
                           data-tone={
                             expense.status === 'PAID'
                               ? 'green'
@@ -1108,64 +1400,93 @@ export function BudgetWorkspacePage() {
                                 : 'plum'
                           }
                         >
-                          {expense.status}
+                          {expense.status.charAt(0) + expense.status.slice(1).toLowerCase()}
                         </span>
-
-                        <button
-                          type="button"
-                          className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.16)]"
-                          aria-label={`Edit ${expense.title}`}
-                          onClick={() => {
-                            openEditExpenseForm(expense);
-                          }}
-                        >
-                          <Pencil className="size-4" />
-                        </button>
-
-                        <button
-                          type="button"
-                          className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
-                          aria-label={`Delete ${expense.title}`}
-                          onClick={() => {
-                            openDeleteExpenseDialog(expense);
-                          }}
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
                       </div>
+
+                      <div className="mt-7 flex flex-col gap-4 border-b border-[rgba(93,58,85,0.10)] pb-6 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/42">
+                            Expense amount
+                          </p>
+
+                          <p className="mt-2 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] sm:text-4xl">
+                            {formatCurrency(expense.amount)}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3.5 py-2 text-sm font-black text-[var(--color-deep-plum)] transition hover:border-[rgba(93,58,85,0.25)] hover:bg-[rgba(93,58,85,0.13)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                            aria-label={`Edit ${expense.title}`}
+                            onClick={() => {
+                              openEditExpenseForm(expense);
+                            }}
+                          >
+                            <Pencil className="size-4" />
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            className="grid size-10 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.06)] text-[var(--color-muted-burgundy)] transition hover:border-[rgba(124,74,90,0.25)] hover:bg-[rgba(124,74,90,0.13)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                            aria-label={`Delete ${expense.title}`}
+                            onClick={() => {
+                              openDeleteExpenseDialog(expense);
+                            }}
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        <div className="flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                            <CircleDollarSign className="size-4" />
+                          </span>
+
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                              Expense date
+                            </p>
+
+                            <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                              {formatDateTime(expense.expenseDate)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954]">
+                            <CreditCard className="size-4" />
+                          </span>
+
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                              Due date
+                            </p>
+
+                            <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                              {formatDateTime(expense.dueDate)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {expense.notes ? (
+                        <div className="mt-5 rounded-2xl border border-white/48 bg-white/20 px-4 py-3.5">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/38">
+                            Notes
+                          </p>
+
+                          <p className="mt-2 line-clamp-3 text-sm font-medium leading-6 text-[var(--color-charcoal)]/64">
+                            {expense.notes}
+                          </p>
+                        </div>
+                      ) : null}
                     </div>
-
-                    <p className="mt-6 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                      {formatCurrency(expense.amount)}
-                    </p>
-
-                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                        <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                          Expense date
-                        </p>
-
-                        <p className="mt-2 text-sm font-bold leading-6 text-[var(--color-near-black)]">
-                          {formatDateTime(expense.expenseDate)}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl bg-white/28 p-4 backdrop-blur-xl">
-                        <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                          Due date
-                        </p>
-
-                        <p className="mt-2 text-sm font-bold leading-6 text-[var(--color-near-black)]">
-                          {formatDateTime(expense.dueDate)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {expense.notes ? (
-                      <p className="mt-4 line-clamp-3 leading-7 text-[var(--color-charcoal)]/64">
-                        {expense.notes}
-                      </p>
-                    ) : null}
                   </article>
                 ))}
               </div>
@@ -1192,7 +1513,7 @@ export function BudgetWorkspacePage() {
           aria-modal="true"
           aria-labelledby="create-budget-category-title"
         >
-          <div className="glass-card w-full max-w-xl p-6 sm:p-8">
+          <div className="glass-card w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,243,248,0.88))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.16)] backdrop-blur-3xl sm:p-9">
             <div className="flex items-start justify-between gap-5">
               <div>
                 <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -1225,7 +1546,19 @@ export function BudgetWorkspacePage() {
               </button>
             </div>
 
-            <form className="mt-8 grid gap-5" onSubmit={submitCategory}>
+            <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
+
+            <form className="mt-8 grid gap-6" onSubmit={submitCategory}>
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                  Category details
+                </p>
+
+                <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                  Create a clear budget area for a specific part of your event.
+                </p>
+              </div>
+
               <label className="block">
                 <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                   Category name
@@ -1239,6 +1572,10 @@ export function BudgetWorkspacePage() {
                   {...categoryForm.register('name')}
                 />
 
+                <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                  Use a short, recognisable name such as venue, catering or photography.
+                </span>
+
                 {categoryForm.formState.errors.name ? (
                   <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
                     {categoryForm.formState.errors.name.message}
@@ -1246,20 +1583,40 @@ export function BudgetWorkspacePage() {
                 ) : null}
               </label>
 
+              <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                  Allocation
+                </p>
+
+                <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                  Set the planned spending limit for this category.
+                </p>
+              </div>
+
               <label className="block">
                 <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                   Allocated amount
                 </span>
 
-                <input
-                  className="form-field"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  placeholder="350000"
-                  disabled={isCategoryMutationPending}
-                  {...categoryForm.register('allocatedAmount')}
-                />
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-black text-[var(--color-deep-plum)]">
+                    LKR
+                  </span>
+
+                  <input
+                    className="form-field pl-16"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="350000"
+                    disabled={isCategoryMutationPending}
+                    {...categoryForm.register('allocatedAmount')}
+                  />
+                </div>
+
+                <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                  This amount contributes to the total allocation shown in your budget summary.
+                </span>
 
                 {categoryForm.formState.errors.allocatedAmount ? (
                   <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
@@ -1267,6 +1624,7 @@ export function BudgetWorkspacePage() {
                   </span>
                 ) : null}
               </label>
+
               {categoryForm.formState.errors.root?.message ? (
                 <div
                   role="alert"
@@ -1287,35 +1645,45 @@ export function BudgetWorkspacePage() {
                 </div>
               ) : null}
 
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  className="btn-secondary justify-center text-sm font-bold"
-                  disabled={isCategoryMutationPending}
-                  onClick={closeCategoryForm}
-                >
-                  Cancel
-                </button>
+              <div className="mt-2 border-t border-[rgba(93,58,85,0.10)] pt-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+                    {categoryToEdit
+                      ? 'Your existing budget totals will update after these changes are saved.'
+                      : 'You can edit or remove this allocation later from the category list.'}
+                  </p>
 
-                <button
-                  type="submit"
-                  className="btn-primary justify-center text-sm font-bold"
-                  disabled={isCategoryMutationPending}
-                >
-                  {isCategoryMutationPending ? (
-                    <LoaderCircle className="size-4 animate-spin" />
-                  ) : (
-                    <Save className="size-4" />
-                  )}
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      className="btn-secondary justify-center text-sm font-bold"
+                      disabled={isCategoryMutationPending}
+                      onClick={closeCategoryForm}
+                    >
+                      Cancel
+                    </button>
 
-                  {updateCategoryMutation.isPending
-                    ? 'Saving category...'
-                    : createCategoryMutation.isPending
-                      ? 'Creating category...'
-                      : categoryToEdit
-                        ? 'Save changes'
-                        : 'Create category'}
-                </button>
+                    <button
+                      type="submit"
+                      className="btn-primary min-w-40 justify-center text-sm font-bold"
+                      disabled={isCategoryMutationPending}
+                    >
+                      {isCategoryMutationPending ? (
+                        <LoaderCircle className="size-4 animate-spin" />
+                      ) : (
+                        <Save className="size-4" />
+                      )}
+
+                      {updateCategoryMutation.isPending
+                        ? 'Saving category...'
+                        : createCategoryMutation.isPending
+                          ? 'Creating category...'
+                          : categoryToEdit
+                            ? 'Save changes'
+                            : 'Create category'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </form>
           </div>
@@ -1330,7 +1698,7 @@ export function BudgetWorkspacePage() {
           aria-labelledby="create-expense-title"
         >
           <div className="mx-auto max-w-2xl">
-            <div className="glass-card p-6 sm:p-8">
+            <div className="glass-card overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,243,248,0.88))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.16)] backdrop-blur-3xl sm:p-9">
               <div className="flex items-start justify-between gap-5">
                 <div>
                   <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -1363,7 +1731,18 @@ export function BudgetWorkspacePage() {
                 </button>
               </div>
 
+              <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
+
               <form className="mt-8 grid gap-5" onSubmit={submitExpense}>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Basic information
+                  </p>
+
+                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
+                    Give this expense a clear name and estimated amount.
+                  </p>
+                </div>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label className="block">
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -1408,6 +1787,16 @@ export function BudgetWorkspacePage() {
                   </label>
                 </div>
 
+                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Classification
+                  </p>
+
+                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
+                    Organise this expense within your event budget.
+                  </p>
+                </div>
+
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label className="block">
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -1448,6 +1837,16 @@ export function BudgetWorkspacePage() {
                   </label>
                 </div>
 
+                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Schedule
+                  </p>
+
+                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
+                    Record when the expense occurs and when payment is expected.
+                  </p>
+                </div>
+
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label className="block">
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -1480,6 +1879,16 @@ export function BudgetWorkspacePage() {
                       {...expenseForm.register('dueDate')}
                     />
                   </label>
+                </div>
+
+                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Additional notes
+                  </p>
+
+                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
+                    Include optional payment references or planning details.
+                  </p>
                 </div>
 
                 <label className="block">
@@ -1520,35 +1929,45 @@ export function BudgetWorkspacePage() {
                     )}
                   </div>
                 ) : null}
-                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    className="btn-secondary justify-center text-sm font-bold"
-                    disabled={isExpenseMutationPending}
-                    onClick={closeExpenseForm}
-                  >
-                    Cancel
-                  </button>
+                <div className="mt-2 border-t border-[rgba(93,58,85,0.10)] pt-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+                      {expenseToEdit
+                        ? 'Saving will immediately update the category totals and budget summary.'
+                        : 'This expense will be included in your event budget calculations.'}
+                    </p>
 
-                  <button
-                    type="submit"
-                    className="btn-primary justify-center text-sm font-bold"
-                    disabled={isExpenseMutationPending}
-                  >
-                    {isExpenseMutationPending ? (
-                      <LoaderCircle className="size-4 animate-spin" />
-                    ) : (
-                      <Save className="size-4" />
-                    )}
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        className="btn-secondary justify-center text-sm font-bold"
+                        disabled={isExpenseMutationPending}
+                        onClick={closeExpenseForm}
+                      >
+                        Cancel
+                      </button>
 
-                    {updateExpenseMutation.isPending
-                      ? 'Saving expense...'
-                      : createExpenseMutation.isPending
-                        ? 'Creating expense...'
-                        : expenseToEdit
-                          ? 'Save changes'
-                          : 'Create expense'}
-                  </button>
+                      <button
+                        type="submit"
+                        className="btn-primary min-w-40 justify-center text-sm font-bold"
+                        disabled={isExpenseMutationPending}
+                      >
+                        {isExpenseMutationPending ? (
+                          <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                          <Save className="size-4" />
+                        )}
+
+                        {updateExpenseMutation.isPending
+                          ? 'Saving expense...'
+                          : createExpenseMutation.isPending
+                            ? 'Creating expense...'
+                            : expenseToEdit
+                              ? 'Save changes'
+                              : 'Create expense'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
@@ -1557,26 +1976,82 @@ export function BudgetWorkspacePage() {
       ) : null}
       {expenseToDelete ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.52)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-expense-title"
         >
-          <div className="glass-card w-full max-w-lg p-6 sm:p-8">
-            <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-              <Trash2 className="size-7" />
+          <div className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,242,245,0.92))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9">
+            <div className="flex items-start justify-between gap-5">
+              <div className="grid size-16 shrink-0 place-items-center rounded-[1.4rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_16px_35px_rgba(124,74,90,0.10)]">
+                <Trash2 className="size-7" />
+              </div>
+
+              <span className="status-chip shrink-0" data-tone="rose">
+                Permanent action
+              </span>
             </div>
 
-            <h2
-              id="delete-expense-title"
-              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
-            >
-              Delete {expenseToDelete.title}?
-            </h2>
+            <div className="mt-7">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                Delete expense
+              </p>
 
-            <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
-              This permanently removes the expense and updates the budget totals.
-            </p>
+              <h2
+                id="delete-expense-title"
+                className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+              >
+                Remove this expense?
+              </h2>
+
+              <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
+                This will permanently remove the expense and immediately recalculate the related
+                budget totals.
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-[1.5rem] border border-white/60 bg-white/38 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <div className="flex items-start gap-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]">
+                  <ReceiptText className="size-5" />
+                </span>
+
+                <div className="min-w-0">
+                  <p className="truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                    {expenseToDelete.title}
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
+                    {expenseToDelete.budgetCategory?.name ?? 'Uncategorised'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between gap-4 border-t border-[rgba(93,58,85,0.10)] pt-5">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                    Expense amount
+                  </p>
+
+                  <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    {formatCurrency(expenseToDelete.amount)}
+                  </p>
+                </div>
+
+                <span
+                  className="status-chip shrink-0"
+                  data-tone={
+                    expenseToDelete.status === 'PAID'
+                      ? 'green'
+                      : expenseToDelete.status === 'CANCELLED'
+                        ? 'rose'
+                        : 'plum'
+                  }
+                >
+                  {expenseToDelete.status.charAt(0) + expenseToDelete.status.slice(1).toLowerCase()}
+                </span>
+              </div>
+            </div>
 
             {deleteExpenseMutation.isError ? (
               <div
@@ -1587,59 +2062,113 @@ export function BudgetWorkspacePage() {
               </div>
             ) : null}
 
-            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                className="btn-secondary justify-center text-sm font-bold"
-                disabled={deleteExpenseMutation.isPending}
-                onClick={closeDeleteExpenseDialog}
-              >
-                Keep expense
-              </button>
+            <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="btn-secondary justify-center text-sm font-bold"
+                  disabled={deleteExpenseMutation.isPending}
+                  onClick={closeDeleteExpenseDialog}
+                >
+                  Keep expense
+                </button>
 
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={deleteExpenseMutation.isPending}
-                onClick={() => {
-                  deleteExpenseMutation.mutate(expenseToDelete.id);
-                }}
-              >
-                {deleteExpenseMutation.isPending ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  <Trash2 className="size-4" />
-                )}
+                <button
+                  type="button"
+                  className="flex min-w-40 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--color-muted-burgundy),var(--color-rosewood))] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,74,90,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={deleteExpenseMutation.isPending}
+                  onClick={() => {
+                    deleteExpenseMutation.mutate(expenseToDelete.id);
+                  }}
+                >
+                  {deleteExpenseMutation.isPending ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-4" />
+                  )}
 
-                {deleteExpenseMutation.isPending ? 'Deleting expense...' : 'Delete expense'}
-              </button>
+                  {deleteExpenseMutation.isPending ? 'Deleting expense...' : 'Delete expense'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       ) : null}
       {categoryToDelete ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.52)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-budget-category-title"
         >
-          <div className="glass-card w-full max-w-lg p-6 sm:p-8">
-            <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-              <Trash2 className="size-7" />
+          <div className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,242,245,0.92))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9">
+            <div className="flex items-start justify-between gap-5">
+              <div className="grid size-16 shrink-0 place-items-center rounded-[1.4rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_16px_35px_rgba(124,74,90,0.10)]">
+                <Trash2 className="size-7" />
+              </div>
+
+              <span className="status-chip shrink-0" data-tone="rose">
+                Permanent action
+              </span>
             </div>
 
-            <h2
-              id="delete-budget-category-title"
-              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
-            >
-              Delete {categoryToDelete.name}?
-            </h2>
+            <div className="mt-7">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                Delete category
+              </p>
 
-            <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
-              This will permanently remove the category allocation. Any associated expenses may
-              remain as uncategorised expenses.
-            </p>
+              <h2
+                id="delete-budget-category-title"
+                className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+              >
+                Remove this allocation?
+              </h2>
+
+              <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
+                This permanently removes the category allocation. Associated expenses may remain in
+                the workspace as uncategorised expenses.
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-[1.5rem] border border-white/60 bg-white/38 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <div className="flex items-start gap-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                  <WalletCards className="size-5" />
+                </span>
+
+                <div className="min-w-0">
+                  <p className="truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                    {categoryToDelete.name}
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
+                    Budget category allocation
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[rgba(93,58,85,0.10)] pt-5">
+                <div className="rounded-2xl border border-white/50 bg-white/28 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                    Allocated
+                  </p>
+
+                  <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                    {formatCurrency(categoryToDelete.allocatedAmount)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/50 bg-white/28 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                    Used
+                  </p>
+
+                  <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                    {formatCurrency(categoryToDelete.totalExpenses)}
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {deleteCategoryMutation.isError ? (
               <div
@@ -1650,32 +2179,34 @@ export function BudgetWorkspacePage() {
               </div>
             ) : null}
 
-            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                className="btn-secondary justify-center text-sm font-bold"
-                disabled={deleteCategoryMutation.isPending}
-                onClick={closeDeleteCategoryDialog}
-              >
-                Keep category
-              </button>
+            <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="btn-secondary justify-center text-sm font-bold"
+                  disabled={deleteCategoryMutation.isPending}
+                  onClick={closeDeleteCategoryDialog}
+                >
+                  Keep category
+                </button>
 
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={deleteCategoryMutation.isPending}
-                onClick={() => {
-                  deleteCategoryMutation.mutate(categoryToDelete.id);
-                }}
-              >
-                {deleteCategoryMutation.isPending ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  <Trash2 className="size-4" />
-                )}
+                <button
+                  type="button"
+                  className="flex min-w-40 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--color-muted-burgundy),var(--color-rosewood))] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,74,90,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={deleteCategoryMutation.isPending}
+                  onClick={() => {
+                    deleteCategoryMutation.mutate(categoryToDelete.id);
+                  }}
+                >
+                  {deleteCategoryMutation.isPending ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-4" />
+                  )}
 
-                {deleteCategoryMutation.isPending ? 'Deleting category...' : 'Delete category'}
-              </button>
+                  {deleteCategoryMutation.isPending ? 'Deleting category...' : 'Delete category'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

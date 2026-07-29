@@ -280,18 +280,36 @@ export function VendorDetailPage() {
 
   if (isLoading) {
     return (
-      <section className="page-container py-24">
-        <div className="glass-card grid min-h-[28rem] place-items-center p-10 text-center">
-          <div>
-            <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+      <section className="relative overflow-hidden py-20 sm:py-24">
+        <div className="pointer-events-none absolute left-[8%] top-16 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[8%] top-20 size-80 rounded-full bg-[rgba(175,201,216,0.2)] blur-3xl" />
 
-            <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
-              Loading vendor profile
-            </p>
+        <div className="page-container">
+          <div className="glass-card relative grid min-h-[30rem] place-items-center overflow-hidden p-10 text-center">
+            <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-[rgba(183,167,200,0.15)] blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 left-1/3 size-56 rounded-full bg-[rgba(214,190,177,0.13)] blur-3xl" />
 
-            <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
-              Gathering packages, portfolio work and public vendor details.
-            </p>
+            <div className="relative max-w-lg">
+              <div className="mx-auto grid size-16 place-items-center rounded-[1.35rem] bg-[var(--color-deep-plum)] text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)]">
+                <LoaderCircle className="size-7 animate-spin" />
+              </div>
+
+              <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                Loading vendor profile
+              </p>
+
+              <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/62">
+                Gathering portfolio work, service packages, ratings, and public vendor information.
+              </p>
+
+              <div className="mx-auto mt-7 flex max-w-sm items-center gap-2">
+                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/55">
+                  <span className="block h-full w-2/3 animate-pulse rounded-full bg-[var(--color-deep-plum)]" />
+                </span>
+
+                <Sparkles className="size-4 text-[var(--color-rosewood)]" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -300,25 +318,45 @@ export function VendorDetailPage() {
 
   if (!vendor || errorMessage) {
     return (
-      <section className="page-container py-24">
-        <div className="glass-card grid min-h-[28rem] place-items-center p-10 text-center">
-          <div className="max-w-lg">
-            <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(130,72,77,0.12)] text-[var(--color-rosewood)]">
-              <CircleAlert className="size-7" />
+      <section className="relative overflow-hidden py-20 sm:py-24">
+        <div className="pointer-events-none absolute left-[8%] top-16 size-72 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[8%] top-20 size-80 rounded-full bg-[rgba(214,190,177,0.18)] blur-3xl" />
+
+        <div className="page-container">
+          <div className="glass-card relative grid min-h-[30rem] place-items-center overflow-hidden p-8 text-center sm:p-12">
+            <div className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-red-100/65 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 left-1/3 size-56 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
+
+            <div className="relative max-w-xl">
+              <div className="mx-auto grid size-16 place-items-center rounded-[1.35rem] bg-[rgba(130,72,77,0.11)] text-[var(--color-rosewood)] shadow-[0_14px_34px_rgba(64,42,51,0.08)]">
+                <CircleAlert className="size-7" />
+              </div>
+
+              <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-3xl">
+                Vendor profile unavailable
+              </p>
+
+              <p className="mt-4 text-sm leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
+                {errorMessage ??
+                  'This vendor profile could not be found in the public marketplace.'}
+              </p>
+
+              <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link to="/vendors" className="btn-primary text-sm font-bold">
+                  <ArrowLeft className="size-4" />
+                  Browse vendors
+                </Link>
+
+                <Link to="/planning-guide" className="btn-secondary text-sm font-bold">
+                  View planning guide
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
+
+              <p className="mt-6 text-xs font-semibold text-[var(--color-charcoal)]/46">
+                The profile may have been removed, renamed, or temporarily unavailable.
+              </p>
             </div>
-
-            <p className="mt-5 text-2xl font-black text-[var(--color-near-black)]">
-              Vendor profile unavailable
-            </p>
-
-            <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-              {errorMessage ?? 'This vendor profile could not be found in the public marketplace.'}
-            </p>
-
-            <Link to="/vendors" className="btn-secondary mt-6 text-sm font-bold">
-              <ArrowLeft className="size-4" />
-              Back to vendors
-            </Link>
           </div>
         </div>
       </section>
@@ -521,45 +559,113 @@ export function VendorDetailPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-3.5 sm:grid-cols-3">
-                  <div className="rounded-[1.55rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/40">
-                    <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                      Starting price
-                    </p>
+                <div className="space-y-4">
+                  <div className="grid gap-3.5 sm:grid-cols-3">
+                    <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
+                      <div className="pointer-events-none absolute -right-8 -top-10 size-24 rounded-full bg-[rgba(183,167,200,0.18)] blur-2xl transition duration-500 group-hover:scale-125" />
 
-                    <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {startingPrice}
-                    </p>
+                      <div className="relative flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                            Starting price
+                          </p>
+
+                          <p className="mt-3 break-words text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-2xl">
+                            {startingPrice}
+                          </p>
+                        </div>
+
+                        <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
+                          <MessageSquareQuote className="size-4" />
+                        </div>
+                      </div>
+
+                      <p className="relative mt-3 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                        Final pricing is confirmed through a structured quotation.
+                      </p>
+                    </div>
+
+                    <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
+                      <div className="pointer-events-none absolute -right-8 -top-10 size-24 rounded-full bg-[rgba(175,201,216,0.18)] blur-2xl transition duration-500 group-hover:scale-125" />
+
+                      <div className="relative flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                            Packages
+                          </p>
+
+                          <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                            {vendor.packages.length}
+                          </p>
+                        </div>
+
+                        <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
+                          <PackageCheck className="size-4" />
+                        </div>
+                      </div>
+
+                      <p className="relative mt-3 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                        Published service options ready for comparison.
+                      </p>
+                    </div>
+
+                    <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
+                      <div className="pointer-events-none absolute -right-8 -top-10 size-24 rounded-full bg-[rgba(214,190,177,0.18)] blur-2xl transition duration-500 group-hover:scale-125" />
+
+                      <div className="relative flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                            Service areas
+                          </p>
+
+                          <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                            {vendor.serviceAreas.length || 1}
+                          </p>
+                        </div>
+
+                        <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-rosewood)] shadow-sm">
+                          <MapPin className="size-4" />
+                        </div>
+                      </div>
+
+                      <p className="relative mt-3 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                        Locations currently covered by this vendor.
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="rounded-[1.55rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/40">
-                    <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Packages</p>
+                  <div className="relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-4 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl sm:p-5">
+                    <div className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.15)] blur-3xl" />
 
-                    <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {vendor.packages.length}
-                    </p>
+                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Ready to plan with {vendor.businessName}?
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
+                          Sign in to send your event details and receive a structured quotation.
+                        </p>
+                      </div>
+
+                      <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+                        <Link
+                          to="/login"
+                          className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
+                        >
+                          Request quotation
+                          <ArrowRight className="size-4" />
+                        </Link>
+
+                        <Link
+                          to="/planning-guide"
+                          className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
+                        >
+                          View planning guide
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-
-                  <div className="rounded-[1.55rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/40">
-                    <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                      Service areas
-                    </p>
-
-                    <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {vendor.serviceAreas.length || 1}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <Link to="/login" className="btn-primary text-sm font-bold">
-                    Request quotation
-                    <ArrowRight className="size-4" />
-                  </Link>
-
-                  <Link to="/planning-guide" className="btn-secondary text-sm font-bold">
-                    View planning guide
-                  </Link>
                 </div>
               </div>
             </div>
@@ -568,21 +674,27 @@ export function VendorDetailPage() {
       </section>
 
       <section className="page-container pb-10">
-        <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--color-rosewood)]">
-              Portfolio preview
+        <div className="glass-card relative mb-7 overflow-hidden p-6 sm:p-7">
+          <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
+
+          <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/42 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)] shadow-sm backdrop-blur-xl">
+                <Image className="size-4" />
+                Portfolio preview
+              </div>
+
+              <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
+                Selected work from {vendor.businessName}
+              </h2>
+            </div>
+
+            <p className="max-w-md text-sm leading-7 text-[var(--color-charcoal)]/62 sm:text-base">
+              Explore portfolio items uploaded by this vendor and discover the style behind their
+              event services.
             </p>
-
-            <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-              Selected work from {vendor.businessName}.
-            </h2>
           </div>
-
-          <p className="max-w-md leading-7 text-[var(--color-charcoal)]/68">
-            Browse portfolio items uploaded by this vendor and explore the style behind their event
-            services.
-          </p>
         </div>
 
         {vendor.portfolioItems.length > 0 ? (
@@ -633,16 +745,22 @@ export function VendorDetailPage() {
             ))}
           </div>
         ) : (
-          <div className="glass-card grid min-h-72 place-items-center p-10 text-center">
-            <div>
-              <Image className="mx-auto size-9 text-[var(--color-deep-plum)]" />
+          <div className="glass-card relative grid min-h-72 place-items-center overflow-hidden p-10 text-center">
+            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
 
-              <p className="mt-4 text-lg font-black text-[var(--color-near-black)]">
+            <div className="relative max-w-md">
+              <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_14px_34px_rgba(91,61,82,0.2)]">
+                <Image className="size-6" />
+              </div>
+
+              <p className="mt-5 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                 Portfolio coming soon
               </p>
 
-              <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
-                This vendor has not published portfolio items yet.
+              <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/60">
+                This vendor has not published portfolio items yet. Their latest work will appear
+                here once uploaded.
               </p>
             </div>
           </div>
@@ -652,15 +770,26 @@ export function VendorDetailPage() {
       <section className="page-container pb-24">
         <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <div>
-            <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--color-rosewood)]">
-                  Packages
-                </p>
+            <div className="glass-card relative mb-7 overflow-hidden p-6 sm:p-7">
+              <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
 
-                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-                  Clear service options before requesting a quotation.
-                </h2>
+              <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/42 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)] shadow-sm backdrop-blur-xl">
+                    <PackageCheck className="size-4" />
+                    Packages
+                  </div>
+
+                  <h2 className="mt-4 max-w-3xl text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
+                    Clear service options before requesting a quotation
+                  </h2>
+                </div>
+
+                <p className="max-w-md text-sm leading-7 text-[var(--color-charcoal)]/62 sm:text-base">
+                  Compare published packages, starting prices, and included service categories
+                  before sending a structured quotation request.
+                </p>
               </div>
             </div>
 
@@ -702,17 +831,28 @@ export function VendorDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="glass-card grid min-h-64 place-items-center p-10 text-center">
-                <div>
-                  <PackageCheck className="mx-auto size-9 text-[var(--color-deep-plum)]" />
+              <div className="glass-card relative grid min-h-64 place-items-center overflow-hidden p-10 text-center">
+                <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
 
-                  <p className="mt-4 text-lg font-black text-[var(--color-near-black)]">
+                <div className="relative max-w-md">
+                  <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_14px_34px_rgba(91,61,82,0.2)]">
+                    <PackageCheck className="size-6" />
+                  </div>
+
+                  <p className="mt-5 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                     Custom quotations available
                   </p>
 
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
-                    This vendor has not published fixed packages yet.
+                  <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/60">
+                    This vendor has not published fixed packages yet, but you can still request a
+                    tailored quotation based on your event requirements.
                   </p>
+
+                  <Link to="/login" className="btn-primary mt-6 text-sm font-bold">
+                    Request quotation
+                    <ArrowRight className="size-4" />
+                  </Link>
                 </div>
               </div>
             )}

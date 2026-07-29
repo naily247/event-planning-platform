@@ -434,27 +434,77 @@ export function VendorAvailabilityPage() {
               </p>
             </div>
 
-            <article className="glass-card p-5">
-              <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Next 90 days</p>
+            <article className="glass-card overflow-hidden p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                    Schedule overview
+                  </p>
 
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/28 p-4">
-                  <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    Next 90 days
+                  </h2>
+                </div>
+
+                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                  <CalendarRange className="size-5" />
+                </div>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-[var(--color-charcoal)]/60">
+                A quick view of confirmed commitments and time you have manually protected.
+              </p>
+
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-[1.35rem] border border-white/50 bg-white/28 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.3)] text-[#334954]">
+                      <BriefcaseBusiness className="size-4" />
+                    </div>
+
+                    <span className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/40">
+                      Committed
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                     {availability.bookings.length}
                   </p>
 
-                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/52">Bookings</p>
+                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/48">
+                    Scheduled bookings
+                  </p>
                 </div>
 
-                <div className="rounded-2xl bg-white/28 p-4">
-                  <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                <div className="rounded-[1.35rem] border border-white/50 bg-white/28 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid size-9 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
+                      <Ban className="size-4" />
+                    </div>
+
+                    <span className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/40">
+                      Protected
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                     {availability.blocks.length}
                   </p>
 
-                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/52">
+                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/48">
                     Blocked periods
                   </p>
                 </div>
+              </div>
+
+              <div className="mt-5 flex items-start gap-3 border-t border-white/48 pt-5">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.11)] text-[var(--color-deep-plum)]">
+                  <Clock3 className="size-3.5" />
+                </span>
+
+                <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                  Eventure checks these periods before allowing new bookings to proceed.
+                </p>
               </div>
             </article>
           </section>
@@ -478,42 +528,70 @@ export function VendorAvailabilityPage() {
 
               {timelineItems.length > 0 ? (
                 <div className="mt-7 space-y-4">
-                  {timelineItems.map((item) => {
+                  {timelineItems.map((item, index) => {
                     if (item.type === 'BOOKING') {
                       return (
                         <div
                           key={`booking-${item.id}`}
-                          className="rounded-[1.5rem] border border-[rgba(93,58,85,0.12)] bg-white/26 p-5"
+                          className="group relative overflow-hidden rounded-[1.65rem] border border-[rgba(93,58,85,0.12)] bg-white/28 p-5 transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.2)] hover:bg-white/36 hover:shadow-[0_18px_45px_rgba(35,24,30,0.08)]"
                         >
-                          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                            <div className="flex items-start gap-4">
-                              <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.34)] text-[#334954]">
+                          <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[rgba(92,139,164,0.62)]" />
+
+                          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                            <div className="flex min-w-0 items-start gap-4">
+                              <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.34)] text-[#334954] shadow-[0_10px_25px_rgba(51,73,84,0.08)]">
                                 <BriefcaseBusiness className="size-5" />
                               </div>
 
-                              <div>
-                                <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                                  Scheduled booking
-                                </p>
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[#526f7d]">
+                                    Scheduled booking
+                                  </p>
 
-                                <p className="mt-2 font-black text-[var(--color-near-black)]">
+                                  {index === 0 ? (
+                                    <span className="rounded-full bg-[rgba(175,201,216,0.28)] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[#405d69]">
+                                      Next
+                                    </span>
+                                  ) : null}
+                                </div>
+
+                                <p className="mt-3 text-base font-black leading-7 text-[var(--color-near-black)]">
                                   {formatDateTimeRange(item.startsAt, item.endsAt)}
                                 </p>
+
+                                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                                  <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--color-charcoal)]/52">
+                                    <CalendarDays className="size-3.5 text-[#526f7d]" />
+                                    Reserved through Eventure
+                                  </span>
+
+                                  <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--color-charcoal)]/52">
+                                    <Clock3 className="size-3.5 text-[#526f7d]" />
+                                    Protected automatically
+                                  </span>
+                                </div>
                               </div>
                             </div>
 
                             <span
-                              className="status-chip w-fit"
+                              className="status-chip w-fit shrink-0"
                               data-tone={getBookingStatusTone(item.booking.status)}
                             >
                               {item.booking.status.replaceAll('_', ' ')}
                             </span>
                           </div>
 
-                          <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                            This time is reserved by an existing booking and cannot be manually
-                            removed here.
-                          </p>
+                          <div className="mt-5 flex items-start gap-3 rounded-[1.2rem] border border-white/48 bg-white/24 px-4 py-3">
+                            <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(175,201,216,0.26)] text-[#405d69]">
+                              <CircleAlert className="size-3.5" />
+                            </span>
+
+                            <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                              This period belongs to an existing booking and cannot be manually
+                              removed from availability.
+                            </p>
+                          </div>
                         </div>
                       );
                     }
@@ -521,33 +599,49 @@ export function VendorAvailabilityPage() {
                     return (
                       <div
                         key={`block-${item.id}`}
-                        className="rounded-[1.5rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] p-5"
+                        className="group relative overflow-hidden rounded-[1.65rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.065)] p-5 transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.26)] hover:bg-[rgba(124,74,90,0.09)] hover:shadow-[0_18px_45px_rgba(35,24,30,0.08)]"
                       >
-                        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                          <div className="flex items-start gap-4">
-                            <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(142,92,103,0.16)] text-[var(--color-rosewood)]">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[rgba(142,92,103,0.7)]" />
+
+                        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                          <div className="flex min-w-0 items-start gap-4">
+                            <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(142,92,103,0.16)] text-[var(--color-rosewood)] shadow-[0_10px_25px_rgba(124,74,90,0.08)]">
                               <Ban className="size-5" />
                             </div>
 
-                            <div>
-                              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                                Unavailable period
-                              </p>
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                                  Unavailable period
+                                </p>
 
-                              <p className="mt-2 font-black text-[var(--color-near-black)]">
+                                {index === 0 ? (
+                                  <span className="rounded-full bg-[rgba(142,92,103,0.14)] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-rosewood)]">
+                                    Next
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              <p className="mt-3 text-base font-black leading-7 text-[var(--color-near-black)]">
                                 {formatDateTimeRange(item.startsAt, item.endsAt)}
                               </p>
 
-                              <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                                {item.block.reason ??
-                                  'No reason was added for this blocked period.'}
-                              </p>
+                              <div className="mt-4 rounded-[1.15rem] border border-white/44 bg-white/22 px-4 py-3">
+                                <p className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                                  Private reason
+                                </p>
+
+                                <p className="mt-1.5 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                                  {item.block.reason ??
+                                    'No reason was added for this blocked period.'}
+                                </p>
+                              </div>
                             </div>
                           </div>
 
                           <button
                             type="button"
-                            className="grid size-10 shrink-0 place-items-center rounded-xl border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
+                            className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.09)] px-3 py-2.5 text-xs font-black text-[var(--color-muted-burgundy)] transition duration-300 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.16)] sm:size-10 sm:px-0"
                             aria-label="Delete availability block"
                             onClick={() => {
                               deleteMutation.reset();
@@ -555,6 +649,8 @@ export function VendorAvailabilityPage() {
                             }}
                           >
                             <Trash2 className="size-4" />
+
+                            <span className="sm:hidden">Remove block</span>
                           </button>
                         </div>
                       </div>
@@ -643,42 +739,88 @@ export function VendorAvailabilityPage() {
             }}
           >
             <div className="glass-card p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-5">
-                <div>
-                  <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                    <Ban className="size-4" />
-                    Block unavailable time
+              <div>
+                <div className="flex items-start justify-between gap-5">
+                  <div className="flex min-w-0 items-start gap-4">
+                    <div className="grid size-14 shrink-0 place-items-center rounded-[1.25rem] bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)] shadow-[0_12px_30px_rgba(124,74,90,0.09)]">
+                      <Ban className="size-6" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                        Availability control
+                      </p>
+
+                      <h2
+                        id="create-availability-title"
+                        className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
+                      >
+                        Protect a period in your schedule.
+                      </h2>
+
+                      <p className="mt-3 max-w-xl leading-7 text-[var(--color-charcoal)]/66">
+                        Prevent customers from requesting or confirming bookings while your business
+                        is unavailable.
+                      </p>
+                    </div>
                   </div>
 
-                  <h2
-                    id="create-availability-title"
-                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+                  <button
+                    type="button"
+                    className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition duration-300 hover:bg-white/42 hover:text-[var(--color-near-black)]"
+                    aria-label="Close availability block dialog"
+                    disabled={createMutation.isPending}
+                    onClick={closeCreateDialog}
                   >
-                    Protect a period in your schedule.
-                  </h2>
-
-                  <p className="mt-3 max-w-xl leading-7 text-[var(--color-charcoal)]/66">
-                    Customers cannot create bookings that overlap this period.
-                  </p>
+                    <X className="size-5" />
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)]"
-                  aria-label="Close availability block dialog"
-                  disabled={createMutation.isPending}
-                  onClick={closeCreateDialog}
-                >
-                  <X className="size-5" />
-                </button>
+                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  <div className="flex items-start gap-3 rounded-[1.25rem] border border-white/50 bg-white/24 p-4">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.2)] text-[var(--color-deep-plum)]">
+                      <CalendarDays className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        Choose an exact period
+                      </p>
+
+                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                        Add the precise start and end date for your absence.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 rounded-[1.25rem] border border-white/50 bg-white/24 p-4">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#405d69]">
+                      <Clock3 className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        Existing bookings stay safe
+                      </p>
+
+                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                        Eventure prevents blocks from conflicting with committed work.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <form className="mt-8 grid gap-5" onSubmit={onSubmit}>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Starts
-                    </span>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                        Starts
+                      </span>
+
+                      <CalendarDays className="size-4 text-[var(--color-deep-plum)]/70" />
+                    </div>
 
                     <input
                       className="form-field"
@@ -688,6 +830,10 @@ export function VendorAvailabilityPage() {
                       {...form.register('startsAt')}
                     />
 
+                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                      Select when this unavailable period begins.
+                    </p>
+
                     {form.formState.errors.startsAt ? (
                       <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
                         {form.formState.errors.startsAt.message}
@@ -696,9 +842,13 @@ export function VendorAvailabilityPage() {
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Ends
-                    </span>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                        Ends
+                      </span>
+
+                      <Clock3 className="size-4 text-[var(--color-deep-plum)]/70" />
+                    </div>
 
                     <input
                       className="form-field"
@@ -707,6 +857,10 @@ export function VendorAvailabilityPage() {
                       disabled={createMutation.isPending}
                       {...form.register('endsAt')}
                     />
+
+                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                      The end must be later than the selected start time.
+                    </p>
 
                     {form.formState.errors.endsAt ? (
                       <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
@@ -717,20 +871,32 @@ export function VendorAvailabilityPage() {
                 </div>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Reason
-                  </span>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                      Reason
+                    </span>
+
+                    <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
+                      {(form.watch('reason') ?? '').length}/500
+                    </span>
+                  </div>
 
                   <textarea
-                    className="form-field min-h-28 resize-y"
-                    placeholder="Personal commitment, equipment maintenance, unavailable team..."
+                    className="form-field min-h-36 resize-y"
+                    placeholder="Annual leave, equipment maintenance, family event, venue inspection, team training..."
+                    maxLength={500}
                     disabled={createMutation.isPending}
                     {...form.register('reason')}
                   />
 
-                  <span className="mt-2 block text-xs font-semibold text-[var(--color-charcoal)]/48">
-                    Optional. This reason is private to your vendor workspace.
-                  </span>
+                  <div className="mt-2 flex items-start gap-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                    <CircleAlert className="mt-0.5 size-3.5 shrink-0" />
+
+                    <span>
+                      This note is optional and remains private to your vendor workspace. Customers
+                      will never see it.
+                    </span>
+                  </div>
 
                   {form.formState.errors.reason ? (
                     <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">

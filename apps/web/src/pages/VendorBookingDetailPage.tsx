@@ -132,15 +132,20 @@ function DetailItem({
   value: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-zinc-100 bg-[#faf8f7] p-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-rose-700 shadow-sm">
-        <Icon className="h-4 w-4" />
+    <div className="group relative flex items-start gap-4 overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/48 p-4 shadow-inner transition duration-300 hover:bg-white/60">
+      <div className="pointer-events-none absolute -right-10 -top-10 size-24 rounded-full bg-[rgba(183,167,200,0.12)] blur-2xl transition duration-500 group-hover:scale-110" />
+      <div className="relative grid size-11 shrink-0 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+        <Icon className="size-5" />
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">{label}</p>
+        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
+          {label}
+        </p>
 
-        <p className="mt-1 break-words text-sm font-medium leading-6 text-zinc-700">{value}</p>
+        <p className="mt-1.5 break-words text-sm font-semibold leading-6 text-[var(--color-near-black)]">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -157,10 +162,14 @@ function TextSection({
 }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-zinc-700">{title}</h3>
+      <h3 className="text-sm font-black tracking-[-0.015em] text-[var(--color-near-black)]">
+        {title}
+      </h3>
 
-      <div className="mt-2 rounded-2xl border border-zinc-100 bg-[#faf8f7] p-4">
-        <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-600">{value || emptyText}</p>
+      <div className="mt-2 rounded-[1.35rem] border border-white/65 bg-white/48 p-4 shadow-inner">
+        <p className="whitespace-pre-wrap text-sm leading-7 text-[var(--color-charcoal)]/64">
+          {value || emptyText}
+        </p>
       </div>
     </div>
   );
@@ -169,7 +178,7 @@ function TextSection({
 function PageSkeleton() {
   return (
     <div className="animate-pulse space-y-6">
-      <div className="rounded-[32px] border border-white/80 bg-white/70 p-8">
+      <div className="glass-card p-8">
         <div className="h-6 w-40 rounded bg-zinc-200" />
         <div className="mt-5 h-10 w-2/3 rounded bg-zinc-200" />
         <div className="mt-4 h-5 w-1/2 rounded bg-zinc-200" />
@@ -177,13 +186,13 @@ function PageSkeleton() {
 
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.75fr]">
         <div className="space-y-6">
-          <div className="h-72 rounded-[28px] bg-white/75" />
-          <div className="h-80 rounded-[28px] bg-white/75" />
+          <div className="glass-card h-72" />
+          <div className="glass-card h-80" />
         </div>
 
         <div className="space-y-6">
-          <div className="h-80 rounded-[28px] bg-white/75" />
-          <div className="h-64 rounded-[28px] bg-white/75" />
+          <div className="glass-card h-80" />
+          <div className="glass-card h-64" />
         </div>
       </div>
     </div>
@@ -362,15 +371,20 @@ export function VendorBookingDetailPage() {
 
   if (!bookingId) {
     return (
-      <main className="min-h-screen bg-[#f5f1f0] px-4 py-8">
-        <div className="mx-auto max-w-3xl rounded-[28px] border border-red-200 bg-red-50 p-8 text-center">
-          <AlertCircle className="mx-auto h-10 w-10 text-red-500" />
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(190,137,154,0.18),_transparent_34%),linear-gradient(180deg,_#f8f5f4_0%,_#f3efee_100%)] px-4 py-8">
+        <div className="glass-card relative mx-auto max-w-3xl overflow-hidden p-8 text-center sm:p-10">
+          <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-red-100/70 blur-3xl" />
+          <div className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600">
+            <AlertCircle className="size-6" />
+          </div>
 
-          <h1 className="mt-4 text-xl font-semibold text-red-900">Invalid booking</h1>
+          <h1 className="relative mt-5 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+            Invalid booking
+          </h1>
 
           <Link
             to="/vendor/bookings"
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-red-700 px-5 py-3 text-sm font-semibold text-white"
+            className="relative mt-6 inline-flex items-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to bookings
@@ -427,27 +441,34 @@ export function VendorBookingDetailPage() {
             <PageSkeleton />
           </div>
         ) : bookingQuery.isError || !booking ? (
-          <section className="mt-6 rounded-[28px] border border-red-200 bg-red-50 p-8 text-center shadow-sm">
-            <AlertCircle className="mx-auto h-10 w-10 text-red-500" />
+          <section className="glass-card relative mt-6 overflow-hidden p-8 text-center sm:p-10">
+            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-red-100/70 blur-3xl" />
+            <div className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600">
+              <AlertCircle className="size-6" />
+            </div>
 
-            <h1 className="mt-4 text-xl font-semibold text-red-900">Booking could not be loaded</h1>
+            <h1 className="relative mt-5 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+              Booking could not be loaded
+            </h1>
 
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-red-700">
+            <p className="relative mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-charcoal)]/62">
               {getErrorMessage(bookingQuery.error)}
             </p>
 
             <button
               type="button"
               onClick={() => bookingQuery.refetch()}
-              className="mt-5 rounded-2xl bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800"
+              className="relative mt-6 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
             >
               Try again
             </button>
           </section>
         ) : (
           <>
-            <section className="mt-6 overflow-hidden rounded-[32px] border border-white/80 bg-white/65 p-6 shadow-[0_24px_80px_rgba(64,42,51,0.08)] backdrop-blur-xl sm:p-8">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <section className="glass-card relative mt-6 overflow-hidden p-6 sm:p-8">
+              <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-28 left-1/3 size-56 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
+              <div className="relative flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <span
                     className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
@@ -461,49 +482,60 @@ export function VendorBookingDetailPage() {
                     {booking.event.eventType}
                   </p>
 
-                  <h1 className="mt-2 max-w-4xl text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+                  <h1 className="mt-2 max-w-4xl text-4xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
                     {booking.event.name}
                   </h1>
 
-                  <p className="mt-3 text-sm text-zinc-500">
+                  <p className="mt-4 text-base leading-7 text-[var(--color-charcoal)]/60">
                     Booking created {formatDateTime(booking.createdAt)}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white bg-white/85 px-5 py-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-zinc-400">
-                    Agreed cost
-                  </p>
+                <div className="relative min-w-[220px] overflow-hidden rounded-[1.6rem] border border-white/60 bg-white/38 p-5 shadow-[0_18px_48px_rgba(49,35,42,0.08)] backdrop-blur-xl">
+                  <div className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-[rgba(183,167,200,0.18)] blur-2xl" />
 
-                  <p className="mt-2 text-2xl font-semibold text-[#34282e]">
-                    {formatMoney(booking.agreedCost)}
-                  </p>
+                  <div className="relative flex items-center gap-4">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.22)]">
+                      <CircleDollarSign className="size-5" />
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/46">
+                        Agreed cost
+                      </p>
+
+                      <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                        {formatMoney(booking.agreedCost)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
 
             {successMessage && (
-              <div className="mt-6 flex items-start gap-3 rounded-[24px] border border-emerald-200 bg-emerald-50 p-5">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+              <div className="glass-card mt-6 flex items-start gap-3 border-emerald-200/70 bg-emerald-50/75 p-5">
+                <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-700" />
 
-                <p className="text-sm font-medium text-emerald-800">{successMessage}</p>
+                <p className="text-sm font-semibold leading-6 text-emerald-800">{successMessage}</p>
               </div>
             )}
 
             {operationError && (
-              <div className="mt-6 flex items-start gap-3 rounded-[24px] border border-red-200 bg-red-50 p-5">
-                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" />
+              <div className="glass-card mt-6 flex items-start gap-3 border-red-200/70 bg-red-50/75 p-5">
+                <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-700" />
 
-                <p className="text-sm font-medium text-red-800">{operationError}</p>
+                <p className="text-sm font-semibold leading-6 text-red-800">operationError</p>
               </div>
             )}
 
             <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_0.75fr]">
               <div className="space-y-6">
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] backdrop-blur-xl sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <CalendarDays className="h-5 w-5" />
+                <section className="glass-card relative overflow-hidden p-6 sm:p-7">
+                  <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
+                  <div className="relative flex items-center gap-4">
+                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+                      <CalendarDays className="size-5" />
                     </div>
 
                     <div>
@@ -511,7 +543,9 @@ export function VendorBookingDetailPage() {
                         Service schedule
                       </p>
 
-                      <h2 className="mt-1 text-xl font-semibold">Booking details</h2>
+                      <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                        Booking details
+                      </h2>
                     </div>
                   </div>
 
@@ -546,10 +580,11 @@ export function VendorBookingDetailPage() {
                   </div>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] backdrop-blur-xl sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <Package className="h-5 w-5" />
+                <section className="glass-card relative overflow-hidden p-6 sm:p-7">
+                  <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
+                  <div className="relative flex items-center gap-4">
+                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+                      <Package className="size-5" />
                     </div>
 
                     <div>
@@ -557,31 +592,34 @@ export function VendorBookingDetailPage() {
                         Accepted quotation
                       </p>
 
-                      <h2 className="mt-1 text-xl font-semibold">Package and service scope</h2>
+                      <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                        Package and service scope
+                      </h2>
                     </div>
                   </div>
 
-                  <div className="mt-6 rounded-2xl border border-zinc-100 bg-[#faf8f7] p-5">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="relative mt-6 overflow-hidden rounded-[1.5rem] border border-white/65 bg-white/48 p-5 shadow-inner">
+                    <div className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-[rgba(183,167,200,0.12)] blur-2xl" />
+                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <p className="text-lg font-semibold text-[#34282e]">
+                        <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                           {booking.acceptedQuotation.quotationRequest.package?.title ||
                             'Custom service'}
                         </p>
 
-                        <p className="mt-1 text-sm font-medium text-rose-700">
+                        <p className="mt-1.5 text-sm font-black text-[var(--color-deep-plum)]">
                           {booking.acceptedQuotation.quotationRequest.package?.category?.name ||
                             'Event service'}
                         </p>
                       </div>
 
-                      <p className="text-lg font-semibold text-[#34282e]">
+                      <p className="text-xl font-black tracking-[-0.03em] text-[var(--color-deep-plum)]">
                         {formatMoney(booking.acceptedQuotation.proposedPrice)}
                       </p>
                     </div>
 
                     {booking.acceptedQuotation.quotationRequest.package?.description && (
-                      <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-zinc-600">
+                      <p className="relative mt-4 whitespace-pre-wrap border-t border-white/60 pt-4 text-sm leading-7 text-[var(--color-charcoal)]/64">
                         {booking.acceptedQuotation.quotationRequest.package.description}
                       </p>
                     )}
@@ -614,10 +652,11 @@ export function VendorBookingDetailPage() {
                   </div>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] backdrop-blur-xl sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <FileCheck2 className="h-5 w-5" />
+                <section className="glass-card relative overflow-hidden p-6 sm:p-7">
+                  <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
+                  <div className="relative flex items-center gap-4">
+                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+                      <FileCheck2 className="size-5" />
                     </div>
 
                     <div>
@@ -625,11 +664,13 @@ export function VendorBookingDetailPage() {
                         Booking record
                       </p>
 
-                      <h2 className="mt-1 text-xl font-semibold">Status timeline</h2>
+                      <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                        Status timeline
+                      </h2>
                     </div>
                   </div>
 
-                  <div className="mt-6 space-y-4">
+                  <div className="relative mt-6 space-y-4">
                     <DetailItem
                       icon={CalendarDays}
                       label="Booking created"
@@ -708,10 +749,11 @@ export function VendorBookingDetailPage() {
               </div>
 
               <aside className="space-y-6">
-                <section className="rounded-[28px] border border-white/80 bg-white/80 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.07)] backdrop-blur-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <UserRound className="h-5 w-5" />
+                <section className="glass-card relative overflow-hidden p-6">
+                  <div className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+                  <div className="relative flex items-center gap-4">
+                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+                      <UserRound className="size-5" />
                     </div>
 
                     <div>
@@ -719,11 +761,13 @@ export function VendorBookingDetailPage() {
                         Customer
                       </p>
 
-                      <h2 className="mt-1 text-lg font-semibold">{getCustomerName(booking)}</h2>
+                      <h2 className="mt-1 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        {getCustomerName(booking)}
+                      </h2>
                     </div>
                   </div>
 
-                  <div className="mt-6 space-y-3">
+                  <div className="relative mt-6 space-y-3">
                     <DetailItem icon={Mail} label="Email" value={booking.event.owner.email} />
 
                     <DetailItem
@@ -734,35 +778,46 @@ export function VendorBookingDetailPage() {
                   </div>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.08)] backdrop-blur-xl">
-                  <div className="flex items-center gap-3">
-                    <CircleDollarSign className="h-5 w-5 text-rose-700" />
+                <section className="glass-card relative overflow-hidden p-6">
+                  <div className="pointer-events-none absolute -left-14 -top-16 size-40 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
+                  <div className="relative flex items-center gap-4">
+                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+                      <CircleDollarSign className="size-5" />
+                    </div>
 
-                    <h2 className="font-semibold">Financial summary</h2>
+                    <h2 className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      Financial summary
+                    </h2>
                   </div>
 
-                  <dl className="mt-5 space-y-4">
+                  <dl className="relative mt-5 space-y-4">
                     <div className="flex items-center justify-between gap-4">
-                      <dt className="text-sm text-zinc-500">Agreed cost</dt>
+                      <dt className="text-sm font-semibold text-[var(--color-charcoal)]/52">
+                        Agreed cost
+                      </dt>
 
-                      <dd className="font-semibold text-[#34282e]">
+                      <dd className="font-black text-[var(--color-near-black)]">
                         {formatMoney(booking.agreedCost)}
                       </dd>
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
-                      <dt className="text-sm text-zinc-500">Deposit</dt>
+                      <dt className="text-sm font-semibold text-[var(--color-charcoal)]/52">
+                        Deposit
+                      </dt>
 
-                      <dd className="font-semibold text-[#34282e]">
+                      <dd className="font-black text-[var(--color-near-black)]">
                         {depositAmount ? formatMoney(depositAmount) : 'Not required'}
                       </dd>
                     </div>
 
-                    <div className="border-t border-zinc-100 pt-4">
+                    <div className="border-t border-white/65 pt-4">
                       <div className="flex items-center justify-between gap-4">
-                        <dt className="text-sm font-semibold text-zinc-700">Remaining balance</dt>
+                        <dt className="text-sm font-black text-[var(--color-near-black)]">
+                          Remaining balance
+                        </dt>
 
-                        <dd className="text-lg font-semibold text-rose-800">
+                        <dd className="text-lg font-black tracking-[-0.025em] text-[var(--color-deep-plum)]">
                           {remainingBalance !== null
                             ? formatMoney(remainingBalance.toString())
                             : 'Not available'}
@@ -773,8 +828,9 @@ export function VendorBookingDetailPage() {
                 </section>
 
                 {(canConfirm || canReject || canCancel || canComplete) && (
-                  <section className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.08)]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                  <section className="glass-card relative overflow-hidden p-6">
+                    <div className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+                    <p className="relative text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
                       Booking actions
                     </p>
 
@@ -782,7 +838,7 @@ export function VendorBookingDetailPage() {
                       <button
                         type="button"
                         onClick={() => openDialog('CONFIRM')}
-                        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#34282e] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#4b343e]"
+                        className="relative mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3.5 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
                       >
                         <CheckCircle2 className="h-4 w-4" />
                         Confirm booking
@@ -793,7 +849,7 @@ export function VendorBookingDetailPage() {
                       <button
                         type="button"
                         onClick={() => openDialog('REJECT')}
-                        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white px-5 py-3.5 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+                        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200/80 bg-white/70 px-5 py-3.5 text-sm font-black text-red-700 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-red-50"
                       >
                         <XCircle className="h-4 w-4" />
                         Reject booking
@@ -804,7 +860,7 @@ export function VendorBookingDetailPage() {
                       <button
                         type="button"
                         onClick={() => openDialog('COMPLETE')}
-                        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3.5 text-sm font-black text-white shadow-[0_16px_38px_rgba(4,120,87,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-800"
                       >
                         <CheckCircle2 className="h-4 w-4" />
                         Mark as completed
@@ -815,7 +871,7 @@ export function VendorBookingDetailPage() {
                       <button
                         type="button"
                         onClick={() => openDialog('CANCEL')}
-                        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white px-5 py-3.5 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+                        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200/80 bg-white/70 px-5 py-3.5 text-sm font-black text-red-700 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-red-50"
                       >
                         <Ban className="h-4 w-4" />
                         Cancel booking
@@ -824,35 +880,43 @@ export function VendorBookingDetailPage() {
                   </section>
                 )}
 
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-sm backdrop-blur-xl">
-                  <div className="flex items-center gap-3">
-                    <ShieldAlert className="h-5 w-5 text-rose-700" />
+                <section className="glass-card relative overflow-hidden p-6">
+                  <div className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
+                  <div className="relative flex items-center gap-4">
+                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+                      <ShieldAlert className="size-5" />
+                    </div>
 
-                    <h2 className="font-semibold">Booking guidance</h2>
+                    <h2 className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      Booking guidance
+                    </h2>
                   </div>
 
-                  <p className="mt-4 text-sm leading-6 text-zinc-600">
+                  <p className="relative mt-5 text-sm leading-7 text-[var(--color-charcoal)]/64">
                     Confirm only when the date and service scope are feasible. Rejections and
                     cancellations require a clear reason and are permanently recorded.
                   </p>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-sm backdrop-blur-xl">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                <section className="glass-card relative overflow-hidden p-6">
+                  <div className="pointer-events-none absolute -left-14 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
+                  <p className="relative text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
                     Record information
                   </p>
 
-                  <dl className="mt-4 space-y-4 text-sm">
+                  <dl className="relative mt-5 space-y-4 text-sm">
                     <div>
-                      <dt className="text-zinc-400">Booking ID</dt>
+                      <dt className="font-semibold text-[var(--color-charcoal)]/42">Booking ID</dt>
 
-                      <dd className="mt-1 break-all font-medium text-zinc-700">{booking.id}</dd>
+                      <dd className="mt-1.5 break-all font-semibold leading-6 text-[var(--color-near-black)]">
+                        {booking.id}
+                      </dd>
                     </div>
 
                     <div>
-                      <dt className="text-zinc-400">Quotation version</dt>
+                      <dt className="font-semibold text-[var(--color-charcoal)]/42"> version</dt>
 
-                      <dd className="mt-1 font-medium text-zinc-700">
+                      <dd className="mt-1.5 font-semibold text-[var(--color-near-black)]">
                         Version {booking.acceptedQuotation.version}
                       </dd>
                     </div>
@@ -878,25 +942,30 @@ export function VendorBookingDetailPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="booking-action-title"
-            className="w-full max-w-lg rounded-[28px] border border-white/80 bg-white p-6 shadow-2xl sm:p-7"
+            className="glass-card relative w-full max-w-lg overflow-hidden p-6 shadow-[0_32px_90px_rgba(38,24,31,0.24)] sm:p-7"
           >
+            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl" />
+
             <div
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+              className={`relative grid size-12 place-items-center rounded-2xl shadow-[0_12px_28px_rgba(49,35,42,0.1)] ${
                 actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-red-50 text-red-700'
               }`}
             >
-              {actionDialog === 'CONFIRM' && <CheckCircle2 className="h-5 w-5" />}
+              {actionDialog === 'CONFIRM' && <CheckCircle2 className="size-5" />}
 
-              {actionDialog === 'REJECT' && <XCircle className="h-5 w-5" />}
+              {actionDialog === 'REJECT' && <XCircle className="size-5" />}
 
-              {actionDialog === 'CANCEL' && <Ban className="h-5 w-5" />}
+              {actionDialog === 'CANCEL' && <Ban className="size-5" />}
 
-              {actionDialog === 'COMPLETE' && <FileCheck2 className="h-5 w-5" />}
+              {actionDialog === 'COMPLETE' && <FileCheck2 className="size-5" />}
             </div>
 
-            <h2 id="booking-action-title" className="mt-5 text-xl font-semibold text-[#34282e]">
+            <h2
+              id="booking-action-title"
+              className="relative mt-5 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]"
+            >
               {actionDialog === 'CONFIRM' && 'Confirm this booking?'}
 
               {actionDialog === 'REJECT' && 'Reject this booking?'}
@@ -906,7 +975,7 @@ export function VendorBookingDetailPage() {
               {actionDialog === 'COMPLETE' && 'Mark this booking as completed?'}
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-zinc-500">
+            <p className="relative mt-3 text-sm leading-7 text-[var(--color-charcoal)]/62">
               {actionDialog === 'CONFIRM' &&
                 'Confirm that you can provide the agreed service on the scheduled date.'}
 
@@ -922,7 +991,7 @@ export function VendorBookingDetailPage() {
 
             {actionDialog === 'CONFIRM' && (
               <label className="mt-5 block">
-                <span className="text-sm font-semibold text-zinc-700">
+                <span className="text-sm font-black text-[var(--color-near-black)]">
                   Confirmation note (optional)
                 </span>
 
@@ -935,16 +1004,18 @@ export function VendorBookingDetailPage() {
                     setFormError('');
                   }}
                   placeholder="Add any useful confirmation details for the customer..."
-                  className="mt-2 w-full resize-y rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-rose-300 focus:ring-4 focus:ring-rose-100 disabled:bg-zinc-100"
+                  className="mt-2 w-full resize-y rounded-2xl border border-white/70 bg-white/65 px-4 py-3 text-sm leading-7 text-[var(--color-near-black)] outline-none transition duration-300 placeholder:text-[var(--color-charcoal)]/38 focus:border-[rgba(183,167,200,0.75)] focus:bg-white focus:ring-4 focus:ring-[rgba(183,167,200,0.18)] disabled:bg-white/40 disabled:text-[var(--color-charcoal)]/40"
                 />
 
-                <p className="mt-2 text-right text-xs text-zinc-400">{confirmNote.length}/2000</p>
+                <p className="mt-2 text-right text-xs font-semibold text-[var(--color-charcoal)]/40">
+                  confirmNote.length/2000
+                </p>
               </label>
             )}
 
             {(actionDialog === 'REJECT' || actionDialog === 'CANCEL') && (
               <label className="mt-5 block">
-                <span className="text-sm font-semibold text-zinc-700">
+                <span className="text-sm font-black text-[var(--color-near-black)]">
                   {actionDialog === 'REJECT' ? 'Rejection reason' : 'Cancellation reason'}
                 </span>
 
@@ -961,10 +1032,12 @@ export function VendorBookingDetailPage() {
                       ? 'Explain why this booking cannot be accepted...'
                       : 'Explain why this booking must be cancelled...'
                   }
-                  className="mt-2 w-full resize-y rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-rose-300 focus:ring-4 focus:ring-rose-100 disabled:bg-zinc-100"
+                  className="mt-2 w-full resize-y rounded-2xl border border-white/70 bg-white/65 px-4 py-3 text-sm leading-7 text-[var(--color-near-black)] outline-none transition duration-300 placeholder:text-[var(--color-charcoal)]/38 focus:border-[rgba(183,167,200,0.75)] focus:bg-white focus:ring-4 focus:ring-[rgba(183,167,200,0.18)] disabled:bg-white/40 disabled:text-[var(--color-charcoal)]/40"
                 />
 
-                <p className="mt-2 text-right text-xs text-zinc-400">{reason.length}/2000</p>
+                <p className="mt-2 text-right text-xs font-semibold text-[var(--color-charcoal)]/40">
+                  {reason.length}/2000
+                </p>
               </label>
             )}
 
@@ -981,7 +1054,7 @@ export function VendorBookingDetailPage() {
                 type="button"
                 disabled={isActionPending}
                 onClick={resetDialog}
-                className="rounded-2xl border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-60"
+                className="rounded-2xl border border-white/70 bg-white/72 px-5 py-3 text-sm font-black text-[var(--color-charcoal)] shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 Go back
               </button>
@@ -1004,7 +1077,7 @@ export function VendorBookingDetailPage() {
                     completeMutation.mutate();
                   }
                 }}
-                className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(49,35,42,0.18)] transition duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${
                   actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
                     ? 'bg-emerald-700 hover:bg-emerald-800'
                     : 'bg-red-700 hover:bg-red-800'

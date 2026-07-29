@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
   ArrowLeft,
+  ArrowUpRight,
   Bell,
   BellDot,
   CalendarClock,
@@ -177,6 +178,28 @@ const getNotificationTone = (
   }
 };
 
+const getNotificationIconSurfaceClass = (type: NotificationType) => {
+  const tone = getNotificationTone(type);
+
+  switch (tone) {
+    case 'green':
+      return 'bg-[rgba(89,133,113,0.14)] text-[#3f735d]';
+
+    case 'rose':
+      return 'bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]';
+
+    case 'blue':
+      return 'bg-[rgba(175,201,216,0.22)] text-[var(--color-deep-plum)]';
+
+    case 'plum':
+      return 'bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]';
+
+    case 'gray':
+    default:
+      return 'bg-white/38 text-[var(--color-charcoal)]/62';
+  }
+};
+
 const getContextualLink = (notification: Notification) => {
   if (!notification.entityId || !notification.entityType) {
     return null;
@@ -349,7 +372,7 @@ export function NotificationsPage() {
           <div className="flex items-center gap-4">
             <Link
               to="/dashboard"
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl"
+              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl transition duration-300 hover:-translate-x-0.5 hover:bg-white/45"
               aria-label="Back to dashboard"
             >
               <ArrowLeft className="size-5" />
@@ -394,20 +417,34 @@ export function NotificationsPage() {
                 </p>
               </div>
 
-              <div className="glass-card p-5">
-                <BellDot className="size-6 text-[var(--color-deep-plum)]" />
+              <div className="glass-card relative overflow-hidden p-6">
+                <div className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
 
-                <p className="mt-6 text-sm font-bold text-[var(--color-charcoal)]/58">
-                  Needs attention
-                </p>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                      <BellDot className="size-6" />
+                    </div>
 
-                <p className="mt-2 text-4xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {unreadCount}
-                </p>
+                    <span className="status-chip" data-tone={unreadCount > 0 ? 'plum' : 'green'}>
+                      {unreadCount > 0 ? 'Action pending' : 'All reviewed'}
+                    </span>
+                  </div>
 
-                <p className="mt-3 text-sm font-semibold text-[var(--color-rosewood)]">
-                  unread notifications across your account
-                </p>
+                  <p className="mt-7 text-sm font-bold text-[var(--color-charcoal)]/58">
+                    Needs attention
+                  </p>
+
+                  <p className="mt-2 text-5xl font-black tracking-[-0.055em] text-[var(--color-near-black)]">
+                    {unreadCount}
+                  </p>
+
+                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-rosewood)]">
+                    {unreadCount === 1
+                      ? 'One unread update is waiting for your review.'
+                      : `${unreadCount} unread updates are waiting for your review.`}
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -497,62 +534,88 @@ export function NotificationsPage() {
                 </button>
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                <select
-                  className="form-field min-h-12"
-                  aria-label="Filter notifications by read status"
-                  value={statusFilter}
-                  onChange={(event) => {
-                    setStatusFilter(event.target.value as NotificationReadStatus);
-                    setPage(1);
-                  }}
-                >
-                  <option value="all">All notifications</option>
-                  <option value="unread">Unread only</option>
-                  <option value="read">Read only</option>
-                </select>
+              <div className="mt-7 rounded-[1.6rem] border border-white/55 bg-white/22 p-5 backdrop-blur-xl">
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <label className="space-y-2">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
+                      Read status
+                    </span>
 
-                <select
-                  className="form-field min-h-12"
-                  aria-label="Filter notifications by type"
-                  value={typeFilter}
-                  onChange={(event) => {
-                    setTypeFilter(event.target.value as NotificationType | '');
-                    setPage(1);
-                  }}
-                >
-                  <option value="">All activity types</option>
+                    <select
+                      className="form-field min-h-12"
+                      aria-label="Filter notifications by read status"
+                      value={statusFilter}
+                      onChange={(event) => {
+                        setStatusFilter(event.target.value as NotificationReadStatus);
+                        setPage(1);
+                      }}
+                    >
+                      <option value="all">All notifications</option>
+                      <option value="unread">Unread only</option>
+                      <option value="read">Read only</option>
+                    </select>
+                  </label>
 
-                  {notificationTypes.map((notificationType) => (
-                    <option key={notificationType} value={notificationType}>
-                      {notificationTypeLabels[notificationType]}
-                    </option>
-                  ))}
-                </select>
+                  <label className="space-y-2">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
+                      Activity type
+                    </span>
 
-                <select
-                  className="form-field min-h-12"
-                  aria-label="Sort notifications"
-                  value={sort}
-                  onChange={(event) => {
-                    setSort(event.target.value as NotificationSort);
-                    setPage(1);
-                  }}
-                >
-                  <option value="newest">Newest first</option>
-                  <option value="oldest">Oldest first</option>
-                </select>
+                    <select
+                      className="form-field min-h-12"
+                      aria-label="Filter notifications by type"
+                      value={typeFilter}
+                      onChange={(event) => {
+                        setTypeFilter(event.target.value as NotificationType | '');
+                        setPage(1);
+                      }}
+                    >
+                      <option value="">All activity types</option>
+
+                      {notificationTypes.map((notificationType) => (
+                        <option key={notificationType} value={notificationType}>
+                          {notificationTypeLabels[notificationType]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
+                      Sort order
+                    </span>
+
+                    <select
+                      className="form-field min-h-12"
+                      aria-label="Sort notifications"
+                      value={sort}
+                      onChange={(event) => {
+                        setSort(event.target.value as NotificationSort);
+                        setPage(1);
+                      }}
+                    >
+                      <option value="newest">Newest first</option>
+                      <option value="oldest">Oldest first</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-4">
+                  <p className="text-sm font-bold text-[var(--color-charcoal)]/52">
+                    {pagination.total} notification{pagination.total === 1 ? '' : 's'} in this view
+                  </p>
+
+                  {filtersAreActive ? (
+                    <button
+                      type="button"
+                      className="btn-secondary text-sm font-bold"
+                      onClick={clearFilters}
+                    >
+                      Clear filters
+                    </button>
+                  ) : null}
+                </div>
               </div>
-
-              {filtersAreActive ? (
-                <button
-                  type="button"
-                  className="btn-secondary mt-4 text-sm font-bold"
-                  onClick={clearFilters}
-                >
-                  Clear filters
-                </button>
-              ) : null}
 
               {markAllNotificationsAsReadMutation.isError ? (
                 <div
@@ -574,14 +637,21 @@ export function NotificationsPage() {
                         key={notification.id}
                         className={
                           notification.isRead
-                            ? 'rounded-[1.65rem] border border-white/50 bg-white/18 p-5 backdrop-blur-2xl sm:p-6'
-                            : 'rounded-[1.65rem] border border-[rgba(93,58,85,0.22)] bg-white/34 p-5 shadow-[0_16px_45px_rgba(93,58,85,0.09)] backdrop-blur-2xl sm:p-6'
+                            ? 'group relative overflow-hidden rounded-[1.7rem] border border-white/55 bg-white/20 p-5 shadow-[0_12px_38px_rgba(31,27,29,0.035)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/28 hover:shadow-[0_20px_55px_rgba(31,27,29,0.07)] sm:p-6'
+                            : 'group relative overflow-hidden rounded-[1.7rem] border border-[rgba(93,58,85,0.24)] bg-white/36 p-5 shadow-[0_18px_52px_rgba(93,58,85,0.10)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/42 hover:shadow-[0_24px_65px_rgba(93,58,85,0.14)] sm:p-6'
                         }
                       >
-                        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                        <div className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl" />
+
+                        {!notification.isRead ? (
+                          <span className="absolute right-5 top-5 size-2.5 rounded-full bg-[var(--color-rosewood)] shadow-[0_0_0_5px_rgba(130,72,77,0.10)]" />
+                        ) : null}
+
+                        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start">
                           <div
-                            className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]"
-                            data-tone={getNotificationTone(notification.type)}
+                            className={`grid size-12 shrink-0 place-items-center rounded-2xl ${getNotificationIconSurfaceClass(
+                              notification.type,
+                            )}`}
                           >
                             <Icon className="size-5" />
                           </div>
@@ -634,24 +704,31 @@ export function NotificationsPage() {
                                 <button
                                   type="button"
                                   className="btn-secondary text-sm font-bold"
-                                  disabled={markNotificationAsReadMutation.isPending}
+                                  disabled={
+                                    markNotificationAsReadMutation.isPending &&
+                                    markNotificationAsReadMutation.variables === notification.id
+                                  }
                                   onClick={() => {
                                     markNotificationAsReadMutation.mutate(notification.id);
                                   }}
                                 >
-                                  {markNotificationAsReadMutation.isPending ? (
+                                  {markNotificationAsReadMutation.isPending &&
+                                  markNotificationAsReadMutation.variables === notification.id ? (
                                     <LoaderCircle className="size-4 animate-spin" />
                                   ) : (
                                     <Check className="size-4" />
                                   )}
-                                  Mark as read
+                                  {markNotificationAsReadMutation.isPending &&
+                                  markNotificationAsReadMutation.variables === notification.id
+                                    ? 'Marking as read...'
+                                    : 'Mark as read'}
                                 </button>
                               ) : null}
 
                               {contextualLink ? (
                                 <Link
                                   to={contextualLink}
-                                  className="btn-secondary text-sm font-bold"
+                                  className="btn-primary text-sm font-bold"
                                   onClick={() => {
                                     if (!notification.isRead) {
                                       markNotificationAsReadMutation.mutate(notification.id);
@@ -659,11 +736,13 @@ export function NotificationsPage() {
                                   }}
                                 >
                                   Open related item
+                                  <ArrowUpRight className="size-4" />
                                 </Link>
                               ) : null}
                             </div>
 
-                            {markNotificationAsReadMutation.isError ? (
+                            {markNotificationAsReadMutation.isError &&
+                            markNotificationAsReadMutation.variables === notification.id ? (
                               <div
                                 role="alert"
                                 className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
@@ -678,20 +757,22 @@ export function NotificationsPage() {
                   })}
                 </div>
               ) : (
-                <div className="mt-8 rounded-[1.5rem] border border-dashed border-white/70 bg-white/20 p-8 text-center">
-                  {filtersAreActive ? (
-                    <SearchX className="mx-auto size-9 text-[var(--color-deep-plum)]" />
-                  ) : (
-                    <CheckCheck className="mx-auto size-9 text-[var(--color-deep-plum)]" />
-                  )}
+                <div className="mt-8 rounded-[1.7rem] border border-dashed border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0.18))] p-9 text-center backdrop-blur-xl">
+                  <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                    {filtersAreActive ? (
+                      <SearchX className="size-8" />
+                    ) : (
+                      <CheckCheck className="size-8" />
+                    )}
+                  </div>
 
-                  <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
+                  <p className="mt-6 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                     {filtersAreActive
                       ? 'No notifications match these filters'
                       : 'You are all caught up'}
                   </p>
 
-                  <p className="mt-2 leading-7 text-[var(--color-charcoal)]/62">
+                  <p className="mx-auto mt-3 max-w-lg leading-7 text-[var(--color-charcoal)]/62">
                     {filtersAreActive
                       ? 'Try changing the read status, activity type or sorting option.'
                       : 'New booking, quotation, payment and platform updates will appear here.'}
@@ -746,49 +827,111 @@ export function NotificationsPage() {
             </article>
 
             <aside className="space-y-5">
-              <article className="rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
-                <BellDot className="size-6 text-[var(--color-powder-blue)]" />
+              <article className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
 
-                <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">
-                  Notification overview
-                </h2>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-white/14 backdrop-blur">
+                      <BellDot className="size-6 text-[var(--color-powder-blue)]" />
+                    </div>
 
-                <p className="mt-3 leading-7 text-white/68">
-                  Review account activity and clear updates after you have handled them.
-                </p>
-
-                <div className="mt-8 space-y-3">
-                  <div className="flex items-center justify-between rounded-2xl bg-white/14 px-4 py-3 backdrop-blur">
-                    <span className="text-sm font-bold text-white/72">All notifications</span>
-
-                    <span className="text-lg font-black">{pagination.total}</span>
+                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur">
+                      {unreadCount} unread
+                    </span>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-2xl bg-white/14 px-4 py-3 backdrop-blur">
-                    <span className="text-sm font-bold text-white/72">Unread</span>
+                  <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">
+                    Notification overview
+                  </h2>
 
-                    <span className="text-lg font-black">{unreadCount}</span>
-                  </div>
+                  <p className="mt-3 leading-7 text-white/68">
+                    Review account activity and clear updates after you have handled them.
+                  </p>
 
-                  <div className="flex items-center justify-between rounded-2xl bg-white/14 px-4 py-3 backdrop-blur">
-                    <span className="text-sm font-bold text-white/72">Read</span>
+                  <div className="mt-8 space-y-3">
+                    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur">
+                      <div>
+                        <span className="text-sm font-black text-white/88">All notifications</span>
+                        <p className="mt-1 text-xs font-semibold text-white/48">
+                          Current activity view
+                        </p>
+                      </div>
 
-                    <span className="text-lg font-black">{readCount}</span>
+                      <span className="grid size-10 place-items-center rounded-xl bg-white/12 text-lg font-black">
+                        {pagination.total}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur">
+                      <div>
+                        <span className="text-sm font-black text-white/88">Unread</span>
+                        <p className="mt-1 text-xs font-semibold text-white/48">
+                          Needs your attention
+                        </p>
+                      </div>
+
+                      <span className="grid size-10 place-items-center rounded-xl bg-white/12 text-lg font-black">
+                        {unreadCount}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur">
+                      <div>
+                        <span className="text-sm font-black text-white/88">Read</span>
+                        <p className="mt-1 text-xs font-semibold text-white/48">Already reviewed</p>
+                      </div>
+
+                      <span className="grid size-10 place-items-center rounded-xl bg-white/12 text-lg font-black">
+                        {readCount}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </article>
 
-              <article className="glass-card p-6">
-                <CircleUserRound className="size-6 text-[var(--color-deep-plum)]" />
+              <article className="glass-card relative overflow-hidden p-6">
+                <div className="pointer-events-none absolute -bottom-16 -right-12 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
 
-                <h2 className="mt-6 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  Account-wide updates
-                </h2>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                      <CircleUserRound className="size-6" />
+                    </div>
 
-                <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
-                  Notifications are connected to your logged-in account rather than one event, so
-                  booking, vendor, payment and complaint activity appears together.
-                </p>
+                    <span className="rounded-full bg-white/30 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/52">
+                      Account
+                    </span>
+                  </div>
+
+                  <h2 className="mt-6 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    Account-wide updates
+                  </h2>
+
+                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                    Notifications are connected to your logged-in account rather than one event, so
+                    booking, vendor, payment and complaint activity appears together.
+                  </p>
+
+                  <div className="mt-6 space-y-3">
+                    {[
+                      'Booking and quotation progress',
+                      'Payment verification decisions',
+                      'Complaint and account updates',
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-3 rounded-2xl border border-white/45 bg-white/28 px-4 py-3"
+                      >
+                        <Check className="size-4 shrink-0 text-[var(--color-rosewood)]" />
+                        <span className="text-sm font-bold text-[var(--color-charcoal)]/66">
+                          {item}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </article>
             </aside>
           </section>

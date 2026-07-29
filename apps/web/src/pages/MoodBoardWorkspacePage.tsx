@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
   ArrowLeft,
+  CheckCircle2,
   CircleAlert,
   ExternalLink,
   Image,
@@ -603,7 +604,7 @@ export function MoodBoardWorkspacePage() {
           <div className="flex items-center gap-4">
             <Link
               to={`/events/${eventId}`}
-              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl"
+              className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl transition duration-300 hover:-translate-x-0.5 hover:bg-white/45 hover:shadow-[0_16px_36px_rgba(31,27,29,0.12)]"
               aria-label="Back to event workspace"
             >
               <ArrowLeft className="size-5" />
@@ -650,27 +651,47 @@ export function MoodBoardWorkspacePage() {
                 </p>
               </div>
 
-              <div className="glass-card p-5">
-                <Palette className="size-6 text-[var(--color-deep-plum)]" />
+              <div className="glass-card relative overflow-hidden p-6">
+                <div className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
 
-                <p className="mt-6 text-sm font-bold text-[var(--color-charcoal)]/58">Event date</p>
+                <div className="relative">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                      <Palette className="size-6" />
+                    </div>
 
-                <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  {formatEventDate(moodBoardSummary.event.eventDate)}
-                </p>
+                    <span className="status-chip" data-tone="plum">
+                      {activeCategoryCount} categories
+                    </span>
+                  </div>
 
-                <p className="mt-3 text-sm font-semibold text-[var(--color-rosewood)]">
-                  {moodBoardSummary.summary.totalItems} ideas collected
-                </p>
+                  <p className="mt-6 text-sm font-bold text-[var(--color-charcoal)]/58">
+                    Event date
+                  </p>
+
+                  <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    {formatEventDate(moodBoardSummary.event.eventDate)}
+                  </p>
+
+                  <div className="mt-5 flex items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4 py-3">
+                    <CheckCircle2 className="size-4 text-[var(--color-rosewood)]" />
+                    <p className="text-sm font-black text-[var(--color-charcoal)]/68">
+                      {moodBoardSummary.summary.totalItems} ideas collected
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
           <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {summaryCards.map(({ label, value, helper, icon: Icon }) => (
-              <article key={label} className="luxe-card p-6">
+              <article
+                key={label}
+                className="luxe-card group p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(31,27,29,0.09)]"
+              >
                 <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                  <Icon className="size-5" />
+                  <Icon className="size-5 transition duration-300 group-hover:scale-110" />
                 </div>
 
                 <p className="mt-8 text-sm font-bold text-[var(--color-charcoal)]/58">{label}</p>
@@ -686,7 +707,7 @@ export function MoodBoardWorkspacePage() {
             ))}
           </section>
 
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_0.28fr]">
+          <section className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
             <article className="glass-card p-6 sm:p-7">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
@@ -797,16 +818,44 @@ export function MoodBoardWorkspacePage() {
                 </div>
               </form>
 
+              <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-white/55 bg-white/18 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-bold text-[var(--color-charcoal)]/60">
+                  Showing <span className="text-[var(--color-near-black)]">{items.length}</span> of{' '}
+                  <span className="text-[var(--color-near-black)]">{pagination.total}</span>{' '}
+                  inspiration items
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {searchQuery ? (
+                    <span className="status-chip" data-tone="plum">
+                      Search: {searchQuery}
+                    </span>
+                  ) : null}
+
+                  {categoryFilter ? (
+                    <span className="status-chip" data-tone="blue">
+                      {categoryLabels[categoryFilter]}
+                    </span>
+                  ) : null}
+
+                  {visualFilter !== 'all' ? (
+                    <span className="status-chip" data-tone="gray">
+                      {visualFilter === 'images' ? 'With images' : 'With sources'}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
               {items.length > 0 ? (
                 <div className="mt-8 columns-1 gap-5 sm:columns-2 xl:columns-3">
                   {items.map((item) => (
                     <article
                       key={item.id}
-                      className="mb-5 break-inside-avoid overflow-hidden rounded-[1.5rem] border border-white/55 bg-white/24 backdrop-blur-2xl"
+                      className="group mb-5 break-inside-avoid overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/28 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/36 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]"
                     >
                       {item.imageUrl ? (
                         <img
-                          className="aspect-[4/3] w-full object-cover"
+                          className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.035]"
                           src={item.imageUrl}
                           alt={item.title}
                           loading="lazy"
@@ -817,7 +866,7 @@ export function MoodBoardWorkspacePage() {
                         </div>
                       )}
 
-                      <div className="p-5">
+                      <div className="border-t border-white/45 p-5">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <p className="text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
@@ -970,7 +1019,7 @@ export function MoodBoardWorkspacePage() {
               ) : null}
             </article>
 
-            <aside className="space-y-5">
+            <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
               <article className="rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
                 <Palette className="size-6 text-[var(--color-powder-blue)]" />
 
@@ -1007,6 +1056,28 @@ export function MoodBoardWorkspacePage() {
                   ) : null}
                 </div>
               </article>
+
+              <article className="glass-card p-6">
+                <Sparkles className="size-6 text-[var(--color-deep-plum)]" />
+
+                <h2 className="mt-6 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                  Build a clear visual story
+                </h2>
+
+                <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  Save references across styling, venue, stationery, food and entertainment so your
+                  choices feel connected rather than collected at random.
+                </p>
+
+                <button
+                  type="button"
+                  className="btn-secondary mt-5 w-full justify-center text-sm font-bold"
+                  onClick={openCreateDialog}
+                >
+                  <Plus className="size-4" />
+                  Add another idea
+                </button>
+              </article>
             </aside>
           </section>
         </main>
@@ -1019,7 +1090,7 @@ export function MoodBoardWorkspacePage() {
           aria-labelledby="create-mood-board-item-title"
         >
           <div className="mx-auto max-w-3xl">
-            <div className="glass-card p-6 sm:p-8">
+            <div className="glass-card max-h-[calc(100vh-4rem)] overflow-y-auto p-6 sm:p-8">
               <div className="flex items-start justify-between gap-5">
                 <div>
                   <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -1374,7 +1445,7 @@ export function MoodBoardWorkspacePage() {
           aria-labelledby="edit-mood-board-item-title"
         >
           <div className="mx-auto max-w-3xl">
-            <div className="glass-card p-6 sm:p-8">
+            <div className="glass-card max-h-[calc(100vh-4rem)] overflow-y-auto p-6 sm:p-8">
               <div className="flex items-start justify-between gap-5">
                 <div>
                   <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -1618,8 +1689,10 @@ export function MoodBoardWorkspacePage() {
           aria-modal="true"
           aria-labelledby="delete-mood-board-item-title"
         >
-          <div className="glass-card w-full max-w-lg p-6 sm:p-8">
-            <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+          <div className="glass-card relative w-full max-w-lg overflow-hidden p-6 sm:p-8">
+            <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(124,74,90,0.12)] blur-3xl" />
+
+            <div className="relative grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
               <Trash2 className="size-7" />
             </div>
 

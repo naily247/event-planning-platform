@@ -1049,267 +1049,280 @@ export function QuotationRequestsWorkspacePage() {
 
       {isCreateDialogOpen ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.56)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-quotation-request-title"
+          onClick={closeCreateDialog}
         >
-          <div className="mx-auto max-w-5xl">
-            <div className="glass-card p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-5">
-                <div>
-                  <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                    <Send className="size-4" />
-                    New quotation request
+          <div className="grid min-h-full place-items-center">
+            <div
+              className="glass-card w-full max-w-5xl overflow-hidden rounded-[2.2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(255,255,255,0.18))] shadow-[0_36px_110px_rgba(31,27,29,0.28)]"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <div className="relative overflow-hidden border-b border-white/45 px-6 py-6 sm:px-8 sm:py-7">
+                <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl" />
+                <div className="pointer-events-none absolute left-[32%] top-[-5rem] size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
+
+                <div className="relative flex items-start justify-between gap-5">
+                  <div>
+                    <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                      <Send className="size-4" />
+                      New quotation request
+                    </div>
+
+                    <h2
+                      id="create-quotation-request-title"
+                      className="max-w-3xl text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
+                    >
+                      Ask a vendor for a proposal.
+                    </h2>
+
+                    <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62 sm:text-base">
+                      Select an active package, describe what your event needs and optionally give
+                      the vendor a response deadline.
+                    </p>
                   </div>
 
-                  <h2
-                    id="create-quotation-request-title"
-                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
+                  <button
+                    type="button"
+                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/60 bg-white/30 text-[var(--color-charcoal)] shadow-[0_12px_30px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:bg-white/48 hover:text-[var(--color-deep-plum)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Close quotation request form"
+                    disabled={createRequestMutation.isPending}
+                    onClick={closeCreateDialog}
                   >
-                    Ask a vendor for a proposal.
-                  </h2>
-
-                  <p className="mt-3 max-w-2xl leading-7 text-[var(--color-charcoal)]/66">
-                    Select an active package, describe your event needs and optionally give the
-                    vendor a response deadline.
-                  </p>
+                    <X className="size-5" />
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28"
-                  aria-label="Close quotation request form"
-                  disabled={createRequestMutation.isPending}
-                  onClick={closeCreateDialog}
-                >
-                  <X className="size-5" />
-                </button>
               </div>
 
-              <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-                <section>
-                  <form
-                    className="flex gap-3"
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      setPackageSearch(packageSearchInput.trim());
-                    }}
-                  >
-                    <div className="flex min-h-12 flex-1 items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4">
-                      <Search className="size-4 shrink-0 text-[var(--color-charcoal)]/42" />
+              <div className="px-6 py-6 sm:px-8 sm:py-8">
+                <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+                  <section>
+                    <form
+                      className="flex gap-3"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        setPackageSearch(packageSearchInput.trim());
+                      }}
+                    >
+                      <div className="flex min-h-12 flex-1 items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4">
+                        <Search className="size-4 shrink-0 text-[var(--color-charcoal)]/42" />
 
-                      <input
-                        className="w-full bg-transparent text-sm font-semibold outline-none"
-                        type="search"
-                        placeholder="Search packages or vendors"
-                        value={packageSearchInput}
-                        disabled={createRequestMutation.isPending}
-                        onChange={(event) => {
-                          setPackageSearchInput(event.target.value);
-                        }}
-                      />
-                    </div>
-
-                    <button type="submit" className="btn-secondary px-4 text-sm font-bold">
-                      Search
-                    </button>
-                  </form>
-
-                  <div className="mt-4 max-h-[34rem] space-y-3 overflow-y-auto pr-1">
-                    {packagesQuery.isLoading ? (
-                      <div className="grid min-h-44 place-items-center rounded-2xl border border-white/55 bg-white/20">
-                        <LoaderCircle className="size-7 animate-spin text-[var(--color-deep-plum)]" />
-                      </div>
-                    ) : null}
-
-                    {packagesQuery.isError ? (
-                      <div
-                        role="alert"
-                        className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
-                      >
-                        {getApiErrorMessage(packagesQuery.error)}
-                      </div>
-                    ) : null}
-
-                    {(packagesQuery.data?.packages ?? []).map((servicePackage) => {
-                      const isSelected = selectedPackage?.id === servicePackage.id;
-
-                      return (
-                        <button
-                          key={servicePackage.id}
-                          type="button"
-                          className={
-                            isSelected
-                              ? 'w-full rounded-[1.35rem] border border-[rgba(93,58,85,0.34)] bg-[rgba(93,58,85,0.10)] p-4 text-left'
-                              : 'w-full rounded-[1.35rem] border border-white/55 bg-white/24 p-4 text-left transition hover:bg-white/34'
-                          }
+                        <input
+                          className="w-full bg-transparent text-sm font-semibold outline-none"
+                          type="search"
+                          placeholder="Search packages or vendors"
+                          value={packageSearchInput}
                           disabled={createRequestMutation.isPending}
-                          onClick={() => {
-                            createRequestMutation.reset();
-                            setSelectedPackage(servicePackage);
+                          onChange={(event) => {
+                            setPackageSearchInput(event.target.value);
                           }}
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="font-black text-[var(--color-near-black)]">
-                                {servicePackage.title}
-                              </p>
+                        />
+                      </div>
 
-                              <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
-                                {servicePackage.vendor.businessName}
-                              </p>
+                      <button type="submit" className="btn-secondary px-4 text-sm font-bold">
+                        Search
+                      </button>
+                    </form>
+
+                    <div className="mt-4 max-h-[34rem] space-y-3 overflow-y-auto pr-1">
+                      {packagesQuery.isLoading ? (
+                        <div className="grid min-h-44 place-items-center rounded-2xl border border-white/55 bg-white/20">
+                          <LoaderCircle className="size-7 animate-spin text-[var(--color-deep-plum)]" />
+                        </div>
+                      ) : null}
+
+                      {packagesQuery.isError ? (
+                        <div
+                          role="alert"
+                          className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+                        >
+                          {getApiErrorMessage(packagesQuery.error)}
+                        </div>
+                      ) : null}
+
+                      {(packagesQuery.data?.packages ?? []).map((servicePackage) => {
+                        const isSelected = selectedPackage?.id === servicePackage.id;
+
+                        return (
+                          <button
+                            key={servicePackage.id}
+                            type="button"
+                            className={
+                              isSelected
+                                ? 'w-full rounded-[1.35rem] border border-[rgba(93,58,85,0.34)] bg-[rgba(93,58,85,0.10)] p-4 text-left'
+                                : 'w-full rounded-[1.35rem] border border-white/55 bg-white/24 p-4 text-left transition hover:bg-white/34'
+                            }
+                            disabled={createRequestMutation.isPending}
+                            onClick={() => {
+                              createRequestMutation.reset();
+                              setSelectedPackage(servicePackage);
+                            }}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <p className="font-black text-[var(--color-near-black)]">
+                                  {servicePackage.title}
+                                </p>
+
+                                <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
+                                  {servicePackage.vendor.businessName}
+                                </p>
+                              </div>
+
+                              <span className="text-sm font-black text-[var(--color-rosewood)]">
+                                {formatCurrency(servicePackage.basePrice)}
+                              </span>
                             </div>
 
-                            <span className="text-sm font-black text-[var(--color-rosewood)]">
-                              {formatCurrency(servicePackage.basePrice)}
-                            </span>
-                          </div>
-
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <span className="status-chip" data-tone="gray">
-                              <Tags className="size-3.5" />
-                              {servicePackage.category.name}
-                            </span>
-
-                            {servicePackage.vendor.baseLocation ? (
-                              <span className="status-chip" data-tone="blue">
-                                <MapPin className="size-3.5" />
-                                {servicePackage.vendor.baseLocation}
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <span className="status-chip" data-tone="gray">
+                                <Tags className="size-3.5" />
+                                {servicePackage.category.name}
                               </span>
+
+                              {servicePackage.vendor.baseLocation ? (
+                                <span className="status-chip" data-tone="blue">
+                                  <MapPin className="size-3.5" />
+                                  {servicePackage.vendor.baseLocation}
+                                </span>
+                              ) : null}
+                            </div>
+
+                            {servicePackage.description ? (
+                              <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                                {servicePackage.description}
+                              </p>
                             ) : null}
-                          </div>
+                          </button>
+                        );
+                      })}
 
-                          {servicePackage.description ? (
-                            <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                              {servicePackage.description}
-                            </p>
-                          ) : null}
-                        </button>
-                      );
-                    })}
-
-                    {packagesQuery.data && packagesQuery.data.packages.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-white/70 bg-white/20 p-6 text-center">
-                        <PackageCheck className="mx-auto size-8 text-[var(--color-deep-plum)]" />
-                        <p className="mt-3 font-black text-[var(--color-near-black)]">
-                          No packages found
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
-                </section>
-
-                <section className="rounded-[1.75rem] border border-white/55 bg-white/20 p-5 sm:p-6">
-                  <p className="text-sm font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                    Request details
-                  </p>
-
-                  {selectedPackage ? (
-                    <div className="mt-5 rounded-2xl bg-white/28 p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="font-black text-[var(--color-near-black)]">
-                            {selectedPackage.title}
-                          </p>
-                          <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
-                            {selectedPackage.vendor.businessName}
+                      {packagesQuery.data && packagesQuery.data.packages.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-white/70 bg-white/20 p-6 text-center">
+                          <PackageCheck className="mx-auto size-8 text-[var(--color-deep-plum)]" />
+                          <p className="mt-3 font-black text-[var(--color-near-black)]">
+                            No packages found
                           </p>
                         </div>
-
-                        <button
-                          type="button"
-                          className="text-sm font-black text-[var(--color-muted-burgundy)]"
-                          disabled={createRequestMutation.isPending}
-                          onClick={() => {
-                            setSelectedPackage(null);
-                          }}
-                        >
-                          Change
-                        </button>
-                      </div>
+                      ) : null}
                     </div>
-                  ) : (
-                    <div className="mt-5 rounded-2xl border border-dashed border-white/70 bg-white/18 p-5 text-center">
-                      <ChevronDown className="mx-auto size-6 text-[var(--color-deep-plum)]" />
-                      <p className="mt-3 text-sm font-bold text-[var(--color-charcoal)]/62">
-                        Choose a package from the list.
-                      </p>
-                    </div>
-                  )}
+                  </section>
 
-                  <label className="mt-5 block">
-                    <span className="mb-2 block text-sm font-black">Event requirements</span>
-
-                    <textarea
-                      className="form-field min-h-40 resize-y"
-                      maxLength={5000}
-                      value={requirements}
-                      disabled={createRequestMutation.isPending}
-                      placeholder="Describe the service, preferred style, quantities, timings and special requirements."
-                      onChange={(event) => {
-                        createRequestMutation.reset();
-                        setRequirements(event.target.value);
-                      }}
-                    />
-                  </label>
-
-                  <label className="mt-5 block">
-                    <span className="mb-2 block text-sm font-black">Response deadline</span>
-
-                    <input
-                      className="form-field"
-                      type="datetime-local"
-                      value={responseDueAt}
-                      disabled={createRequestMutation.isPending}
-                      onChange={(event) => {
-                        createRequestMutation.reset();
-                        setResponseDueAt(event.target.value);
-                      }}
-                    />
-
-                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                      Optional. The deadline must be in the future and before the event date.
+                  <section className="rounded-[1.75rem] border border-white/55 bg-white/20 p-5 sm:p-6">
+                    <p className="text-sm font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                      Request details
                     </p>
-                  </label>
 
-                  {createRequestMutation.isError ? (
-                    <div
-                      role="alert"
-                      className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
-                    >
-                      {getApiErrorMessage(createRequestMutation.error)}
+                    {selectedPackage ? (
+                      <div className="mt-5 rounded-2xl bg-white/28 p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="font-black text-[var(--color-near-black)]">
+                              {selectedPackage.title}
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
+                              {selectedPackage.vendor.businessName}
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="text-sm font-black text-[var(--color-muted-burgundy)]"
+                            disabled={createRequestMutation.isPending}
+                            onClick={() => {
+                              setSelectedPackage(null);
+                            }}
+                          >
+                            Change
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-5 rounded-2xl border border-dashed border-white/70 bg-white/18 p-5 text-center">
+                        <ChevronDown className="mx-auto size-6 text-[var(--color-deep-plum)]" />
+                        <p className="mt-3 text-sm font-bold text-[var(--color-charcoal)]/62">
+                          Choose a package from the list.
+                        </p>
+                      </div>
+                    )}
+
+                    <label className="mt-5 block">
+                      <span className="mb-2 block text-sm font-black">Event requirements</span>
+
+                      <textarea
+                        className="form-field min-h-40 resize-y"
+                        maxLength={5000}
+                        value={requirements}
+                        disabled={createRequestMutation.isPending}
+                        placeholder="Describe the service, preferred style, quantities, timings and special requirements."
+                        onChange={(event) => {
+                          createRequestMutation.reset();
+                          setRequirements(event.target.value);
+                        }}
+                      />
+                    </label>
+
+                    <label className="mt-5 block">
+                      <span className="mb-2 block text-sm font-black">Response deadline</span>
+
+                      <input
+                        className="form-field"
+                        type="datetime-local"
+                        value={responseDueAt}
+                        disabled={createRequestMutation.isPending}
+                        onChange={(event) => {
+                          createRequestMutation.reset();
+                          setResponseDueAt(event.target.value);
+                        }}
+                      />
+
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                        Optional. The deadline must be in the future and before the event date.
+                      </p>
+                    </label>
+
+                    {createRequestMutation.isError ? (
+                      <div
+                        role="alert"
+                        className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+                      >
+                        {getApiErrorMessage(createRequestMutation.error)}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        className="btn-secondary justify-center text-sm font-bold"
+                        disabled={createRequestMutation.isPending}
+                        onClick={closeCreateDialog}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn-primary justify-center text-sm font-bold"
+                        disabled={createRequestMutation.isPending}
+                        onClick={() => {
+                          createRequestMutation.mutate();
+                        }}
+                      >
+                        {createRequestMutation.isPending ? (
+                          <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                          <Send className="size-4" />
+                        )}
+
+                        {createRequestMutation.isPending ? 'Sending request...' : 'Send request'}
+                      </button>
                     </div>
-                  ) : null}
-
-                  <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      className="btn-secondary justify-center text-sm font-bold"
-                      disabled={createRequestMutation.isPending}
-                      onClick={closeCreateDialog}
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      type="button"
-                      className="btn-primary justify-center text-sm font-bold"
-                      disabled={createRequestMutation.isPending}
-                      onClick={() => {
-                        createRequestMutation.mutate();
-                      }}
-                    >
-                      {createRequestMutation.isPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                      ) : (
-                        <Send className="size-4" />
-                      )}
-
-                      {createRequestMutation.isPending ? 'Sending request...' : 'Send request'}
-                    </button>
-                  </div>
-                </section>
+                  </section>
+                </div>
               </div>
             </div>
           </div>

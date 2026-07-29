@@ -290,96 +290,152 @@ export function VendorQuotationRequestDetailPage() {
           </section>
         ) : (
           <>
-            <section className="mt-6 overflow-hidden rounded-[32px] border border-white/80 bg-white/65 p-6 shadow-[0_24px_80px_rgba(64,42,51,0.08)] backdrop-blur-xl sm:p-8">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div>
+            <section className="glass-card relative mt-6 overflow-hidden p-6 sm:p-8">
+              <div className="pointer-events-none absolute -right-24 -top-28 size-80 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl" />
+
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 size-72 rounded-full bg-[rgba(221,188,163,0.14)] blur-3xl" />
+
+              <div className="relative flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+                <div className="max-w-4xl">
                   <div className="flex flex-wrap items-center gap-3">
                     <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
+                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${
                         statusStyles[request.status]
                       }`}
                     >
                       {statusLabels[request.status]}
                     </span>
 
+                    <span className="rounded-full bg-[rgba(183,167,200,0.16)] px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
+                      {request.event.eventType}
+                    </span>
+
                     {markViewedMutation.isPending && (
-                      <span className="text-xs font-medium text-zinc-400">Marking as viewed…</span>
+                      <span className="text-xs font-semibold text-[var(--color-charcoal)]/42">
+                        Marking as viewed…
+                      </span>
                     )}
 
                     {markViewedMutation.isSuccess && (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+                        <CheckCircle2 className="size-3.5" />
                         Marked as viewed
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-rose-700/70">
-                    {request.event.eventType}
+                  <p className="mt-6 text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                    Quotation request
                   </p>
 
-                  <h1 className="mt-2 max-w-4xl text-3xl font-semibold tracking-[-0.04em] text-[#2e2529] sm:text-4xl">
+                  <h1 className="mt-3 text-4xl font-black tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
                     {request.event.name}
                   </h1>
 
-                  <p className="mt-3 text-sm text-zinc-500">
-                    Received {formatDateTime(request.createdAt)}
-                  </p>
+                  <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-[var(--color-charcoal)]/55">
+                    <span className="inline-flex items-center gap-2">
+                      <Clock3 className="size-4 text-[var(--color-deep-plum)]" />
+                      Received {formatDateTime(request.createdAt)}
+                    </span>
+
+                    <span className="inline-flex items-center gap-2">
+                      <UserRound className="size-4 text-[var(--color-deep-plum)]" />
+                      {`${request.event.owner.firstName} ${request.event.owner.lastName}`.trim() ||
+                        request.event.owner.email}
+                    </span>
+                  </div>
                 </div>
 
-                <div
-                  className={`rounded-2xl border px-5 py-4 ${
-                    deadlinePassed ? 'border-red-200 bg-red-50' : 'border-white bg-white/85'
+                <article
+                  className={`relative overflow-hidden rounded-[1.6rem] border p-5 shadow-[0_18px_50px_rgba(64,42,51,0.08)] lg:min-w-[290px] ${
+                    deadlinePassed
+                      ? 'border-red-200 bg-red-50/90'
+                      : 'border-white/60 bg-white/45 backdrop-blur-xl'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Clock3
-                      className={`h-4 w-4 ${deadlinePassed ? 'text-red-600' : 'text-rose-700'}`}
-                    />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p
+                        className={`text-[0.68rem] font-black uppercase tracking-[0.16em] ${
+                          deadlinePassed ? 'text-red-600' : 'text-[var(--color-charcoal)]/42'
+                        }`}
+                      >
+                        Response deadline
+                      </p>
 
-                    <p
-                      className={`text-xs font-semibold uppercase tracking-[0.14em] ${
-                        deadlinePassed ? 'text-red-600' : 'text-zinc-400'
+                      <p
+                        className={`mt-3 text-2xl font-black tracking-[-0.04em] ${
+                          deadlinePassed ? 'text-red-800' : 'text-[var(--color-near-black)]'
+                        }`}
+                      >
+                        {request.responseDueAt ? formatDate(request.responseDueAt) : 'No deadline'}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`grid size-11 shrink-0 place-items-center rounded-2xl ${
+                        deadlinePassed
+                          ? 'bg-red-100 text-red-600'
+                          : 'bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]'
                       }`}
                     >
-                      Response deadline
-                    </p>
+                      <Clock3 className="size-5" />
+                    </span>
                   </div>
 
-                  <p
-                    className={`mt-2 text-lg font-semibold ${
-                      deadlinePassed ? 'text-red-800' : 'text-[#34282e]'
+                  <div
+                    className={`mt-5 border-t pt-4 ${
+                      deadlinePassed ? 'border-red-200' : 'border-white/55'
                     }`}
                   >
-                    {request.responseDueAt ? formatDate(request.responseDueAt) : 'No deadline'}
-                  </p>
-
-                  {deadlinePassed && (
-                    <p className="mt-1 text-xs font-medium text-red-600">
-                      This response deadline has passed.
+                    <p
+                      className={`text-sm font-semibold leading-6 ${
+                        deadlinePassed ? 'text-red-700' : 'text-[var(--color-charcoal)]/58'
+                      }`}
+                    >
+                      {deadlinePassed
+                        ? 'The response deadline has passed, so quotation editing may be unavailable.'
+                        : request.responseDueAt
+                          ? 'Prepare and send your quotation before this date.'
+                          : 'The customer did not set a response deadline.'}
                     </p>
-                  )}
-                </div>
+                  </div>
+                </article>
               </div>
             </section>
 
             <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_0.75fr]">
               <div className="space-y-6">
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] backdrop-blur-xl sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <CalendarDays className="h-5 w-5" />
+                <section className="glass-card p-6 sm:p-7">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="grid size-12 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <CalendarDays className="size-5" />
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                          Event overview
+                        </p>
+
+                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                          Event details
+                        </h2>
+                      </div>
                     </div>
 
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                        Event overview
-                      </p>
-                      <h2 className="mt-1 text-xl font-semibold text-[#34282e]">Event details</h2>
+                    <div className="hidden rounded-full bg-[rgba(183,167,200,0.16)] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)] sm:block">
+                      {request.event.eventType}
                     </div>
                   </div>
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--color-charcoal)]/62">
+                    Review the customer's event information before preparing your quotation. This
+                    helps ensure your pricing, availability, and services match the event
+                    requirements.
+                  </p>
+
+                  <div className="mt-7 grid gap-5 sm:grid-cols-2">
                     <DetailItem
                       icon={CalendarDays}
                       label="Event date"
@@ -402,61 +458,89 @@ export function VendorQuotationRequestDetailPage() {
                   </div>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] backdrop-blur-xl sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <FileText className="h-5 w-5" />
+                <section className="glass-card p-6 sm:p-7">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-12 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <FileText className="size-5" />
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                        Customer request
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                        Customer brief
                       </p>
-                      <h2 className="mt-1 text-xl font-semibold text-[#34282e]">
+
+                      <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                         Service requirements
                       </h2>
+
+                      <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-charcoal)]/62">
+                        Read every requirement carefully before preparing your quotation. This
+                        information should guide your pricing, deliverables, and proposed services.
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 rounded-2xl border border-zinc-100 bg-[#faf8f7] p-5">
-                    <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-700">
+                  <div className="mt-7 rounded-[1.6rem] border border-white/55 bg-[rgba(255,255,255,0.45)] p-6 shadow-[0_16px_40px_rgba(64,42,51,0.05)]">
+                    <div className="mb-5 flex items-center justify-between border-b border-white/55 pb-4">
+                      <p className="text-[0.7rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                        Customer instructions
+                      </p>
+
+                      <span className="rounded-full bg-[rgba(183,167,200,0.16)] px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.12em] text-[var(--color-deep-plum)]">
+                        Review carefully
+                      </span>
+                    </div>
+
+                    <p className="whitespace-pre-wrap text-[15px] leading-8 text-[var(--color-charcoal)]/82">
                       {request.requirements}
                     </p>
                   </div>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] backdrop-blur-xl sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <Package className="h-5 w-5" />
+                <section className="glass-card p-6 sm:p-7">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-12 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <Package className="size-5" />
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                         Requested service
                       </p>
-                      <h2 className="mt-1 text-xl font-semibold text-[#34282e]">
+
+                      <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                         Package information
                       </h2>
+
+                      <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-charcoal)]/62">
+                        Review the selected service package before preparing your quotation.
+                        Customers may also request additional services beyond the base package.
+                      </p>
                     </div>
                   </div>
 
                   {request.package ? (
-                    <div className="mt-6 rounded-2xl border border-zinc-100 bg-[#faf8f7] p-5">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="mt-7 rounded-[1.6rem] border border-white/55 bg-[rgba(255,255,255,0.45)] p-6 shadow-[0_16px_40px_rgba(64,42,51,0.05)]">
+                      <div className="flex flex-col gap-5 border-b border-white/55 pb-5 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <p className="text-lg font-semibold text-[#34282e]">
+                          <p className="text-2xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                             {request.package.title}
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-rose-700">
+                          <p className="mt-2 text-sm font-bold text-[var(--color-deep-plum)]">
                             {request.package.category?.name || 'Service package'}
                           </p>
                         </div>
 
-                        <p className="text-lg font-semibold text-[#34282e]">
-                          {formatMoney(request.package.basePrice)}
-                        </p>
+                        <div className="rounded-[1.2rem] bg-[rgba(183,167,200,0.16)] px-5 py-3">
+                          <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
+                            Base price
+                          </p>
+
+                          <p className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                            {formatMoney(request.package.basePrice)}
+                          </p>
+                        </div>
                       </div>
 
                       <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-zinc-600">
@@ -476,24 +560,29 @@ export function VendorQuotationRequestDetailPage() {
               </div>
 
               <aside className="space-y-6">
-                <section className="rounded-[28px] border border-white/80 bg-white/80 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.07)] backdrop-blur-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <UserRound className="h-5 w-5" />
+                <section className="glass-card p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <UserRound className="size-5" />
                     </div>
 
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                         Customer
                       </p>
-                      <h2 className="mt-1 text-lg font-semibold text-[#34282e]">
+
+                      <h2 className="mt-2 break-words text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                         {`${request.event.owner.firstName} ${request.event.owner.lastName}`.trim() ||
                           'Customer'}
                       </h2>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Primary contact for this quotation request.
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 space-y-3">
+                  <div className="mt-6 space-y-4 border-t border-white/55 pt-6">
                     <DetailItem icon={Mail} label="Email" value={request.event.owner.email} />
 
                     <DetailItem
@@ -504,16 +593,30 @@ export function VendorQuotationRequestDetailPage() {
                   </div>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.08)] backdrop-blur-xl">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                    Quotation response
-                  </p>
+                <section className="glass-card relative overflow-hidden p-6">
+                  <div className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl" />
+                  <div className="relative flex items-start gap-4">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <FileText className="size-5" />
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                        Quotation response
+                      </p>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Prepare, review, and manage your response to this customer request.
+                      </p>
+                    </div>
+                  </div>
 
                   {draftQuery.isLoading ? (
-                    <div className="mt-5 animate-pulse">
-                      <div className="h-5 w-2/3 rounded bg-zinc-200" />
-                      <div className="mt-3 h-4 w-full rounded bg-zinc-200" />
-                      <div className="mt-6 h-12 rounded-2xl bg-zinc-200" />
+                    <div className="relative mt-6 animate-pulse rounded-[1.4rem] border border-white/55 bg-white/35 p-5">
+                      <div className="h-6 w-2/3 rounded bg-zinc-200/80" />
+                      <div className="mt-4 h-4 w-full rounded bg-zinc-200/75" />
+                      <div className="mt-2 h-4 w-4/5 rounded bg-zinc-200/75" />
+                      <div className="mt-6 h-12 rounded-2xl bg-[rgba(91,61,82,0.18)]" />
                     </div>
                   ) : draftQuery.isError && !draftNotFound ? (
                     <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4">
@@ -531,20 +634,44 @@ export function VendorQuotationRequestDetailPage() {
                     </div>
                   ) : (
                     <>
-                      <h2 className="mt-3 text-xl font-semibold text-[#34282e]">
-                        {draftExists ? 'Continue your quotation' : 'Prepare a quotation'}
-                      </h2>
+                      <div className="relative mt-6 rounded-[1.4rem] border border-white/55 bg-white/35 p-5">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                              {draftExists ? 'Draft available' : 'No quotation drafted'}
+                            </p>
 
-                      <p className="mt-2 text-sm leading-6 text-zinc-500">
-                        {draftExists
-                          ? 'A saved draft exists for this request. Review it before sending it to the customer.'
-                          : 'Create a detailed response with pricing, deposit, inclusions, exclusions, terms, and expiry.'}
-                      </p>
+                            <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                              {draftExists ? 'Continue your quotation' : 'Prepare a quotation'}
+                            </h2>
+                          </div>
+
+                          <span
+                            className={`grid size-10 shrink-0 place-items-center rounded-2xl ${
+                              draftExists
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]'
+                            }`}
+                          >
+                            {draftExists ? (
+                              <Clock3 className="size-4.5" />
+                            ) : (
+                              <FileText className="size-4.5" />
+                            )}
+                          </span>
+                        </div>
+
+                        <p className="mt-4 text-sm leading-7 text-[var(--color-charcoal)]/62">
+                          {draftExists
+                            ? 'A saved draft exists for this request. Review its pricing, deliverables, terms, and expiry before sending it to the customer.'
+                            : 'Create a detailed response with pricing, deposit, inclusions, exclusions, terms, and expiry.'}
+                        </p>
+                      </div>
 
                       {canPrepareQuotation ? (
                         <Link
                           to={`/vendor/quotation-requests/${request.id}/quotation`}
-                          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#34282e] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#4b343e] focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2"
+                          className="relative mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3.5 text-sm font-black text-white shadow-[0_16px_40px_rgba(91,61,82,0.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:shadow-[0_22px_50px_rgba(91,61,82,0.3)] focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2"
                         >
                           {draftExists ? 'Continue draft' : 'Create quotation'}
                           <ArrowRight className="h-4 w-4" />
@@ -565,20 +692,40 @@ export function VendorQuotationRequestDetailPage() {
                   )}
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/75 p-6 shadow-sm backdrop-blur-xl">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                    Request record
-                  </p>
-
-                  <dl className="mt-4 space-y-4 text-sm">
-                    <div>
-                      <dt className="text-zinc-400">Request ID</dt>
-                      <dd className="mt-1 break-all font-medium text-zinc-700">{request.id}</dd>
+                <section className="glass-card p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-11 place-items-center rounded-[1.05rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <FileText className="size-5" />
                     </div>
 
                     <div>
-                      <dt className="text-zinc-400">Last updated</dt>
-                      <dd className="mt-1 font-medium text-zinc-700">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                        Request record
+                      </p>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Internal reference details for this quotation request.
+                      </p>
+                    </div>
+                  </div>
+
+                  <dl className="mt-6 space-y-5 border-t border-white/55 pt-6 text-sm">
+                    <div className="rounded-2xl border border-white/55 bg-white/35 p-4">
+                      <dt className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                        Request ID
+                      </dt>
+
+                      <dd className="mt-2 break-all text-sm font-semibold leading-6 text-[var(--color-charcoal)]">
+                        {request.id}
+                      </dd>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/55 bg-white/35 p-4">
+                      <dt className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                        Last updated
+                      </dt>
+
+                      <dd className="mt-2 font-semibold text-[var(--color-charcoal)]">
                         {formatDateTime(request.updatedAt)}
                       </dd>
                     </div>

@@ -110,6 +110,14 @@ export function VendorPortfolioPage() {
   const [deletingItem, setDeletingItem] = useState<VendorPortfolioItem | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  const selectedFilePreviewUrl = useMemo(() => {
+    if (!selectedFile) {
+      return null;
+    }
+
+    return URL.createObjectURL(selectedFile);
+  }, [selectedFile]);
+
   const uploadForm = useForm<PortfolioFormValues>({
     resolver: zodResolver(portfolioFormSchema),
     defaultValues: getInitialFormValues(),
@@ -142,6 +150,14 @@ export function VendorPortfolioPage() {
 
     editForm.reset(getInitialFormValues(editingItem));
   }, [editForm, editingItem]);
+
+  useEffect(() => {
+    return () => {
+      if (selectedFilePreviewUrl) {
+        URL.revokeObjectURL(selectedFilePreviewUrl);
+      }
+    };
+  }, [selectedFilePreviewUrl]);
 
   const uploadMutation = useMutation({
     mutationFn: async ({ values, file }: { values: PortfolioFormValues; file: File }) =>
@@ -242,6 +258,22 @@ export function VendorPortfolioPage() {
       });
     },
   });
+
+  const handleSelectedUploadFile = (file: File | null) => {
+    if (file && !file.type.startsWith('image/')) {
+      setSelectedFile(null);
+
+      uploadForm.setError('root', {
+        type: 'manual',
+        message: 'Choose a valid image file.',
+      });
+
+      return;
+    }
+
+    setSelectedFile(file);
+    uploadForm.clearErrors('root');
+  };
 
   const openUploadDialog = () => {
     uploadMutation.reset();
@@ -351,6 +383,24 @@ export function VendorPortfolioPage() {
 
   const featuredCount = sortedPortfolio.filter((item) => item.isFeatured).length;
 
+  const portfolioCompletion = Math.min(100, sortedPortfolio.length * 12 + featuredCount * 8);
+
+  const portfolioHealth =
+    portfolioCompletion >= 85
+      ? {
+          label: 'Excellent',
+          message: 'Your portfolio presents a strong and organised customer experience.',
+        }
+      : portfolioCompletion >= 55
+        ? {
+            label: 'Growing',
+            message: 'Your portfolio is taking shape. A few more strong examples will improve it.',
+          }
+        : {
+            label: 'Getting started',
+            message: 'Add more examples and feature your strongest work to build customer trust.',
+          };
+
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -407,111 +457,235 @@ export function VendorPortfolioPage() {
               </p>
             </div>
 
-            <article className="glass-card p-5">
-              <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Portfolio summary</p>
+            <article className="glass-card overflow-hidden p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                    Portfolio health
+                  </p>
 
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/28 p-4">
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {portfolioHealth.label}
+                  </h2>
+                </div>
+
+                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                  <Sparkles className="size-5" />
+                </div>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-[var(--color-charcoal)]/60">
+                {portfolioHealth.message}
+              </p>
+
+              <div className="mt-6">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/48">
+                    Completion
+                  </p>
+
+                  <p className="text-sm font-black text-[var(--color-deep-plum)]">
+                    {portfolioCompletion}%
+                  </p>
+                </div>
+
+                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/42">
+                  <div
+                    className="h-full rounded-full bg-[var(--color-deep-plum)] transition-[width] duration-700"
+                    style={{
+                      width: `${portfolioCompletion}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-[1.35rem] border border-white/50 bg-white/28 p-4">
                   <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                     {sortedPortfolio.length}
                   </p>
 
-                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/52">
-                    Total images
+                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/48">
+                    Portfolio items
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-white/28 p-4">
+                <div className="rounded-[1.35rem] border border-white/50 bg-white/28 p-4">
                   <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                     {featuredCount}
                   </p>
 
-                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/52">Featured</p>
+                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/48">
+                    Featured works
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-3 border-t border-white/48 pt-5">
+                <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-charcoal)]/62">
+                  <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.12)] text-[var(--color-deep-plum)]">
+                    <Star className="size-3.5" />
+                  </span>
+                  Feature your strongest customer-facing work
+                </div>
+
+                <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-charcoal)]/62">
+                  <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.12)] text-[var(--color-deep-plum)]">
+                    <Images className="size-3.5" />
+                  </span>
+                  Add varied examples across your services
                 </div>
               </div>
             </article>
           </section>
 
           {sortedPortfolio.length === 0 ? (
-            <section className="glass-card mt-8 grid min-h-96 place-items-center p-10 text-center">
-              <div className="max-w-lg">
-                <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                  <ImagePlus className="size-8" />
+            <section className="glass-card relative mt-8 overflow-hidden p-6 sm:p-8 lg:p-10">
+              <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl" />
+
+              <div className="pointer-events-none absolute -bottom-28 -left-20 size-72 rounded-full bg-[rgba(221,188,163,0.16)] blur-3xl" />
+
+              <div className="relative grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+                <div className="rounded-[2rem] border border-white/55 bg-white/26 p-4 shadow-[0_20px_60px_rgba(35,24,30,0.08)]">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="aspect-[4/5] overflow-hidden rounded-[1.4rem] bg-[rgba(183,167,200,0.22)] p-4">
+                      <div className="flex h-full flex-col justify-between rounded-[1.1rem] border border-white/48 bg-white/24 p-4">
+                        <div className="grid size-10 place-items-center rounded-xl bg-white/42 text-[var(--color-deep-plum)]">
+                          <Images className="size-5" />
+                        </div>
+
+                        <div>
+                          <div className="h-2.5 w-16 rounded-full bg-white/60" />
+                          <div className="mt-2 h-2 w-10 rounded-full bg-white/38" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3">
+                      <div className="aspect-square rounded-[1.4rem] border border-white/50 bg-[rgba(221,188,163,0.2)] p-4">
+                        <div className="grid h-full place-items-center rounded-[1.05rem] border border-dashed border-white/64 bg-white/22 text-[var(--color-rosewood)]">
+                          <Star className="size-6" />
+                        </div>
+                      </div>
+
+                      <div className="aspect-square rounded-[1.4rem] border border-white/50 bg-white/24 p-4">
+                        <div className="grid h-full place-items-center rounded-[1.05rem] bg-[rgba(91,61,82,0.1)] text-[var(--color-deep-plum)]">
+                          <ImagePlus className="size-7" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between gap-4 rounded-[1.35rem] border border-white/50 bg-white/28 px-4 py-3">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
+                        Your work
+                      </p>
+
+                      <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
+                        Ready to be discovered
+                      </p>
+                    </div>
+
+                    <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.2)] text-[var(--color-deep-plum)]">
+                      <Sparkles className="size-5" />
+                    </div>
+                  </div>
                 </div>
 
-                <h2 className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                  Build your visual portfolio
-                </h2>
+                <div className="max-w-2xl">
+                  <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)]">
+                    <ImagePlus className="size-4" />
+                    Start your portfolio
+                  </div>
 
-                <p className="mt-3 leading-7 text-[var(--color-charcoal)]/64">
-                  Upload examples of your work so customers can understand your style before
-                  requesting a quotation.
-                </p>
+                  <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
+                    Turn your best work into customer confidence.
+                  </h2>
 
-                <button
-                  type="button"
-                  className="btn-primary mt-7 text-sm font-bold"
-                  onClick={openUploadDialog}
-                >
-                  <Upload className="size-4" />
-                  Upload your first image
-                </button>
+                  <p className="mt-5 max-w-xl text-base leading-7 text-[var(--color-charcoal)]/64">
+                    Add a few carefully selected images that show your style, service quality, and
+                    the kinds of events you can deliver.
+                  </p>
+
+                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                    <div className="flex items-start gap-3 rounded-[1.3rem] border border-white/50 bg-white/24 p-4">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(91,61,82,0.11)] text-[var(--color-deep-plum)]">
+                        <Star className="size-4" />
+                      </span>
+
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Lead with strong work
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-[var(--color-charcoal)]/52">
+                          Feature the images that best represent your business.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 rounded-[1.3rem] border border-white/50 bg-white/24 p-4">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(91,61,82,0.11)] text-[var(--color-deep-plum)]">
+                        <Images className="size-4" />
+                      </span>
+
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Show variety
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-[var(--color-charcoal)]/52">
+                          Include different settings, services, and event types.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn-primary mt-8 text-sm font-bold"
+                    onClick={openUploadDialog}
+                  >
+                    <Upload className="size-4" />
+                    Upload your first image
+                  </button>
+                </div>
               </div>
             </section>
           ) : (
-            <section className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <section className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {sortedPortfolio.map((portfolioItem, index) => (
-                <article key={portfolioItem.id} className="luxe-card overflow-hidden p-4">
-                  <div className="group relative min-h-72 overflow-hidden rounded-[1.5rem] bg-[var(--color-light-champagne)]">
+                <article
+                  key={portfolioItem.id}
+                  className="group overflow-hidden rounded-[2rem] border border-white/55 bg-white/32 p-3 shadow-[0_20px_55px_rgba(35,24,30,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_75px_rgba(35,24,30,0.14)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-[1.6rem] bg-[var(--color-light-champagne)]">
                     <img
                       src={portfolioItem.imageUrl}
                       alt={portfolioItem.title ?? `Vendor portfolio item ${index + 1}`}
-                      className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                      className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.055]"
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.74)] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[rgba(25,16,21,0.82)] via-[rgba(25,16,21,0.06)] to-transparent opacity-75 transition duration-500 group-hover:opacity-90" />
 
-                    <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center rounded-full border border-white/40 bg-white/26 px-3 py-2 text-xs font-black text-white backdrop-blur-xl">
-                        Order {portfolioItem.displayOrder}
+                    <div className="absolute left-4 top-4 flex max-w-[calc(100%-2rem)] flex-wrap gap-2">
+                      <span className="inline-flex items-center rounded-full border border-white/35 bg-black/18 px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-white backdrop-blur-xl">
+                        Work {String(index + 1).padStart(2, '0')}
                       </span>
 
                       {portfolioItem.isFeatured ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-white/26 px-3 py-2 text-xs font-black text-white backdrop-blur-xl">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(255,255,255,0.40)] bg-white/24 px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.12em] text-white backdrop-blur-xl">
                           <Star className="size-3.5 fill-white" />
-                          Featured
+                          Featured work
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h2 className="text-xl font-black tracking-[-0.035em] text-white">
-                        {portfolioItem.title ?? `Portfolio item ${index + 1}`}
-                      </h2>
-
-                      {portfolioItem.description ? (
-                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/76">
-                          {portfolioItem.description}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-bold text-[var(--color-charcoal)]/48">
-                        {portfolioItem.originalName}
-                      </p>
-
-                      <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/42">
-                        {formatFileSize(portfolioItem.fileSize)}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
+                    <div className="absolute inset-x-4 bottom-4 flex translate-y-2 items-center justify-end gap-2 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                       <button
                         type="button"
-                        className="grid size-10 place-items-center rounded-xl border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="grid size-10 place-items-center rounded-full border border-white/35 bg-white/22 text-white shadow-lg backdrop-blur-xl transition hover:bg-white hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="Move portfolio item up"
                         disabled={index === 0 || reorderMutation.isPending}
                         onClick={() => {
@@ -526,7 +700,7 @@ export function VendorPortfolioPage() {
 
                       <button
                         type="button"
-                        className="grid size-10 place-items-center rounded-xl border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="grid size-10 place-items-center rounded-full border border-white/35 bg-white/22 text-white shadow-lg backdrop-blur-xl transition hover:bg-white hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="Move portfolio item down"
                         disabled={index === sortedPortfolio.length - 1 || reorderMutation.isPending}
                         onClick={() => {
@@ -541,7 +715,7 @@ export function VendorPortfolioPage() {
 
                       <button
                         type="button"
-                        className="grid size-10 place-items-center rounded-xl border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
+                        className="grid size-10 place-items-center rounded-full border border-white/35 bg-white/22 text-white shadow-lg backdrop-blur-xl transition hover:bg-white hover:text-[var(--color-deep-plum)]"
                         aria-label="Edit portfolio item"
                         onClick={() => {
                           updateMutation.reset();
@@ -550,18 +724,75 @@ export function VendorPortfolioPage() {
                       >
                         <Pencil className="size-4" />
                       </button>
+                    </div>
+                  </div>
 
-                      <button
-                        type="button"
-                        className="grid size-10 place-items-center rounded-xl border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
-                        aria-label="Delete portfolio item"
-                        onClick={() => {
-                          deleteMutation.reset();
-                          setDeletingItem(portfolioItem);
-                        }}
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
+                  <div className="px-2 pb-2 pt-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Portfolio item
+                        </p>
+
+                        <h2 className="mt-2 line-clamp-2 text-xl font-black leading-tight tracking-[-0.035em] text-[var(--color-near-black)]">
+                          {portfolioItem.title ?? `Portfolio item ${index + 1}`}
+                        </h2>
+                      </div>
+
+                      <span className="shrink-0 rounded-full border border-white/55 bg-white/36 px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/55">
+                        Order {portfolioItem.displayOrder}
+                      </span>
+                    </div>
+
+                    {portfolioItem.description ? (
+                      <p className="mt-3 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-[var(--color-charcoal)]/62">
+                        {portfolioItem.description}
+                      </p>
+                    ) : (
+                      <p className="mt-3 min-h-[4.5rem] text-sm italic leading-6 text-[var(--color-charcoal)]/42">
+                        Add a short description to help customers understand this work.
+                      </p>
+                    )}
+
+                    <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/50 pt-4">
+                      <div className="min-w-0">
+                        <p
+                          className="truncate text-xs font-bold text-[var(--color-charcoal)]/52"
+                          title={portfolioItem.originalName}
+                        >
+                          {portfolioItem.originalName}
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/38">
+                          {formatFileSize(portfolioItem.fileSize)}
+                        </p>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-white/60 bg-white/38 px-4 text-xs font-black text-[var(--color-charcoal)] transition hover:-translate-y-0.5 hover:text-[var(--color-deep-plum)]"
+                          onClick={() => {
+                            updateMutation.reset();
+                            setEditingItem(portfolioItem);
+                          }}
+                        >
+                          <Pencil className="size-3.5" />
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          className="grid size-10 place-items-center rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.09)] text-[var(--color-muted-burgundy)] transition hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.15)]"
+                          aria-label="Delete portfolio item"
+                          onClick={() => {
+                            deleteMutation.reset();
+                            setDeletingItem(portfolioItem);
+                          }}
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -621,41 +852,148 @@ export function VendorPortfolioPage() {
               </div>
 
               <form className="mt-8 grid gap-5" onSubmit={onUpload}>
-                <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Image
-                  </span>
+                <div>
+                  <div className="mb-3 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-charcoal)]/76">
+                        Portfolio image
+                      </p>
+
+                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                        Choose a clear, high-quality image that represents your work.
+                      </p>
+                    </div>
+
+                    {selectedFile ? (
+                      <span className="shrink-0 rounded-full border border-white/55 bg-white/34 px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.12em] text-[var(--color-deep-plum)]">
+                        Ready
+                      </span>
+                    ) : null}
+                  </div>
 
                   <input
-                    className="form-field"
+                    id="portfolio-image-upload"
+                    className="sr-only"
                     type="file"
                     accept="image/*"
                     disabled={uploadMutation.isPending}
                     onChange={(event) => {
-                      setSelectedFile(event.target.files?.[0] ?? null);
-                      uploadForm.clearErrors('root');
+                      handleSelectedUploadFile(event.target.files?.[0] ?? null);
+                      event.target.value = '';
                     }}
                   />
 
-                  {selectedFile ? (
-                    <p className="mt-2 text-sm font-semibold text-[var(--color-deep-plum)]">
-                      {selectedFile.name} · {formatFileSize(selectedFile.size)}
-                    </p>
-                  ) : null}
-                </label>
+                  {selectedFile && selectedFilePreviewUrl ? (
+                    <div className="overflow-hidden rounded-[1.75rem] border border-white/55 bg-white/28 p-3 shadow-[0_18px_45px_rgba(35,24,30,0.08)]">
+                      <div className="group relative aspect-[16/10] overflow-hidden rounded-[1.4rem] bg-[var(--color-light-champagne)]">
+                        <img
+                          src={selectedFilePreviewUrl}
+                          alt="Selected portfolio preview"
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(25,16,21,0.72)] via-transparent to-transparent" />
+
+                        <div className="absolute inset-x-4 bottom-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                          <div className="min-w-0 text-white">
+                            <p className="truncate text-sm font-black" title={selectedFile.name}>
+                              {selectedFile.name}
+                            </p>
+
+                            <p className="mt-1 text-xs font-semibold text-white/68">
+                              {formatFileSize(selectedFile.size)}
+                              {selectedFile.type ? ` · ${selectedFile.type}` : ''}
+                            </p>
+                          </div>
+
+                          <div className="flex shrink-0 gap-2">
+                            <label
+                              htmlFor="portfolio-image-upload"
+                              className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/35 bg-white/20 px-4 text-xs font-black text-white backdrop-blur-xl transition hover:bg-white hover:text-[var(--color-deep-plum)]"
+                            >
+                              <ImagePlus className="size-4" />
+                              Replace
+                            </label>
+
+                            <button
+                              type="button"
+                              className="grid size-10 place-items-center rounded-full border border-white/35 bg-white/20 text-white backdrop-blur-xl transition hover:bg-white hover:text-[var(--color-muted-burgundy)]"
+                              aria-label="Remove selected image"
+                              disabled={uploadMutation.isPending}
+                              onClick={() => {
+                                handleSelectedUploadFile(null);
+                              }}
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor="portfolio-image-upload"
+                      className="group flex min-h-64 cursor-pointer flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-[rgba(91,61,82,0.28)] bg-white/22 px-6 py-10 text-center transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(91,61,82,0.48)] hover:bg-white/34 hover:shadow-[0_18px_45px_rgba(35,24,30,0.08)]"
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+
+                        if (uploadMutation.isPending) {
+                          return;
+                        }
+
+                        handleSelectedUploadFile(event.dataTransfer.files?.[0] ?? null);
+                      }}
+                    >
+                      <div className="grid size-16 place-items-center rounded-[1.4rem] bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover:scale-105">
+                        <Upload className="size-7" />
+                      </div>
+
+                      <p className="mt-5 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        Drop an image here
+                      </p>
+
+                      <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--color-charcoal)]/56">
+                        Or click to browse your device and choose the work you want customers to
+                        see.
+                      </p>
+
+                      <span className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-white/60 bg-white/40 px-5 text-xs font-black text-[var(--color-deep-plum)]">
+                        <ImagePlus className="size-4" />
+                        Choose image
+                      </span>
+
+                      <p className="mt-4 text-xs font-semibold text-[var(--color-charcoal)]/40">
+                        JPG, PNG, WebP and other supported image formats
+                      </p>
+                    </label>
+                  )}
+                </div>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Title
-                  </span>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                      Title
+                    </span>
+
+                    <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
+                      {(uploadForm.watch('title') ?? '').length}/120
+                    </span>
+                  </div>
 
                   <input
                     className="form-field"
                     type="text"
-                    placeholder="Elegant garden ceremony"
+                    placeholder="Elegant Garden Reception"
                     disabled={uploadMutation.isPending}
                     {...uploadForm.register('title')}
                   />
+
+                  <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/46">
+                    Give customers a short, memorable title.
+                  </p>
 
                   {uploadForm.formState.errors.title ? (
                     <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
@@ -665,16 +1003,26 @@ export function VendorPortfolioPage() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Description
-                  </span>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                      Description
+                    </span>
+
+                    <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
+                      {(uploadForm.watch('description') ?? '').length}/500
+                    </span>
+                  </div>
 
                   <textarea
-                    className="form-field min-h-28 resize-y"
-                    placeholder="Add useful context about the event, style, or service shown."
+                    className="form-field min-h-32 resize-y"
+                    placeholder="Describe the event, venue, styling, lighting, or the services showcased in this image..."
                     disabled={uploadMutation.isPending}
                     {...uploadForm.register('description')}
                   />
+
+                  <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                    Good descriptions help customers understand what makes this work special.
+                  </p>
 
                   {uploadForm.formState.errors.description ? (
                     <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
@@ -687,6 +1035,9 @@ export function VendorPortfolioPage() {
                   <label className="block">
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                       Display order
+                      <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/46">
+                        Lower numbers appear first in your public portfolio.
+                      </p>
                     </span>
 
                     <input
@@ -706,17 +1057,37 @@ export function VendorPortfolioPage() {
                     ) : null}
                   </label>
 
-                  <label className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4 py-3">
+                  <label className="group relative flex cursor-pointer overflow-hidden rounded-[1.6rem] border border-white/55 bg-white/28 p-5 transition duration-300 hover:border-[rgba(91,61,82,0.32)] hover:bg-white/36 hover:shadow-[0_16px_40px_rgba(35,24,30,0.08)]">
                     <input
                       type="checkbox"
-                      className="size-4 accent-[var(--color-deep-plum)]"
+                      className="peer sr-only"
                       disabled={uploadMutation.isPending}
                       {...uploadForm.register('isFeatured')}
                     />
 
-                    <span className="text-sm font-black text-[var(--color-near-black)]">
-                      Feature this image
-                    </span>
+                    <div className="flex w-full items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(183,167,200,0.18)] px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
+                          <Sparkles className="size-3.5" />
+                          Featured
+                        </div>
+
+                        <h3 className="mt-4 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                          Highlight this portfolio item
+                        </h3>
+
+                        <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
+                          Featured images help customers immediately notice your strongest work and
+                          create a better first impression.
+                        </p>
+                      </div>
+
+                      <div className="flex h-7 w-12 shrink-0 items-center rounded-full bg-[rgba(160,160,160,0.35)] p-1 transition duration-300 peer-checked:bg-[var(--color-deep-plum)]">
+                        <div className="size-5 rounded-full bg-white shadow-md transition duration-300 peer-checked:translate-x-5" />
+                      </div>
+                    </div>
+
+                    <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] border-2 border-transparent transition duration-300 peer-checked:border-[rgba(91,61,82,0.28)]" />
                   </label>
                 </div>
 
@@ -813,16 +1184,27 @@ export function VendorPortfolioPage() {
 
               <form className="mt-8 grid gap-5" onSubmit={onEdit}>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Title
-                  </span>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                      Title
+                    </span>
+
+                    <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
+                      {(editForm.watch('title') ?? '').length}/120
+                    </span>
+                  </div>
 
                   <input
                     className="form-field"
                     type="text"
+                    placeholder="Elegant Garden Reception"
                     disabled={updateMutation.isPending}
                     {...editForm.register('title')}
                   />
+
+                  <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/46">
+                    A memorable title makes this work easier to recognise.
+                  </p>
 
                   {editForm.formState.errors.title ? (
                     <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
@@ -832,15 +1214,26 @@ export function VendorPortfolioPage() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Description
-                  </span>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                      Description
+                    </span>
+
+                    <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
+                      {(editForm.watch('description') ?? '').length}/500
+                    </span>
+                  </div>
 
                   <textarea
-                    className="form-field min-h-28 resize-y"
+                    className="form-field min-h-32 resize-y"
+                    placeholder="Describe what makes this project unique..."
                     disabled={updateMutation.isPending}
                     {...editForm.register('description')}
                   />
+
+                  <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                    Update the story behind this portfolio item whenever your work evolves.
+                  </p>
 
                   {editForm.formState.errors.description ? (
                     <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
@@ -853,6 +1246,9 @@ export function VendorPortfolioPage() {
                   <label className="block">
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                       Display order
+                      <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/46">
+                        Lower numbers appear first in your public portfolio.
+                      </p>
                     </span>
 
                     <input
@@ -872,17 +1268,37 @@ export function VendorPortfolioPage() {
                     ) : null}
                   </label>
 
-                  <label className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4 py-3">
+                  <label className="group relative flex cursor-pointer overflow-hidden rounded-[1.6rem] border border-white/55 bg-white/28 p-5 transition duration-300 hover:border-[rgba(91,61,82,0.32)] hover:bg-white/36 hover:shadow-[0_16px_40px_rgba(35,24,30,0.08)]">
                     <input
                       type="checkbox"
-                      className="size-4 accent-[var(--color-deep-plum)]"
+                      className="peer sr-only"
                       disabled={updateMutation.isPending}
                       {...editForm.register('isFeatured')}
                     />
 
-                    <span className="text-sm font-black text-[var(--color-near-black)]">
-                      Featured image
-                    </span>
+                    <div className="flex w-full items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(183,167,200,0.18)] px-3 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
+                          <Sparkles className="size-3.5" />
+                          Featured
+                        </div>
+
+                        <h3 className="mt-4 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                          Highlight this portfolio item
+                        </h3>
+
+                        <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
+                          Featured items appear more prominently in your public portfolio and help
+                          customers notice your best work first.
+                        </p>
+                      </div>
+
+                      <div className="flex h-7 w-12 shrink-0 items-center rounded-full bg-[rgba(160,160,160,0.35)] p-1 transition duration-300 peer-checked:bg-[var(--color-deep-plum)]">
+                        <div className="size-5 rounded-full bg-white shadow-md transition duration-300 peer-checked:translate-x-5" />
+                      </div>
+                    </div>
+
+                    <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] border-2 border-transparent transition duration-300 peer-checked:border-[rgba(91,61,82,0.28)]" />
                   </label>
                 </div>
 

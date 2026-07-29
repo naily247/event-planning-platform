@@ -797,22 +797,37 @@ export function GuestWorkspacePage() {
                   {guests.map((guest) => (
                     <article
                       key={guest.id}
-                      className="rounded-[1.5rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl"
+                      className="group rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.34),rgba(255,255,255,0.18))] p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/80 hover:shadow-[0_24px_55px_rgba(31,27,29,0.09)] sm:p-6"
                     >
-                      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                        <div>
-                          <p className="text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            {formatGuestName(guest)}
-                          </p>
+                      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                        <div className="flex min-w-0 items-start gap-4">
+                          <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(93,58,85,0.08)]">
+                            {guest.firstName.charAt(0)}
+                            {guest.lastName.charAt(0)}
+                          </span>
 
-                          <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                            {guest.groupName ?? 'No guest group'}
-                          </p>
+                          <div className="min-w-0">
+                            <p className="truncate text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                              {formatGuestName(guest)}
+                            </p>
+
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold text-[var(--color-charcoal)]/58">
+                                {guest.groupName ?? 'No guest group'}
+                              </span>
+
+                              <span className="size-1 rounded-full bg-[var(--color-charcoal)]/24" />
+
+                              <span className="text-sm font-semibold text-[var(--color-charcoal)]/52">
+                                Party of {guest.partySize}
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-end gap-2">
+                        <div className="flex flex-wrap items-center justify-end gap-3">
                           <select
-                            className="min-h-9 rounded-full border border-white/55 bg-white/34 px-3 text-xs font-black text-[var(--color-deep-plum)] outline-none backdrop-blur-xl"
+                            className="min-h-10 rounded-2xl border border-white/60 bg-white/38 px-4 text-xs font-black tracking-[0.04em] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] outline-none transition hover:border-[rgba(93,58,85,0.22)] focus:border-[rgba(93,58,85,0.30)] backdrop-blur-xl"
                             aria-label={`Update RSVP status for ${formatGuestName(guest)}`}
                             value={guest.status}
                             disabled={
@@ -848,7 +863,7 @@ export function GuestWorkspacePage() {
 
                           <button
                             type="button"
-                            className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.16)]"
+                            className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_28px_rgba(31,27,29,0.08)]"
                             aria-label={`Edit ${formatGuestName(guest)}`}
                             onClick={() => {
                               openEditGuestForm(guest);
@@ -859,7 +874,7 @@ export function GuestWorkspacePage() {
 
                           <button
                             type="button"
-                            className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
+                            className="grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_28px_rgba(31,27,29,0.08)]"
                             aria-label={`Delete ${formatGuestName(guest)}`}
                             onClick={() => {
                               openDeleteGuestDialog(guest);
@@ -879,34 +894,36 @@ export function GuestWorkspacePage() {
                         </div>
                       ) : null}
 
-                      <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Party size:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
-                            {guest.partySize}
-                          </span>
-                        </p>
+                      <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-5 text-sm sm:grid-cols-3">
+                        <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            Meal preference
+                          </p>
 
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Meal:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
+                          <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
                             {guest.mealPreference ?? 'Not specified'}
-                          </span>
-                        </p>
+                          </p>
+                        </div>
 
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Email:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
+                        <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            Email
+                          </p>
+
+                          <p className="mt-2 break-words font-black leading-6 text-[var(--color-near-black)]">
                             {guest.email ?? 'Not provided'}
-                          </span>
-                        </p>
+                          </p>
+                        </div>
 
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Phone:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
+                        <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            Phone
+                          </p>
+
+                          <p className="mt-2 break-words font-black leading-6 text-[var(--color-near-black)]">
                             {guest.phone ?? 'Not provided'}
-                          </span>
-                        </p>
+                          </p>
+                        </div>
                       </div>
 
                       <>
@@ -1075,7 +1092,7 @@ export function GuestWorkspacePage() {
           aria-labelledby="create-guest-title"
         >
           <div className="mx-auto max-w-3xl">
-            <div className="glass-card p-6 sm:p-8">
+            <div className="glass-card overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,243,248,0.88))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.16)] backdrop-blur-3xl sm:p-9">
               <div className="flex items-start justify-between gap-5">
                 <div>
                   <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -1113,7 +1130,18 @@ export function GuestWorkspacePage() {
                 </button>
               </div>
 
+              <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
+
               <form className="mt-8 grid gap-5" onSubmit={submitGuest}>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Basic information
+                  </p>
+
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                    Record the guest’s name and core identity details.
+                  </p>
+                </div>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label>
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -1154,6 +1182,15 @@ export function GuestWorkspacePage() {
                   </label>
                 </div>
 
+                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Contact information
+                  </p>
+
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                    Add the best ways to reach this guest for event updates.
+                  </p>
+                </div>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label>
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -1193,7 +1230,15 @@ export function GuestWorkspacePage() {
                     ) : null}
                   </label>
                 </div>
+                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Attendance details
+                  </p>
 
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                    Organise the guest by group, party size and RSVP progress.
+                  </p>
+                </div>
                 <div className="grid gap-5 sm:grid-cols-3">
                   <label>
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
@@ -1249,7 +1294,15 @@ export function GuestWorkspacePage() {
                     </select>
                   </label>
                 </div>
+                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Meal preferences
+                  </p>
 
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                    Capture meal choices and any dietary requirements for planning.
+                  </p>
+                </div>
                 <label>
                   <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                     Meal preference
@@ -1275,7 +1328,15 @@ export function GuestWorkspacePage() {
                     {...guestForm.register('dietaryRequirements')}
                   />
                 </label>
+                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Additional notes
+                  </p>
 
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                    Add any optional context that may help during event planning.
+                  </p>
+                </div>
                 <label>
                   <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                     Notes
@@ -1308,35 +1369,45 @@ export function GuestWorkspacePage() {
                   </div>
                 ) : null}
 
-                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    className="btn-secondary justify-center text-sm font-bold"
-                    disabled={isGuestMutationPending}
-                    onClick={closeGuestForm}
-                  >
-                    Keep guest
-                  </button>
+                <div className="mt-2 border-t border-[rgba(93,58,85,0.10)] pt-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+                      {guestToEdit
+                        ? 'Saving will update this guest’s details across the guest and invitation workspaces.'
+                        : 'You can update RSVP, attendance and meal details later as plans change.'}
+                    </p>
 
-                  <button
-                    type="submit"
-                    className="btn-primary justify-center text-sm font-bold"
-                    disabled={isGuestMutationPending}
-                  >
-                    {isGuestMutationPending ? (
-                      <LoaderCircle className="size-4 animate-spin" />
-                    ) : (
-                      <Save className="size-4" />
-                    )}
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        className="btn-secondary justify-center text-sm font-bold"
+                        disabled={isGuestMutationPending}
+                        onClick={closeGuestForm}
+                      >
+                        Cancel
+                      </button>
 
-                    {updateGuestMutation.isPending
-                      ? 'Saving guest...'
-                      : createGuestMutation.isPending
-                        ? 'Adding guest...'
-                        : guestToEdit
-                          ? 'Save changes'
-                          : 'Add guest'}
-                  </button>
+                      <button
+                        type="submit"
+                        className="btn-primary min-w-40 justify-center text-sm font-bold"
+                        disabled={isGuestMutationPending}
+                      >
+                        {isGuestMutationPending ? (
+                          <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                          <Save className="size-4" />
+                        )}
+
+                        {updateGuestMutation.isPending
+                          ? 'Saving guest...'
+                          : createGuestMutation.isPending
+                            ? 'Adding guest...'
+                            : guestToEdit
+                              ? 'Save changes'
+                              : 'Add guest'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
@@ -1346,7 +1417,7 @@ export function GuestWorkspacePage() {
 
       {isDeleteDialogOpen && guestToDelete ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center bg-[rgba(31,27,29,0.48)] px-4 backdrop-blur-md"
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.52)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-guest-title"
@@ -1357,25 +1428,84 @@ export function GuestWorkspacePage() {
           }}
         >
           <div
-            className="glass-card w-full max-w-md p-8"
+            className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,242,245,0.92))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9"
             onClick={(event) => {
               event.stopPropagation();
             }}
           >
-            <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
-              <Trash2 className="size-7" />
+            <div className="flex items-start justify-between gap-5">
+              <div className="grid size-16 shrink-0 place-items-center rounded-[1.4rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_16px_35px_rgba(124,74,90,0.10)]">
+                <Trash2 className="size-7" />
+              </div>
+
+              <span className="status-chip shrink-0" data-tone="rose">
+                Permanent action
+              </span>
             </div>
 
-            <h2
-              id="delete-guest-title"
-              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
-            >
-              Delete {formatGuestName(guestToDelete)}?
-            </h2>
+            <div className="mt-7">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                Delete guest
+              </p>
 
-            <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
-              This permanently removes the guest from your event. This action cannot be undone.
-            </p>
+              <h2
+                id="delete-guest-title"
+                className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+              >
+                Remove this guest?
+              </h2>
+
+              <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
+                This permanently removes the guest from the event and deletes their saved
+                attendance, contact and meal details.
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-[1.5rem] border border-white/60 bg-white/38 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <div className="flex items-start gap-4">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-base font-black text-[var(--color-deep-plum)]">
+                  {guestToDelete.firstName.charAt(0)}
+                  {guestToDelete.lastName.charAt(0)}
+                </span>
+
+                <div className="min-w-0">
+                  <p className="truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                    {formatGuestName(guestToDelete)}
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
+                    {guestToDelete.groupName ?? 'No guest group'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 border-t border-[rgba(93,58,85,0.10)] pt-5 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/50 bg-white/28 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                    Party size
+                  </p>
+
+                  <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                    {guestToDelete.partySize}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/50 bg-white/28 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                    RSVP status
+                  </p>
+
+                  <div className="mt-2">
+                    <span
+                      className="status-chip w-fit"
+                      data-tone={getStatusTone(guestToDelete.status)}
+                    >
+                      {guestStatusLabels[guestToDelete.status]}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {deleteGuestMutation.isError ? (
               <div
@@ -1386,32 +1516,34 @@ export function GuestWorkspacePage() {
               </div>
             ) : null}
 
-            <div className="mt-8 flex justify-end gap-3">
-              <button
-                type="button"
-                className="btn-secondary text-sm font-bold"
-                disabled={deleteGuestMutation.isPending}
-                onClick={closeDeleteGuestDialog}
-              >
-                Keep guest
-              </button>
+            <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="btn-secondary justify-center text-sm font-bold"
+                  disabled={deleteGuestMutation.isPending}
+                  onClick={closeDeleteGuestDialog}
+                >
+                  Keep guest
+                </button>
 
-              <button
-                type="button"
-                className="btn-primary bg-[var(--color-muted-burgundy)] text-sm font-bold"
-                disabled={deleteGuestMutation.isPending}
-                onClick={() => {
-                  deleteGuestMutation.mutate();
-                }}
-              >
-                {deleteGuestMutation.isPending ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  <Trash2 className="size-4" />
-                )}
+                <button
+                  type="button"
+                  className="flex min-w-40 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--color-muted-burgundy),var(--color-rosewood))] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,74,90,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={deleteGuestMutation.isPending}
+                  onClick={() => {
+                    deleteGuestMutation.mutate();
+                  }}
+                >
+                  {deleteGuestMutation.isPending ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-4" />
+                  )}
 
-                {deleteGuestMutation.isPending ? 'Deleting...' : 'Delete guest'}
-              </button>
+                  {deleteGuestMutation.isPending ? 'Deleting guest...' : 'Delete guest'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

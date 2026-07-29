@@ -446,30 +446,33 @@ export function VendorQuotationEditorPage() {
           </section>
         ) : (
           <>
-            <section className="mt-6 rounded-[32px] border border-white/80 bg-white/70 p-6 shadow-[0_24px_80px_rgba(64,42,51,0.08)] backdrop-blur-xl sm:p-8">
+            <section className="glass-card relative mt-6 overflow-hidden p-6 sm:p-8">
+              <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl" />
+
+              <div className="pointer-events-none absolute -left-24 bottom-0 size-56 rounded-full bg-[rgba(220,186,167,0.16)] blur-3xl" />
               <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-rose-800">
-                    <FileCheck2 className="h-4 w-4" />
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(91,61,82,0.08)] bg-white/70 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)] backdrop-blur">
+                    <FileCheck2 className="size-4" />
                     {draftExists ? 'Saved quotation draft' : 'New quotation'}
                   </div>
 
-                  <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+                  <h1 className="mt-5 text-4xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
                     Prepare quotation
                   </h1>
 
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600 sm:text-base">
+                  <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--color-charcoal)]/68">
                     Respond to <strong>{request.event.name}</strong> with complete pricing, service
                     inclusions, exclusions, terms, and validity details.
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white bg-white/85 px-5 py-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-zinc-400">
+                <div className="rounded-[1.5rem] border border-white/60 bg-white/45 px-6 py-5 shadow-[0_18px_45px_rgba(64,42,51,0.08)] backdrop-blur-xl">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/45">
                     Request status
                   </p>
 
-                  <p className="mt-1 font-semibold text-[#34282e]">
+                  <p className="mt-2 text-2xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                     {request.status.replaceAll('_', ' ')}
                   </p>
                 </div>
@@ -509,23 +512,30 @@ export function VendorQuotationEditorPage() {
 
             <div className="mt-6 grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
               <section className="space-y-6">
-                <div className="rounded-[28px] border border-white/80 bg-white/80 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <CircleDollarSign className="h-5 w-5" />
+                <div className="glass-card p-6 sm:p-7">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <CircleDollarSign className="size-5" />
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                         Financial details
                       </p>
-                      <h2 className="mt-1 text-xl font-semibold">Pricing and deposit</h2>
+
+                      <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Pricing and deposit
+                      </h2>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Define the total quotation value and any upfront payment required.
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                  <div className="mt-6 grid gap-5 border-t border-white/55 pt-6 sm:grid-cols-2">
                     <label className="block">
-                      <span className="text-sm font-semibold text-zinc-700">
+                      <span className="text-sm font-bold text-[var(--color-charcoal)]">
                         Proposed price (LKR)
                       </span>
 
@@ -537,7 +547,7 @@ export function VendorQuotationEditorPage() {
                         value={form.proposedPrice}
                         onChange={(event) => updateField('proposedPrice', event.target.value)}
                         placeholder="150000"
-                        className={`mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none transition disabled:cursor-not-allowed disabled:bg-zinc-100 ${
+                        className={`mt-2 w-full rounded-[1.1rem] border bg-white/70 px-4 py-3.5 text-sm shadow-sm outline-none transition duration-300 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
                           errors.proposedPrice
                             ? 'border-red-300 focus:ring-4 focus:ring-red-100'
                             : 'border-zinc-200 focus:border-rose-300 focus:ring-4 focus:ring-rose-100'
@@ -552,7 +562,7 @@ export function VendorQuotationEditorPage() {
                     </label>
 
                     <label className="block">
-                      <span className="text-sm font-semibold text-zinc-700">
+                      <span className="text-sm font-bold text-[var(--color-charcoal)]">
                         Deposit amount (optional)
                       </span>
 
@@ -564,7 +574,7 @@ export function VendorQuotationEditorPage() {
                         value={form.depositAmount}
                         onChange={(event) => updateField('depositAmount', event.target.value)}
                         placeholder="50000"
-                        className={`mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none transition disabled:cursor-not-allowed disabled:bg-zinc-100 ${
+                        className={`mt-2 w-full rounded-[1.1rem] border bg-white/70 px-4 py-3.5 text-sm shadow-sm outline-none transition duration-300 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
                           errors.depositAmount
                             ? 'border-red-300 focus:ring-4 focus:ring-red-100'
                             : 'border-zinc-200 focus:border-rose-300 focus:ring-4 focus:ring-rose-100'
@@ -580,23 +590,33 @@ export function VendorQuotationEditorPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[28px] border border-white/80 bg-white/80 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <FileText className="h-5 w-5" />
+                <div className="glass-card p-6 sm:p-7">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <FileText className="size-5" />
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                         Service scope
                       </p>
-                      <h2 className="mt-1 text-xl font-semibold">Inclusions and exclusions</h2>
+
+                      <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Inclusions & exclusions
+                      </h2>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Clearly explain what is included and excluded to avoid misunderstandings
+                        with the customer.
+                      </p>
                     </div>
                   </div>
 
-                  <label className="mt-6 block">
+                  <label className="mt-6 block border-t border-white/55 pt-6">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-semibold text-zinc-700">Inclusions</span>
+                      <span className="text-sm font-bold text-[var(--color-charcoal)]">
+                        Inclusions
+                      </span>
 
                       <CharacterCount current={form.inclusions.length} maximum={5000} />
                     </div>
@@ -607,7 +627,7 @@ export function VendorQuotationEditorPage() {
                       value={form.inclusions}
                       onChange={(event) => updateField('inclusions', event.target.value)}
                       placeholder="Describe everything included in this quotation..."
-                      className={`mt-2 w-full resize-y rounded-2xl border bg-white px-4 py-3 text-sm leading-6 outline-none transition disabled:cursor-not-allowed disabled:bg-zinc-100 ${
+                      className={`mt-2 w-full resize-y rounded-[1.1rem] border bg-white/70 px-4 py-3.5 text-sm leading-7 shadow-sm outline-none transition duration-300 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
                         errors.inclusions
                           ? 'border-red-300 focus:ring-4 focus:ring-red-100'
                           : 'border-zinc-200 focus:border-rose-300 focus:ring-4 focus:ring-rose-100'
@@ -621,7 +641,7 @@ export function VendorQuotationEditorPage() {
 
                   <label className="mt-5 block">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-semibold text-zinc-700">
+                      <span className="text-sm font-bold text-[var(--color-charcoal)]">
                         Exclusions (optional)
                       </span>
 
@@ -634,7 +654,7 @@ export function VendorQuotationEditorPage() {
                       value={form.exclusions}
                       onChange={(event) => updateField('exclusions', event.target.value)}
                       placeholder="List anything not included in this quotation..."
-                      className={`mt-2 w-full resize-y rounded-2xl border bg-white px-4 py-3 text-sm leading-6 outline-none transition disabled:cursor-not-allowed disabled:bg-zinc-100 ${
+                      className={`mt-2 w-full resize-y rounded-[1.1rem] border bg-white/70 px-4 py-3.5 text-sm leading-7 shadow-sm outline-none transition duration-300 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
                         errors.exclusions
                           ? 'border-red-300 focus:ring-4 focus:ring-red-100'
                           : 'border-zinc-200 focus:border-rose-300 focus:ring-4 focus:ring-rose-100'
@@ -647,23 +667,33 @@ export function VendorQuotationEditorPage() {
                   </label>
                 </div>
 
-                <div className="rounded-[28px] border border-white/80 bg-white/80 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.06)] sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-                      <ShieldCheck className="h-5 w-5" />
+                <div className="glass-card p-6 sm:p-7">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <ShieldCheck className="size-5" />
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                         Conditions
                       </p>
-                      <h2 className="mt-1 text-xl font-semibold">Terms and validity</h2>
+
+                      <h2 className="mt-2 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Terms & validity
+                      </h2>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Set clear payment, cancellation, timing, and validity conditions for the
+                        customer.
+                      </p>
                     </div>
                   </div>
 
-                  <label className="mt-6 block">
+                  <label className="mt-6 block border-t border-white/55 pt-6">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-semibold text-zinc-700">Terms (optional)</span>
+                      <span className="text-sm font-bold text-[var(--color-charcoal)]">
+                        Terms (optional)
+                      </span>
 
                       <CharacterCount current={form.terms.length} maximum={5000} />
                     </div>
@@ -674,7 +704,7 @@ export function VendorQuotationEditorPage() {
                       value={form.terms}
                       onChange={(event) => updateField('terms', event.target.value)}
                       placeholder="Add payment terms, cancellation rules, timing expectations, and other conditions..."
-                      className={`mt-2 w-full resize-y rounded-2xl border bg-white px-4 py-3 text-sm leading-6 outline-none transition disabled:cursor-not-allowed disabled:bg-zinc-100 ${
+                      className={`mt-2 w-full resize-y rounded-[1.1rem] border bg-white/70 px-4 py-3.5 text-sm leading-7 shadow-sm outline-none transition duration-300 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
                         errors.terms
                           ? 'border-red-300 focus:ring-4 focus:ring-red-100'
                           : 'border-zinc-200 focus:border-rose-300 focus:ring-4 focus:ring-rose-100'
@@ -687,7 +717,7 @@ export function VendorQuotationEditorPage() {
                   </label>
 
                   <label className="mt-5 block">
-                    <span className="text-sm font-semibold text-zinc-700">
+                    <span className="text-sm font-bold text-[var(--color-charcoal)]">
                       Quotation expiry (optional)
                     </span>
 
@@ -696,7 +726,7 @@ export function VendorQuotationEditorPage() {
                       disabled={editingDisabled}
                       value={form.expiresAt}
                       onChange={(event) => updateField('expiresAt', event.target.value)}
-                      className={`mt-2 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none transition disabled:cursor-not-allowed disabled:bg-zinc-100 ${
+                      className={`mt-2 w-full rounded-[1.1rem] border bg-white/70 px-4 py-3.5 text-sm shadow-sm outline-none transition duration-300 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
                         errors.expiresAt
                           ? 'border-red-300 focus:ring-4 focus:ring-red-100'
                           : 'border-zinc-200 focus:border-rose-300 focus:ring-4 focus:ring-rose-100'
@@ -711,34 +741,54 @@ export function VendorQuotationEditorPage() {
               </section>
 
               <aside className="space-y-6">
-                <section className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.08)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                    Quotation summary
-                  </p>
+                <section className="glass-card relative overflow-hidden p-6">
+                  <div className="pointer-events-none absolute -right-14 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl" />
+                  <div className="relative flex items-start gap-4">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-[1.05rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <CircleDollarSign className="size-5" />
+                    </div>
 
-                  <dl className="mt-5 space-y-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="text-sm text-zinc-500">Proposed price</dt>
-                      <dd className="font-semibold text-[#34282e]">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                        Quotation summary
+                      </p>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Live financial breakdown based on the values entered.
+                      </p>
+                    </div>
+                  </div>
+
+                  <dl className="relative mt-6 space-y-3 border-t border-white/55 pt-6">
+                    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/55 bg-white/35 px-4 py-3.5">
+                      <dt className="text-sm font-semibold text-[var(--color-charcoal)]/62">
+                        Proposed price
+                      </dt>
+
+                      <dd className="text-sm font-black text-[var(--color-near-black)]">
                         {Number.isFinite(parsedPrice) && parsedPrice > 0
                           ? `LKR ${parsedPrice.toLocaleString('en-LK')}`
                           : '—'}
                       </dd>
                     </div>
 
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="text-sm text-zinc-500">Deposit</dt>
-                      <dd className="font-semibold text-[#34282e]">
+                    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/55 bg-white/35 px-4 py-3.5">
+                      <dt className="text-sm font-semibold text-[var(--color-charcoal)]/62">
+                        Deposit
+                      </dt>
+
+                      <dd className="text-sm font-black text-[var(--color-near-black)]">
                         {parsedDeposit !== null && Number.isFinite(parsedDeposit)
                           ? `LKR ${parsedDeposit.toLocaleString('en-LK')}`
                           : 'Not required'}
                       </dd>
                     </div>
 
-                    <div className="border-t border-zinc-100 pt-4">
+                    <div className="mt-2 rounded-[1.25rem] bg-[var(--color-deep-plum)] px-4 py-4 text-white shadow-[0_16px_38px_rgba(91,61,82,0.2)]">
                       <div className="flex items-center justify-between gap-4">
-                        <dt className="text-sm font-semibold text-zinc-700">Remaining balance</dt>
-                        <dd className="text-lg font-semibold text-rose-800">
+                        <dt className="text-sm font-bold text-white/72">Remaining balance</dt>
+
+                        <dd className="text-lg font-black tracking-[-0.03em]">
                           {remainingBalance !== null && Number.isFinite(remainingBalance)
                             ? `LKR ${remainingBalance.toLocaleString('en-LK')}`
                             : '—'}
@@ -748,51 +798,99 @@ export function VendorQuotationEditorPage() {
                   </dl>
                 </section>
 
-                <section className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <CalendarClock className="h-5 w-5 text-rose-700" />
-                    <h2 className="font-semibold text-[#34282e]">Before sending</h2>
+                <section className="glass-card p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-[1.05rem] bg-[rgba(220,186,167,0.2)] text-[var(--color-rosewood)]">
+                      <CalendarClock className="size-5" />
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                        Final review
+                      </p>
+
+                      <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Before sending
+                      </h2>
+
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Check these essentials before the quotation reaches the customer.
+                      </p>
+                    </div>
                   </div>
 
-                  <ul className="mt-4 space-y-3 text-sm leading-6 text-zinc-600">
-                    <li>Confirm the proposed price and deposit.</li>
-                    <li>Clearly state all service inclusions.</li>
-                    <li>List exclusions to avoid misunderstandings.</li>
-                    <li>Add relevant payment and cancellation terms.</li>
-                    <li>Review the expiry date before submission.</li>
+                  <ul className="mt-6 space-y-3 border-t border-white/55 pt-6">
+                    {[
+                      'Confirm the proposed price and deposit.',
+                      'Clearly state all service inclusions.',
+                      'List exclusions to avoid misunderstandings.',
+                      'Add relevant payment and cancellation terms.',
+                      'Review the expiry date before submission.',
+                    ].map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-3 rounded-2xl border border-white/55 bg-white/35 px-4 py-3.5"
+                      >
+                        <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                          <CheckCircle2 className="size-3.5" />
+                        </span>
+
+                        <span className="text-sm font-medium leading-6 text-[var(--color-charcoal)]/72">
+                          {item}
+                        </span>
+                      </li>
+                    ))}
                   </ul>
                 </section>
 
                 {!editingDisabled && (
-                  <section className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-[0_18px_60px_rgba(64,42,51,0.08)]">
-                    <button
-                      type="button"
-                      disabled={saveMutation.isPending || sendMutation.isPending}
-                      onClick={handleSave}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-5 py-3.5 text-sm font-semibold text-zinc-700 transition hover:border-rose-200 hover:text-rose-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {saveMutation.isPending ? (
-                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
+                  <section className="glass-card relative overflow-hidden p-6">
+                    <div className="pointer-events-none absolute -right-12 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl" />
+                    <div className="relative">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                        Quotation actions
+                      </p>
 
-                      {draftExists ? 'Update draft' : 'Save draft'}
-                    </button>
+                      <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Save or send
+                      </h2>
 
-                    <button
-                      type="button"
-                      disabled={saveMutation.isPending || sendMutation.isPending}
-                      onClick={handleOpenSendConfirmation}
-                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#34282e] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#4b343e] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {sendMutation.isPending ? (
-                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                      Send quotation
-                    </button>
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                        Save your progress as a draft, or send the completed quotation to the
+                        customer.
+                      </p>
+                    </div>
+
+                    <div className="relative mt-6 space-y-3 border-t border-white/55 pt-6">
+                      <button
+                        type="button"
+                        disabled={saveMutation.isPending || sendMutation.isPending}
+                        onClick={handleSave}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/70 bg-white/65 px-5 py-3.5 text-sm font-black text-[var(--color-charcoal)] shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(91,61,82,0.16)] hover:bg-white hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                      >
+                        {saveMutation.isPending ? (
+                          <LoaderCircle className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4" />
+                        )}
+
+                        {draftExists ? 'Update draft' : 'Save draft'}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={saveMutation.isPending || sendMutation.isPending}
+                        onClick={handleOpenSendConfirmation}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3.5 text-sm font-black text-white shadow-[0_16px_40px_rgba(91,61,82,0.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:shadow-[0_22px_50px_rgba(91,61,82,0.3)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                      >
+                        {sendMutation.isPending ? (
+                          <LoaderCircle className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="h-4 w-4" />
+                        )}
+                        Send quotation
+                      </button>
+                    </div>
                   </section>
                 )}
               </aside>
@@ -815,27 +913,40 @@ export function VendorQuotationEditorPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="send-quotation-title"
-            className="w-full max-w-md rounded-[28px] border border-white/80 bg-white p-6 shadow-2xl sm:p-7"
+            className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/75 bg-white/90 p-6 shadow-[0_32px_90px_rgba(35,25,30,0.28)] backdrop-blur-2xl sm:p-7"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-700">
-              <Send className="h-5 w-5" />
+            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.2)] blur-3xl" />
+            <div className="relative grid size-12 place-items-center rounded-[1.1rem] bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+              <Send className="size-5" />
             </div>
 
-            <h2 id="send-quotation-title" className="mt-5 text-xl font-semibold text-[#34282e]">
+            <h2
+              id="send-quotation-title"
+              className="relative mt-5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+            >
               Send this quotation?
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-zinc-500">
+            <p className="relative mt-3 text-sm leading-7 text-[var(--color-charcoal)]/62">
               The draft will be saved first and then sent to the customer. Once sent, this current
               backend workflow does not support editing or revising it.
             </p>
 
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <div className="relative mt-5 flex items-start gap-3 rounded-[1.2rem] border border-amber-200/80 bg-amber-50/80 p-4">
+              <AlertCircle className="mt-0.5 size-4.5 shrink-0 text-amber-700" />
+
+              <p className="text-sm font-medium leading-6 text-amber-900">
+                Review all pricing, inclusions, exclusions, terms, and expiry details before
+                sending.
+              </p>
+            </div>
+
+            <div className="relative mt-6 flex flex-col-reverse gap-3 border-t border-zinc-100 pt-6 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 disabled={sendMutation.isPending}
                 onClick={() => setShowSendConfirmation(false)}
-                className="rounded-2xl border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
+                className="rounded-2xl border border-zinc-200 bg-white px-5 py-3 text-sm font-black text-[var(--color-charcoal)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(91,61,82,0.16)] hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Keep editing
               </button>
@@ -844,7 +955,7 @@ export function VendorQuotationEditorPage() {
                 type="button"
                 disabled={sendMutation.isPending}
                 onClick={() => sendMutation.mutate()}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#34282e] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#4b343e] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:shadow-[0_22px_46px_rgba(91,61,82,0.3)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {sendMutation.isPending ? (
                   <LoaderCircle className="h-4 w-4 animate-spin" />

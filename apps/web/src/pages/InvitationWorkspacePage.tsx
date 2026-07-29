@@ -636,20 +636,35 @@ export function InvitationWorkspacePage() {
                   {invitations.map((invitation) => (
                     <article
                       key={invitation.id}
-                      className="rounded-[1.5rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl"
+                      className="group rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/80 hover:shadow-[0_24px_55px_rgba(31,27,29,0.09)] sm:p-6"
                     >
-                      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                        <div>
-                          <p className="text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            {invitation.guest.firstName} {invitation.guest.lastName}
-                          </p>
+                      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                        <div className="flex min-w-0 items-start gap-4">
+                          <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(93,58,85,0.08)]">
+                            {invitation.guest.firstName.charAt(0)}
+                            {invitation.guest.lastName.charAt(0)}
+                          </span>
 
-                          <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                            {invitation.guest.email ?? 'No email address provided'}
-                          </p>
+                          <div className="min-w-0">
+                            <p className="truncate text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                              {invitation.guest.firstName} {invitation.guest.lastName}
+                            </p>
+
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <span className="max-w-full truncate text-sm font-semibold text-[var(--color-charcoal)]/58">
+                                {invitation.guest.email ?? 'No email address provided'}
+                              </span>
+
+                              <span className="size-1 rounded-full bg-[var(--color-charcoal)]/24" />
+
+                              <span className="text-sm font-semibold text-[var(--color-charcoal)]/52">
+                                Party of {invitation.guest.partySize}
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-end gap-2">
+                        <div className="flex flex-wrap items-center justify-end gap-3">
                           <span
                             className="status-chip w-fit"
                             data-tone={
@@ -673,7 +688,7 @@ export function InvitationWorkspacePage() {
 
                           <button
                             type="button"
-                            className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.16)]"
+                            className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_28px_rgba(31,27,29,0.08)]"
                             aria-label={`Regenerate invitation for ${invitation.guest.firstName} ${invitation.guest.lastName}`}
                             onClick={() => {
                               openRegenerateInvitationDialog(invitation);
@@ -684,7 +699,7 @@ export function InvitationWorkspacePage() {
 
                           <button
                             type="button"
-                            className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)] disabled:cursor-not-allowed disabled:opacity-45"
+                            className="grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_28px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-[0_10px_24px_rgba(31,27,29,0.04)]"
                             aria-label={`Revoke invitation for ${invitation.guest.firstName} ${invitation.guest.lastName}`}
                             disabled={invitation.isRevoked}
                             onClick={() => {
@@ -695,43 +710,49 @@ export function InvitationWorkspacePage() {
                           </button>
                         </div>
                       </div>
-                      <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Guest status:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
+
+                      <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-5 text-sm sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            Guest status
+                          </p>
+
+                          <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
                             {invitation.guest.status.replaceAll('_', ' ')}
-                          </span>
-                        </p>
+                          </p>
+                        </div>
 
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Party size:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
-                            {invitation.guest.partySize}
-                          </span>
-                        </p>
+                        <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            Expires
+                          </p>
 
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Expires:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
+                          <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
                             {formatEventDate(invitation.expiresAt)}
-                          </span>
-                        </p>
+                          </p>
+                        </div>
 
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Created:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
+                        <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            Created
+                          </p>
+
+                          <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
                             {formatEventDate(invitation.createdAt)}
-                          </span>
-                        </p>
+                          </p>
+                        </div>
 
-                        <p className="font-semibold text-[var(--color-charcoal)]/62">
-                          Last sent:{' '}
-                          <span className="font-black text-[var(--color-near-black)]">
+                        <div className="rounded-2xl border border-white/45 bg-white/22 p-4 sm:col-span-2 xl:col-span-3">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            Last sent
+                          </p>
+
+                          <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
                             {invitation.lastSentAt
                               ? formatEventDate(invitation.lastSentAt)
                               : 'Not recorded'}
-                          </span>
-                        </p>
+                          </p>
+                        </div>
                       </div>
                     </article>
                   ))}
@@ -790,7 +811,7 @@ export function InvitationWorkspacePage() {
             </article>
 
             <aside className="space-y-5">
-              <article className="glass-card p-6 sm:p-7">
+              <article className="glass-card overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-6 shadow-[0_24px_60px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-7">
                 <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                   Event details
                 </p>
@@ -799,32 +820,79 @@ export function InvitationWorkspacePage() {
                   Invitation context.
                 </h2>
 
-                <div className="mt-8 rounded-2xl bg-white/28 p-5 backdrop-blur-xl">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Event date</p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                  Keep the event essentials visible while managing guest invitations.
+                </p>
 
-                  <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                    {formatEventDate(event.eventDate)}
-                  </p>
-                </div>
+                <div className="mt-7 grid gap-3">
+                  <div className="rounded-[1.4rem] border border-white/55 bg-white/28 p-5 shadow-[0_12px_30px_rgba(31,27,29,0.04)] backdrop-blur-xl">
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                      Event date
+                    </p>
 
-                <div className="mt-3 rounded-2xl bg-white/28 p-5 backdrop-blur-xl">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Location</p>
+                    <p className="mt-2 text-xl font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      {formatEventDate(event.eventDate)}
+                    </p>
+                  </div>
 
-                  <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                    {event.location}
-                  </p>
+                  <div className="rounded-[1.4rem] border border-white/55 bg-white/28 p-5 shadow-[0_12px_30px_rgba(31,27,29,0.04)] backdrop-blur-xl">
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                      Location
+                    </p>
+
+                    <p className="mt-2 text-xl font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      {event.location}
+                    </p>
+                  </div>
                 </div>
               </article>
 
-              <article className="rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
-                <MailCheck className="size-6 text-[var(--color-powder-blue)]" />
+              <article className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_34px_90px_rgba(93,58,85,0.36)]">
+                <div className="pointer-events-none absolute -right-12 -top-14 size-44 rounded-full bg-white/10 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-16 left-6 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
 
-                <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">Invitation tools</h2>
+                <div className="relative">
+                  <div className="grid size-12 place-items-center rounded-2xl border border-white/12 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_14px_30px_rgba(31,27,29,0.16)] backdrop-blur-xl">
+                    <MailCheck className="size-6" />
+                  </div>
 
-                <p className="mt-3 leading-7 text-white/68">
-                  Create secure links, share them with guests, replace compromised invitations and
-                  revoke access whenever needed.
-                </p>
+                  <p className="mt-7 text-xs font-black uppercase tracking-[0.2em] text-white/52">
+                    Secure guest access
+                  </p>
+
+                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">Invitation tools</h2>
+
+                  <p className="mt-4 leading-7 text-white/70">
+                    Create secure links, share them with guests, replace compromised invitations and
+                    revoke access whenever needed.
+                  </p>
+
+                  <div className="mt-7 grid gap-3">
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 backdrop-blur-xl">
+                      <Check className="size-4 shrink-0 text-[var(--color-powder-blue)]" />
+
+                      <span className="text-sm font-bold text-white/78">
+                        Unique links for every guest
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 backdrop-blur-xl">
+                      <RefreshCcw className="size-4 shrink-0 text-[var(--color-powder-blue)]" />
+
+                      <span className="text-sm font-bold text-white/78">
+                        Regenerate access when needed
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 backdrop-blur-xl">
+                      <Ban className="size-4 shrink-0 text-[var(--color-powder-blue)]" />
+
+                      <span className="text-sm font-bold text-white/78">
+                        Revoke compromised links instantly
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </article>
             </aside>
           </section>
@@ -832,13 +900,23 @@ export function InvitationWorkspacePage() {
       </div>
       {isCreateDialogOpen ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.52)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-invitation-title"
+          onClick={() => {
+            if (!createInvitationMutation.isPending) {
+              closeCreateInvitationDialog();
+            }
+          }}
         >
-          <div className="mx-auto max-w-2xl">
-            <div className="glass-card p-6 sm:p-8">
+          <div className="mx-auto flex min-h-full max-w-2xl items-center">
+            <div
+              className="glass-card w-full overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,243,248,0.90))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
               <div className="flex items-start justify-between gap-5">
                 <div>
                   <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -848,19 +926,20 @@ export function InvitationWorkspacePage() {
 
                   <h2
                     id="create-invitation-title"
-                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
                   >
                     Create a secure guest invitation.
                   </h2>
 
-                  <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-                    Choose a guest and set how long their invitation link should remain active.
+                  <p className="mt-3 max-w-xl leading-7 text-[var(--color-charcoal)]/66">
+                    Choose a guest and decide how long their personal invitation link should remain
+                    active.
                   </p>
                 </div>
 
                 <button
                   type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
+                  className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/60 bg-white/32 text-[var(--color-charcoal)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition hover:-translate-y-0.5 hover:text-[var(--color-deep-plum)]"
                   aria-label="Close invitation dialog"
                   disabled={createInvitationMutation.isPending}
                   onClick={closeCreateInvitationDialog}
@@ -869,33 +948,35 @@ export function InvitationWorkspacePage() {
                 </button>
               </div>
 
+              <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
+
               {createdInvitation ? (
-                <div className="mt-8">
-                  <div className="rounded-[1.5rem] border border-[rgba(142,151,115,0.28)] bg-[rgba(142,151,115,0.12)] p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(142,151,115,0.24)] text-[#3d452f]">
+                <div className="mt-7">
+                  <div className="rounded-[1.5rem] border border-[rgba(142,151,115,0.28)] bg-[linear-gradient(145deg,rgba(142,151,115,0.16),rgba(255,255,255,0.28))] p-5 shadow-[0_16px_36px_rgba(61,69,47,0.06)]">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(142,151,115,0.24)] text-[#3d452f]">
                         <Check className="size-5" />
                       </div>
 
                       <div>
-                        <p className="font-black text-[var(--color-near-black)]">
+                        <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                           Invitation created successfully
                         </p>
 
-                        <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/60">
-                          The invitation is active and ready to share.
+                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                          The link is active and ready to share with your guest.
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-[1.5rem] border border-white/55 bg-white/24 p-5">
-                    <div className="flex items-center gap-2 text-sm font-black text-[var(--color-rosewood)]">
+                  <div className="mt-5 rounded-[1.5rem] border border-white/60 bg-white/30 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
                       <Link2 className="size-4" />
                       Invitation link
                     </div>
 
-                    <p className="mt-3 break-all rounded-2xl bg-white/35 px-4 py-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/72">
+                    <p className="mt-4 break-all rounded-2xl border border-white/55 bg-white/38 px-4 py-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/72">
                       {createdInvitation.invitationUrl}
                     </p>
 
@@ -916,18 +997,34 @@ export function InvitationWorkspacePage() {
                     </button>
                   </div>
 
-                  <div className="mt-6 flex justify-end">
-                    <button
-                      type="button"
-                      className="btn-secondary text-sm font-bold"
-                      onClick={closeCreateInvitationDialog}
-                    >
-                      Done
-                    </button>
+                  <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+                        You can regenerate or revoke this invitation later from the invitation list.
+                      </p>
+
+                      <button
+                        type="button"
+                        className="btn-secondary justify-center text-sm font-bold"
+                        onClick={closeCreateInvitationDialog}
+                      >
+                        Done
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="mt-8 grid gap-5">
+                <div className="mt-7 grid gap-6">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Guest selection
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                      Choose which guest should receive the secure invitation link.
+                    </p>
+                  </div>
+
                   <label>
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                       Guest
@@ -959,6 +1056,16 @@ export function InvitationWorkspacePage() {
                     </p>
                   </label>
 
+                  <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Invitation settings
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
+                      Decide how long the invitation should remain active before it expires.
+                    </p>
+                  </div>
+
                   <label>
                     <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
                       Link expiry
@@ -979,13 +1086,13 @@ export function InvitationWorkspacePage() {
                         }}
                       />
 
-                      <span className="shrink-0 text-sm font-black text-[var(--color-charcoal)]/60">
+                      <span className="shrink-0 rounded-2xl border border-white/55 bg-white/28 px-4 py-3 text-sm font-black text-[var(--color-charcoal)]/60 backdrop-blur-xl">
                         days
                       </span>
                     </div>
 
                     <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                      Invitations may remain active for between 1 and 30 days.
+                      Invitation links may remain active for between 1 and 30 days.
                     </p>
                   </label>
 
@@ -1010,38 +1117,47 @@ export function InvitationWorkspacePage() {
                     </div>
                   ) : null}
 
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      className="btn-secondary justify-center text-sm font-bold"
-                      disabled={createInvitationMutation.isPending}
-                      onClick={closeCreateInvitationDialog}
-                    >
-                      Cancel
-                    </button>
+                  <div className="border-t border-[rgba(93,58,85,0.10)] pt-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+                        Invitation links can be regenerated or revoked later if circumstances
+                        change.
+                      </p>
 
-                    <button
-                      type="button"
-                      className="btn-primary justify-center text-sm font-bold"
-                      disabled={
-                        createInvitationMutation.isPending ||
-                        guestsQuery.isLoading ||
-                        !selectedGuestId
-                      }
-                      onClick={() => {
-                        createInvitationMutation.mutate();
-                      }}
-                    >
-                      {createInvitationMutation.isPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                      ) : (
-                        <Send className="size-4" />
-                      )}
+                      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                        <button
+                          type="button"
+                          className="btn-secondary justify-center text-sm font-bold"
+                          disabled={createInvitationMutation.isPending}
+                          onClick={closeCreateInvitationDialog}
+                        >
+                          Cancel
+                        </button>
 
-                      {createInvitationMutation.isPending
-                        ? 'Creating invitation...'
-                        : 'Create invitation'}
-                    </button>
+                        <button
+                          type="button"
+                          className="btn-primary min-w-44 justify-center text-sm font-bold"
+                          disabled={
+                            createInvitationMutation.isPending ||
+                            guestsQuery.isLoading ||
+                            !selectedGuestId
+                          }
+                          onClick={() => {
+                            createInvitationMutation.mutate();
+                          }}
+                        >
+                          {createInvitationMutation.isPending ? (
+                            <LoaderCircle className="size-4 animate-spin" />
+                          ) : (
+                            <Send className="size-4" />
+                          )}
+
+                          {createInvitationMutation.isPending
+                            ? 'Creating invitation...'
+                            : 'Create invitation'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1052,13 +1168,23 @@ export function InvitationWorkspacePage() {
 
       {isRegenerateDialogOpen && invitationToRegenerate ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.52)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="regenerate-invitation-title"
+          onClick={() => {
+            if (!regenerateInvitationMutation.isPending) {
+              closeRegenerateInvitationDialog();
+            }
+          }}
         >
-          <div className="mx-auto max-w-2xl">
-            <div className="glass-card p-6 sm:p-8">
+          <div className="mx-auto flex min-h-full max-w-2xl items-center">
+            <div
+              className="glass-card w-full overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,243,248,0.90))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
               <div className="flex items-start justify-between gap-5">
                 <div>
                   <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
@@ -1085,7 +1211,7 @@ export function InvitationWorkspacePage() {
 
                 <button
                   type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
+                  className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/60 bg-white/32 text-[var(--color-charcoal)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition hover:-translate-y-0.5 hover:text-[var(--color-deep-plum)]"
                   aria-label="Close regenerate invitation dialog"
                   disabled={regenerateInvitationMutation.isPending}
                   onClick={closeRegenerateInvitationDialog}
@@ -1094,25 +1220,56 @@ export function InvitationWorkspacePage() {
                 </button>
               </div>
 
-              {regeneratedInvitation ? (
-                <div className="mt-8">
-                  <div className="rounded-[1.5rem] border border-[rgba(142,151,115,0.28)] bg-[rgba(142,151,115,0.12)] p-5">
-                    <p className="font-black text-[var(--color-near-black)]">
-                      Invitation regenerated successfully
-                    </p>
+              <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
 
-                    <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/60">
-                      The previous link is no longer valid.
-                    </p>
+              {regeneratedInvitation ? (
+                <div className="mt-7">
+                  <div className="rounded-[1.5rem] border border-[rgba(142,151,115,0.28)] bg-[linear-gradient(145deg,rgba(142,151,115,0.16),rgba(255,255,255,0.28))] p-5 shadow-[0_16px_36px_rgba(61,69,47,0.06)]">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(142,151,115,0.24)] text-[#3d452f]">
+                        <Check className="size-5" />
+                      </div>
+
+                      <div>
+                        <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                          Invitation regenerated successfully
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                          A fresh secure link has been created for{' '}
+                          <strong className="text-[var(--color-near-black)]">
+                            {invitationToRegenerate.guest.firstName}{' '}
+                            {invitationToRegenerate.guest.lastName}
+                          </strong>
+                          .
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="mt-5 rounded-[1.5rem] border border-white/55 bg-white/24 p-5">
-                    <div className="flex items-center gap-2 text-sm font-black text-[var(--color-rosewood)]">
+                  <div className="mt-5 rounded-[1.5rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] p-5">
+                    <div className="flex items-start gap-3">
+                      <CircleAlert className="mt-0.5 size-5 shrink-0 text-[var(--color-muted-burgundy)]" />
+
+                      <div>
+                        <p className="font-black text-[var(--color-near-black)]">
+                          The previous invitation link is now invalid
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                          Only the new link below should be shared with the guest.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 rounded-[1.5rem] border border-white/60 bg-white/30 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
                       <Link2 className="size-4" />
                       New invitation link
                     </div>
 
-                    <p className="mt-3 break-all rounded-2xl bg-white/35 px-4 py-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/72">
+                    <p className="mt-4 break-all rounded-2xl border border-white/55 bg-white/38 px-4 py-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/72">
                       {regeneratedInvitation.invitationUrl}
                     </p>
 
@@ -1133,14 +1290,21 @@ export function InvitationWorkspacePage() {
                     </button>
                   </div>
 
-                  <div className="mt-6 flex justify-end">
-                    <button
-                      type="button"
-                      className="btn-secondary text-sm font-bold"
-                      onClick={closeRegenerateInvitationDialog}
-                    >
-                      Done
-                    </button>
+                  <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+                        You can regenerate or revoke this invitation again later from the invitation
+                        list.
+                      </p>
+
+                      <button
+                        type="button"
+                        className="btn-secondary justify-center text-sm font-bold"
+                        onClick={closeRegenerateInvitationDialog}
+                      >
+                        Done
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -1221,7 +1385,7 @@ export function InvitationWorkspacePage() {
 
       {isRevokeDialogOpen && invitationToRevoke ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center bg-[rgba(31,27,29,0.48)] px-4 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.54)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="revoke-invitation-title"
@@ -1231,67 +1395,119 @@ export function InvitationWorkspacePage() {
             }
           }}
         >
-          <div
-            className="glass-card w-full max-w-lg p-6 sm:p-8"
-            onClick={(event) => {
-              event.stopPropagation();
-            }}
-          >
-            <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-              <Ban className="size-7" />
-            </div>
-
-            <h2
-              id="revoke-invitation-title"
-              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+          <div className="mx-auto flex min-h-full max-w-xl items-center">
+            <div
+              className="glass-card w-full overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,243,248,0.91))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
             >
-              Revoke invitation for {invitationToRevoke.guest.firstName}{' '}
-              {invitationToRevoke.guest.lastName}?
-            </h2>
+              <div className="flex items-start justify-between gap-5">
+                <div>
+                  <div className="grid size-14 place-items-center rounded-2xl border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_14px_30px_rgba(124,74,90,0.08)]">
+                    <Ban className="size-7" />
+                  </div>
 
-            <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
-              The current invitation link for{' '}
-              <strong>
-                {invitationToRevoke.guest.firstName} {invitationToRevoke.guest.lastName}
-              </strong>{' '}
-              will stop working immediately.
-            </p>
+                  <h2
+                    id="revoke-invitation-title"
+                    className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
+                  >
+                    Revoke this invitation?
+                  </h2>
 
-            {revokeInvitationMutation.isError ? (
-              <div
-                role="alert"
-                className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-              >
-                {getApiErrorMessage(revokeInvitationMutation.error)}
+                  <p className="mt-3 max-w-lg leading-7 text-[var(--color-charcoal)]/66">
+                    This will immediately disable the current invitation link and prevent the guest
+                    from using it.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/60 bg-white/32 text-[var(--color-charcoal)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition hover:-translate-y-0.5 hover:text-[var(--color-deep-plum)]"
+                  aria-label="Close revoke invitation dialog"
+                  disabled={revokeInvitationMutation.isPending}
+                  onClick={closeRevokeInvitationDialog}
+                >
+                  <X className="size-5" />
+                </button>
               </div>
-            ) : null}
 
-            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                className="btn-secondary justify-center text-sm font-bold"
-                disabled={revokeInvitationMutation.isPending}
-                onClick={closeRevokeInvitationDialog}
-              >
-                Keep invitation
-              </button>
+              <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
 
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={revokeInvitationMutation.isPending}
-                onClick={() => {
-                  revokeInvitationMutation.mutate();
-                }}
-              >
-                {revokeInvitationMutation.isPending ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  <Ban className="size-4" />
-                )}
+              <div className="mt-7 rounded-[1.5rem] border border-white/60 bg-white/28 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                <div className="flex items-center gap-4">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)]">
+                    {invitationToRevoke.guest.firstName.charAt(0)}
+                    {invitationToRevoke.guest.lastName.charAt(0)}
+                  </span>
 
-                {revokeInvitationMutation.isPending ? 'Revoking...' : 'Revoke invitation'}
-              </button>
+                  <div className="min-w-0">
+                    <p className="truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      {invitationToRevoke.guest.firstName} {invitationToRevoke.guest.lastName}
+                    </p>
+
+                    <p className="mt-1 truncate text-sm font-semibold text-[var(--color-charcoal)]/58">
+                      {invitationToRevoke.guest.email ?? 'No email address provided'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-[1.5rem] border border-[rgba(124,74,90,0.20)] bg-[linear-gradient(145deg,rgba(124,74,90,0.12),rgba(255,255,255,0.20))] p-5">
+                <div className="flex items-start gap-3">
+                  <CircleAlert className="mt-0.5 size-5 shrink-0 text-[var(--color-muted-burgundy)]" />
+
+                  <div>
+                    <p className="font-black text-[var(--color-near-black)]">
+                      Access will be removed immediately
+                    </p>
+
+                    <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                      The current invitation link will stop working as soon as you confirm. You can
+                      create or regenerate another invitation later.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {revokeInvitationMutation.isError ? (
+                <div
+                  role="alert"
+                  className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+                >
+                  {getApiErrorMessage(revokeInvitationMutation.error)}
+                </div>
+              ) : null}
+
+              <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    className="btn-secondary justify-center text-sm font-bold"
+                    disabled={revokeInvitationMutation.isPending}
+                    onClick={closeRevokeInvitationDialog}
+                  >
+                    Keep invitation
+                  </button>
+
+                  <button
+                    type="button"
+                    className="flex min-w-44 items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,74,90,0.28)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                    disabled={revokeInvitationMutation.isPending}
+                    onClick={() => {
+                      revokeInvitationMutation.mutate();
+                    }}
+                  >
+                    {revokeInvitationMutation.isPending ? (
+                      <LoaderCircle className="size-4 animate-spin" />
+                    ) : (
+                      <Ban className="size-4" />
+                    )}
+
+                    {revokeInvitationMutation.isPending ? 'Revoking...' : 'Revoke invitation'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

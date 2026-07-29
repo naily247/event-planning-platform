@@ -708,13 +708,13 @@ export function EventWorkspacePage() {
 
         <main className="py-10">
           <section className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-[7%] top-10 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.28)] blur-3xl" />
+            <div className="pointer-events-none absolute left-[6%] top-10 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.26)] blur-3xl" />
             <div className="pointer-events-none absolute right-[8%] top-16 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
 
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.42fr] lg:items-end">
+            <div className="relative grid gap-6 sm:gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
               <div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+                  <div className="soft-chip text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
                     <Sparkles className="size-4" />
                     {event.eventType}
                   </div>
@@ -724,234 +724,446 @@ export function EventWorkspacePage() {
                   </span>
                 </div>
 
-                <h1 className="mt-6 max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
+                <h1 className="mt-5 max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:mt-6 sm:text-5xl sm:leading-[0.98] lg:text-6xl">
                   {event.name}
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
+                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/70 sm:mt-6 sm:text-lg sm:leading-8">
                   {event.requirements ??
-                    'Build the event plan, coordinate vendors and keep every important detail together in one workspace.'}
+                    'Coordinate vendors, budgets, guests and every important milestone from one organised workspace.'}
                 </p>
               </div>
 
-              <div className="glass-card p-5">
-                <p className="text-sm font-bold text-[var(--color-charcoal)]/58">Event date</p>
-
-                <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  {formatEventDate(event.eventDate)}
+              <aside className="glass-card overflow-hidden p-5 sm:p-6">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  Event snapshot
                 </p>
 
-                <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-rosewood)]">
-                  <MapPin className="size-4" />
-                  {event.location}
-                </p>
-              </div>
+                <div className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
+                  <div className="flex items-start gap-4">
+                    <span className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <CalendarDays className="size-5" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/45">
+                        Date & time
+                      </p>
+
+                      <p className="mt-1 font-black text-[var(--color-near-black)]">
+                        {formatEventDate(event.eventDate)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <span className="grid size-11 place-items-center rounded-2xl bg-[rgba(175,201,216,0.18)] text-[var(--color-deep-plum)]">
+                      <MapPin className="size-5" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/45">
+                        Location
+                      </p>
+
+                      <p className="mt-1 font-black text-[var(--color-near-black)]">
+                        {event.location}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <span className="grid size-11 place-items-center rounded-2xl bg-[rgba(142,151,115,0.18)] text-[#586047]">
+                      <UsersRound className="size-5" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/45">
+                        Guests
+                      </p>
+
+                      <p className="mt-1 font-black text-[var(--color-near-black)]">
+                        {event.guestCount
+                          ? `${event.guestCount.toLocaleString('en-LK')} guests`
+                          : 'Not set'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <span className="grid size-11 place-items-center rounded-2xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
+                      <WalletCards className="size-5" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/45">
+                        Planned budget
+                      </p>
+
+                      <p className="mt-1 font-black text-[var(--color-near-black)]">
+                        {formatCurrency(event.plannedBudget)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/55 pt-5">
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/45">
+                      Theme
+                    </p>
+
+                    <p className="mt-2 text-lg font-black text-[var(--color-deep-plum)]">
+                      {event.theme ?? 'No theme selected'}
+                    </p>
+                  </div>
+                </div>
+              </aside>
             </div>
           </section>
 
           <nav
-            className="glass-card mt-10 flex gap-2 overflow-x-auto p-3"
+            className="glass-card mt-8 overflow-x-auto overscroll-x-contain p-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mt-10 sm:p-4"
             aria-label="Event workspace sections"
           >
-            {workspaceSections.map(({ label, icon: Icon, path }) => {
-              const isActive = label === 'Overview';
+            <div className="flex min-w-max items-center gap-2">
+              {workspaceSections.map(({ label, icon: Icon, path }) => {
+                const isActive = label === 'Overview';
 
-              return (
-                <Link
-                  key={label}
-                  to={path(event.id)}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={
-                    isActive
-                      ? 'soft-chip shrink-0 bg-[rgba(93,58,85,0.92)] text-[#fffaf5]'
-                      : 'soft-chip shrink-0 transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]'
-                  }
-                >
-                  <Icon aria-hidden="true" className="size-4" />
-                  {label}
-                </Link>
-              );
-            })}
+                return (
+                  <Link
+                    key={label}
+                    to={path(event.id)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={
+                      isActive
+                        ? 'group relative flex min-w-[7.75rem] sm:min-w-[8.5rem] shrink-0 items-center gap-3 overflow-hidden rounded-[1.25rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] px-3 py-3 sm:px-4 sm:py-3.5 text-[#fffaf5] shadow-[0_16px_35px_rgba(93,58,85,0.24)]'
+                        : 'group relative flex min-w-[7.75rem] sm:min-w-[8.5rem] shrink-0 items-center gap-3 rounded-[1.25rem] border border-white/45 bg-white/22 px-3 py-3 sm:px-4 sm:py-3.5 text-[var(--color-charcoal)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/40 hover:shadow-[0_14px_30px_rgba(31,27,29,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/35'
+                    }
+                  >
+                    {isActive ? (
+                      <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_48%)]" />
+                    ) : null}
+
+                    <span
+                      className={
+                        isActive
+                          ? 'relative grid size-9 shrink-0 place-items-center rounded-xl bg-white/14 text-[var(--color-powder-blue)]'
+                          : 'relative grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)] transition duration-300 group-hover:scale-105 group-hover:bg-[rgba(93,58,85,0.16)]'
+                      }
+                    >
+                      <Icon aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <span className="relative text-sm font-black">{label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
 
           <section className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-            <article className="glass-card p-6 sm:p-7">
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Event overview
-              </p>
+            <article className="glass-card overflow-hidden">
+              <div className="border-b border-white/45 px-6 py-7 sm:px-8 sm:py-8">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                      Event overview
+                    </p>
 
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                The essential details for this celebration.
-              </h2>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[1.5rem] bg-white/28 p-5 backdrop-blur-xl">
-                  <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                    <CalendarDays className="size-4 text-[var(--color-rosewood)]" />
-                    Date and time
+                    <h2 className="mt-3 max-w-2xl text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl sm:tracking-[-0.045em]">
+                      The essential details shaping this event.
+                    </h2>
                   </div>
 
-                  <p className="mt-4 font-black text-[var(--color-near-black)]">
+                  <button
+                    type="button"
+                    className="btn-secondary shrink-0 self-start text-sm font-bold sm:self-auto"
+                    disabled={!isEventEditable}
+                    title={
+                      isEventEditable
+                        ? 'Edit event details'
+                        : 'Completed or cancelled events cannot be edited'
+                    }
+                    onClick={openEditForm}
+                  >
+                    <Pencil className="size-4" />
+                    Update details
+                  </button>
+                </div>
+              </div>
+
+              <div className="divide-y divide-white/45 px-6 sm:px-8">
+                <div className="grid gap-4 py-6 sm:grid-cols-[13rem_1fr] sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.12)] text-[var(--color-rosewood)]">
+                      <CalendarDays className="size-4" />
+                    </span>
+
+                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
+                      Date and time
+                    </p>
+                  </div>
+
+                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
                     {formatEventDate(event.eventDate)}
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] bg-white/28 p-5 backdrop-blur-xl">
-                  <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                    <MapPin className="size-4 text-[var(--color-rosewood)]" />
-                    Location
+                <div className="grid gap-4 py-6 sm:grid-cols-[13rem_1fr] sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[#405966]">
+                      <MapPin className="size-4" />
+                    </span>
+
+                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">Location</p>
                   </div>
 
-                  <p className="mt-4 font-black text-[var(--color-near-black)]">{event.location}</p>
-                </div>
-
-                <div className="rounded-[1.5rem] bg-white/28 p-5 backdrop-blur-xl">
-                  <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                    <UsersRound className="size-4 text-[var(--color-rosewood)]" />
-                    Estimated guests
-                  </div>
-
-                  <p className="mt-4 font-black text-[var(--color-near-black)]">
-                    {event.guestCount ?? 'Not set'}
+                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
+                    {event.location}
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] bg-white/28 p-5 backdrop-blur-xl">
-                  <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-charcoal)]/58">
-                    <WalletCards className="size-4 text-[var(--color-rosewood)]" />
-                    Planned budget
+                <div className="grid gap-4 py-6 sm:grid-cols-[13rem_1fr] sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.18)] text-[#586047]">
+                      <UsersRound className="size-4" />
+                    </span>
+
+                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
+                      Estimated guests
+                    </p>
                   </div>
 
-                  <p className="mt-4 font-black text-[var(--color-near-black)]">
+                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
+                    {event.guestCount
+                      ? `${event.guestCount.toLocaleString('en-GB')} guests`
+                      : 'Not set'}
+                  </p>
+                </div>
+
+                <div className="grid gap-4 py-6 sm:grid-cols-[13rem_1fr] sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                      <WalletCards className="size-4" />
+                    </span>
+
+                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
+                      Planned budget
+                    </p>
+                  </div>
+
+                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
                     {formatCurrency(event.plannedBudget)}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[1.5rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl">
-                <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                  Theme and creative direction
-                </p>
+              <div className="grid border-t border-white/45 lg:grid-cols-2">
+                <div className="border-b border-white/45 p-6 sm:p-8 lg:border-b-0 lg:border-r">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                      <Sparkles className="size-4" />
+                    </span>
 
-                <p className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  {event.theme ?? 'No theme added yet'}
-                </p>
-              </div>
+                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
+                      Theme and creative direction
+                    </p>
+                  </div>
 
-              <div className="mt-5 rounded-[1.5rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl">
-                <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                  Planning requirements
-                </p>
+                  <p className="mt-5 text-xl font-black leading-7 tracking-[-0.035em] text-[var(--color-near-black)]">
+                    {event.theme ?? 'No theme added yet'}
+                  </p>
+                </div>
 
-                <p className="mt-3 leading-7 text-[var(--color-charcoal)]/68">
-                  {event.requirements ?? 'No additional planning requirements have been added yet.'}
-                </p>
+                <div className="p-6 sm:p-8">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 place-items-center rounded-xl bg-[rgba(142,92,103,0.12)] text-[var(--color-rosewood)]">
+                      <FileText className="size-4" />
+                    </span>
+
+                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
+                      Planning requirements
+                    </p>
+                  </div>
+
+                  <p className="mt-5 leading-7 text-[var(--color-charcoal)]/70">
+                    {event.requirements ??
+                      'No additional planning requirements have been added yet.'}
+                  </p>
+                </div>
               </div>
             </article>
 
-            <aside className="rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
-              <Sparkles className="size-6 text-[var(--color-powder-blue)]" />
+            <aside className="self-start overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] sm:rounded-[2rem] xl:sticky xl:top-6">
+              <div className="relative overflow-hidden border-b border-white/12 p-6 sm:p-7">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-white/10 blur-3xl"
+                />
 
-              <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">Planning workspace</h2>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] backdrop-blur">
+                      <Sparkles className="size-5" />
+                    </span>
 
-              <p className="mt-3 leading-7 text-white/68">
-                Budgets, tasks, guests, quotations, vendors and documents all connect together to
-                keep your entire event planning workflow in one place.
-              </p>
+                    <span className="rounded-full border border-white/16 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/76">
+                      {event.status.replaceAll('_', ' ')}
+                    </span>
+                  </div>
 
-              <div className="mt-8 rounded-[1.5rem] border border-white/16 bg-white/10 p-4 backdrop-blur">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-white/54">
-                  Event status
-                </p>
+                  <p className="mt-7 text-xs font-black uppercase tracking-[0.22em] text-white/52">
+                    Event progress
+                  </p>
 
-                <p className="mt-2 text-xl font-black">{event.status.replaceAll('_', ' ')}</p>
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] sm:text-3xl sm:tracking-[-0.045em]">
+                    Manage the event stage.
+                  </h2>
 
-                {availableStatusActions.length > 0 ? (
-                  <div className="mt-5 space-y-3">
-                    {availableStatusActions.map(
-                      ({ status, label, description, icon: Icon, tone }) => (
-                        <div key={status}>
-                          <button
-                            type="button"
-                            className={getStatusButtonClassName(tone)}
-                            disabled={updateEventStatusMutation.isPending}
-                            onClick={() => {
-                              updateEventStatusMutation.reset();
+                  <p className="mt-4 leading-7 text-white/66">
+                    Update the status as planning progresses. Each stage keeps the rest of the
+                    workspace aligned with the event lifecycle.
+                  </p>
+                </div>
+              </div>
 
-                              setPendingStatusAction({
-                                status,
-                                label,
-                                description,
-                                icon: Icon,
-                                tone,
-                              });
-                            }}
+              <div className="p-6 sm:p-7">
+                <div className="rounded-[1.6rem] border border-white/14 bg-white/[0.08] p-5 backdrop-blur-xl">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-white/48">
+                        Current status
+                      </p>
+
+                      <p className="mt-2 text-xl font-black">{event.status.replaceAll('_', ' ')}</p>
+                    </div>
+
+                    <span
+                      className={
+                        event.status === 'COMPLETED'
+                          ? 'grid size-11 place-items-center rounded-2xl bg-[rgba(142,151,115,0.22)] text-[#dce7c5]'
+                          : event.status === 'CANCELLED'
+                            ? 'grid size-11 place-items-center rounded-2xl bg-white/10 text-white/68'
+                            : 'grid size-11 place-items-center rounded-2xl bg-[rgba(175,201,216,0.16)] text-[var(--color-powder-blue)]'
+                      }
+                    >
+                      {event.status === 'COMPLETED' ? (
+                        <CheckCircle2 className="size-5" />
+                      ) : event.status === 'CANCELLED' ? (
+                        <Ban className="size-5" />
+                      ) : (
+                        <PlayCircle className="size-5" />
+                      )}
+                    </span>
+                  </div>
+
+                  {availableStatusActions.length > 0 ? (
+                    <div className="mt-6 space-y-4">
+                      <div className="h-px bg-white/12" />
+
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-white/48">
+                        Available actions
+                      </p>
+
+                      {availableStatusActions.map(
+                        ({ status, label, description, icon: Icon, tone }) => (
+                          <div
+                            key={status}
+                            className="rounded-[1.35rem] border border-white/10 bg-black/[0.08] p-3.5"
                           >
-                            <Icon aria-hidden="true" className="size-4" />
-                            {label}
-                          </button>
+                            <button
+                              type="button"
+                              className={getStatusButtonClassName(tone)}
+                              disabled={updateEventStatusMutation.isPending}
+                              onClick={() => {
+                                updateEventStatusMutation.reset();
 
-                          <p className="mt-2 px-1 text-xs font-semibold leading-5 text-white/48">
-                            {description}
+                                setPendingStatusAction({
+                                  status,
+                                  label,
+                                  description,
+                                  icon: Icon,
+                                  tone,
+                                });
+                              }}
+                            >
+                              <Icon aria-hidden="true" className="size-4" />
+                              {label}
+                            </button>
+
+                            <p className="mt-2.5 px-1 text-xs font-semibold leading-5 text-white/48">
+                              {description}
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-6 rounded-[1.35rem] border border-white/12 bg-black/[0.08] p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-white/72">
+                          {event.status === 'COMPLETED' ? (
+                            <CheckCircle2 className="size-4" />
+                          ) : (
+                            <Ban className="size-4" />
+                          )}
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-white/86">Final event status</p>
+
+                          <p className="mt-1 text-xs font-semibold leading-5 text-white/50">
+                            This event has reached a final stage, so no further status changes are
+                            available.
                           </p>
                         </div>
-                      ),
-                    )}
-                  </div>
-                ) : (
-                  <p className="mt-4 text-sm font-semibold leading-6 text-white/58">
-                    This event has reached its final status. No further status changes are
-                    available.
-                  </p>
-                )}
+                      </div>
+                    </div>
+                  )}
 
-                {updateEventStatusMutation.isError ? (
-                  <div
-                    role="alert"
-                    className="mt-4 rounded-2xl border border-white/16 bg-black/12 px-4 py-3 text-sm font-bold leading-6 text-white/78"
-                  >
-                    {getApiErrorMessage(updateEventStatusMutation.error)}
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="mt-5 rounded-[1.5rem] border border-white/16 bg-black/10 p-4 backdrop-blur">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-white/54">
-                  Danger zone
-                </p>
-
-                <p className="mt-3 text-sm font-semibold leading-6 text-white/60">
-                  Only draft or cancelled events without quotation requests or bookings can be
-                  deleted.
-                </p>
-
-                <button
-                  type="button"
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-black text-white transition hover:bg-white/18 disabled:cursor-not-allowed disabled:opacity-45"
-                  disabled={!canDeleteEvent}
-                  onClick={() => {
-                    deleteEventMutation.reset();
-                    setIsDeleteDialogOpen(true);
-                  }}
-                >
-                  <Trash2 className="size-4" />
-                  Delete event
-                </button>
-              </div>
-
-              <div className="mt-8 space-y-3">
-                {workspaceSections
-                  .filter(({ label }) => label !== 'Overview')
-                  .map(({ label, icon: Icon, path }) => (
-                    <Link
-                      key={label}
-                      to={path(event.id)}
-                      className="flex items-center gap-3 rounded-2xl bg-white/12 px-4 py-3 text-sm font-bold backdrop-blur transition hover:bg-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                  {updateEventStatusMutation.isError ? (
+                    <div
+                      role="alert"
+                      className="mt-4 rounded-2xl border border-white/16 bg-black/12 px-4 py-3 text-sm font-bold leading-6 text-white/78"
                     >
-                      <Icon aria-hidden="true" className="size-4 text-[var(--color-powder-blue)]" />
-                      {label}
-                    </Link>
-                  ))}
+                      {getApiErrorMessage(updateEventStatusMutation.error)}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="mt-5 rounded-[1.6rem] border border-white/12 bg-black/[0.10] p-5 backdrop-blur">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-white/66">
+                      <Trash2 className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-sm font-black text-white/82">Delete event</p>
+
+                      <p className="mt-1 text-xs font-semibold leading-5 text-white/46">
+                        Only draft or cancelled events without quotation requests or bookings can be
+                        deleted.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/16 bg-white/[0.07] px-4 py-3 text-sm font-black text-white/76 transition hover:border-white/26 hover:bg-white/12 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    disabled={!canDeleteEvent}
+                    title={
+                      canDeleteEvent
+                        ? 'Delete this event'
+                        : 'This event cannot currently be deleted'
+                    }
+                    onClick={() => {
+                      deleteEventMutation.reset();
+                      setIsDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="size-4" />
+                    Delete event
+                  </button>
+                </div>
               </div>
             </aside>
           </section>
