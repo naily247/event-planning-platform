@@ -118,7 +118,21 @@ export const getAdminEventReportSchema = z.object({
       ...dateRangeQuerySchema,
       status: z.nativeEnum(EventStatus).optional(),
       ownerId: cuidSchema.optional(),
-      eventType: z.string().trim().min(1).max(100).optional(),
+      eventType: z
+        .enum([
+          'BIRTHDAY',
+          'WEDDING',
+          'GRADUATION',
+          'CORPORATE',
+          'PARTY',
+          'BABY_SHOWER',
+          'ENGAGEMENT',
+          'FESTIVAL',
+          'ANNIVERSARY',
+          'RECEPTION',
+          'PRODUCT_LAUNCH',
+        ])
+        .optional(),
       location: z.string().trim().min(1).max(150).optional(),
       groupBy: z.enum(['day', 'month']).default('day'),
       recentLimit: z.coerce.number().int().min(1).max(20).default(10),
@@ -350,13 +364,19 @@ export type GetAdminRevenueReportQuery = z.infer<typeof getAdminRevenueReportSch
 
 export type GetAdminComplaintReportQuery = z.infer<typeof getAdminComplaintReportSchema>['query'];
 
-export type GetPendingVendorApplicationsQuery = z.infer<typeof getPendingVendorApplicationsSchema>['query'];
+export type GetPendingVendorApplicationsQuery = z.infer<
+  typeof getPendingVendorApplicationsSchema
+>['query'];
 
 export type GetVendorApplicationParams = z.infer<typeof getVendorApplicationSchema>['params'];
 
-export type GetVendorApplicationByIdParams = z.infer<typeof getVendorApplicationByIdSchema>['params'];
+export type GetVendorApplicationByIdParams = z.infer<
+  typeof getVendorApplicationByIdSchema
+>['params'];
 
-export type ApproveVendorApplicationParams = z.infer<typeof approveVendorApplicationSchema>['params'];
+export type ApproveVendorApplicationParams = z.infer<
+  typeof approveVendorApplicationSchema
+>['params'];
 
 export type RejectVendorApplicationParams = z.infer<typeof rejectVendorApplicationSchema>['params'];
 

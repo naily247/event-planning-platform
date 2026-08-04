@@ -800,6 +800,50 @@ export function BudgetWorkspacePage() {
         </header>
 
         <main className="py-10">
+          <style>
+            {`
+    @keyframes budgetHealthEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.985);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes budgetIconFloat {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes budgetProgressReveal {
+      0% {
+        transform: scaleX(0);
+      }
+
+      100% {
+        transform: scaleX(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .budget-health-enter,
+      .budget-icon-float,
+      .budget-progress-reveal {
+        animation: none !important;
+      }
+    }
+  `}
+          </style>
           <section className="relative overflow-hidden">
             <div className="pointer-events-none absolute left-[4%] top-10 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.25)] blur-3xl" />
             <div className="pointer-events-none absolute right-[7%] top-8 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
@@ -838,7 +882,7 @@ export function BudgetWorkspacePage() {
                 </div>
               </div>
 
-              <aside className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] sm:p-7">
+              <aside className="budget-health-enter group/health relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.34)] sm:p-7 [animation:budgetHealthEnter_560ms_cubic-bezier(0.22,1,0.36,1)_both]">
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-white/10 blur-3xl"
@@ -860,14 +904,14 @@ export function BudgetWorkspacePage() {
                       </p>
                     </div>
 
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] backdrop-blur">
+                    <span className="budget-icon-float grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/health:scale-105 [animation:budgetIconFloat_2.8s_ease-in-out_infinite]">
                       <PiggyBank className="size-5" />
                     </span>
                   </div>
 
                   <div className="mt-7 h-2.5 overflow-hidden rounded-full bg-white/12">
                     <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] transition-[width] duration-700"
+                      className="budget-progress-reveal h-full origin-left rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.28)] transition-[width] duration-700 [animation:budgetProgressReveal_900ms_cubic-bezier(0.22,1,0.36,1)_180ms_both]"
                       style={{
                         width: `${budgetUsagePercentage}%`,
                       }}
@@ -875,42 +919,42 @@ export function BudgetWorkspacePage() {
                   </div>
 
                   <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
                       <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
                         Planned
                       </p>
 
-                      <p className="mt-2 text-lg font-black">
+                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
                         {formatCurrency(summary.summary.plannedBudget)}
                       </p>
                     </div>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
                       <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
                         Committed
                       </p>
 
-                      <p className="mt-2 text-lg font-black">
+                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
                         {formatCurrency(summary.summary.totalCommitted)}
                       </p>
                     </div>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
                       <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
                         Paid
                       </p>
 
-                      <p className="mt-2 text-lg font-black">
+                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
                         {formatCurrency(summary.summary.totalPaid)}
                       </p>
                     </div>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
+                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
                       <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
                         {summary.summary.isOverBudget ? 'Over budget' : 'Remaining'}
                       </p>
 
-                      <p className="mt-2 text-lg font-black">
+                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
                         {summary.summary.isOverBudget
                           ? formatCurrency(summary.summary.overBudgetAmount)
                           : formatCurrency(summary.summary.remainingBudget)}
@@ -934,8 +978,8 @@ export function BudgetWorkspacePage() {
                     <span
                       className={
                         summary.summary.isOverBudget
-                          ? 'status-chip shrink-0 border-white/14 bg-white/10 text-white'
-                          : 'status-chip shrink-0 border-white/14 bg-[rgba(142,151,115,0.22)] text-[#e7efd5]'
+                          ? 'status-chip shrink-0 border-white/14 bg-white/10 text-white transition duration-300 group-hover/health:-translate-y-0.5 group-hover/health:bg-white/14'
+                          : 'status-chip shrink-0 border-white/14 bg-[rgba(142,151,115,0.22)] text-[#e7efd5] transition duration-300 group-hover/health:-translate-y-0.5 group-hover/health:bg-[rgba(142,151,115,0.30)]'
                       }
                     >
                       {summary.summary.isOverBudget ? 'Over plan' : 'On track'}
@@ -946,53 +990,104 @@ export function BudgetWorkspacePage() {
             </div>
           </section>
 
-          <section className="mt-10 grid gap-5 lg:grid-cols-[1.2fr_repeat(3,1fr)]">
+          <section className="mt-12 grid gap-5 lg:grid-cols-[1.2fr_repeat(3,1fr)]">
             {summaryCards.map(({ label, value, helper, icon: Icon, tone }) => (
               <article
                 key={label}
-                className={`luxe-card relative overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)]
+                className={`group/summary-card luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:shadow-[0_28px_68px_rgba(31,27,29,0.12)]
     ${
       label === 'Planned budget'
-        ? 'lg:row-span-2 bg-[linear-gradient(145deg,rgba(255,255,255,0.9),rgba(247,241,249,0.94))]'
-        : ''
+        ? 'lg:row-span-2 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(247,241,249,0.96))]'
+        : 'bg-white/48'
     }`}
               >
-                <div className={`grid size-12 place-items-center rounded-2xl ${tone}`}>
-                  <Icon className="size-5" />
-                </div>
-
-                <p className="mt-7 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/48">
-                  {label}
-                </p>
-
-                <p
-                  className={`mt-3 font-black tracking-[-0.055em] text-[var(--color-near-black)]
-    ${label === 'Planned budget' ? 'text-4xl sm:text-[2.8rem]' : 'text-3xl'}`}
-                >
-                  {value}
-                </p>
-
-                <p className="mt-3 text-sm leading-6 font-semibold text-[var(--color-charcoal)]/58">
-                  {helper}
-                </p>
-
                 {label === 'Planned budget' ? (
-                  <div className="mt-7">
-                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/45">
-                      <span>Budget usage</span>
-                      <span>{Math.round(budgetUsagePercentage)}%</span>
-                    </div>
+                  <>
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-16 size-52 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl transition duration-500 group-hover/summary-card:scale-110 group-hover/summary-card:bg-[rgba(183,167,200,0.28)]"
+                    />
 
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))]"
-                        style={{
-                          width: `${budgetUsagePercentage}%`,
-                        }}
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -bottom-16 -left-16 size-44 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl transition duration-500 group-hover/summary-card:scale-110"
+                    />
+
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 220 220"
+                      className="pointer-events-none absolute -bottom-12 -right-10 size-48 opacity-[0.10] transition duration-500 group-hover/summary-card:rotate-6 group-hover/summary-card:scale-105"
+                      fill="none"
+                    >
+                      <circle
+                        cx="110"
+                        cy="110"
+                        r="78"
+                        stroke="rgba(93,58,85,0.72)"
+                        strokeWidth="2"
                       />
-                    </div>
-                  </div>
+                      <circle
+                        cx="110"
+                        cy="110"
+                        r="52"
+                        stroke="rgba(142,92,103,0.58)"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M110 32V188M32 110H188"
+                        stroke="rgba(93,58,85,0.36)"
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+                  </>
                 ) : null}
+                <div className="relative">
+                  <div
+                    className={`grid size-12 place-items-center rounded-2xl shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/summary-card:-translate-y-0.5 group-hover/summary-card:scale-105 ${tone}`}
+                  >
+                    <Icon
+                      aria-hidden="true"
+                      className="size-5 transition duration-300 group-hover/summary-card:rotate-[4deg]"
+                    />
+                  </div>
+
+                  <p className="mt-7 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/summary-card:text-[var(--color-rosewood)]/72">
+                    {label}
+                  </p>
+
+                  <p
+                    className={`mt-3 font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/summary-card:translate-x-0.5
+    ${
+      label === 'Planned budget'
+        ? 'text-4xl sm:text-[2.8rem]'
+        : 'text-3xl group-hover/summary-card:text-[var(--color-deep-plum)]'
+    }`}
+                  >
+                    {value}
+                  </p>
+
+                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58 transition duration-300 group-hover/summary-card:text-[var(--color-charcoal)]/68">
+                    {helper}
+                  </p>
+
+                  {label === 'Planned budget' ? (
+                    <div className="mt-8 rounded-[1.35rem] border border-white/60 bg-white/34 p-4 backdrop-blur-xl transition duration-300 group-hover/summary-card:bg-white/44">
+                      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/45">
+                        <span>Budget usage</span>
+                        <span>{Math.round(budgetUsagePercentage)}%</span>
+                      </div>
+
+                      <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)] shadow-inner">
+                        <div
+                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] shadow-[0_0_14px_rgba(142,92,103,0.24)] transition-[width,filter] duration-700 group-hover/summary-card:brightness-110"
+                          style={{
+                            width: `${budgetUsagePercentage}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </article>
             ))}
           </section>
@@ -1040,23 +1135,26 @@ export function BudgetWorkspacePage() {
                     return (
                       <article
                         key={category.id}
-                        className="group relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/36 hover:shadow-[0_24px_55px_rgba(31,27,29,0.08)] sm:p-6"
+                        className="group/category relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/82 hover:bg-white/40 hover:shadow-[0_28px_66px_rgba(31,27,29,0.10)] sm:p-6"
                       >
                         <div
                           aria-hidden="true"
-                          className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition-opacity duration-300 group-hover:opacity-80"
+                          className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/category:scale-125 group-hover/category:bg-[rgba(183,167,200,0.26)]"
                         />
 
                         <div className="relative">
                           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-3">
-                                <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                                  <WalletCards className="size-5" />
+                                <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/category:-translate-y-0.5 group-hover/category:scale-105 group-hover/category:bg-[rgba(183,167,200,0.32)]">
+                                  <WalletCards
+                                    aria-hidden="true"
+                                    className="size-5 transition duration-300 group-hover/category:rotate-[5deg]"
+                                  />
                                 </div>
 
                                 <div>
-                                  <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)] sm:text-xl">
+                                  <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)] transition duration-300 group-hover/category:translate-x-0.5 group-hover/category:text-[var(--color-deep-plum)] sm:text-xl">
                                     {category.name}
                                   </p>
 
@@ -1069,7 +1167,7 @@ export function BudgetWorkspacePage() {
 
                             <div className="flex shrink-0 flex-wrap items-center gap-2">
                               <span
-                                className="status-chip w-fit"
+                                className="status-chip w-fit transition duration-300 group-hover/category:-translate-y-0.5 group-hover/category:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
                                 data-tone={category.isOverAllocated ? 'rose' : 'green'}
                               >
                                 {category.isOverAllocated
@@ -1079,24 +1177,30 @@ export function BudgetWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                                className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.15)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
                                 aria-label={`Edit ${category.name}`}
                                 onClick={() => {
                                   openEditCategoryForm(category);
                                 }}
                               >
-                                <Pencil className="size-4" />
+                                <Pencil
+                                  aria-hidden="true"
+                                  className="size-4 transition duration-300 group-hover/category:rotate-[3deg]"
+                                />
                               </button>
 
                               <button
                                 type="button"
-                                className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                                className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.15)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
                                 aria-label={`Delete ${category.name}`}
                                 onClick={() => {
                                   openDeleteCategoryDialog(category);
                                 }}
                               >
-                                <Trash2 className="size-4" />
+                                <Trash2
+                                  aria-hidden="true"
+                                  className="size-4 transition duration-300 hover:rotate-[4deg]"
+                                />
                               </button>
                             </div>
                           </div>
@@ -1119,7 +1223,7 @@ export function BudgetWorkspacePage() {
                             </div>
 
                             <p
-                              className={`text-sm font-black ${
+                              className={`text-sm font-black transition duration-300 group-hover/category:-translate-y-0.5 ${
                                 category.isOverAllocated
                                   ? 'text-[var(--color-muted-burgundy)]'
                                   : 'text-[var(--color-deep-plum)]'
@@ -1131,10 +1235,10 @@ export function BudgetWorkspacePage() {
 
                           <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
                             <div
-                              className={`h-full rounded-full transition-[width] duration-700 ${
+                              className={`h-full rounded-full shadow-[0_0_12px_rgba(93,58,85,0.16)] transition-[width,filter] duration-700 group-hover/category:brightness-110 ${
                                 category.isOverAllocated
-                                  ? 'bg-[linear-gradient(90deg,var(--color-muted-burgundy),#c28c98)]'
-                                  : 'bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy))]'
+                                  ? 'bg-[linear-gradient(90deg,var(--color-muted-burgundy),#c28c98,#dfb1ba)]'
+                                  : 'bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)]'
                               }`}
                               style={{
                                 width: `${usagePercentage}%`,
@@ -1143,7 +1247,7 @@ export function BudgetWorkspacePage() {
                           </div>
 
                           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4">
+                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4 transition duration-300 group-hover/category:border-white/68 group-hover/category:bg-white/34">
                               <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                                 Planned
                               </p>
@@ -1153,7 +1257,7 @@ export function BudgetWorkspacePage() {
                               </p>
                             </div>
 
-                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4">
+                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4 transition duration-300 group-hover/category:border-white/68 group-hover/category:bg-white/34">
                               <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                                 Paid
                               </p>
@@ -1163,7 +1267,7 @@ export function BudgetWorkspacePage() {
                               </p>
                             </div>
 
-                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4">
+                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4 transition duration-300 group-hover/category:border-white/68 group-hover/category:bg-white/34">
                               <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                                 Balance
                               </p>
@@ -1187,17 +1291,43 @@ export function BudgetWorkspacePage() {
                   })}
                 </div>
               ) : (
-                <div className="mt-8 rounded-[1.5rem] border border-dashed border-white/70 bg-white/20 p-8 text-center">
-                  <CircleDollarSign className="mx-auto size-9 text-[var(--color-deep-plum)]" />
+                <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                  />
 
-                  <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                    No budget categories yet
-                  </p>
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+                  />
 
-                  <p className="mt-2 leading-7 text-[var(--color-charcoal)]/62">
-                    Categories will help separate venue, catering, photography, decoration and other
-                    event costs.
-                  </p>
+                  <div className="relative">
+                    <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
+                      <CircleDollarSign aria-hidden="true" className="size-8" />
+                    </div>
+
+                    <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      No budget categories yet
+                    </p>
+
+                    <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                      Create allocations for venue, catering, photography, decoration and other
+                      event costs so spending stays organised.
+                    </p>
+
+                    <button
+                      type="button"
+                      className="group/first-budget-category btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                      onClick={openCategoryForm}
+                    >
+                      <Plus
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/first-budget-category:rotate-90"
+                      />
+                      Add first category
+                    </button>
+                  </div>
                 </div>
               )}
             </article>
@@ -1362,23 +1492,26 @@ export function BudgetWorkspacePage() {
                 {expenses.map((expense) => (
                   <article
                     key={expense.id}
-                    className="group relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/38 hover:shadow-[0_24px_60px_rgba(31,27,29,0.08)] sm:p-6"
+                    className="group/expense relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/82 hover:bg-white/40 hover:shadow-[0_28px_68px_rgba(31,27,29,0.10)] sm:p-6"
                   >
                     <div
                       aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl transition-opacity duration-300 group-hover:opacity-90"
+                      className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl transition duration-500 group-hover/expense:scale-125 group-hover/expense:bg-[rgba(175,201,216,0.26)]"
                     />
 
                     <div className="relative">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                           <div className="flex items-center gap-3">
-                            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]">
-                              <ReceiptText className="size-5" />
+                            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/expense:-translate-y-0.5 group-hover/expense:scale-105 group-hover/expense:bg-[rgba(233,221,207,0.82)]">
+                              <ReceiptText
+                                aria-hidden="true"
+                                className="size-5 transition duration-300 group-hover/expense:rotate-[4deg]"
+                              />
                             </span>
 
                             <div className="min-w-0">
-                              <p className="truncate text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)] sm:text-xl">
+                              <p className="truncate text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)] transition duration-300 group-hover/expense:translate-x-0.5 group-hover/expense:text-[var(--color-deep-plum)] sm:text-xl">
                                 {expense.title}
                               </p>
 
@@ -1390,7 +1523,7 @@ export function BudgetWorkspacePage() {
                         </div>
 
                         <span
-                          className="status-chip shrink-0"
+                          className="status-chip shrink-0 transition duration-300 group-hover/expense:-translate-y-0.5 group-hover/expense:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
                           data-tone={
                             expense.status === 'PAID'
                               ? 'green'
@@ -1409,7 +1542,7 @@ export function BudgetWorkspacePage() {
                             Expense amount
                           </p>
 
-                          <p className="mt-2 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] sm:text-4xl">
+                          <p className="mt-2 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/expense:translate-x-0.5 group-hover/expense:text-[var(--color-deep-plum)] sm:text-4xl">
                             {formatCurrency(expense.amount)}
                           </p>
                         </div>
@@ -1417,32 +1550,39 @@ export function BudgetWorkspacePage() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            className="flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3.5 py-2 text-sm font-black text-[var(--color-deep-plum)] transition hover:border-[rgba(93,58,85,0.25)] hover:bg-[rgba(93,58,85,0.13)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                            className="flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3.5 py-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
                             aria-label={`Edit ${expense.title}`}
                             onClick={() => {
                               openEditExpenseForm(expense);
                             }}
                           >
-                            <Pencil className="size-4" />
+                            <Pencil
+                              aria-hidden="true"
+                              className="size-4 transition duration-300 group-hover/expense:rotate-[3deg]"
+                            />
                             Edit
                           </button>
 
                           <button
                             type="button"
-                            className="grid size-10 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.06)] text-[var(--color-muted-burgundy)] transition hover:border-[rgba(124,74,90,0.25)] hover:bg-[rgba(124,74,90,0.13)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                            className="grid size-10 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.06)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
                             aria-label={`Delete ${expense.title}`}
                             onClick={() => {
                               openDeleteExpenseDialog(expense);
                             }}
                           >
-                            <Trash2 className="size-4" />
+                            <Trash2
+                              aria-hidden="true"
+                              className="size-4 transition duration-300 hover:rotate-[4deg]"
+                            />
                           </button>
                         </div>
                       </div>
 
                       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                        <div className="flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4">
-                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                        <div className="group/expense-detail flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4 transition duration-300 group-hover/expense:border-white/68 group-hover/expense:bg-white/34">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/expense-detail:-translate-y-0.5 group-hover/expense-detail:scale-105">
+                            {' '}
                             <CircleDollarSign className="size-4" />
                           </span>
 
@@ -1457,11 +1597,11 @@ export function BudgetWorkspacePage() {
                           </div>
                         </div>
 
-                        <div className="flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4">
+                        <div className="group/expense-detail flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4 transition duration-300 group-hover/expense:border-white/68 group-hover/expense:bg-white/34">
+                          {' '}
                           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954]">
                             <CreditCard className="size-4" />
                           </span>
-
                           <div>
                             <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                               Due date
@@ -1475,7 +1615,7 @@ export function BudgetWorkspacePage() {
                       </div>
 
                       {expense.notes ? (
-                        <div className="mt-5 rounded-2xl border border-white/48 bg-white/20 px-4 py-3.5">
+                        <div className="mt-5 rounded-2xl border border-white/48 bg-white/20 px-4 py-3.5 transition duration-300 group-hover/expense:border-white/66 group-hover/expense:bg-white/30">
                           <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/38">
                             Notes
                           </p>
@@ -1490,16 +1630,43 @@ export function BudgetWorkspacePage() {
                 ))}
               </div>
             ) : (
-              <div className="mt-8 rounded-[1.5rem] border border-dashed border-white/70 bg-white/20 p-8 text-center">
-                <ReceiptText className="mx-auto size-9 text-[var(--color-deep-plum)]" />
+              <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                />
 
-                <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                  No expenses recorded
-                </p>
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(255,228,210,0.16)] blur-3xl"
+                />
 
-                <p className="mt-2 leading-7 text-[var(--color-charcoal)]/62">
-                  Planned and paid costs will appear here once expenses are added.
-                </p>
+                <div className="relative">
+                  <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
+                    <ReceiptText aria-hidden="true" className="size-8" />
+                  </div>
+
+                  <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    No expenses recorded
+                  </p>
+
+                  <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                    Add the first planned or paid cost to begin tracking commitments, deadlines and
+                    category totals.
+                  </p>
+
+                  <button
+                    type="button"
+                    className="group/first-budget-expense btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                    onClick={openExpenseForm}
+                  >
+                    <Plus
+                      aria-hidden="true"
+                      className="size-4 transition duration-300 group-hover/first-budget-expense:rotate-90"
+                    />
+                    Add first expense
+                  </button>
+                </div>
               </div>
             )}
           </section>
@@ -1507,436 +1674,838 @@ export function BudgetWorkspacePage() {
       </div>
       {isCategoryFormOpen ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-budget-category-title"
+          onClick={() => {
+            if (!isCategoryMutationPending) {
+              closeCategoryForm();
+            }
+          }}
         >
-          <div className="glass-card w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,243,248,0.88))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.16)] backdrop-blur-3xl sm:p-9">
-            <div className="flex items-start justify-between gap-5">
-              <div>
-                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <WalletCards className="size-4" />
-                  Budget category
-                </div>
+          <div className="grid min-h-full place-items-center">
+            <div
+              className="relative w-full max-w-2xl overflow-hidden rounded-[2.25rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(240,231,246,0.86))] shadow-[0_42px_120px_rgba(31,27,29,0.28)] backdrop-blur-3xl"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+              />
 
-                <h2
-                  id="create-budget-category-title"
-                  className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
-                >
-                  {categoryToEdit ? 'Edit budget allocation.' : 'Add a new allocation.'}
-                </h2>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-[12%] top-[-8rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+              />
 
-                <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-                  {categoryToEdit
-                    ? 'Update the category name or allocated budget.'
-                    : 'Create a category such as venue, catering, photography or decoration.'}
-                </p>
-              </div>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(255,228,210,0.14)] blur-3xl"
+              />
 
-              <button
-                type="button"
-                className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
-                aria-label="Close category form"
-                disabled={isCategoryMutationPending}
-                onClick={closeCategoryForm}
-              >
-                <X className="size-5" />
-              </button>
-            </div>
+              <div className="relative max-h-[calc(100vh-3rem)] overflow-y-auto p-6 sm:p-8">
+                <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)]">
+                        {categoryToEdit ? (
+                          <Pencil aria-hidden="true" className="size-6" />
+                        ) : (
+                          <WalletCards aria-hidden="true" className="size-6" />
+                        )}
+                      </span>
 
-            <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
+                      <span className="rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
+                        {categoryToEdit ? 'Edit budget category' : 'New budget category'}
+                      </span>
+                    </div>
 
-            <form className="mt-8 grid gap-6" onSubmit={submitCategory}>
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                  Category details
-                </p>
-
-                <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
-                  Create a clear budget area for a specific part of your event.
-                </p>
-              </div>
-
-              <label className="block">
-                <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                  Category name
-                </span>
-
-                <input
-                  className="form-field"
-                  type="text"
-                  placeholder="Photography"
-                  disabled={isCategoryMutationPending}
-                  {...categoryForm.register('name')}
-                />
-
-                <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
-                  Use a short, recognisable name such as venue, catering or photography.
-                </span>
-
-                {categoryForm.formState.errors.name ? (
-                  <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                    {categoryForm.formState.errors.name.message}
-                  </span>
-                ) : null}
-              </label>
-
-              <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                  Allocation
-                </p>
-
-                <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
-                  Set the planned spending limit for this category.
-                </p>
-              </div>
-
-              <label className="block">
-                <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                  Allocated amount
-                </span>
-
-                <div className="relative">
-                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-black text-[var(--color-deep-plum)]">
-                    LKR
-                  </span>
-
-                  <input
-                    className="form-field pl-16"
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    placeholder="350000"
-                    disabled={isCategoryMutationPending}
-                    {...categoryForm.register('allocatedAmount')}
-                  />
-                </div>
-
-                <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
-                  This amount contributes to the total allocation shown in your budget summary.
-                </span>
-
-                {categoryForm.formState.errors.allocatedAmount ? (
-                  <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                    {categoryForm.formState.errors.allocatedAmount.message}
-                  </span>
-                ) : null}
-              </label>
-
-              {categoryForm.formState.errors.root?.message ? (
-                <div
-                  role="alert"
-                  className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                >
-                  {categoryForm.formState.errors.root.message}
-                </div>
-              ) : null}
-
-              {createCategoryMutation.isError || updateCategoryMutation.isError ? (
-                <div
-                  role="alert"
-                  className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                >
-                  {getApiErrorMessage(
-                    categoryToEdit ? updateCategoryMutation.error : createCategoryMutation.error,
-                  )}
-                </div>
-              ) : null}
-
-              <div className="mt-2 border-t border-[rgba(93,58,85,0.10)] pt-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
-                    {categoryToEdit
-                      ? 'Your existing budget totals will update after these changes are saved.'
-                      : 'You can edit or remove this allocation later from the category list.'}
-                  </p>
-
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      className="btn-secondary justify-center text-sm font-bold"
-                      disabled={isCategoryMutationPending}
-                      onClick={closeCategoryForm}
+                    <h2
+                      id="create-budget-category-title"
+                      className="mt-6 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
                     >
-                      Cancel
-                    </button>
+                      {categoryToEdit ? 'Refine this allocation.' : 'Create a new allocation.'}
+                    </h2>
 
-                    <button
-                      type="submit"
-                      className="btn-primary min-w-40 justify-center text-sm font-bold"
-                      disabled={isCategoryMutationPending}
-                    >
-                      {isCategoryMutationPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
+                    <p className="mt-4 max-w-xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
+                      {categoryToEdit
+                        ? 'Update the category name or allocated amount while keeping its expense history intact.'
+                        : 'Create a clear spending area for venue, catering, photography, decoration or another event cost.'}
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <span className="status-chip" data-tone="plum">
+                        <WalletCards aria-hidden="true" className="size-3.5" />
+                        Budget allocation
+                      </span>
+
+                      <span className="status-chip" data-tone="blue">
+                        <CircleDollarSign aria-hidden="true" className="size-3.5" />
+                        LKR amount
+                      </span>
+
+                      {categoryToEdit ? (
+                        <span className="status-chip" data-tone="gray">
+                          Existing category
+                        </span>
                       ) : (
-                        <Save className="size-4" />
+                        <span className="status-chip" data-tone="green">
+                          New category
+                        </span>
                       )}
-
-                      {updateCategoryMutation.isPending
-                        ? 'Saving category...'
-                        : createCategoryMutation.isPending
-                          ? 'Creating category...'
-                          : categoryToEdit
-                            ? 'Save changes'
-                            : 'Create category'}
-                    </button>
+                    </div>
                   </div>
+
+                  <button
+                    type="button"
+                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Close category form"
+                    disabled={isCategoryMutationPending}
+                    onClick={closeCategoryForm}
+                  >
+                    <X aria-hidden="true" className="size-5" />
+                  </button>
                 </div>
+
+                <form className="mt-7 grid gap-5" onSubmit={submitCategory}>
+                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start gap-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                          <WalletCards aria-hidden="true" className="size-5" />
+                        </span>
+
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Category details
+                          </p>
+
+                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                            Name this spending area
+                          </h3>
+
+                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                            Use a short, recognisable label that stays easy to scan across the
+                            budget.
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="mt-6 block">
+                        <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                          Category name
+                          <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
+                        </span>
+
+                        <input
+                          className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                          type="text"
+                          placeholder="Photography"
+                          disabled={isCategoryMutationPending}
+                          {...categoryForm.register('name')}
+                        />
+
+                        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                          Examples: venue, catering, photography, decoration or entertainment.
+                        </p>
+
+                        {categoryForm.formState.errors.name ? (
+                          <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
+                            <CircleAlert
+                              aria-hidden="true"
+                              className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
+                            />
+
+                            <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                              {categoryForm.formState.errors.name.message}
+                            </p>
+                          </div>
+                        ) : null}
+                      </label>
+                    </div>
+                  </section>
+
+                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(220,235,242,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start gap-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#334954]">
+                          <CircleDollarSign aria-hidden="true" className="size-5" />
+                        </span>
+
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Allocation
+                          </p>
+
+                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                            Set the planned spending limit
+                          </h3>
+
+                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                            This amount contributes to the total allocated budget shown throughout
+                            the workspace.
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="mt-6 block">
+                        <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                          Allocated amount
+                          <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
+                        </span>
+
+                        <div className="relative mt-2">
+                          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-black text-[var(--color-deep-plum)]">
+                            LKR
+                          </span>
+
+                          <input
+                            className="form-field min-h-12 pl-16 transition duration-300 focus:bg-white/52"
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="350000"
+                            disabled={isCategoryMutationPending}
+                            {...categoryForm.register('allocatedAmount')}
+                          />
+                        </div>
+
+                        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                          Enter the maximum amount you plan to reserve for this category.
+                        </p>
+
+                        {categoryForm.formState.errors.allocatedAmount ? (
+                          <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
+                            <CircleAlert
+                              aria-hidden="true"
+                              className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
+                            />
+
+                            <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                              {categoryForm.formState.errors.allocatedAmount.message}
+                            </p>
+                          </div>
+                        ) : null}
+                      </label>
+
+                      {categoryToEdit ? (
+                        <div className="mt-5 rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                          <div className="flex items-start gap-3">
+                            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                              <PiggyBank aria-hidden="true" className="size-4" />
+                            </span>
+
+                            <div>
+                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                                Current usage
+                              </p>
+
+                              <p className="mt-2 text-sm font-black text-[var(--color-near-black)]">
+                                {formatCurrency(categoryToEdit.totalExpenses)} used from{' '}
+                                {formatCurrency(categoryToEdit.allocatedAmount)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </section>
+
+                  {categoryForm.formState.errors.root?.message ? (
+                    <div
+                      role="alert"
+                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                          <CircleAlert aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                            No category changes detected
+                          </p>
+
+                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                            {categoryForm.formState.errors.root.message}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {createCategoryMutation.isError || updateCategoryMutation.isError ? (
+                    <div
+                      role="alert"
+                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                          <CircleAlert aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                            Budget category could not be saved
+                          </p>
+
+                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                            {getApiErrorMessage(
+                              categoryToEdit
+                                ? updateCategoryMutation.error
+                                : createCategoryMutation.error,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="flex flex-col gap-5 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <PiggyBank aria-hidden="true" className="size-4" />
+                      </span>
+
+                      <p className="max-w-sm text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
+                        {categoryToEdit
+                          ? 'Saving updates the budget totals while preserving the expenses assigned to this category.'
+                          : 'The new allocation will immediately appear in the category breakdown and budget totals.'}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                      <button
+                        type="button"
+                        className="btn-secondary justify-center text-sm font-bold"
+                        disabled={isCategoryMutationPending}
+                        onClick={closeCategoryForm}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="submit"
+                        className="group/save-budget-category btn-primary min-w-40 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                        disabled={isCategoryMutationPending}
+                      >
+                        {isCategoryMutationPending ? (
+                          <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                          <Save
+                            aria-hidden="true"
+                            className="size-4 transition duration-300 group-hover/save-budget-category:scale-105"
+                          />
+                        )}
+
+                        {updateCategoryMutation.isPending
+                          ? 'Saving category...'
+                          : createCategoryMutation.isPending
+                            ? 'Creating category...'
+                            : categoryToEdit
+                              ? 'Save changes'
+                              : 'Create category'}
+                      </button>
+                    </div>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       ) : null}
 
       {isExpenseFormOpen ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-expense-title"
+          onClick={() => {
+            if (!isExpenseMutationPending) {
+              closeExpenseForm();
+            }
+          }}
         >
-          <div className="mx-auto max-w-2xl">
-            <div className="glass-card overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,243,248,0.88))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.16)] backdrop-blur-3xl sm:p-9">
-              <div className="flex items-start justify-between gap-5">
-                <div>
-                  <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                    <ReceiptText className="size-4" />
-                    Event expense
-                  </div>
+          <div className="grid min-h-full place-items-center">
+            <div
+              className="relative w-full max-w-3xl overflow-hidden rounded-[2.25rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(240,231,246,0.86))] shadow-[0_42px_120px_rgba(31,27,29,0.28)] backdrop-blur-3xl"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+              />
 
-                  <h2
-                    id="create-expense-title"
-                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
-                  >
-                    {expenseToEdit ? 'Edit event expense.' : 'Record a new event cost.'}
-                  </h2>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-[14%] top-[-8rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+              />
 
-                  <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-                    {expenseToEdit
-                      ? 'Update the amount, status, category, dates or payment notes.'
-                      : 'Add a planned, paid or cancelled expense and optionally assign it to a budget category.'}
-                  </p>
-                </div>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(255,228,210,0.14)] blur-3xl"
+              />
 
-                <button
-                  type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
-                  aria-label="Close expense form"
-                  disabled={isExpenseMutationPending}
-                  onClick={closeExpenseForm}
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
-
-              <div className="mt-7 border-t border-[rgba(93,58,85,0.10)]" />
-
-              <form className="mt-8 grid gap-5" onSubmit={submitExpense}>
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                    Basic information
-                  </p>
-
-                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
-                    Give this expense a clear name and estimated amount.
-                  </p>
-                </div>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Expense title
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="text"
-                      placeholder="Photography deposit"
-                      disabled={isExpenseMutationPending}
-                      {...expenseForm.register('title')}
-                    />
-
-                    {expenseForm.formState.errors.title ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {expenseForm.formState.errors.title.message}
+              <div className="relative max-h-[calc(100vh-3rem)] overflow-y-auto p-6 sm:p-8">
+                <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)]">
+                        {expenseToEdit ? (
+                          <Pencil aria-hidden="true" className="size-6" />
+                        ) : (
+                          <ReceiptText aria-hidden="true" className="size-6" />
+                        )}
                       </span>
-                    ) : null}
-                  </label>
 
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Amount
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      placeholder="75000"
-                      disabled={isExpenseMutationPending}
-                      {...expenseForm.register('amount')}
-                    />
-
-                    {expenseForm.formState.errors.amount ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {expenseForm.formState.errors.amount.message}
+                      <span className="rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
+                        {expenseToEdit ? 'Edit event expense' : 'New event expense'}
                       </span>
-                    ) : null}
-                  </label>
-                </div>
+                    </div>
 
-                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                    Classification
-                  </p>
-
-                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
-                    Organise this expense within your event budget.
-                  </p>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Budget category
-                    </span>
-
-                    <select
-                      className="form-field"
-                      disabled={isExpenseMutationPending}
-                      {...expenseForm.register('budgetCategoryId')}
+                    <h2
+                      id="create-expense-title"
+                      className="mt-6 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
                     >
-                      <option value="">Uncategorised</option>
+                      {expenseToEdit ? 'Refine this event cost.' : 'Record a new event cost.'}
+                    </h2>
 
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Status
-                    </span>
-
-                    <select
-                      className="form-field"
-                      disabled={isExpenseMutationPending}
-                      {...expenseForm.register('status')}
-                    >
-                      {expenseStatuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status.charAt(0) + status.slice(1).toLowerCase()}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-
-                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                    Schedule
-                  </p>
-
-                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
-                    Record when the expense occurs and when payment is expected.
-                  </p>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Expense date
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="datetime-local"
-                      disabled={isExpenseMutationPending}
-                      {...expenseForm.register('expenseDate')}
-                    />
-
-                    {expenseForm.formState.errors.expenseDate ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {expenseForm.formState.errors.expenseDate.message}
-                      </span>
-                    ) : null}
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Due date
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="datetime-local"
-                      disabled={isExpenseMutationPending}
-                      {...expenseForm.register('dueDate')}
-                    />
-                  </label>
-                </div>
-
-                <div className="border-t border-[rgba(93,58,85,0.08)] pt-6">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                    Additional notes
-                  </p>
-
-                  <p className="mt-1 text-sm text-[var(--color-charcoal)]/58">
-                    Include optional payment references or planning details.
-                  </p>
-                </div>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Notes
-                  </span>
-
-                  <textarea
-                    className="form-field min-h-28 resize-y"
-                    placeholder="Optional payment details or planning notes"
-                    disabled={isExpenseMutationPending}
-                    {...expenseForm.register('notes')}
-                  />
-
-                  {expenseForm.formState.errors.notes ? (
-                    <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                      {expenseForm.formState.errors.notes.message}
-                    </span>
-                  ) : null}
-                </label>
-
-                {expenseForm.formState.errors.root?.message ? (
-                  <div
-                    role="alert"
-                    className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                  >
-                    {expenseForm.formState.errors.root.message}
-                  </div>
-                ) : null}
-
-                {createExpenseMutation.isError || updateExpenseMutation.isError ? (
-                  <div
-                    role="alert"
-                    className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                  >
-                    {getApiErrorMessage(
-                      expenseToEdit ? updateExpenseMutation.error : createExpenseMutation.error,
-                    )}
-                  </div>
-                ) : null}
-                <div className="mt-2 border-t border-[rgba(93,58,85,0.10)] pt-6">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="max-w-sm text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+                    <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
                       {expenseToEdit
-                        ? 'Saving will immediately update the category totals and budget summary.'
-                        : 'This expense will be included in your event budget calculations.'}
+                        ? 'Update the amount, category, payment status, dates or planning notes while keeping the expense history intact.'
+                        : 'Add a planned, paid or cancelled cost and optionally connect it to one of your budget categories.'}
                     </p>
 
-                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <span className="status-chip" data-tone="plum">
+                        <ReceiptText aria-hidden="true" className="size-3.5" />
+                        Expense record
+                      </span>
+
+                      <span className="status-chip" data-tone="blue">
+                        <CircleDollarSign aria-hidden="true" className="size-3.5" />
+                        LKR amount
+                      </span>
+
+                      <span className="status-chip" data-tone="gray">
+                        <WalletCards aria-hidden="true" className="size-3.5" />
+                        Optional category
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Close expense form"
+                    disabled={isExpenseMutationPending}
+                    onClick={closeExpenseForm}
+                  >
+                    <X aria-hidden="true" className="size-5" />
+                  </button>
+                </div>
+
+                <form className="mt-7 grid gap-5" onSubmit={submitExpense}>
+                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start gap-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                          <ReceiptText aria-hidden="true" className="size-5" />
+                        </span>
+
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Basic information
+                          </p>
+
+                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                            Name and value this expense
+                          </h3>
+
+                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                            Use a clear title and enter the full expected or paid amount.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                        <label className="block">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                            Expense title
+                            <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
+                          </span>
+
+                          <input
+                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                            type="text"
+                            placeholder="Photography deposit"
+                            disabled={isExpenseMutationPending}
+                            {...expenseForm.register('title')}
+                          />
+
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                            Keep the title short and easy to recognise in the expense list.
+                          </p>
+
+                          {expenseForm.formState.errors.title ? (
+                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
+                              <CircleAlert
+                                aria-hidden="true"
+                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
+                              />
+
+                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                                {expenseForm.formState.errors.title.message}
+                              </p>
+                            </div>
+                          ) : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                            Amount
+                            <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
+                          </span>
+
+                          <div className="mt-2 flex min-h-12 overflow-hidden rounded-2xl border border-white/60 bg-white/34 shadow-[0_8px_22px_rgba(31,27,29,0.04)] transition duration-300 focus-within:border-[rgba(93,58,85,0.24)] focus-within:bg-white/52 focus-within:shadow-[0_12px_28px_rgba(31,27,29,0.07)]">
+                            <span className="flex w-[4.75rem] shrink-0 items-center justify-center border-r border-[rgba(93,58,85,0.12)] bg-[rgba(183,167,200,0.20)] text-xs font-black uppercase tracking-[0.08em] text-[var(--color-deep-plum)]">
+                              LKR
+                            </span>
+
+                            <input
+                              className="min-w-0 flex-1 appearance-none bg-transparent px-4 py-3 text-base font-bold tabular-nums text-[var(--color-near-black)] outline-none placeholder:font-semibold placeholder:text-[var(--color-charcoal)]/38 disabled:cursor-not-allowed disabled:opacity-60"
+                              type="number"
+                              min="0.01"
+                              step="0.01"
+                              placeholder="75000"
+                              disabled={isExpenseMutationPending}
+                              {...expenseForm.register('amount')}
+                            />
+                          </div>
+
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                            Enter the complete planned or paid value for this expense.
+                          </p>
+
+                          {expenseForm.formState.errors.amount ? (
+                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
+                              <CircleAlert
+                                aria-hidden="true"
+                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
+                              />
+
+                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                                {expenseForm.formState.errors.amount.message}
+                              </p>
+                            </div>
+                          ) : null}
+                        </label>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(240,231,246,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start gap-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                          <WalletCards aria-hidden="true" className="size-5" />
+                        </span>
+
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Classification
+                          </p>
+
+                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                            Organise the expense
+                          </h3>
+
+                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                            Assign a category and choose the expense’s current payment status.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                        <label className="block">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                            Budget category
+                          </span>
+
+                          <select
+                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                            disabled={isExpenseMutationPending}
+                            {...expenseForm.register('budgetCategoryId')}
+                          >
+                            <option value="">Uncategorised</option>
+
+                            {categories.map((category) => (
+                              <option key={category.id} value={category.id}>
+                                {category.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                            Leave empty when the cost does not belong to a specific allocation.
+                          </p>
+                        </label>
+
+                        <label className="block">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                            Status
+                            <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
+                          </span>
+
+                          <select
+                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                            disabled={isExpenseMutationPending}
+                            {...expenseForm.register('status')}
+                          >
+                            {expenseStatuses.map((status) => (
+                              <option key={status} value={status}>
+                                {status.charAt(0) + status.slice(1).toLowerCase()}
+                              </option>
+                            ))}
+                          </select>
+
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                            Planned costs count toward commitments; paid costs count toward
+                            completed spending.
+                          </p>
+                        </label>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(220,235,242,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start gap-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#334954]">
+                          <CreditCard aria-hidden="true" className="size-5" />
+                        </span>
+
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Schedule
+                          </p>
+
+                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                            Record payment timing
+                          </h3>
+
+                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                            Add the expense date, due date or both when the timing is known.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                        <label className="block">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                            Expense date
+                          </span>
+
+                          <input
+                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                            type="datetime-local"
+                            disabled={isExpenseMutationPending}
+                            {...expenseForm.register('expenseDate')}
+                          />
+
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                            The date the cost was recorded, confirmed or paid.
+                          </p>
+
+                          {expenseForm.formState.errors.expenseDate ? (
+                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
+                              <CircleAlert
+                                aria-hidden="true"
+                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
+                              />
+
+                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                                {expenseForm.formState.errors.expenseDate.message}
+                              </p>
+                            </div>
+                          ) : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                            Due date
+                          </span>
+
+                          <input
+                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                            type="datetime-local"
+                            disabled={isExpenseMutationPending}
+                            {...expenseForm.register('dueDate')}
+                          />
+
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                            The deadline by which this payment should be completed.
+                          </p>
+                        </label>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(248,235,223,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(255,228,210,0.18)] blur-3xl"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start gap-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)]">
+                          <Pencil aria-hidden="true" className="size-5" />
+                        </span>
+
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Additional notes
+                          </p>
+
+                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                            Preserve useful context
+                          </h3>
+
+                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                            Add optional references, payment details or planning notes.
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="mt-6 block">
+                        <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                          Notes
+                        </span>
+
+                        <textarea
+                          className="form-field mt-2 min-h-32 resize-y transition duration-300 focus:bg-white/52"
+                          placeholder="Optional payment details or planning notes"
+                          disabled={isExpenseMutationPending}
+                          {...expenseForm.register('notes')}
+                        />
+
+                        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                          Use this for reference numbers, instalment details or follow-up
+                          information.
+                        </p>
+
+                        {expenseForm.formState.errors.notes ? (
+                          <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
+                            <CircleAlert
+                              aria-hidden="true"
+                              className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
+                            />
+
+                            <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                              {expenseForm.formState.errors.notes.message}
+                            </p>
+                          </div>
+                        ) : null}
+                      </label>
+                    </div>
+                  </section>
+
+                  {expenseForm.formState.errors.root?.message ? (
+                    <div
+                      role="alert"
+                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                          <CircleAlert aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                            No expense changes detected
+                          </p>
+
+                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                            {expenseForm.formState.errors.root.message}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {createExpenseMutation.isError || updateExpenseMutation.isError ? (
+                    <div
+                      role="alert"
+                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                          <CircleAlert aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                            Expense could not be saved
+                          </p>
+
+                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                            {getApiErrorMessage(
+                              expenseToEdit
+                                ? updateExpenseMutation.error
+                                : createExpenseMutation.error,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="flex flex-col gap-5 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <PiggyBank aria-hidden="true" className="size-4" />
+                      </span>
+
+                      <p className="max-w-sm text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
+                        {expenseToEdit
+                          ? 'Saving immediately updates the related category totals and overall budget summary.'
+                          : 'The new expense will immediately contribute to your event budget calculations.'}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row">
                       <button
                         type="button"
                         className="btn-secondary justify-center text-sm font-bold"
@@ -1948,13 +2517,16 @@ export function BudgetWorkspacePage() {
 
                       <button
                         type="submit"
-                        className="btn-primary min-w-40 justify-center text-sm font-bold"
+                        className="group/save-event-expense btn-primary min-w-40 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
                         disabled={isExpenseMutationPending}
                       >
                         {isExpenseMutationPending ? (
                           <LoaderCircle className="size-4 animate-spin" />
                         ) : (
-                          <Save className="size-4" />
+                          <Save
+                            aria-hidden="true"
+                            className="size-4 transition duration-300 group-hover/save-event-expense:scale-105"
+                          />
                         )}
 
                         {updateExpenseMutation.isPending
@@ -1967,127 +2539,246 @@ export function BudgetWorkspacePage() {
                       </button>
                     </div>
                   </div>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </div>
       ) : null}
       {expenseToDelete ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.52)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.64)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-expense-title"
+          onClick={() => {
+            if (!deleteExpenseMutation.isPending) {
+              closeDeleteExpenseDialog();
+            }
+          }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,242,245,0.92))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9">
-            <div className="flex items-start justify-between gap-5">
-              <div className="grid size-16 shrink-0 place-items-center rounded-[1.4rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_16px_35px_rgba(124,74,90,0.10)]">
-                <Trash2 className="size-7" />
-              </div>
-
-              <span className="status-chip shrink-0" data-tone="rose">
-                Permanent action
-              </span>
-            </div>
-
-            <div className="mt-7">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                Delete expense
-              </p>
-
-              <h2
-                id="delete-expense-title"
-                className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
-              >
-                Remove this expense?
-              </h2>
-
-              <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
-                This will permanently remove the expense and immediately recalculate the related
-                budget totals.
-              </p>
-            </div>
-
-            <div className="mt-6 rounded-[1.5rem] border border-white/60 bg-white/38 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
-              <div className="flex items-start gap-4">
-                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]">
-                  <ReceiptText className="size-5" />
-                </span>
-
-                <div className="min-w-0">
-                  <p className="truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                    {expenseToDelete.title}
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
-                    {expenseToDelete.budgetCategory?.name ?? 'Uncategorised'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-center justify-between gap-4 border-t border-[rgba(93,58,85,0.10)] pt-5">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
-                    Expense amount
-                  </p>
-
-                  <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                    {formatCurrency(expenseToDelete.amount)}
-                  </p>
-                </div>
-
-                <span
-                  className="status-chip shrink-0"
-                  data-tone={
-                    expenseToDelete.status === 'PAID'
-                      ? 'green'
-                      : expenseToDelete.status === 'CANCELLED'
-                        ? 'rose'
-                        : 'plum'
-                  }
-                >
-                  {expenseToDelete.status.charAt(0) + expenseToDelete.status.slice(1).toLowerCase()}
-                </span>
-              </div>
-            </div>
-
-            {deleteExpenseMutation.isError ? (
+          <div className="grid min-h-full place-items-center">
+            <div
+              className="relative w-full max-w-xl overflow-hidden rounded-[2.2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(249,235,240,0.87))] p-6 shadow-[0_42px_120px_rgba(31,27,29,0.28)] backdrop-blur-3xl sm:p-8"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
               <div
-                role="alert"
-                className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-              >
-                {getApiErrorMessage(deleteExpenseMutation.error)}
-              </div>
-            ) : null}
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-[rgba(210,146,160,0.22)] blur-3xl"
+              />
 
-            <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  className="btn-secondary justify-center text-sm font-bold"
-                  disabled={deleteExpenseMutation.isPending}
-                  onClick={closeDeleteExpenseDialog}
-                >
-                  Keep expense
-                </button>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+              />
 
-                <button
-                  type="button"
-                  className="flex min-w-40 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--color-muted-burgundy),var(--color-rosewood))] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,74,90,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={deleteExpenseMutation.isPending}
-                  onClick={() => {
-                    deleteExpenseMutation.mutate(expenseToDelete.id);
-                  }}
-                >
-                  {deleteExpenseMutation.isPending ? (
-                    <LoaderCircle className="size-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="size-4" />
-                  )}
+              <div className="relative">
+                <div className="flex items-start justify-between gap-5 border-b border-[rgba(93,58,85,0.10)] pb-7">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-14 shrink-0 place-items-center rounded-2xl border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_14px_30px_rgba(124,74,90,0.08)]">
+                        <Trash2 aria-hidden="true" className="size-7" />
+                      </span>
 
-                  {deleteExpenseMutation.isPending ? 'Deleting expense...' : 'Delete expense'}
-                </button>
+                      <span className="rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.09)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-muted-burgundy)]">
+                        Permanent action
+                      </span>
+                    </div>
+
+                    <h2
+                      id="delete-expense-title"
+                      className="mt-6 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
+                    >
+                      Remove this expense?
+                    </h2>
+
+                    <p className="mt-4 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
+                      This permanently removes the expense and recalculates the related category and
+                      budget totals.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Close delete expense dialog"
+                    disabled={deleteExpenseMutation.isPending}
+                    onClick={closeDeleteExpenseDialog}
+                  >
+                    <X aria-hidden="true" className="size-5" />
+                  </button>
+                </div>
+
+                <section className="relative mt-7 overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.68),rgba(248,235,223,0.40))] p-5 shadow-[0_16px_42px_rgba(31,27,29,0.05)] backdrop-blur-xl sm:p-6">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(255,228,210,0.18)] blur-3xl"
+                  />
+
+                  <div className="relative">
+                    <div className="flex items-start gap-4">
+                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
+                        <ReceiptText aria-hidden="true" className="size-5" />
+                      </span>
+
+                      <div className="min-w-0">
+                        <p className="truncate text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                          {expenseToDelete.title}
+                        </p>
+
+                        <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                          {expenseToDelete.budgetCategory?.name ?? 'Uncategorised expense'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Expense amount
+                        </p>
+
+                        <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          {formatCurrency(expenseToDelete.amount)}
+                        </p>
+                      </div>
+
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Status
+                        </p>
+
+                        <div className="mt-3">
+                          <span
+                            className="status-chip"
+                            data-tone={
+                              expenseToDelete.status === 'PAID'
+                                ? 'green'
+                                : expenseToDelete.status === 'CANCELLED'
+                                  ? 'rose'
+                                  : 'plum'
+                            }
+                          >
+                            {expenseToDelete.status.charAt(0) +
+                              expenseToDelete.status.slice(1).toLowerCase()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Expense date
+                        </p>
+
+                        <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                          {formatDateTime(expenseToDelete.expenseDate)}
+                        </p>
+                      </div>
+
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Due date
+                        </p>
+
+                        <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                          {formatDateTime(expenseToDelete.dueDate)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="relative mt-5 overflow-hidden rounded-[1.5rem] border border-[rgba(124,74,90,0.20)] bg-[linear-gradient(145deg,rgba(249,235,240,0.78),rgba(255,255,255,0.40))] p-5">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(210,146,160,0.18)] blur-3xl"
+                  />
+
+                  <div className="relative flex items-start gap-4">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                      <CircleAlert aria-hidden="true" className="size-5" />
+                    </span>
+
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        Budget totals will update immediately
+                      </p>
+
+                      <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                        The expense amount will be removed from committed, paid and category
+                        calculations where applicable.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {deleteExpenseMutation.isError ? (
+                  <div
+                    role="alert"
+                    className="mt-5 rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                        <CircleAlert aria-hidden="true" className="size-4" />
+                      </span>
+
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                          Expense could not be deleted
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                          {getApiErrorMessage(deleteExpenseMutation.error)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-7 flex flex-col gap-5 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)]">
+                      <Trash2 aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <p className="max-w-sm text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
+                      This action cannot be undone after the expense has been removed.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      className="btn-secondary justify-center text-sm font-bold"
+                      disabled={deleteExpenseMutation.isPending}
+                      onClick={closeDeleteExpenseDialog}
+                    >
+                      Keep expense
+                    </button>
+
+                    <button
+                      type="button"
+                      className="group/delete-expense-confirm flex min-w-40 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--color-muted-burgundy),var(--color-rosewood))] px-5 py-3 text-sm font-black text-white shadow-[0_14px_32px_rgba(124,74,90,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(124,74,90,0.30)] disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={deleteExpenseMutation.isPending}
+                      onClick={() => {
+                        deleteExpenseMutation.mutate(expenseToDelete.id);
+                      }}
+                    >
+                      {deleteExpenseMutation.isPending ? (
+                        <LoaderCircle className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2
+                          aria-hidden="true"
+                          className="size-4 transition duration-300 group-hover/delete-expense-confirm:scale-105"
+                        />
+                      )}
+
+                      {deleteExpenseMutation.isPending ? 'Deleting expense...' : 'Delete expense'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2095,116 +2786,228 @@ export function BudgetWorkspacePage() {
       ) : null}
       {categoryToDelete ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.52)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.64)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-budget-category-title"
+          onClick={() => {
+            if (!deleteCategoryMutation.isPending) {
+              closeDeleteCategoryDialog();
+            }
+          }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,242,245,0.92))] p-7 shadow-[0_40px_100px_rgba(31,27,29,0.18)] backdrop-blur-3xl sm:p-9">
-            <div className="flex items-start justify-between gap-5">
-              <div className="grid size-16 shrink-0 place-items-center rounded-[1.4rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_16px_35px_rgba(124,74,90,0.10)]">
-                <Trash2 className="size-7" />
-              </div>
-
-              <span className="status-chip shrink-0" data-tone="rose">
-                Permanent action
-              </span>
-            </div>
-
-            <div className="mt-7">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                Delete category
-              </p>
-
-              <h2
-                id="delete-budget-category-title"
-                className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
-              >
-                Remove this allocation?
-              </h2>
-
-              <p className="mt-4 leading-7 text-[var(--color-charcoal)]/66">
-                This permanently removes the category allocation. Associated expenses may remain in
-                the workspace as uncategorised expenses.
-              </p>
-            </div>
-
-            <div className="mt-6 rounded-[1.5rem] border border-white/60 bg-white/38 p-5 shadow-[0_16px_40px_rgba(31,27,29,0.05)] backdrop-blur-xl">
-              <div className="flex items-start gap-4">
-                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                  <WalletCards className="size-5" />
-                </span>
-
-                <div className="min-w-0">
-                  <p className="truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                    {categoryToDelete.name}
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
-                    Budget category allocation
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[rgba(93,58,85,0.10)] pt-5">
-                <div className="rounded-2xl border border-white/50 bg-white/28 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
-                    Allocated
-                  </p>
-
-                  <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
-                    {formatCurrency(categoryToDelete.allocatedAmount)}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/50 bg-white/28 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
-                    Used
-                  </p>
-
-                  <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
-                    {formatCurrency(categoryToDelete.totalExpenses)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {deleteCategoryMutation.isError ? (
+          <div className="grid min-h-full place-items-center">
+            <div
+              className="relative w-full max-w-xl overflow-hidden rounded-[2.2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(249,235,240,0.87))] p-6 shadow-[0_42px_120px_rgba(31,27,29,0.28)] backdrop-blur-3xl sm:p-8"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
               <div
-                role="alert"
-                className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-              >
-                {getApiErrorMessage(deleteCategoryMutation.error)}
-              </div>
-            ) : null}
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-[rgba(210,146,160,0.22)] blur-3xl"
+              />
 
-            <div className="mt-7 border-t border-[rgba(93,58,85,0.10)] pt-6">
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  className="btn-secondary justify-center text-sm font-bold"
-                  disabled={deleteCategoryMutation.isPending}
-                  onClick={closeDeleteCategoryDialog}
-                >
-                  Keep category
-                </button>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+              />
 
-                <button
-                  type="button"
-                  className="flex min-w-40 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--color-muted-burgundy),var(--color-rosewood))] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(124,74,90,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={deleteCategoryMutation.isPending}
-                  onClick={() => {
-                    deleteCategoryMutation.mutate(categoryToDelete.id);
-                  }}
-                >
-                  {deleteCategoryMutation.isPending ? (
-                    <LoaderCircle className="size-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="size-4" />
-                  )}
+              <div className="relative">
+                <div className="flex items-start justify-between gap-5 border-b border-[rgba(93,58,85,0.10)] pb-7">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-14 shrink-0 place-items-center rounded-2xl border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_14px_30px_rgba(124,74,90,0.08)]">
+                        <Trash2 aria-hidden="true" className="size-7" />
+                      </span>
 
-                  {deleteCategoryMutation.isPending ? 'Deleting category...' : 'Delete category'}
-                </button>
+                      <span className="rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.09)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-muted-burgundy)]">
+                        Permanent action
+                      </span>
+                    </div>
+
+                    <h2
+                      id="delete-budget-category-title"
+                      className="mt-6 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
+                    >
+                      Remove this allocation?
+                    </h2>
+
+                    <p className="mt-4 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
+                      This permanently removes the category allocation and recalculates the budget
+                      breakdown.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Close delete category dialog"
+                    disabled={deleteCategoryMutation.isPending}
+                    onClick={closeDeleteCategoryDialog}
+                  >
+                    <X aria-hidden="true" className="size-5" />
+                  </button>
+                </div>
+
+                <section className="relative mt-7 overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.68),rgba(240,231,246,0.40))] p-5 shadow-[0_16px_42px_rgba(31,27,29,0.05)] backdrop-blur-xl sm:p-6">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                  />
+
+                  <div className="relative">
+                    <div className="flex items-start gap-4">
+                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
+                        <WalletCards aria-hidden="true" className="size-5" />
+                      </span>
+
+                      <div className="min-w-0">
+                        <p className="truncate text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                          {categoryToDelete.name}
+                        </p>
+
+                        <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                          Budget category allocation
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Allocated
+                        </p>
+
+                        <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          {formatCurrency(categoryToDelete.allocatedAmount)}
+                        </p>
+                      </div>
+
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Used
+                        </p>
+
+                        <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          {formatCurrency(categoryToDelete.totalExpenses)}
+                        </p>
+                      </div>
+
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Planned expenses
+                        </p>
+
+                        <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                          {formatCurrency(categoryToDelete.plannedExpenses)}
+                        </p>
+                      </div>
+
+                      <div className="rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          Paid expenses
+                        </p>
+
+                        <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                          {formatCurrency(categoryToDelete.paidExpenses)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="relative mt-5 overflow-hidden rounded-[1.5rem] border border-[rgba(124,74,90,0.20)] bg-[linear-gradient(145deg,rgba(249,235,240,0.78),rgba(255,255,255,0.40))] p-5">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(210,146,160,0.18)] blur-3xl"
+                  />
+
+                  <div className="relative flex items-start gap-4">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                      <CircleAlert aria-hidden="true" className="size-5" />
+                    </span>
+
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        Associated expenses may remain
+                      </p>
+
+                      <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                        Expenses assigned to this category may stay in the workspace as
+                        uncategorised expenses after the allocation is removed.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {deleteCategoryMutation.isError ? (
+                  <div
+                    role="alert"
+                    className="mt-5 rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                        <CircleAlert aria-hidden="true" className="size-4" />
+                      </span>
+
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                          Budget category could not be deleted
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                          {getApiErrorMessage(deleteCategoryMutation.error)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-7 flex flex-col gap-5 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)]">
+                      <Trash2 aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <p className="max-w-sm text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
+                      This allocation cannot be restored after it has been deleted.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      className="btn-secondary justify-center text-sm font-bold"
+                      disabled={deleteCategoryMutation.isPending}
+                      onClick={closeDeleteCategoryDialog}
+                    >
+                      Keep category
+                    </button>
+
+                    <button
+                      type="button"
+                      className="group/delete-category-confirm flex min-w-40 items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--color-muted-burgundy),var(--color-rosewood))] px-5 py-3 text-sm font-black text-white shadow-[0_14px_32px_rgba(124,74,90,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(124,74,90,0.30)] disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={deleteCategoryMutation.isPending}
+                      onClick={() => {
+                        deleteCategoryMutation.mutate(categoryToDelete.id);
+                      }}
+                    >
+                      {deleteCategoryMutation.isPending ? (
+                        <LoaderCircle className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2
+                          aria-hidden="true"
+                          className="size-4 transition duration-300 group-hover/delete-category-confirm:scale-105"
+                        />
+                      )}
+
+                      {deleteCategoryMutation.isPending
+                        ? 'Deleting category...'
+                        : 'Delete category'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

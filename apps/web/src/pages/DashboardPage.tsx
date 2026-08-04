@@ -11,14 +11,19 @@ import {
   LayoutDashboard,
   LoaderCircle,
   LogOut,
+  MapPin,
   Plus,
   Sparkles,
   UsersRound,
   WalletCards,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AmbientBackground } from '../components/ui/AmbientBackground';
+import { SectionHeader } from '../components/ui/SectionHeader';
 import { clearAuthTokens } from '../features/auth/auth.storage';
+import { HeroAtmosphere } from '../components/ui/HeroAtmosphere';
 import { api } from '../lib/api';
+import { CustomerWorkspaceFooter } from '../components/ui/CustomerWorkspaceFooter';
 
 type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
@@ -257,6 +262,24 @@ const getDeadlineLabel = (dueDate: string | null) => {
   return `Due in ${days} days`;
 };
 
+const getEventCountdownLabel = (eventDate: string) => {
+  const days = getDaysUntil(eventDate);
+
+  if (days < 0) {
+    return 'Event date passed';
+  }
+
+  if (days === 0) {
+    return 'Event is today';
+  }
+
+  if (days === 1) {
+    return '1 day remaining';
+  }
+
+  return `${days} days remaining`;
+};
+
 export function DashboardPage() {
   const navigate = useNavigate();
 
@@ -284,20 +307,27 @@ export function DashboardPage() {
 
   const handleLogout = () => {
     clearAuthTokens();
+
     navigate('/login', {
       replace: true,
     });
   };
 
   const isLoading = currentUserQuery.isLoading || dashboardQuery.isLoading;
-
   const queryError = currentUserQuery.error ?? dashboardQuery.error;
 
   if (isLoading) {
     return (
-      <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
-        <div className="glass-card grid min-h-80 w-full max-w-3xl place-items-center p-10 text-center">
-          <div>
+      <div className="app-shell relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
+        <AmbientBackground variant="dashboard" />
+
+        <div className="glass-card relative grid min-h-80 w-full max-w-3xl place-items-center p-10 text-center">
+          <div
+            aria-hidden="true"
+            className="absolute -left-20 top-0 size-56 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+          />
+
+          <div className="relative">
             <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
 
             <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
@@ -305,7 +335,7 @@ export function DashboardPage() {
             </p>
 
             <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/62">
-              Loading your events, tasks, bookings, and planning progress.
+              Loading your events, tasks, bookings, and planning activity.
             </p>
           </div>
         </div>
@@ -315,9 +345,16 @@ export function DashboardPage() {
 
   if (queryError || !currentUserQuery.data || !dashboardQuery.data) {
     return (
-      <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
-        <div className="glass-card grid min-h-80 w-full max-w-3xl place-items-center p-10 text-center">
-          <div className="max-w-lg">
+      <div className="app-shell relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
+        <AmbientBackground variant="dashboard" />
+
+        <div className="glass-card relative grid min-h-80 w-full max-w-3xl place-items-center overflow-hidden p-10 text-center">
+          <div
+            aria-hidden="true"
+            className="absolute -right-20 -top-16 size-56 rounded-full bg-[rgba(142,92,103,0.16)] blur-3xl"
+          />
+
+          <div className="relative max-w-lg">
             <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(130,72,77,0.12)] text-[var(--color-rosewood)]">
               <CircleAlert className="size-7" />
             </div>
@@ -358,18 +395,17 @@ export function DashboardPage() {
 
   const user = currentUserQuery.data;
   const dashboard = dashboardQuery.data;
-  const activeEvent = dashboard.events.upcomingEvent;
+  const highlightedEvent = dashboard.events.upcomingEvent;
 
-  const planningProgress = getTaskProgress(dashboard.tasks.byStatus);
+  const accountTaskProgress = getTaskProgress(dashboard.tasks.byStatus);
 
-  const committedCost = dashboard.bookings.upcoming.reduce(
-    (sum, booking) => sum + Number(booking.agreedCost),
-    0,
-  );
+  const openTaskCount = dashboard.tasks.byStatus.TODO + dashboard.tasks.byStatus.IN_PROGRESS;
 
-  const upcomingTaskCount = dashboard.tasks.byStatus.TODO + dashboard.tasks.byStatus.IN_PROGRESS;
+  const highlightedEventTask =
+    dashboard.tasks.upcoming.find((task) => task.event.id === highlightedEvent?.id) ?? null;
 
-  const nextTask = dashboard.tasks.upcoming[0] ?? null;
+  const nextAccountTask = dashboard.tasks.upcoming[0] ?? null;
+  const displayedTask = highlightedEventTask ?? nextAccountTask;
 
   const confirmedGuestCount = dashboard.guests.byStatus.CONFIRMED;
 
@@ -378,68 +414,98 @@ export function DashboardPage() {
     dashboard.bookings.byStatus.DEPOSIT_PENDING +
     dashboard.bookings.byStatus.ACTIVE;
 
+  const upcomingBookingValue = dashboard.bookings.upcoming.reduce((sum, booking) => {
+    const amount = Number(booking.agreedCost);
+
+    return Number.isFinite(amount) ? sum + amount : sum;
+  }, 0);
+
+  const hasActiveBooking = activeBookingCount > 0;
+
   const stats = [
     {
-      label: 'Planned budget',
-      value: activeEvent?.plannedBudget ? formatCurrency(activeEvent.plannedBudget) : 'Not set',
-      helper: activeEvent ? `${activeEvent.name} estimate` : 'Create an event to begin',
+      label: 'Highlighted budget',
+      value: highlightedEvent?.plannedBudget
+        ? formatCurrency(highlightedEvent.plannedBudget)
+        : 'Not set',
+      helper: highlightedEvent
+        ? `${highlightedEvent.name} planned budget`
+        : 'Create an event to set a budget',
+      badge: highlightedEvent ? 'Event' : 'Setup',
       icon: WalletCards,
       tone: 'bg-[rgba(183,167,200,0.26)] text-[var(--color-deep-plum)]',
+      glow: 'bg-[rgba(183,167,200,0.24)]',
     },
     {
-      label: 'Committed',
-      value: formatCurrency(committedCost),
-      helper: `${activeBookingCount} active ${activeBookingCount === 1 ? 'booking' : 'bookings'}`,
+      label: 'Upcoming booking value',
+      value: formatCurrency(upcomingBookingValue),
+      helper: `${dashboard.bookings.upcoming.length} upcoming ${
+        dashboard.bookings.upcoming.length === 1 ? 'booking' : 'bookings'
+      } shown`,
+      badge: 'Upcoming',
       icon: CheckCircle2,
       tone: 'bg-[rgba(142,151,115,0.24)] text-[#3d452f]',
+      glow: 'bg-[rgba(142,151,115,0.20)]',
     },
     {
       label: 'Confirmed guests',
       value: String(confirmedGuestCount),
       helper: `${dashboard.guests.total} total guest ${
         dashboard.guests.total === 1 ? 'entry' : 'entries'
-      }`,
+      } across your events`,
+      badge: 'Overall',
       icon: UsersRound,
       tone: 'bg-[rgba(175,201,216,0.34)] text-[#334954]',
+      glow: 'bg-[rgba(175,201,216,0.24)]',
     },
     {
-      label: 'Upcoming tasks',
-      value: String(upcomingTaskCount),
+      label: 'Open tasks',
+      value: String(openTaskCount),
       helper: `${dashboard.tasks.byStatus.IN_PROGRESS} currently in progress`,
+      badge: 'Overall',
       icon: ClipboardList,
       tone: 'bg-[rgba(142,92,103,0.18)] text-[var(--color-rosewood)]',
+      glow: 'bg-[rgba(142,92,103,0.18)]',
     },
   ];
 
   const timeline = [
     {
-      label: 'Planning started',
-      description: activeEvent ? 'Your event workspace is ready.' : 'Create your event workspace.',
-      complete: Boolean(activeEvent),
+      label: 'Event workspace created',
+      description:
+        dashboard.events.total > 0
+          ? `${dashboard.events.total} ${
+              dashboard.events.total === 1 ? 'event is' : 'events are'
+            } available in your account.`
+          : 'Create your first event workspace.',
+      complete: dashboard.events.total > 0,
     },
     {
-      label: 'Tasks underway',
+      label: 'Planning underway',
       description:
         dashboard.tasks.byStatus.COMPLETED > 0 || dashboard.tasks.byStatus.IN_PROGRESS > 0
-          ? `${dashboard.tasks.byStatus.COMPLETED} completed so far.`
-          : 'Add and begin your planning tasks.',
+          ? `${dashboard.tasks.byStatus.COMPLETED} completed and ${
+              dashboard.tasks.byStatus.IN_PROGRESS
+            } in progress across your events.`
+          : 'Add tasks and begin organising the work.',
       complete: dashboard.tasks.byStatus.COMPLETED > 0 || dashboard.tasks.byStatus.IN_PROGRESS > 0,
     },
     {
-      label: 'Vendors booked',
-      description:
-        dashboard.bookings.total > 0
-          ? `${activeBookingCount} active ${activeBookingCount === 1 ? 'booking' : 'bookings'}.`
-          : 'Compare vendors and confirm bookings.',
-      complete: dashboard.bookings.total > 0,
+      label: 'Vendors confirmed',
+      description: hasActiveBooking
+        ? `${activeBookingCount} active ${
+            activeBookingCount === 1 ? 'vendor booking' : 'vendor bookings'
+          }.`
+        : 'Compare quotations and confirm suitable vendors.',
+      complete: hasActiveBooking,
     },
     {
       label: 'Final preparation',
       description:
-        planningProgress >= 80
-          ? 'Your event is approaching the final checks.'
-          : 'Complete most tasks to reach this stage.',
-      complete: planningProgress >= 80,
+        accountTaskProgress >= 80
+          ? 'Most active planning tasks across your events are complete.'
+          : 'Complete most active tasks to reach final preparation.',
+      complete: accountTaskProgress >= 80,
     },
   ];
 
@@ -449,12 +515,44 @@ export function DashboardPage() {
     firstIncompleteTimelineIndex === -1 ? timeline.length - 1 : firstIncompleteTimelineIndex;
 
   return (
-    <div className="app-shell px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl">
-              <CalendarDays className="size-5 text-[var(--color-deep-plum)]" />
+    <div className="app-shell relative min-h-screen overflow-hidden px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
+      <AmbientBackground variant="dashboard" />
+
+      {highlightedEvent ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 top-0 z-0 hidden h-[42rem] w-[56vw] min-w-[46rem] overflow-hidden lg:block"
+        >
+          <img
+            src="/images/workspaces/dashboard-hero.png"
+            alt=""
+            className="absolute -inset-[0%] size-[100%] object-cover"
+            style={{
+              objectPosition: '72% center',
+              opacity: 1.0,
+              filter: ' saturate(0.96) contrast(0.98)',
+              WebkitMaskImage:
+                'radial-gradient(ellipse 118% 116% at 100% 0%, black 0%, black 45%, rgba(0,0,0,0.86) 58%, rgba(0,0,0,0.48) 73%, rgba(0,0,0,0.14) 87%, transparent 98%)',
+              maskImage:
+                'radial-gradient(ellipse 118% 116% at 100% 0%, black 0%, black 45%, rgba(0,0,0,0.86) 58%, rgba(0,0,0,0.48) 73%, rgba(0,0,0,0.14) 87%, transparent 98%)',
+            }}
+          />
+
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,239,233,0.94)_0%,rgba(246,239,233,0.58)_17%,rgba(246,239,233,0.18)_38%,transparent_64%)]" />
+
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(73,43,68,0.02)_0%,rgba(93,58,85,0.035)_38%,rgba(190,163,162,0.12)_58%,rgba(224,209,201,0.48)_76%,rgba(239,228,219,0.92)_91%,rgba(239,228,219,1)_100%)]" />
+
+          <div className="absolute bottom-0 left-[16%] h-[46%] w-[84%] bg-[radial-gradient(ellipse_at_bottom,rgba(224,209,201,0.72),rgba(190,163,162,0.18)_46%,transparent_76%)] blur-2xl" />
+
+          <div className="absolute -right-24 -top-24 size-[28rem] rounded-full bg-[rgba(255,210,190,0.1)] blur-3xl" />
+        </div>
+      ) : null}
+
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <header className="glass-card relative z-30 flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <Link to="/" className="group flex items-center gap-3">
+            <span className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl transition duration-300 group-hover:-translate-y-0.5 group-hover:bg-white/45">
+              <CalendarDays className="size-5 text-[var(--color-deep-plum)] transition duration-300 group-hover:scale-105" />
             </span>
 
             <span className="flex flex-col leading-none">
@@ -471,7 +569,7 @@ export function DashboardPage() {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               to="/notifications"
-              className="soft-chip text-sm font-bold transition hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+              className="soft-chip text-sm font-bold transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
             >
               <Bell className="size-4" />
               {dashboard.notifications.unreadCount}{' '}
@@ -498,251 +596,322 @@ export function DashboardPage() {
           </div>
         </header>
 
-        <main className="py-10">
-          <section className="overflow-hidden rounded-[2.25rem] border border-white/55 bg-white/22 shadow-[0_28px_90px_rgba(31,27,29,0.10)] backdrop-blur-2xl">
-            <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="relative overflow-hidden p-6 sm:p-8 lg:p-10">
-                <div
-                  aria-hidden="true"
-                  className="absolute -left-24 top-8 size-64 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
-                />
+        <main className="relative z-10 py-10">
+          <section className="group/hero relative isolate overflow-visible rounded-[2.35rem] border border-white/20 bg-[linear-gradient(128deg,rgba(73,43,68,0.99),rgba(112,61,78,0.97)_48%,rgba(98,77,110,0.95))] text-[#fffaf5] shadow-[0_30px_90px_rgba(93,58,85,0.28)] animate-[heroFloat_2s_ease-in-out_infinite] transition-[transform,box-shadow] duration-500 ease-out hover:!translate-y-[-0.55rem] hover:shadow-[0_38px_110px_rgba(93,58,85,0.36)]">
+            <HeroAtmosphere
+              imageSrc={highlightedEvent ? '/images/workspaces/dashboard-hero.png' : undefined}
+              imagePosition="68% center"
+              imageOpacity={0.92}
+            />
 
-                <div
-                  aria-hidden="true"
-                  className="absolute bottom-0 right-0 size-72 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl"
-                />
+            {highlightedEvent ? (
+              <div className="relative z-10 grid gap-10 p-6 :p-8 lg:min-h-[34rem] lg:grid-cols-[1.08fr_0.92fr] lg:gap-10 lg:p-10 xl:p-12">
+                <div className="relative z-10 flex min-w-0 flex-col justify-center">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-3.5 py-2 text-[0.64rem] font-black uppercase tracking-[0.18em] text-white/70 backdrop-blur-xl">
+                      <LayoutDashboard className="size-3.5 text-[var(--color-powder-blue)]" />
+                      Planning command centre
+                    </span>
 
-                <div className="relative">
-                  <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                    <LayoutDashboard className="size-4" />
-                    Planning command centre
+                    <span className="rounded-full border border-white/14 bg-white/10 px-3.5 py-2 text-[0.64rem] font-black uppercase tracking-[0.18em] text-white/70 backdrop-blur-xl">
+                      {highlightedEvent.status.replaceAll('_', ' ')}
+                    </span>
                   </div>
 
-                  <h1 className="max-w-3xl text-balance text-4xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl xl:text-6xl">
+                  <p className="mt-8 text-sm font-bold text-white/58">
                     {getGreeting()}, {user.firstName}.
-                  </h1>
-
-                  <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/68">
-                    {activeEvent
-                      ? `Here is what needs your attention as you continue planning ${activeEvent.name}.`
-                      : 'Create your first event and bring every planning detail into one organised workspace.'}
                   </p>
 
-                  {activeEvent ? (
-                    <div className="mt-8 flex flex-wrap gap-3">
-                      <Link
-                        to={`/events/${activeEvent.id}`}
-                        className="btn-primary text-sm font-bold"
-                      >
-                        Open event workspace
-                        <ArrowRight aria-hidden="true" className="size-4" />
-                      </Link>
+                  <h1 className="mt-3 max-w-4xl text-4xl font-black tracking-[-0.06em] sm:text-5xl lg:text-[3.7rem] lg:leading-[1.01]">
+                    Everything for{' '}
+                    <span className="text-[var(--color-powder-blue)]">{highlightedEvent.name}</span>{' '}
+                    is ready in one workspace.
+                  </h1>
 
-                      <Link
-                        to={`/events/${activeEvent.id}/tasks`}
-                        className="btn-secondary text-sm font-bold"
-                      >
-                        Review tasks
-                        <ClipboardList className="size-4" />
-                      </Link>
-                    </div>
-                  ) : (
-                    <Link to="/events" className="btn-primary mt-8 w-fit text-sm font-bold">
-                      Create your first event
-                      <Plus aria-hidden="true" className="size-4" />
+                  <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-white/66">
+                    Keep the important details moving from one focused place. Review the next task,
+                    coordinate guests, compare vendors, and stay ready for the day ahead.
+                  </p>
+
+                  <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-white/66">
+                    <span className="flex items-center gap-2">
+                      <CalendarDays className="size-4 text-[var(--color-powder-blue)]" />
+                      {formatEventDate(highlightedEvent.eventDate)}
+                    </span>
+
+                    <span className="flex items-center gap-2">
+                      <MapPin className="size-4 text-[var(--color-powder-blue)]" />
+                      {highlightedEvent.location}
+                    </span>
+
+                    <span className="flex items-center gap-2">
+                      <UsersRound className="size-4 text-[var(--color-powder-blue)]" />
+                      {highlightedEvent.guestCount ?? 0}{' '}
+                      {(highlightedEvent.guestCount ?? 0) === 1 ? 'guest' : 'guests'}
+                    </span>
+                  </div>
+
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <Link
+                      to={`/events/${highlightedEvent.id}`}
+                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-black !text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#fffaf5] hover:shadow-[0_18px_42px_rgba(31,27,29,0.24)]"
+                    >
+                      Continue planning
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                      />
                     </Link>
-                  )}
 
-                  {activeEvent ? (
-                    <div className="mt-10 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-[1.35rem] border border-white/55 bg-white/30 p-4 backdrop-blur-xl">
-                        <CalendarDays className="size-5 text-[var(--color-deep-plum)]" />
-
-                        <p className="mt-5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                          Event date
-                        </p>
-
-                        <p className="mt-2 text-sm font-black text-[var(--color-near-black)]">
-                          {formatEventDate(activeEvent.eventDate)}
-                        </p>
-                      </div>
-
-                      <div className="rounded-[1.35rem] border border-white/55 bg-white/30 p-4 backdrop-blur-xl">
-                        <ClipboardList className="size-5 text-[var(--color-rosewood)]" />
-
-                        <p className="mt-5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                          Next priority
-                        </p>
-
-                        <p className="mt-2 line-clamp-2 text-sm font-black text-[var(--color-near-black)]">
-                          {nextTask?.title ?? 'No pending task'}
-                        </p>
-                      </div>
-
-                      <div className="rounded-[1.35rem] border border-white/55 bg-white/30 p-4 backdrop-blur-xl">
-                        <CheckCircle2 className="size-5 text-[#536044]" />
-
-                        <p className="mt-5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                          Progress
-                        </p>
-
-                        <p className="mt-2 text-sm font-black text-[var(--color-near-black)]">
-                          {planningProgress}% completed
-                        </p>
-                      </div>
-                    </div>
-                  ) : null}
+                    <Link
+                      to={`/events/${highlightedEvent.id}/tasks`}
+                      className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/16"
+                    >
+                      Review event tasks
+                      <ClipboardList className="size-4 transition-transform duration-300 group-hover:scale-105" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
 
-              <div className="border-t border-white/45 bg-[linear-gradient(145deg,rgba(93,58,85,0.96),rgba(130,72,77,0.92))] p-6 text-[#fffaf5] sm:p-8 lg:border-l lg:border-t-0 lg:p-10">
-                {activeEvent ? (
-                  <>
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.22em] text-white/55">
-                          Active event
-                        </p>
+                <div className="relative min-h-[25rem] lg:min-h-0">
+                  <div
+                    aria-hidden="true"
+                    className="absolute left-[8%] top-[8%] size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                  />
 
-                        <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
-                          {activeEvent.name}
-                        </h2>
+                  <div
+                    aria-hidden="true"
+                    className="absolute bottom-[7%] right-[3%] size-52 rounded-full bg-[rgba(255,199,169,0.12)] blur-3xl"
+                  />
 
-                        <p className="mt-2 text-sm font-semibold text-white/66">
-                          {activeEvent.eventType.replaceAll('_', ' ')} · {activeEvent.location}
-                        </p>
-                      </div>
-
-                      <span className="rounded-full bg-white/12 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-white/78 backdrop-blur">
-                        {activeEvent.status.replaceAll('_', ' ')}
-                      </span>
-                    </div>
-
-                    <div className="mt-10">
-                      <div className="flex items-end justify-between gap-4">
+                  <div className="relative mx-auto h-full max-w-xl lg:max-w-none">
+                    <div className="absolute left-0 top-[8%] w-[78%] rounded-[1.8rem] border border-white/14 bg-white/[0.11] p-5 shadow-[0_24px_70px_rgba(31,27,29,0.16)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/[0.14] sm:p-6 lg:left-[2%] lg:w-[82%]">
+                      <div className="flex items-start justify-between gap-5">
                         <div>
-                          <p className="text-sm font-bold text-white/58">Planning progress</p>
+                          <p className="text-xs font-black uppercase tracking-[0.2em] text-white/48">
+                            Event countdown
+                          </p>
 
-                          <p className="mt-2 text-5xl font-black tracking-[-0.06em]">
-                            {planningProgress}%
+                          <p className="mt-3 text-[2.65rem] font-black leading-none tracking-[-0.06em] sm:text-5xl">
+                            {getDaysUntil(highlightedEvent.eventDate) < 0
+                              ? 'Passed'
+                              : Math.max(getDaysUntil(highlightedEvent.eventDate), 0)}
+                          </p>
+
+                          <p className="mt-2 text-sm font-black text-[var(--color-powder-blue)]">
+                            {getDaysUntil(highlightedEvent.eventDate) < 0
+                              ? 'Event date passed'
+                              : getDaysUntil(highlightedEvent.eventDate) === 1
+                                ? 'day remaining'
+                                : 'days remaining'}
                           </p>
                         </div>
 
-                        <p className="max-w-32 text-right text-sm font-semibold leading-6 text-white/58">
-                          Based on completed event tasks
+                        <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/10 text-[var(--color-powder-blue)]">
+                          <CalendarDays className="size-5" />
+                        </span>
+                      </div>
+
+                      <div className="mt-6 border-t border-white/12 pt-4">
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-white/42">
+                          Scheduled date
+                        </p>
+
+                        <p className="mt-2 text-sm font-bold text-white/70">
+                          {formatEventDate(highlightedEvent.eventDate)}
                         </p>
                       </div>
-
-                      <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/14">
-                        <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,#fffaf5,var(--color-powder-blue))] transition-[width] duration-700"
-                          style={{
-                            width: `${planningProgress}%`,
-                          }}
-                        />
-                      </div>
                     </div>
 
-                    <div className="mt-8 rounded-[1.5rem] border border-white/12 bg-white/10 p-5 backdrop-blur-xl">
-                      <p className="text-xs font-black uppercase tracking-[0.2em] text-white/48">
-                        Next deadline
+                    <div className="absolute bottom-[5%] left-[4%] w-[58%] rounded-[1.55rem] border border-white/13 bg-[rgba(58,35,58,0.34)] p-5 shadow-[0_22px_60px_rgba(31,27,29,0.18)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-[rgba(58,35,58,0.42)] sm:w-[54%] lg:left-0 lg:w-[58%]">
+                      <ClipboardList className="size-5 text-[var(--color-powder-blue)]" />
+
+                      <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-white/46">
+                        Priority task
                       </p>
 
-                      <p className="mt-3 text-xl font-black tracking-[-0.03em]">
-                        {nextTask?.title ?? 'Your task list is clear'}
+                      <p className="mt-2 line-clamp-2 text-base font-black tracking-[-0.025em]">
+                        {highlightedEventTask?.title ?? 'No upcoming task'}
                       </p>
 
-                      <p className="mt-2 text-sm font-semibold text-[var(--color-powder-blue)]">
-                        {nextTask ? getDeadlineLabel(nextTask.dueDate) : 'Nothing urgent right now'}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex h-full min-h-80 flex-col justify-between">
-                    <Sparkles className="size-7 text-[var(--color-powder-blue)]" />
-
-                    <div className="mt-12">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/55">
-                        Start planning
-                      </p>
-
-                      <h2 className="mt-3 text-4xl font-black tracking-[-0.05em]">
-                        Your next event begins here.
-                      </h2>
-
-                      <p className="mt-4 leading-7 text-white/66">
-                        Add the event date, location, budget, and guest estimate to unlock your full
-                        planning workspace.
+                      <p className="mt-2 text-xs font-bold text-[var(--color-powder-blue)]">
+                        {highlightedEventTask
+                          ? getDeadlineLabel(highlightedEventTask.dueDate)
+                          : 'Your event task list is clear'}
                       </p>
                     </div>
 
-                    <Link
-                      to="/events"
-                      className="mt-8 flex items-center justify-between rounded-2xl bg-white/14 px-5 py-4 text-sm font-bold backdrop-blur transition hover:bg-white/20"
-                    >
-                      Set up an event
-                      <ArrowRight aria-hidden="true" className="size-4" />
-                    </Link>
+                    <div className="absolute bottom-[2%] right-0 w-[48%] rounded-[1.55rem] border border-white/13 bg-white/[0.12] p-5 shadow-[0_22px_60px_rgba(31,27,29,0.16)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/[0.16] sm:w-[43%] lg:w-[46%]">
+                      <WalletCards className="size-5 text-[var(--color-powder-blue)]" />
+
+                      <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-white/46">
+                        Planned budget
+                      </p>
+
+                      <p className="mt-2 text-xl font-black tracking-[-0.035em]">
+                        {highlightedEvent.plannedBudget
+                          ? formatCurrency(highlightedEvent.plannedBudget)
+                          : 'Not set'}
+                      </p>
+
+                      <Link
+                        to={`/events/${highlightedEvent.id}/budget`}
+                        className="group mt-3 inline-flex items-center gap-1.5 text-xs font-black text-[var(--color-powder-blue)] transition hover:text-white"
+                      >
+                        Review budget
+                        <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      </Link>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
+            ) : (
+              <div className="relative z-10 grid gap-10 p-6 ... sm:p-8 lg:min-h-[32rem] lg:grid-cols-[1.08fr_0.92fr] lg:p-10 xl:p-12">
+                <div className="relative z-10 flex flex-col justify-center">
+                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/14 bg-white/10 px-3.5 py-2 text-[0.64rem] font-black uppercase tracking-[0.18em] text-white/70 backdrop-blur-xl">
+                    <Sparkles className="size-3.5 text-[var(--color-powder-blue)]" />
+                    Planning command centre
+                  </span>
+
+                  <p className="mt-8 text-sm font-bold text-white/58">
+                    {getGreeting()}, {user.firstName}.
+                  </p>
+
+                  <h1 className="mt-3 max-w-3xl text-4xl font-black tracking-[-0.06em] sm:text-5xl lg:text-[3.7rem] lg:leading-[1.01]">
+                    Your next event begins here.
+                  </h1>
+
+                  <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-white/66">
+                    Create an event workspace and bring your schedule, budget, guests, vendors,
+                    documents, and bookings into one beautifully organised place.
+                  </p>
+
+                  <Link
+                    to="/events"
+                    className="group mt-8 inline-flex w-fit items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black !text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#fffaf5] hover:shadow-[0_18px_42px_rgba(31,27,29,0.24)]"
+                  >
+                    Set up an event
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                    />
+                  </Link>
+                </div>
+
+                <div className="relative min-h-[24rem]">
+                  <div
+                    aria-hidden="true"
+                    className="absolute left-[10%] top-[4%] size-48 rounded-full bg-[rgba(183,167,200,0.2)] blur-3xl"
+                  />
+
+                  <div className="absolute left-[4%] top-[4%] w-[66%] rounded-[1.7rem] border border-white/16 bg-white/[0.15] p-5 shadow-[0_22px_60px_rgba(31,27,29,0.18)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/[0.19]">
+                    <ClipboardList className="size-5 text-[var(--color-powder-blue)]" />
+
+                    <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-white/46">
+                      Plan the work
+                    </p>
+
+                    <p className="mt-2 text-sm font-semibold leading-6 text-white/64">
+                      Build tasks, dates, and priorities in one organised workspace.
+                    </p>
+                  </div>
+
+                  <div className="absolute right-[2%] top-[26%] w-[50%] rounded-[1.7rem] border border-white/16 bg-[rgba(58,35,58,0.48)] p-5 shadow-[0_24px_64px_rgba(31,27,29,0.22)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-[rgba(58,35,58,0.56)]">
+                    <UsersRound className="size-5 text-[var(--color-powder-blue)]" />
+
+                    <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-white/46">
+                      Manage guests
+                    </p>
+
+                    <p className="mt-2 text-sm font-semibold leading-6 text-white/64">
+                      Keep invitations, responses, and party sizes clear.
+                    </p>
+                  </div>
+
+                  <div className="absolute bottom-[3%] left-[12%] w-[62%] rounded-[1.7rem] border border-white/16 bg-white/[0.16] p-5 shadow-[0_22px_60px_rgba(31,27,29,0.18)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/[0.2]">
+                    <WalletCards className="size-5 text-[var(--color-powder-blue)]" />
+
+                    <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-white/46">
+                      Stay in control
+                    </p>
+
+                    <p className="mt-2 text-sm font-semibold leading-6 text-white/64">
+                      Coordinate budgets, vendors, bookings, and documents together.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className="mt-8">
+            <SectionHeader
+              eyebrow="Account pulse"
+              icon={<Sparkles className="size-4" />}
+              title="Your planning activity at a glance."
+              description="A quick account-wide view of your budget, upcoming bookings, guests, and active work."
+            />
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {stats.map(({ label, value, helper, badge, icon: Icon, tone, glow }) => (
+                <article
+                  key={label}
+                  className="group relative overflow-hidden rounded-[1.75rem] border border-white/55 bg-white/28 p-6 shadow-[0_16px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-500 ease-out hover:-translate-y-2 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/42 hover:shadow-[0_28px_80px_rgba(31,27,29,0.14)]"
+                >
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.32),transparent)] opacity-0 blur-sm transition-all duration-700 ease-out group-hover:left-[115%] group-hover:opacity-100"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className={`absolute -right-10 -top-10 size-32 rounded-full ${glow} blur-3xl transition-all duration-700 group-hover:scale-150 group-hover:opacity-90`}
+                  />
+
+                  <div className="relative flex items-start justify-between">
+                    <div
+                      className={`grid size-12 place-items-center rounded-2xl ${tone} shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:rotate-2 group-hover:scale-110 group-hover:shadow-[0_16px_34px_rgba(31,27,29,0.12)]`}
+                    >
+                      <Icon className="size-5" />
+                    </div>
+
+                    <span className="rounded-full border border-transparent bg-white/38 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/55 transition-all duration-300 group-hover:border-white/55 group-hover:bg-white/60 group-hover:text-[var(--color-deep-plum)]">
+                      {' '}
+                      {badge}
+                    </span>
+                  </div>
+
+                  <p className="relative mt-8 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/48">
+                    {label}
+                  </p>
+
+                  <p className="relative mt-3 text-4xl font-black tracking-[-0.06em] text-[var(--color-near-black)] transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-[1.025]">
+                    {' '}
+                    {value}
+                  </p>
+
+                  <div className="relative mt-6 border-t border-white/45 pt-4">
+                    <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                      {helper}
+                    </p>
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map(({ label, value, helper, icon: Icon, tone }) => (
-              <article
-                key={label}
-                className="group relative overflow-hidden rounded-[1.75rem] border border-white/55 bg-white/26 p-6 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[rgba(93,58,85,0.18)] hover:shadow-[0_24px_70px_rgba(31,27,29,0.12)]"
-              >
-                <div
-                  aria-hidden="true"
-                  className="absolute right-0 top-0 h-24 w-24 rounded-full bg-white/18 blur-2xl transition-transform duration-500 group-hover:scale-125"
-                />
 
-                <div className="relative flex items-start justify-between">
-                  <div className={`grid size-12 place-items-center rounded-2xl ${tone}`}>
-                    <Icon className="size-5" />
-                  </div>
-
-                  <span className="rounded-full bg-white/35 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/55">
-                    Live
-                  </span>
-                </div>
-
-                <p className="relative mt-8 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/48">
-                  {label}
-                </p>
-
-                <p className="relative mt-3 text-4xl font-black tracking-[-0.06em] text-[var(--color-near-black)]">
-                  {value}
-                </p>
-
-                <div className="relative mt-6 border-t border-white/45 pt-4">
-                  <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
-                    {helper}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+          <section className="mt-8 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
             <article className="glass-card overflow-hidden p-6 sm:p-7">
-              <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-                <div>
-                  <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                    Event journey
-                  </p>
-
-                  <h2 className="mt-3 max-w-2xl text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                    See where your planning stands and what comes next.
-                  </h2>
-                </div>
-
-                <span className="status-chip w-fit" data-tone="plum">
-                  {activeEvent?.status.replaceAll('_', ' ') ?? 'Not started'}
-                </span>
-              </div>
+              <SectionHeader
+                eyebrow="Planning journey"
+                icon={<CheckCircle2 className="size-4" />}
+                title="See how your customer account is progressing."
+                description="This journey summarises planning activity across all of your Eventure events."
+                badge={
+                  <span className="status-chip" data-tone="plum">
+                    {accountTaskProgress}% tasks complete
+                  </span>
+                }
+              />
 
               <div className="mt-9">
                 {timeline.map((item, index) => {
@@ -750,10 +919,10 @@ export function DashboardPage() {
                   const isLast = index === timeline.length - 1;
 
                   return (
-                    <div key={item.label} className="relative flex gap-4">
+                    <div key={item.label} className="group/step relative flex gap-4">
                       <div className="flex w-10 shrink-0 flex-col items-center">
                         <div
-                          className={`relative z-10 grid size-10 place-items-center rounded-full border transition ${
+                          className={`relative z-10 grid size-10 place-items-center rounded-full border transition-all duration-500 ease-out group-hover/step:-translate-y-0.5 group-hover/step:scale-110 ${
                             item.complete
                               ? 'border-[var(--color-deep-plum)] bg-[var(--color-deep-plum)] text-white shadow-[0_10px_25px_rgba(93,58,85,0.24)]'
                               : isCurrent
@@ -771,10 +940,10 @@ export function DashboardPage() {
                         {!isLast ? (
                           <div
                             aria-hidden="true"
-                            className={`min-h-14 w-px flex-1 ${
+                            className={`min-h-14 w-px flex-1 transition-all duration-500 group-hover/step:w-[2px] ${
                               item.complete
-                                ? 'bg-[linear-gradient(var(--color-deep-plum),rgba(93,58,85,0.18))]'
-                                : 'bg-white/55'
+                                ? 'bg-[linear-gradient(var(--color-deep-plum),rgba(93,58,85,0.18))] group-hover/step:bg-[linear-gradient(var(--color-deep-plum),rgba(93,58,85,0.38))]'
+                                : 'bg-white/55 group-hover/step:bg-[rgba(93,58,85,0.22)]'
                             }`}
                           />
                         ) : null}
@@ -782,10 +951,10 @@ export function DashboardPage() {
 
                       <div className={`min-w-0 flex-1 ${isLast ? 'pb-0' : 'pb-6'}`}>
                         <div
-                          className={`rounded-[1.35rem] border p-4 transition ${
+                          className={`rounded-[1.35rem] border p-4 transition-all duration-500 ease-out group-hover/step:translate-x-1.5 group-hover/step:border-[rgba(93,58,85,0.20)] group-hover/step:bg-white/40 group-hover/step:shadow-[0_18px_48px_rgba(31,27,29,0.09)] ${
                             isCurrent
                               ? 'border-[rgba(93,58,85,0.16)] bg-white/42 shadow-[0_14px_40px_rgba(31,27,29,0.07)]'
-                              : 'border-white/45 bg-white/22'
+                              : 'border-white/45 bg-white/22 hover:bg-white/32'
                           }`}
                         >
                           <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
@@ -794,7 +963,7 @@ export function DashboardPage() {
                             </p>
 
                             <span
-                              className={`w-fit rounded-full px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.14em] ${
+                              className={`w-fit rounded-full px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.14em] transition-all duration-300 group-hover/step:scale-105 ${
                                 item.complete
                                   ? 'bg-[rgba(142,151,115,0.20)] text-[#465038]'
                                   : isCurrent
@@ -816,59 +985,79 @@ export function DashboardPage() {
                 })}
               </div>
 
-              <div className="mt-8 overflow-hidden rounded-[1.65rem] border border-[rgba(93,58,85,0.12)] bg-[linear-gradient(135deg,rgba(255,255,255,0.42),rgba(183,167,200,0.15))]">
-                <div className="p-5 sm:p-6">
+              <div className="group/priority relative mt-8 overflow-hidden rounded-[1.65rem] border border-[rgba(93,58,85,0.12)] bg-[linear-gradient(135deg,rgba(255,255,255,0.48),rgba(183,167,200,0.17))] shadow-[0_12px_36px_rgba(31,27,29,0.04)] transition-all duration-500 ease-out hover:-translate-y-1 hover:border-[rgba(93,58,85,0.20)] hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.62),rgba(183,167,200,0.24))] hover:shadow-[0_24px_65px_rgba(31,27,29,0.11)]">
+                <div
+                  aria-hidden="true"
+                  className="absolute -right-20 -top-24 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition-all duration-700 group-hover/priority:scale-125 group-hover/priority:bg-[rgba(183,167,200,0.28)]"
+                />{' '}
+                <div className="relative p-5 sm:p-6">
                   <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                          Next priority
+                          Next account priority
                         </p>
 
-                        {nextTask ? (
+                        {displayedTask ? (
                           <span className="rounded-full bg-[rgba(142,92,103,0.14)] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
-                            {nextTask.priority}
+                            {displayedTask.priority}
                           </span>
                         ) : null}
                       </div>
 
                       <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                        {nextTask?.title ?? 'Your task list is clear'}
+                        {displayedTask?.title ?? 'Your task list is clear'}
                       </h3>
 
-                      <p className="mt-2 text-sm font-semibold text-[var(--color-rosewood)]">
-                        {nextTask
-                          ? getDeadlineLabel(nextTask.dueDate)
-                          : 'Nothing currently needs attention'}
-                      </p>
+                      {displayedTask ? (
+                        <p className="mt-2 text-sm font-semibold text-[var(--color-rosewood)]">
+                          {displayedTask.event.name} · {getDeadlineLabel(displayedTask.dueDate)}
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-sm font-semibold text-[var(--color-rosewood)]">
+                          Nothing currently needs attention
+                        </p>
+                      )}
 
-                      {nextTask?.description ? (
+                      {displayedTask?.description ? (
                         <p className="mt-3 line-clamp-2 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/60">
-                          {nextTask.description}
+                          {displayedTask.description}
                         </p>
                       ) : null}
                     </div>
 
-                    {nextTask ? (
+                    {displayedTask ? (
                       <Link
-                        to={`/events/${nextTask.event.id}/tasks`}
-                        className="btn-secondary shrink-0 text-sm font-bold"
+                        to={`/events/${displayedTask.event.id}/tasks`}
+                        className="btn-secondary group/button shrink-0 text-sm font-bold transition-all duration-300 group-hover/priority:-translate-y-0.5 group-hover/priority:shadow-[0_14px_34px_rgba(31,27,29,0.12)]"
                       >
                         Review task
-                        <ArrowRight aria-hidden="true" className="size-4" />
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="size-4 transition-transform duration-300 group-hover/button:translate-x-1"
+                        />
                       </Link>
-                    ) : activeEvent ? (
+                    ) : highlightedEvent ? (
                       <Link
-                        to={`/events/${activeEvent.id}/tasks`}
-                        className="btn-secondary shrink-0 text-sm font-bold"
+                        to={`/events/${highlightedEvent.id}/tasks`}
+                        className="btn-secondary group/button shrink-0 text-sm font-bold transition-all duration-300 group-hover/priority:-translate-y-0.5 group-hover/priority:shadow-[0_14px_34px_rgba(31,27,29,0.12)]"
                       >
                         Open task list
-                        <ArrowRight aria-hidden="true" className="size-4" />
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="size-4 transition-transform duration-300 group-hover/button:translate-x-1"
+                        />
                       </Link>
                     ) : (
-                      <Link to="/events" className="btn-secondary shrink-0 text-sm font-bold">
+                      <Link
+                        to="/events"
+                        className="btn-secondary group/button shrink-0 text-sm font-bold transition-all duration-300 group-hover/priority:-translate-y-0.5 group-hover/priority:shadow-[0_14px_34px_rgba(31,27,29,0.12)]"
+                      >
                         Create an event
-                        <ArrowRight aria-hidden="true" className="size-4" />
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="size-4 transition-transform duration-300 group-hover/button:translate-x-1"
+                        />
                       </Link>
                     )}
                   </div>
@@ -876,124 +1065,119 @@ export function DashboardPage() {
               </div>
             </article>
 
-            <aside className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
+            <aside className="group/access relative self-start overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_32px_90px_rgba(93,58,85,0.36)]">
+              {' '}
               <div
                 aria-hidden="true"
                 className="absolute -right-20 -top-20 size-56 rounded-full bg-white/10 blur-3xl"
               />
-
               <div
                 aria-hidden="true"
                 className="absolute -bottom-24 -left-20 size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
               />
-
               <div className="relative">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="grid size-11 place-items-center rounded-2xl border border-white/12 bg-white/10 backdrop-blur-xl">
-                    <Sparkles className="size-5 text-[var(--color-powder-blue)]" />
-                  </div>
-
-                  <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-[0.62rem] font-black uppercase tracking-[0.16em] text-white/64 backdrop-blur-xl">
-                    Shortcuts
-                  </span>
-                </div>
-
-                <h2 className="mt-7 text-3xl font-black tracking-[-0.045em]">Continue planning</h2>
-
-                <p className="mt-3 leading-7 text-white/66">
-                  Jump straight into the work that keeps your event moving forward.
-                </p>
+                <SectionHeader
+                  eyebrow="Quick access"
+                  icon={<Sparkles className="size-4" />}
+                  title="Continue planning"
+                  description={
+                    highlightedEvent
+                      ? 'Jump straight into the work that keeps your highlighted event moving forward.'
+                      : 'Create an event workspace to unlock your planning tools and begin coordinating every detail.'
+                  }
+                  tone="light"
+                />
 
                 <div className="mt-8 space-y-3">
-                  {activeEvent ? (
+                  {highlightedEvent ? (
                     <>
                       <Link
-                        to={`/events/${activeEvent.id}/quotation-requests`}
-                        className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        to={`/events/${highlightedEvent.id}/quotation-requests`}
+                        className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:translate-x-0.5 hover:border-white/24 hover:bg-white/18 hover:shadow-[0_16px_36px_rgba(31,27,29,0.18)]"
                       >
                         <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/12 text-[var(--color-powder-blue)] transition group-hover:bg-white/18">
                           <ClipboardList className="size-5" />
                         </span>
 
-                        <span className="min-w-0 flex-1 text-left">
-                          <span className="block text-sm font-black">Request quotations</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-black transition-colors duration-300 group-hover:text-white">
+                            {' '}
+                            quotations
+                          </span>
 
-                          <span className="mt-1 block text-xs font-semibold leading-5 text-white/54">
+                          <span className="mt-1 block text-xs font-semibold leading-5 text-white/54 transition-colors duration-300 group-hover:text-white/70">
+                            {' '}
                             Send event details to suitable vendors.
                           </span>
                         </span>
 
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white"
-                        />
+                        <ArrowRight className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white" />
                       </Link>
 
                       <Link
-                        to={`/events/${activeEvent.id}/guests`}
-                        className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        to={`/events/${highlightedEvent.id}/guests`}
+                        className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:translate-x-0.5 hover:border-white/24 hover:bg-white/18 hover:shadow-[0_16px_36px_rgba(31,27,29,0.18)]"
                       >
                         <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/12 text-[var(--color-powder-blue)] transition group-hover:bg-white/18">
                           <UsersRound className="size-5" />
                         </span>
 
-                        <span className="min-w-0 flex-1 text-left">
-                          <span className="block text-sm font-black">Manage guests</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-black transition-colors duration-300 group-hover:text-white">
+                            Manage guests
+                          </span>
 
-                          <span className="mt-1 block text-xs font-semibold leading-5 text-white/54">
+                          <span className="mt-1 block text-xs font-semibold leading-5 text-white/54 transition-colors duration-300 group-hover:text-white/70">
+                            {' '}
                             Review names, responses, and party sizes.
                           </span>
                         </span>
 
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white"
-                        />
+                        <ArrowRight className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white" />
                       </Link>
 
                       <Link
-                        to={`/events/${activeEvent.id}/bookings`}
-                        className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        to={`/events/${highlightedEvent.id}/bookings`}
+                        className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:translate-x-0.5 hover:border-white/24 hover:bg-white/18 hover:shadow-[0_16px_36px_rgba(31,27,29,0.18)]"
                       >
                         <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/12 text-[var(--color-powder-blue)] transition group-hover:bg-white/18">
                           <CheckCircle2 className="size-5" />
                         </span>
 
-                        <span className="min-w-0 flex-1 text-left">
-                          <span className="block text-sm font-black">Review bookings</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-black transition-colors duration-300 group-hover:text-white">
+                            Review bookings
+                          </span>
 
-                          <span className="mt-1 block text-xs font-semibold leading-5 text-white/54">
+                          <span className="mt-1 block text-xs font-semibold leading-5 text-white/54 transition-colors duration-300 group-hover:text-white/70">
+                            {' '}
                             Track confirmations and vendor commitments.
                           </span>
                         </span>
 
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white"
-                        />
+                        <ArrowRight className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white" />
                       </Link>
                     </>
                   ) : (
                     <Link
                       to="/events"
-                      className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                      className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:translate-x-0.5 hover:border-white/24 hover:bg-white/18 hover:shadow-[0_16px_36px_rgba(31,27,29,0.18)]"
                     >
                       <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/12 text-[var(--color-powder-blue)] transition group-hover:bg-white/18">
                         <Plus className="size-5" />
                       </span>
 
-                      <span className="min-w-0 flex-1 text-left">
-                        <span className="block text-sm font-black">Create your first event</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-black transition-colors duration-300 group-hover:text-white">
+                          Create your first event
+                        </span>
 
-                        <span className="mt-1 block text-xs font-semibold leading-5 text-white/54">
+                        <span className="mt-1 block text-xs font-semibold leading-5 text-white/54 transition-colors duration-300 group-hover:text-white/70">
                           Unlock budgets, guests, tasks, vendors, and bookings.
                         </span>
                       </span>
 
-                      <ArrowRight
-                        aria-hidden="true"
-                        className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white"
-                      />
+                      <ArrowRight className="size-4 shrink-0 text-white/58 transition-transform group-hover:translate-x-1 group-hover:text-white" />
                     </Link>
                   )}
                 </div>
@@ -1002,29 +1186,27 @@ export function DashboardPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <Link
                       to="/notifications"
-                      className="group rounded-[1.25rem] border border-white/10 bg-white/8 p-4 backdrop-blur-xl transition hover:border-white/18 hover:bg-white/13"
+                      className="group rounded-[1.25rem] border border-white/10 bg-white/8 p-4 backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:border-white/22 hover:bg-white/16 hover:shadow-[0_16px_35px_rgba(31,27,29,0.16)]"
                     >
-                      <Bell className="size-5 text-[var(--color-powder-blue)]" />
+                      <Bell className="size-5 text-[var(--color-powder-blue)] transition-all duration-500 group-hover:-translate-y-0.5 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(175,201,216,0.65)]" />
 
-                      <p className="mt-4 text-2xl font-black">
+                      <p className="mt-4 text-2xl font-black transition-all duration-500 group-hover:-translate-y-0.5 group-hover:text-white">
                         {dashboard.notifications.unreadCount}
                       </p>
 
                       <div className="mt-1 flex items-center justify-between gap-2">
                         <p className="text-xs font-bold text-white/58">Unread updates</p>
 
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="size-3.5 text-white/42 transition-transform group-hover:translate-x-0.5 group-hover:text-white/75"
-                        />
+                        <ArrowRight className="size-3.5 text-white/42 transition-transform group-hover:translate-x-0.5 group-hover:text-white/75" />
                       </div>
                     </Link>
 
-                    <div className="rounded-[1.25rem] border border-white/10 bg-white/8 p-4 backdrop-blur-xl">
-                      <FileCheck2 className="size-5 text-[var(--color-powder-blue)]" />
-
-                      <p className="mt-4 text-2xl font-black">{dashboard.payments.pendingCount}</p>
-
+                    <div className="group rounded-[1.25rem] border border-white/10 bg-white/8 p-4 backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:border-white/22 hover:bg-white/16 hover:shadow-[0_16px_35px_rgba(31,27,29,0.16)]">
+                      {' '}
+                      <FileCheck2 className="size-5 text-[var(--color-powder-blue)] transition-all duration-500 group-hover:-translate-y-0.5 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(175,201,216,0.65)]" />
+                      <p className="mt-4 text-2xl font-black transition-all duration-500 group-hover:-translate-y-0.5 group-hover:text-white">
+                        {dashboard.payments.pendingCount}
+                      </p>
                       <p className="mt-1 text-xs font-bold text-white/58">Pending payments</p>
                     </div>
                   </div>

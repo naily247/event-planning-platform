@@ -3,6 +3,23 @@ import { z } from 'zod';
 
 const eventIdSchema = z.string().cuid('Event ID must be valid');
 
+export const eventTypeOptions = [
+  'Birthday',
+  'Wedding',
+  'Graduation',
+  'Corporate',
+  'Party',
+  'Baby Shower',
+  'Engagement',
+  'Festival',
+] as const;
+
+export const eventSortOptions = ['upcoming', 'newest', 'oldest'] as const;
+
+const eventTypeSchema = z.enum(eventTypeOptions, {
+  message: 'Choose a supported event type',
+});
+
 const plannedBudgetSchema = z.coerce
   .number()
   .positive('Planned budget must be greater than zero')
@@ -20,13 +37,11 @@ const eventDateSchema = z
     message: 'Event date must be in the future',
   });
 
-export const eventSortOptions = ['upcoming', 'newest', 'oldest'] as const;
-
 export const createEventSchema = z.object({
   body: z.object({
     name: z.string().trim().min(3).max(120),
 
-    eventType: z.string().trim().min(2).max(80),
+    eventType: eventTypeSchema,
 
     eventDate: eventDateSchema,
 
@@ -75,7 +90,7 @@ export const updateCustomerEventSchema = z.object({
     .object({
       name: z.string().trim().min(3).max(120).optional(),
 
-      eventType: z.string().trim().min(2).max(80).optional(),
+      eventType: eventTypeSchema.optional(),
 
       eventDate: eventDateSchema.optional(),
 
@@ -111,6 +126,8 @@ export const updateCustomerEventStatusSchema = z.object({
 });
 
 export const deleteCustomerEventSchema = getCustomerEventSchema;
+
+export type EventTypeOption = (typeof eventTypeOptions)[number];
 
 export type CreateEventInput = z.infer<typeof createEventSchema>['body'];
 

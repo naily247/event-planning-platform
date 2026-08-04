@@ -257,7 +257,7 @@ const createAdminEventReportFixture = async () => {
     data: {
       ownerId: customer.id,
       name: 'Admin Event Report Wedding',
-      eventType: 'Wedding',
+      eventType: 'WEDDING',
       eventDate: new Date('2030-06-20T09:00:00.000Z'),
       location: 'Colombo',
       guestCount: 150,
@@ -273,7 +273,7 @@ const createAdminEventReportFixture = async () => {
     data: {
       ownerId: secondCustomer.id,
       name: 'Admin Event Report Birthday',
-      eventType: 'Birthday',
+      eventType: 'BIRTHDAY',
       eventDate: new Date('2030-07-10T09:00:00.000Z'),
       location: 'Kandy',
       guestCount: 80,
@@ -289,7 +289,7 @@ const createAdminEventReportFixture = async () => {
     data: {
       ownerId: customer.id,
       name: 'Admin Event Report Corporate Meetup',
-      eventType: 'Corporate',
+      eventType: 'CORPORATE',
       eventDate: new Date('2030-08-15T09:00:00.000Z'),
       location: 'Colombo',
       guestCount: 200,
@@ -467,7 +467,7 @@ const createAdminBookingReportFixture = async () => {
     data: {
       ownerId: customer.id,
       name: 'Admin Booking Report Wedding',
-      eventType: 'Wedding',
+      eventType: 'WEDDING',
       eventDate: new Date('2030-06-20T09:00:00.000Z'),
       location: 'Colombo',
       guestCount: 150,
@@ -482,7 +482,7 @@ const createAdminBookingReportFixture = async () => {
     data: {
       ownerId: secondCustomer.id,
       name: 'Admin Booking Report Birthday',
-      eventType: 'Birthday',
+      eventType: 'BIRTHDAY',
       eventDate: new Date('2030-07-10T09:00:00.000Z'),
       location: 'Kandy',
       guestCount: 80,
@@ -1824,15 +1824,15 @@ describe('Admin user management API', () => {
       expect(response.body.data.topEventTypes).toEqual(
         expect.arrayContaining([
           {
-            eventType: 'Wedding',
+            eventType: 'WEDDING',
             eventCount: 1,
           },
           {
-            eventType: 'Birthday',
+            eventType: 'BIRTHDAY',
             eventCount: 1,
           },
           {
-            eventType: 'Corporate',
+            eventType: 'CORPORATE',
             eventCount: 1,
           },
         ]),
@@ -1885,7 +1885,7 @@ describe('Admin user management API', () => {
       expect(response.body.data.recentEvents[0]).toMatchObject({
         id: fixture.corporateEvent.id,
         name: 'Admin Event Report Corporate Meetup',
-        eventType: 'Corporate',
+        eventType: 'CORPORATE',
         location: 'Colombo',
         guestCount: 200,
         plannedBudget: '2000000',
@@ -1905,7 +1905,7 @@ describe('Admin user management API', () => {
       expect(response.body.data.recentEvents[1]).toMatchObject({
         id: fixture.birthdayEvent.id,
         name: 'Admin Event Report Birthday',
-        eventType: 'Birthday',
+        eventType: 'BIRTHDAY',
         location: 'Kandy',
         guestCount: 80,
         plannedBudget: '600000',
@@ -1971,7 +1971,7 @@ describe('Admin user management API', () => {
 
       expect(response.body.data.topEventTypes).toEqual([
         {
-          eventType: 'Wedding',
+          eventType: 'WEDDING',
           eventCount: 1,
         },
       ]);
@@ -2002,7 +2002,7 @@ describe('Admin user management API', () => {
       expect(response.body.data.recentEvents[0]).toMatchObject({
         id: fixture.weddingEvent.id,
         name: 'Admin Event Report Wedding',
-        eventType: 'Wedding',
+        eventType: 'WEDDING',
         location: 'Colombo',
         plannedBudget: '1200000',
         status: 'PLANNING',
@@ -2461,7 +2461,7 @@ describe('Admin user management API', () => {
         event: {
           id: fixture.secondEvent.id,
           name: 'Admin Booking Report Birthday',
-          eventType: 'Birthday',
+          eventType: 'BIRTHDAY',
           location: 'Kandy',
           owner: {
             id: fixture.secondCustomer.id,
@@ -2486,7 +2486,7 @@ describe('Admin user management API', () => {
         event: {
           id: fixture.firstEvent.id,
           name: 'Admin Booking Report Wedding',
-          eventType: 'Wedding',
+          eventType: 'WEDDING',
           location: 'Colombo',
           owner: {
             id: fixture.customer.id,

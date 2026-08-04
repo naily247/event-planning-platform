@@ -204,6 +204,20 @@ enum ComplaintActionType {
   REOPENED
 }
 
+enum EventType {
+  BIRTHDAY
+  WEDDING
+  GRADUATION
+  CORPORATE
+  PARTY
+  BABY_SHOWER
+  ENGAGEMENT
+  FESTIVAL
+  ANNIVERSARY
+  RECEPTION
+  PRODUCT_LAUNCH
+}
+
 model User {
   id                        String                   @id @default(cuid())
   email                     String                   @unique
@@ -304,7 +318,7 @@ model Event {
   id                String                @id @default(cuid())
   ownerId           String
   name              String
-  eventType         String
+  eventType         EventType
   eventDate         DateTime
   location          String
   guestCount        Int?

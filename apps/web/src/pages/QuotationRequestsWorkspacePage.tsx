@@ -643,6 +643,13 @@ export function QuotationRequestsWorkspacePage() {
 
   const eventDetails = requests[0]?.event ?? null;
 
+  const awaitingVendorCount = requestCounts.SENT + requestCounts.VIEWED;
+
+  const quotationProgress =
+    totalRequests > 0
+      ? Math.round(((requestCounts.QUOTED + requestCounts.ACCEPTED) / totalRequests) * 100)
+      : 0;
+
   const summaryCards = [
     {
       label: 'Total requests',
@@ -701,59 +708,179 @@ export function QuotationRequestsWorkspacePage() {
         <main className="py-10">
           <section className="relative overflow-hidden">
             <div className="pointer-events-none absolute left-[7%] top-8 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.28)] blur-3xl" />
+
             <div className="pointer-events-none absolute right-[8%] top-14 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl" />
 
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.42fr] lg:items-end">
-              <div>
+            <div className="relative grid gap-7 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+              <div className="flex flex-col justify-center">
                 <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                  <Sparkles className="size-4" />
-                  Vendor proposals
+                  <Sparkles aria-hidden="true" className="size-4" />
+                  Vendor quotations
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
-                  Request, compare and approve vendor quotations.
+                <h2 className="max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl sm:leading-[0.98] lg:text-[3.65rem]">
+                  Compare proposals before making commitments.
                 </h2>
 
-                <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                  Choose an active vendor package, explain what your event needs and review the
-                  vendor’s final pricing before making a commitment.
+                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/70 sm:text-lg sm:leading-8">
+                  Request quotations from trusted vendors, compare pricing, review inclusions and
+                  confidently approve the proposal that best matches your event.
                 </p>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <div className="soft-chip">
+                    <MessageSquareQuote
+                      aria-hidden="true"
+                      className="size-4 text-[var(--color-deep-plum)]"
+                    />
+                    {totalRequests} requests
+                  </div>
+
+                  <div className="soft-chip">
+                    <WalletCards
+                      aria-hidden="true"
+                      className="size-4 text-[var(--color-deep-plum)]"
+                    />
+                    {requestCounts.QUOTED} quotations received
+                  </div>
+
+                  <div className="soft-chip">
+                    <CalendarClock
+                      aria-hidden="true"
+                      className="size-4 text-[var(--color-deep-plum)]"
+                    />
+
+                    {eventDetails ? formatLongDate(eventDetails.eventDate) : 'Event not available'}
+                  </div>
+                </div>
               </div>
 
-              <div className="glass-card p-5">
-                <CalendarClock className="size-6 text-[var(--color-deep-plum)]" />
+              <aside className="group/quotation-health relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.28)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.33)] sm:p-7">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-white/10 blur-3xl"
+                />
 
-                <p className="mt-6 text-sm font-bold text-[var(--color-charcoal)]/58">Event date</p>
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-24 -left-20 size-56 rounded-full bg-[rgba(175,201,216,0.10)] blur-3xl"
+                />
 
-                <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  {eventDetails
-                    ? formatLongDate(eventDetails.eventDate)
-                    : 'Available after the first request'}
-                </p>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/50">
+                        Quotation health
+                      </p>
 
-                <p className="mt-3 text-sm font-semibold text-[var(--color-rosewood)]">
-                  {requestCounts.QUOTED} quotations currently ready
-                </p>
-              </div>
+                      <p className="mt-3 text-4xl font-black tracking-[-0.055em] sm:text-5xl">
+                        {quotationProgress}%
+                      </p>
+
+                      <p className="mt-2 text-sm font-semibold text-white/58">Request completion</p>
+                    </div>
+
+                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/quotation-health:-translate-y-0.5 group-hover/quotation-health:scale-105">
+                      <WalletCards aria-hidden="true" className="size-5" />
+                    </span>
+                  </div>
+
+                  <div className="mt-7 h-2.5 overflow-hidden rounded-full bg-white/12">
+                    <div
+                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.24)] transition-[width] duration-700"
+                      style={{
+                        width: `${Math.min(Math.max(quotationProgress, 0), 100)}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-7 grid grid-cols-2 gap-3">
+                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Awaiting
+                      </p>
+
+                      <p className="mt-2 text-2xl font-black">{awaitingVendorCount}</p>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(142,151,115,0.16)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(142,151,115,0.22)]">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Quoted
+                      </p>
+
+                      <p className="mt-2 text-2xl font-black">{requestCounts.QUOTED}</p>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.07] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.11]">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Accepted
+                      </p>
+
+                      <p className="mt-2 text-2xl font-black">{requestCounts.ACCEPTED}</p>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(183,167,200,0.16)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(183,167,200,0.22)]">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Clarification
+                      </p>
+
+                      <p className="mt-2 text-2xl font-black">
+                        {requestCounts.CLARIFICATION_REQUESTED}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </aside>
             </div>
           </section>
 
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {summaryCards.map(({ label, value, helper, icon: Icon }) => (
-              <article key={label} className="luxe-card p-6">
-                <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                  <Icon className="size-5" />
+              <article
+                key={label}
+                className={`group/quotation-summary luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)] ${
+                  label === 'Total requests'
+                    ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(226,211,235,0.88))]'
+                    : label === 'Quotations received'
+                      ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(214,231,238,0.86))]'
+                      : label === 'Accepted'
+                        ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(216,226,194,0.86))]'
+                        : 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(239,215,223,0.86))]'
+                }`}
+              >
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute -right-14 -top-14 size-40 rounded-full opacity-60 blur-3xl transition duration-500 group-hover/quotation-summary:scale-125 group-hover/quotation-summary:opacity-100 ${
+                    label === 'Total requests'
+                      ? 'bg-[rgba(164,126,184,0.34)]'
+                      : label === 'Quotations received'
+                        ? 'bg-[rgba(130,179,201,0.34)]'
+                        : label === 'Accepted'
+                          ? 'bg-[rgba(142,151,115,0.34)]'
+                          : 'bg-[rgba(170,100,117,0.32)]'
+                  }`}
+                />
+
+                <div className="relative">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/quotation-summary:-translate-y-0.5 group-hover/quotation-summary:scale-110 group-hover/quotation-summary:bg-[rgba(183,167,200,0.34)]">
+                    <Icon
+                      aria-hidden="true"
+                      className="size-5 transition duration-300 group-hover/quotation-summary:rotate-[4deg]"
+                    />
+                  </div>
+
+                  <p className="mt-8 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/quotation-summary:text-[var(--color-rosewood)]/76">
+                    {label}
+                  </p>
+
+                  <p className="mt-3 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/quotation-summary:translate-x-0.5 group-hover/quotation-summary:text-[var(--color-deep-plum)] sm:text-[2.15rem]">
+                    {value}
+                  </p>
+
+                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55 transition duration-300 group-hover/quotation-summary:text-[var(--color-charcoal)]/68">
+                    {helper}
+                  </p>
                 </div>
-
-                <p className="mt-8 text-sm font-bold text-[var(--color-charcoal)]/58">{label}</p>
-
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {value}
-                </p>
-
-                <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/55">
-                  {helper}
-                </p>
               </article>
             ))}
           </section>
@@ -829,85 +956,104 @@ export function QuotationRequestsWorkspacePage() {
                   {requests.map((request) => (
                     <article
                       key={request.id}
-                      className="rounded-[1.65rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl sm:p-6"
+                      className="group/request relative overflow-hidden rounded-[1.65rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/88 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(231,222,240,0.58))] hover:shadow-[0_28px_68px_rgba(31,27,29,0.11)] sm:p-6"
                     >
-                      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className="status-chip"
-                              data-tone={getRequestTone(request.status)}
-                            >
-                              {quotationRequestStatusLabels[request.status]}
-                            </span>
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.16)] opacity-60 blur-3xl transition duration-500 group-hover/request:scale-125 group-hover/request:bg-[rgba(183,167,200,0.30)] group-hover/request:opacity-100"
+                      />
 
-                            {request.package?.category ? (
-                              <span className="status-chip" data-tone="gray">
-                                <Tags className="size-3.5" />
-                                {request.package.category.name}
+                      <div className="relative">
+                        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className="status-chip transition duration-300 group-hover/request:-translate-y-0.5 group-hover/request:scale-[1.02] group-hover/request:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                                data-tone={getRequestTone(request.status)}
+                              >
+                                {quotationRequestStatusLabels[request.status]}
                               </span>
-                            ) : null}
+
+                              {request.package?.category ? (
+                                <span
+                                  className="status-chip transition duration-300 group-hover/request:-translate-y-0.5 group-hover/request:bg-white/54"
+                                  data-tone="gray"
+                                >
+                                  <Tags className="size-3.5" />
+                                  {request.package.category.name}
+                                </span>
+                              ) : null}
+                            </div>
+
+                            <h3 className="mt-4 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] transition duration-300 group-hover/request:translate-x-0.5 group-hover/request:text-[var(--color-deep-plum)]">
+                              {request.package?.title ?? 'Custom service request'}
+                            </h3>
+
+                            <Link
+                              to={`/vendors/${request.vendor.slug}`}
+                              className="group/vendor-link mt-3 inline-flex items-center gap-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:translate-x-0.5 hover:text-[var(--color-rosewood)]"
+                            >
+                              <Store
+                                aria-hidden="true"
+                                className="size-4 transition duration-300 group-hover/vendor-link:-translate-y-0.5 group-hover/vendor-link:scale-105"
+                              />
+                              {request.vendor.businessName}
+                            </Link>
+
+                            <p className="mt-4 max-w-3xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64 transition duration-300 group-hover/request:text-[var(--color-charcoal)]/74">
+                              {request.requirements}
+                            </p>
+
+                            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                              <div className="rounded-2xl border border-white/46 bg-white/28 p-4 transition duration-300 group-hover/request:border-white/72 group-hover/request:bg-white/42">
+                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/request:text-[var(--color-rosewood)]/70">
+                                  {' '}
+                                  Base price
+                                </p>
+                                <p className="mt-2 font-black text-[var(--color-near-black)] transition duration-300 group-hover/request:text-[var(--color-deep-plum)]">
+                                  {formatCurrency(request.package?.basePrice ?? null)}
+                                </p>
+                              </div>
+
+                              <div className="rounded-2xl border border-white/46 bg-white/28 p-4 transition duration-300 group-hover/request:border-white/72 group-hover/request:bg-white/42">
+                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/request:text-[var(--color-rosewood)]/70">
+                                  {' '}
+                                  Response deadline
+                                </p>
+                                <p className="mt-2 font-black text-[var(--color-near-black)] transition duration-300 group-hover/request:text-[var(--color-deep-plum)]">
+                                  {request.responseDueAt
+                                    ? formatDate(request.responseDueAt)
+                                    : 'No deadline'}
+                                </p>
+                              </div>
+
+                              <div className="rounded-2xl border border-white/46 bg-white/28 p-4 transition duration-300 group-hover/request:border-white/72 group-hover/request:bg-white/42">
+                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/request:text-[var(--color-rosewood)]/70">
+                                  {' '}
+                                  Requested
+                                </p>
+                                <p className="mt-2 font-black text-[var(--color-near-black)] transition duration-300 group-hover/request:text-[var(--color-deep-plum)]">
+                                  {formatDate(request.createdAt)}
+                                </p>
+                              </div>
+                            </div>
                           </div>
 
-                          <h3 className="mt-4 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                            {request.package?.title ?? 'Custom service request'}
-                          </h3>
-
-                          <Link
-                            to={`/vendors/${request.vendor.slug}`}
-                            className="mt-3 inline-flex items-center gap-2 text-sm font-black text-[var(--color-deep-plum)]"
+                          <button
+                            type="button"
+                            className="group/view-quotations btn-secondary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.10)]"
+                            onClick={() => {
+                              setSelectedRequest(request);
+                              acceptQuotationMutation.reset();
+                            }}
                           >
-                            <Store className="size-4" />
-                            {request.vendor.businessName}
-                          </Link>
-
-                          <p className="mt-4 max-w-3xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
-                            {request.requirements}
-                          </p>
-
-                          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                            <div className="rounded-2xl bg-white/28 p-4">
-                              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                                Base price
-                              </p>
-                              <p className="mt-2 font-black text-[var(--color-near-black)]">
-                                {formatCurrency(request.package?.basePrice ?? null)}
-                              </p>
-                            </div>
-
-                            <div className="rounded-2xl bg-white/28 p-4">
-                              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                                Response deadline
-                              </p>
-                              <p className="mt-2 font-black text-[var(--color-near-black)]">
-                                {request.responseDueAt
-                                  ? formatDate(request.responseDueAt)
-                                  : 'No deadline'}
-                              </p>
-                            </div>
-
-                            <div className="rounded-2xl bg-white/28 p-4">
-                              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                                Requested
-                              </p>
-                              <p className="mt-2 font-black text-[var(--color-near-black)]">
-                                {formatDate(request.createdAt)}
-                              </p>
-                            </div>
-                          </div>
+                            <MessageSquareQuote
+                              aria-hidden="true"
+                              className="size-4 transition duration-300 group-hover/view-quotations:rotate-[4deg] group-hover/view-quotations:scale-105"
+                            />
+                            View quotations
+                          </button>
                         </div>
-
-                        <button
-                          type="button"
-                          className="btn-secondary shrink-0 justify-center text-sm font-bold"
-                          onClick={() => {
-                            setSelectedRequest(request);
-                            acceptQuotationMutation.reset();
-                          }}
-                        >
-                          <MessageSquareQuote className="size-4" />
-                          View quotations
-                        </button>
                       </div>
                     </article>
                   ))}
@@ -1056,19 +1202,26 @@ export function QuotationRequestsWorkspacePage() {
         >
           <div className="grid min-h-full place-items-center">
             <div
-              className="glass-card w-full max-w-5xl overflow-hidden rounded-[2.2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(255,255,255,0.18))] shadow-[0_36px_110px_rgba(31,27,29,0.28)]"
+              className="relative w-full max-w-5xl overflow-hidden rounded-[2.2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(246,239,248,0.48))] shadow-[0_36px_110px_rgba(31,27,29,0.28)] backdrop-blur-3xl"
               onClick={(event) => {
                 event.stopPropagation();
               }}
             >
-              <div className="relative overflow-hidden border-b border-white/45 px-6 py-6 sm:px-8 sm:py-7">
-                <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl" />
-                <div className="pointer-events-none absolute left-[32%] top-[-5rem] size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
+              />
 
-                <div className="relative flex items-start justify-between gap-5">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-[25%] top-[-7rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+              />
+
+              <div className="relative overflow-hidden border-b border-white/45 px-6 py-6 sm:px-8 sm:py-7">
+                <div className="flex items-start justify-between gap-5">
                   <div>
                     <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                      <Send className="size-4" />
+                      <Send aria-hidden="true" className="size-4" />
                       New quotation request
                     </div>
 
@@ -1087,28 +1240,31 @@ export function QuotationRequestsWorkspacePage() {
 
                   <button
                     type="button"
-                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/60 bg-white/30 text-[var(--color-charcoal)] shadow-[0_12px_30px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:bg-white/48 hover:text-[var(--color-deep-plum)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/60 bg-white/34 text-[var(--color-charcoal)] shadow-[0_12px_30px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/25 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
                     aria-label="Close quotation request form"
                     disabled={createRequestMutation.isPending}
                     onClick={closeCreateDialog}
                   >
-                    <X className="size-5" />
+                    <X aria-hidden="true" className="size-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="px-6 py-6 sm:px-8 sm:py-8">
+              <div className="relative px-6 py-6 sm:px-8 sm:py-8">
                 <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
                   <section>
                     <form
-                      className="flex gap-3"
+                      className="flex flex-col gap-3 sm:flex-row"
                       onSubmit={(event) => {
                         event.preventDefault();
                         setPackageSearch(packageSearchInput.trim());
                       }}
                     >
-                      <div className="flex min-h-12 flex-1 items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4">
-                        <Search className="size-4 shrink-0 text-[var(--color-charcoal)]/42" />
+                      <div className="group/search flex min-h-12 flex-1 items-center gap-3 rounded-2xl border border-white/55 bg-white/26 px-4 shadow-[0_10px_26px_rgba(31,27,29,0.04)] transition duration-300 focus-within:border-[rgba(93,58,85,0.28)] focus-within:bg-white/42 focus-within:shadow-[0_14px_32px_rgba(31,27,29,0.08)]">
+                        <Search
+                          aria-hidden="true"
+                          className="size-4 shrink-0 text-[var(--color-charcoal)]/42 transition duration-300 group-focus-within/search:text-[var(--color-deep-plum)]"
+                        />
 
                         <input
                           className="w-full bg-transparent text-sm font-semibold outline-none"
@@ -1122,7 +1278,10 @@ export function QuotationRequestsWorkspacePage() {
                         />
                       </div>
 
-                      <button type="submit" className="btn-secondary px-4 text-sm font-bold">
+                      <button
+                        type="submit"
+                        className="btn-secondary justify-center px-4 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                      >
                         Search
                       </button>
                     </form>
@@ -1150,52 +1309,66 @@ export function QuotationRequestsWorkspacePage() {
                           <button
                             key={servicePackage.id}
                             type="button"
-                            className={
+                            className={`group/package relative w-full overflow-hidden rounded-[1.35rem] border p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(31,27,29,0.09)] ${
                               isSelected
-                                ? 'w-full rounded-[1.35rem] border border-[rgba(93,58,85,0.34)] bg-[rgba(93,58,85,0.10)] p-4 text-left'
-                                : 'w-full rounded-[1.35rem] border border-white/55 bg-white/24 p-4 text-left transition hover:bg-white/34'
-                            }
+                                ? 'border-[rgba(93,58,85,0.34)] bg-[linear-gradient(145deg,rgba(239,228,245,0.82),rgba(255,255,255,0.58))] shadow-[0_16px_38px_rgba(93,58,85,0.10)]'
+                                : 'border-white/55 bg-white/26 hover:border-white/86 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(236,226,242,0.52))]'
+                            }`}
                             disabled={createRequestMutation.isPending}
                             onClick={() => {
                               createRequestMutation.reset();
                               setSelectedPackage(servicePackage);
                             }}
                           >
-                            <div className="flex items-start justify-between gap-4">
-                              <div>
-                                <p className="font-black text-[var(--color-near-black)]">
-                                  {servicePackage.title}
-                                </p>
+                            <div
+                              aria-hidden="true"
+                              className="pointer-events-none absolute -right-12 -top-14 size-32 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl transition duration-500 group-hover/package:scale-125 group-hover/package:bg-[rgba(183,167,200,0.24)]"
+                            />
 
-                                <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
-                                  {servicePackage.vendor.businessName}
-                                </p>
+                            <div className="relative">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="min-w-0">
+                                  {isSelected ? (
+                                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.10)] px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
+                                      <CheckCircle2 aria-hidden="true" className="size-3.5" />
+                                      Selected
+                                    </div>
+                                  ) : null}
+
+                                  <p className="font-black text-[var(--color-near-black)] transition duration-300 group-hover/package:text-[var(--color-deep-plum)]">
+                                    {servicePackage.title}
+                                  </p>
+
+                                  <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
+                                    {servicePackage.vendor.businessName}
+                                  </p>
+                                </div>
+
+                                <span className="shrink-0 text-right text-sm font-black text-[var(--color-rosewood)] transition duration-300 group-hover/package:-translate-y-0.5">
+                                  {formatCurrency(servicePackage.basePrice)}
+                                </span>
                               </div>
 
-                              <span className="text-sm font-black text-[var(--color-rosewood)]">
-                                {formatCurrency(servicePackage.basePrice)}
-                              </span>
-                            </div>
-
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <span className="status-chip" data-tone="gray">
-                                <Tags className="size-3.5" />
-                                {servicePackage.category.name}
-                              </span>
-
-                              {servicePackage.vendor.baseLocation ? (
-                                <span className="status-chip" data-tone="blue">
-                                  <MapPin className="size-3.5" />
-                                  {servicePackage.vendor.baseLocation}
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <span className="status-chip" data-tone="gray">
+                                  <Tags aria-hidden="true" className="size-3.5" />
+                                  {servicePackage.category.name}
                                 </span>
+
+                                {servicePackage.vendor.baseLocation ? (
+                                  <span className="status-chip" data-tone="blue">
+                                    <MapPin aria-hidden="true" className="size-3.5" />
+                                    {servicePackage.vendor.baseLocation}
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              {servicePackage.description ? (
+                                <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58 transition duration-300 group-hover/package:text-[var(--color-charcoal)]/70">
+                                  {servicePackage.description}
+                                </p>
                               ) : null}
                             </div>
-
-                            {servicePackage.description ? (
-                              <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                                {servicePackage.description}
-                              </p>
-                            ) : null}
                           </button>
                         );
                       })}
@@ -1203,6 +1376,7 @@ export function QuotationRequestsWorkspacePage() {
                       {packagesQuery.data && packagesQuery.data.packages.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-white/70 bg-white/20 p-6 text-center">
                           <PackageCheck className="mx-auto size-8 text-[var(--color-deep-plum)]" />
+
                           <p className="mt-3 font-black text-[var(--color-near-black)]">
                             No packages found
                           </p>
@@ -1211,38 +1385,74 @@ export function QuotationRequestsWorkspacePage() {
                     </div>
                   </section>
 
-                  <section className="rounded-[1.75rem] border border-white/55 bg-white/20 p-5 sm:p-6">
+                  <section className="rounded-[1.75rem] border border-white/58 bg-white/24 p-5 shadow-[0_18px_46px_rgba(31,27,29,0.05)] backdrop-blur-2xl sm:p-6">
                     <p className="text-sm font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                       Request details
                     </p>
 
                     {selectedPackage ? (
-                      <div className="mt-5 rounded-2xl bg-white/28 p-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <p className="font-black text-[var(--color-near-black)]">
-                              {selectedPackage.title}
-                            </p>
-                            <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
-                              {selectedPackage.vendor.businessName}
-                            </p>
+                      <div className="relative mt-5 overflow-hidden rounded-[1.5rem] border border-[rgba(93,58,85,0.18)] bg-[linear-gradient(145deg,rgba(241,231,246,0.78),rgba(255,255,255,0.54))] p-5 shadow-[0_16px_38px_rgba(93,58,85,0.08)]">
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+                        />
+
+                        <div className="relative">
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                              <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.10)] px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
+                                <CheckCircle2 aria-hidden="true" className="size-3.5" />
+                                Selected package
+                              </div>
+
+                              <p className="mt-4 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                                {selectedPackage.title}
+                              </p>
+
+                              <p className="mt-1 text-sm font-bold text-[var(--color-deep-plum)]">
+                                {selectedPackage.vendor.businessName}
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              className="w-fit rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.08)] px-3 py-2 text-xs font-black text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.14)]"
+                              disabled={createRequestMutation.isPending}
+                              onClick={() => {
+                                setSelectedPackage(null);
+                              }}
+                            >
+                              Change
+                            </button>
                           </div>
 
-                          <button
-                            type="button"
-                            className="text-sm font-black text-[var(--color-muted-burgundy)]"
-                            disabled={createRequestMutation.isPending}
-                            onClick={() => {
-                              setSelectedPackage(null);
-                            }}
-                          >
-                            Change
-                          </button>
+                          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-white/56 bg-white/34 p-4">
+                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                                Category
+                              </p>
+
+                              <p className="mt-2 font-black text-[var(--color-near-black)]">
+                                {selectedPackage.category.name}
+                              </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-white/56 bg-white/34 p-4">
+                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                                Base price
+                              </p>
+
+                              <p className="mt-2 font-black text-[var(--color-rosewood)]">
+                                {formatCurrency(selectedPackage.basePrice)}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-5 rounded-2xl border border-dashed border-white/70 bg-white/18 p-5 text-center">
+                      <div className="mt-5 rounded-[1.5rem] border border-dashed border-white/70 bg-white/18 p-5 text-center">
                         <ChevronDown className="mx-auto size-6 text-[var(--color-deep-plum)]" />
+
                         <p className="mt-3 text-sm font-bold text-[var(--color-charcoal)]/62">
                           Choose a package from the list.
                         </p>
@@ -1250,10 +1460,16 @@ export function QuotationRequestsWorkspacePage() {
                     )}
 
                     <label className="mt-5 block">
-                      <span className="mb-2 block text-sm font-black">Event requirements</span>
+                      <span className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-black">Event requirements</span>
+
+                        <span className="text-xs font-black tabular-nums text-[var(--color-charcoal)]/44">
+                          {requirements.length.toLocaleString('en-LK')} / 5,000
+                        </span>
+                      </span>
 
                       <textarea
-                        className="form-field min-h-40 resize-y"
+                        className="form-field mt-2 min-h-40 resize-y transition duration-300 focus:bg-white/46"
                         maxLength={5000}
                         value={requirements}
                         disabled={createRequestMutation.isPending}
@@ -1263,13 +1479,41 @@ export function QuotationRequestsWorkspacePage() {
                           setRequirements(event.target.value);
                         }}
                       />
+
+                      <div className="mt-2 flex flex-col gap-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48 sm:flex-row sm:items-center sm:justify-between">
+                        <span>Include timings, quantities, style and special requirements.</span>
+
+                        <span
+                          className={
+                            requirements.trim().length > 0 && requirements.trim().length < 10
+                              ? 'font-black text-[var(--color-muted-burgundy)]'
+                              : 'font-black text-[var(--color-deep-plum)]/60'
+                          }
+                        >
+                          Minimum 10 characters
+                        </span>
+                      </div>
                     </label>
 
-                    <label className="mt-5 block">
-                      <span className="mb-2 block text-sm font-black">Response deadline</span>
+                    <div className="mt-5 rounded-[1.5rem] border border-[rgba(175,201,216,0.26)] bg-[rgba(222,236,242,0.30)] p-5">
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.30)] text-[#3b515b]">
+                          <CalendarClock aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-near-black)]">
+                            Response deadline
+                          </p>
+
+                          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
+                            Choose when the vendor should reply. This field is optional.
+                          </p>
+                        </div>
+                      </div>
 
                       <input
-                        className="form-field"
+                        className="form-field mt-4"
                         type="datetime-local"
                         value={responseDueAt}
                         disabled={createRequestMutation.isPending}
@@ -1280,9 +1524,9 @@ export function QuotationRequestsWorkspacePage() {
                       />
 
                       <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                        Optional. The deadline must be in the future and before the event date.
+                        The deadline must be in the future and before the event date.
                       </p>
-                    </label>
+                    </div>
 
                     {createRequestMutation.isError ? (
                       <div
@@ -1305,7 +1549,7 @@ export function QuotationRequestsWorkspacePage() {
 
                       <button
                         type="button"
-                        className="btn-primary justify-center text-sm font-bold"
+                        className="group/send-request btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
                         disabled={createRequestMutation.isPending}
                         onClick={() => {
                           createRequestMutation.mutate();
@@ -1314,7 +1558,10 @@ export function QuotationRequestsWorkspacePage() {
                         {createRequestMutation.isPending ? (
                           <LoaderCircle className="size-4 animate-spin" />
                         ) : (
-                          <Send className="size-4" />
+                          <Send
+                            aria-hidden="true"
+                            className="size-4 transition duration-300 group-hover/send-request:translate-x-0.5"
+                          />
                         )}
 
                         {createRequestMutation.isPending ? 'Sending request...' : 'Send request'}
@@ -1330,206 +1577,358 @@ export function QuotationRequestsWorkspacePage() {
 
       {selectedRequest ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.56)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="quotation-comparison-title"
+          onClick={() => {
+            if (!acceptQuotationMutation.isPending) {
+              closeQuotationDialog();
+            }
+          }}
         >
-          <div className="mx-auto max-w-6xl">
-            <div className="glass-card p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-5">
-                <div>
-                  <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                    <MessageSquareQuote className="size-4" />
-                    Quotation comparison
+          <div className="mx-auto flex min-h-full max-w-6xl items-start justify-center">
+            <div
+              className="relative w-full overflow-hidden rounded-[2.2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.88),rgba(246,239,248,0.84))] p-6 shadow-[0_40px_110px_rgba(31,27,29,0.24)] backdrop-blur-3xl sm:p-8"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+              />
+
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-[22%] top-[-7rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+              />
+
+              <div className="relative">
+                <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                      <MessageSquareQuote aria-hidden="true" className="size-4" />
+                      Quotation comparison
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span
+                        className="status-chip"
+                        data-tone={getRequestTone(selectedRequest.status)}
+                      >
+                        {quotationRequestStatusLabels[selectedRequest.status]}
+                      </span>
+
+                      {selectedRequest.package?.category ? (
+                        <span className="status-chip" data-tone="gray">
+                          <Tags aria-hidden="true" className="size-3.5" />
+                          {selectedRequest.package.category.name}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <h2
+                      id="quotation-comparison-title"
+                      className="mt-5 max-w-4xl text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
+                    >
+                      {selectedRequest.package?.title ?? 'Vendor quotation'}
+                    </h2>
+
+                    <Link
+                      to={`/vendors/${selectedRequest.vendor.slug}`}
+                      className="group/comparison-vendor mt-3 inline-flex items-center gap-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:translate-x-0.5 hover:text-[var(--color-rosewood)]"
+                    >
+                      <Store
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/comparison-vendor:-translate-y-0.5"
+                      />
+
+                      {selectedRequest.vendor.businessName}
+                    </Link>
+
+                    <p className="mt-4 max-w-3xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
+                      Review every quotation version, compare pricing and terms, then choose the
+                      proposal that best fits this event.
+                    </p>
                   </div>
 
-                  <h2
-                    id="quotation-comparison-title"
-                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
+                  <button
+                    type="button"
+                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/25 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Close quotation comparison"
+                    disabled={acceptQuotationMutation.isPending}
+                    onClick={closeQuotationDialog}
                   >
-                    {selectedRequest.package?.title ?? 'Vendor quotation'}
-                  </h2>
-
-                  <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-                    {selectedRequest.vendor.businessName}
-                  </p>
+                    <X aria-hidden="true" className="size-5" />
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28"
-                  aria-label="Close quotation comparison"
-                  disabled={acceptQuotationMutation.isPending}
-                  onClick={closeQuotationDialog}
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
+                {quotationsQuery.isLoading ? (
+                  <div className="mt-8 grid min-h-60 place-items-center rounded-[1.75rem] border border-white/55 bg-white/24">
+                    <div className="text-center">
+                      <LoaderCircle className="mx-auto size-8 animate-spin text-[var(--color-deep-plum)]" />
 
-              {quotationsQuery.isLoading ? (
-                <div className="mt-8 grid min-h-60 place-items-center rounded-2xl bg-white/18">
-                  <LoaderCircle className="size-8 animate-spin text-[var(--color-deep-plum)]" />
-                </div>
-              ) : null}
+                      <p className="mt-4 text-sm font-bold text-[var(--color-charcoal)]/58">
+                        Loading quotation versions
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
 
-              {quotationsQuery.isError ? (
-                <div
-                  role="alert"
-                  className="mt-8 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
-                >
-                  {getApiErrorMessage(quotationsQuery.error)}
-                </div>
-              ) : null}
+                {quotationsQuery.isError ? (
+                  <div
+                    role="alert"
+                    className="mt-8 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+                  >
+                    {getApiErrorMessage(quotationsQuery.error)}
+                  </div>
+                ) : null}
 
-              {quotationsQuery.data && quotationsQuery.data.length > 0 ? (
-                <div className="mt-8 grid gap-5 lg:grid-cols-2">
-                  {quotationsQuery.data.map((quotation) => {
-                    const expired = isQuotationExpired(quotation);
-                    const canAccept =
-                      selectedRequest.status === 'QUOTED' &&
-                      quotation.status === 'SENT' &&
-                      !expired;
+                {quotationsQuery.data && quotationsQuery.data.length > 0 ? (
+                  <div className="mt-8 grid gap-5 lg:grid-cols-2">
+                    {quotationsQuery.data.map((quotation) => {
+                      const expired = isQuotationExpired(quotation);
 
-                    return (
-                      <article
-                        key={quotation.id}
-                        className="rounded-[1.65rem] border border-white/55 bg-white/24 p-5 backdrop-blur-2xl sm:p-6"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <span
-                              className="status-chip"
-                              data-tone={getQuotationTone(quotation.status)}
+                      const canAccept =
+                        selectedRequest.status === 'QUOTED' &&
+                        quotation.status === 'SENT' &&
+                        !expired;
+
+                      const proposedPrice = Number(quotation.proposedPrice);
+                      const depositAmount = quotation.depositAmount
+                        ? Number(quotation.depositAmount)
+                        : 0;
+
+                      const remainingBalance =
+                        Number.isFinite(proposedPrice) && Number.isFinite(depositAmount)
+                          ? Math.max(proposedPrice - depositAmount, 0)
+                          : null;
+
+                      return (
+                        <article
+                          key={quotation.id}
+                          className={`group/quotation relative overflow-hidden rounded-[1.75rem] border p-5 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_72px_rgba(31,27,29,0.12)] sm:p-6 ${
+                            quotation.status === 'ACCEPTED'
+                              ? 'border-[rgba(142,151,115,0.36)] bg-[linear-gradient(145deg,rgba(244,248,235,0.82),rgba(255,255,255,0.50))] shadow-[0_22px_58px_rgba(61,69,47,0.10)]'
+                              : 'border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.60),rgba(238,229,244,0.40))] shadow-[0_20px_52px_rgba(31,27,29,0.07)] hover:border-white/88'
+                          }`}
+                        >
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/quotation:scale-125 group-hover/quotation:bg-[rgba(183,167,200,0.30)]"
+                          />
+
+                          <div className="relative">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                              <div>
+                                <span
+                                  className="status-chip transition duration-300 group-hover/quotation:-translate-y-0.5 group-hover/quotation:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                                  data-tone={getQuotationTone(quotation.status)}
+                                >
+                                  {quotationStatusLabels[quotation.status]}
+                                </span>
+
+                                <h3 className="mt-4 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/quotation:text-[var(--color-deep-plum)]">
+                                  Quotation version {quotation.version}
+                                </h3>
+                              </div>
+
+                              <div className="sm:text-right">
+                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/40">
+                                  Submitted
+                                </p>
+
+                                <p className="mt-1 text-sm font-black text-[var(--color-charcoal)]/62">
+                                  {formatDate(quotation.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="mt-6 rounded-[1.5rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(242,233,247,0.52))] p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
+                              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                                Proposed price
+                              </p>
+
+                              <p className="mt-3 break-words text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] sm:text-4xl">
+                                {formatCurrency(quotation.proposedPrice)}
+                              </p>
+
+                              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                                <div className="rounded-2xl border border-white/52 bg-white/32 p-4">
+                                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                                    Deposit
+                                  </p>
+
+                                  <p className="mt-2 font-black text-[var(--color-deep-plum)]">
+                                    {quotation.depositAmount
+                                      ? formatCurrency(quotation.depositAmount)
+                                      : 'No deposit'}
+                                  </p>
+                                </div>
+
+                                <div className="rounded-2xl border border-white/52 bg-white/32 p-4">
+                                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                                    Remaining balance
+                                  </p>
+
+                                  <p className="mt-2 font-black text-[var(--color-deep-plum)]">
+                                    {remainingBalance !== null
+                                      ? formatCurrency(String(remainingBalance))
+                                      : 'Not available'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-5 grid gap-4">
+                              <section className="rounded-[1.35rem] border border-[rgba(142,151,115,0.18)] bg-[rgba(235,241,219,0.34)] p-5 transition duration-300 group-hover/quotation:bg-[rgba(235,241,219,0.46)]">
+                                <div className="flex items-center gap-3">
+                                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#4d5739]">
+                                    <CheckCircle2 aria-hidden="true" className="size-4" />
+                                  </span>
+
+                                  <p className="text-sm font-black text-[var(--color-near-black)]">
+                                    Inclusions
+                                  </p>
+                                </div>
+
+                                <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+                                  {quotation.inclusions}
+                                </p>
+                              </section>
+
+                              {quotation.exclusions ? (
+                                <section className="rounded-[1.35rem] border border-[rgba(142,92,103,0.16)] bg-[rgba(245,225,230,0.30)] p-5 transition duration-300 group-hover/quotation:bg-[rgba(245,225,230,0.42)]">
+                                  <div className="flex items-center gap-3">
+                                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.16)] text-[var(--color-muted-burgundy)]">
+                                      <X aria-hidden="true" className="size-4" />
+                                    </span>
+
+                                    <p className="text-sm font-black text-[var(--color-near-black)]">
+                                      Exclusions
+                                    </p>
+                                  </div>
+
+                                  <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+                                    {quotation.exclusions}
+                                  </p>
+                                </section>
+                              ) : null}
+
+                              {quotation.terms ? (
+                                <section className="rounded-[1.35rem] border border-[rgba(175,201,216,0.24)] bg-[rgba(222,236,242,0.34)] p-5 transition duration-300 group-hover/quotation:bg-[rgba(222,236,242,0.46)]">
+                                  <div className="flex items-center gap-3">
+                                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.26)] text-[#3b515b]">
+                                      <FileText aria-hidden="true" className="size-4" />
+                                    </span>
+
+                                    <p className="text-sm font-black text-[var(--color-near-black)]">
+                                      Terms
+                                    </p>
+                                  </div>
+
+                                  <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+                                    {quotation.terms}
+                                  </p>
+                                </section>
+                              ) : null}
+                            </div>
+
+                            <div
+                              className={`mt-5 rounded-[1.35rem] border p-4 ${
+                                expired
+                                  ? 'border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)]'
+                                  : 'border-white/54 bg-white/30'
+                              }`}
                             >
-                              {quotationStatusLabels[quotation.status]}
-                            </span>
+                              <div className="flex items-start gap-3">
+                                <span
+                                  className={`grid size-9 shrink-0 place-items-center rounded-xl ${
+                                    expired
+                                      ? 'bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]'
+                                      : 'bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]'
+                                  }`}
+                                >
+                                  <Clock3 aria-hidden="true" className="size-4" />
+                                </span>
 
-                            <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                              Quotation version {quotation.version}
-                            </h3>
+                                <div>
+                                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44">
+                                    Quotation expiry
+                                  </p>
+
+                                  <p className="mt-2 font-black text-[var(--color-near-black)]">
+                                    {quotation.expiresAt
+                                      ? formatDate(quotation.expiresAt)
+                                      : 'No expiry date'}
+                                  </p>
+
+                                  {expired ? (
+                                    <p className="mt-2 text-sm font-bold text-[var(--color-muted-burgundy)]">
+                                      This quotation has expired and can no longer be accepted.
+                                    </p>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </div>
+
+                            {canAccept ? (
+                              <button
+                                type="button"
+                                className="group/accept-quotation btn-primary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
+                                onClick={() => {
+                                  acceptQuotationMutation.reset();
+                                  setQuotationToAccept(quotation);
+                                }}
+                              >
+                                <CheckCircle2
+                                  aria-hidden="true"
+                                  className="size-4 transition duration-300 group-hover/accept-quotation:scale-110"
+                                />
+                                Accept quotation
+                              </button>
+                            ) : null}
+
+                            {quotation.status === 'ACCEPTED' ? (
+                              <button
+                                type="button"
+                                className="group/create-booking btn-primary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
+                                onClick={() => {
+                                  openCreateBookingDialog(quotation);
+                                }}
+                              >
+                                <CalendarRange
+                                  aria-hidden="true"
+                                  className="size-4 transition duration-300 group-hover/create-booking:scale-110"
+                                />
+                                Create booking
+                              </button>
+                            ) : null}
                           </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                ) : null}
 
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/52">
-                            {formatDate(quotation.createdAt)}
-                          </span>
-                        </div>
+                {quotationsQuery.data && quotationsQuery.data.length === 0 ? (
+                  <div className="mt-8 rounded-[1.75rem] border border-dashed border-white/70 bg-white/24 p-8 text-center">
+                    <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                      <MessageSquareQuote aria-hidden="true" className="size-7" />
+                    </span>
 
-                        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-2xl bg-white/28 p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] opacity-50">
-                              Proposed price
-                            </p>
-                            <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                              {formatCurrency(quotation.proposedPrice)}
-                            </p>
-                          </div>
+                    <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
+                      No quotation received yet
+                    </p>
 
-                          <div className="rounded-2xl bg-white/28 p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] opacity-50">
-                              Deposit
-                            </p>
-                            <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
-                              {quotation.depositAmount
-                                ? formatCurrency(quotation.depositAmount)
-                                : 'No deposit'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-5">
-                          <p className="text-sm font-black text-[var(--color-charcoal)]/58">
-                            Inclusions
-                          </p>
-                          <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                            {quotation.inclusions}
-                          </p>
-                        </div>
-
-                        {quotation.exclusions ? (
-                          <div className="mt-5">
-                            <p className="text-sm font-black text-[var(--color-charcoal)]/58">
-                              Exclusions
-                            </p>
-                            <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                              {quotation.exclusions}
-                            </p>
-                          </div>
-                        ) : null}
-
-                        {quotation.terms ? (
-                          <div className="mt-5">
-                            <p className="text-sm font-black text-[var(--color-charcoal)]/58">
-                              Terms
-                            </p>
-                            <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                              {quotation.terms}
-                            </p>
-                          </div>
-                        ) : null}
-
-                        <div className="mt-5 rounded-2xl bg-white/22 p-4">
-                          <p className="text-xs font-bold uppercase tracking-[0.16em] opacity-50">
-                            Expiry
-                          </p>
-
-                          <p className="mt-2 font-black text-[var(--color-near-black)]">
-                            {quotation.expiresAt
-                              ? formatDate(quotation.expiresAt)
-                              : 'No expiry date'}
-                          </p>
-
-                          {expired ? (
-                            <p className="mt-2 text-sm font-bold text-[var(--color-muted-burgundy)]">
-                              This quotation has expired.
-                            </p>
-                          ) : null}
-                        </div>
-
-                        {canAccept ? (
-                          <button
-                            type="button"
-                            className="btn-primary mt-6 w-full justify-center text-sm font-bold"
-                            onClick={() => {
-                              acceptQuotationMutation.reset();
-                              setQuotationToAccept(quotation);
-                            }}
-                          >
-                            <CheckCircle2 className="size-4" />
-                            Accept quotation
-                          </button>
-                        ) : null}
-                        {quotation.status === 'ACCEPTED' ? (
-                          <button
-                            type="button"
-                            className="btn-primary mt-6 w-full justify-center text-sm font-bold"
-                            onClick={() => {
-                              openCreateBookingDialog(quotation);
-                            }}
-                          >
-                            <CalendarRange className="size-4" />
-                            Create booking
-                          </button>
-                        ) : null}
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : null}
-
-              {quotationsQuery.data && quotationsQuery.data.length === 0 ? (
-                <div className="mt-8 rounded-2xl border border-dashed border-white/70 bg-white/20 p-8 text-center">
-                  <MessageSquareQuote className="mx-auto size-9 text-[var(--color-deep-plum)]" />
-
-                  <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                    No quotation received yet
-                  </p>
-
-                  <p className="mt-2 leading-7 text-[var(--color-charcoal)]/62">
-                    The vendor has not sent a quotation for this request.
-                  </p>
-                </div>
-              ) : null}
+                    <p className="mx-auto mt-2 max-w-lg leading-7 text-[var(--color-charcoal)]/62">
+                      The vendor has not sent a quotation for this request. It will appear here once
+                      the vendor submits a proposal.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>

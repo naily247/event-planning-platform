@@ -377,7 +377,7 @@ describe('Dashboard API', () => {
         data: {
           ownerId: customerId,
           name: 'Maya Wedding',
-          eventType: 'Wedding',
+          eventType: 'WEDDING',
           eventDate: new Date('2030-08-20T10:00:00.000Z'),
           location: 'Colombo',
           guestCount: 150,
@@ -391,7 +391,7 @@ describe('Dashboard API', () => {
         data: {
           ownerId: customerId,
           name: 'Completed Birthday',
-          eventType: 'Birthday',
+          eventType: 'BIRTHDAY',
           eventDate: new Date('2029-02-10T10:00:00.000Z'),
           location: 'Kandy',
           guestCount: 50,
@@ -405,7 +405,7 @@ describe('Dashboard API', () => {
         data: {
           ownerId: secondCustomerId,
           name: 'Other Customer Event',
-          eventType: 'Engagement',
+          eventType: 'ENGAGEMENT',
           eventDate: new Date('2030-09-10T10:00:00.000Z'),
           location: 'Galle',
           status: EventStatus.ACTIVE,
@@ -741,7 +741,7 @@ describe('Dashboard API', () => {
         data: {
           ownerId: customerId,
           name: 'Maya Wedding',
-          eventType: 'Wedding',
+          eventType: 'WEDDING',
           eventDate: new Date('2030-08-20T10:00:00.000Z'),
           location: 'Colombo',
           status: EventStatus.PLANNING,

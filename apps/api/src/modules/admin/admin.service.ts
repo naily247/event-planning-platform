@@ -1016,10 +1016,7 @@ const buildAdminEventReportWhere = (query: GetAdminEventReportQuery): Prisma.Eve
     }),
 
     ...(query.eventType && {
-      eventType: {
-        contains: query.eventType,
-        mode: 'insensitive',
-      },
+      eventType: query.eventType,
     }),
 
     ...(query.location && {

@@ -581,3 +581,148 @@ h6 {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes heroFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[heroFloat_2s_ease-in-out_infinite\] {
+    animation: none;
+  }
+}
+
+@keyframes eventsLightWash {
+  0%,
+  100% {
+    transform: translate3d(-8%, 0, 0) skewX(-8deg);
+    opacity: 0.34;
+  }
+
+  50% {
+    transform: translate3d(18%, 0, 0) skewX(-8deg);
+    opacity: 0.58;
+  }
+}
+
+@keyframes eventsCountSheen {
+  0%,
+  72%,
+  100% {
+    transform: translateX(-150%) rotate(16deg);
+  }
+
+  84% {
+    transform: translateX(250%) rotate(16deg);
+  }
+}
+
+@keyframes eventsCardReveal {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes eventsModalBackdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes eventsModalPanelIn {
+  from {
+    transform: translateY(22px) scale(0.975);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.events-hero-light-wash {
+  position: absolute;
+  top: -18%;
+  bottom: -18%;
+  left: -24%;
+  width: 58%;
+  pointer-events: none;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.34),
+    rgba(183, 167, 200, 0.18),
+    transparent
+  );
+  filter: blur(34px);
+  animation: eventsLightWash 11s ease-in-out infinite;
+}
+
+.events-count-card {
+  isolation: isolate;
+}
+
+.events-count-card::after {
+  position: absolute;
+  top: -55%;
+  bottom: -55%;
+  left: -28%;
+  z-index: 0;
+  width: 22%;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.48), transparent);
+  filter: blur(4px);
+  animation: eventsCountSheen 8s ease-in-out infinite;
+}
+
+.events-count-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.events-card-reveal {
+  opacity: 0;
+  animation: eventsCardReveal 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.events-modal-backdrop {
+  animation: eventsModalBackdropIn 220ms ease-out both;
+}
+
+.events-modal-panel {
+  animation: eventsModalPanelIn 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .events-hero-light-wash,
+  .events-count-card::after,
+  .events-card-reveal,
+  .events-modal-backdrop,
+  .events-modal-panel {
+    animation: none;
+  }
+
+  .events-card-reveal {
+    opacity: 1;
+  }
+}

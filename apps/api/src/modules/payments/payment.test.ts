@@ -316,7 +316,7 @@ const prepareDepositPendingBooking = async () => {
     data: {
       ownerId: customerUserId,
       name: 'Deposit Payment Wedding',
-      eventType: 'Wedding',
+      eventType: 'WEDDING',
       eventDate: new Date('2030-08-20T09:00:00.000Z'),
       location: 'Colombo',
       guestCount: 250,

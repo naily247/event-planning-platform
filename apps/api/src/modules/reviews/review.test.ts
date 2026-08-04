@@ -213,7 +213,7 @@ const createEvent = async (customerId: string, name: string) => {
     data: {
       ownerId: customerId,
       name,
-      eventType: 'Wedding',
+      eventType: 'WEDDING',
       eventDate: new Date('2032-08-20T09:00:00.000Z'),
       location: 'Colombo',
       guestCount: 200,

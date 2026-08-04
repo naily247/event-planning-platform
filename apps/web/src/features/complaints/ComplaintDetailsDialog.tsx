@@ -285,665 +285,1014 @@ export function ComplaintDetailsDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[70] overflow-y-auto bg-[rgba(31,27,29,0.56)] px-4 py-8 backdrop-blur-md"
+      className="fixed inset-0 z-[70] overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
       role="dialog"
       aria-modal="true"
       aria-labelledby="complaint-details-title"
+      onClick={() => {
+        if (!isReplyPending && !isClosePending) {
+          onClose();
+        }
+      }}
     >
-      <div className="mx-auto max-w-6xl">
-        <div className="glass-card p-6 sm:p-8">
-          <div className="flex items-start justify-between gap-5">
-            <div>
-              <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                <MessageSquareText className="size-4" />
-                Support case
+      <div className="mx-auto flex min-h-full max-w-6xl items-start justify-center">
+        <div
+          className="relative w-full overflow-hidden rounded-[2.25rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.90),rgba(245,237,248,0.84))] p-6 shadow-[0_42px_120px_rgba(31,27,29,0.28)] backdrop-blur-3xl sm:p-8"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+          />
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-[24%] top-[-7rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+          />
+
+          <div className="relative">
+            <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                  <MessageSquareText aria-hidden="true" className="size-4" />
+                  Support case
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="status-chip" data-tone={getStatusTone(complaint.status)}>
+                    <CircleAlert aria-hidden="true" className="size-3.5" />
+                    {complaintStatusLabels[complaint.status]}
+                  </span>
+
+                  <span className="status-chip" data-tone={getPriorityTone(complaint.priority)}>
+                    <ShieldAlert aria-hidden="true" className="size-3.5" />
+                    {complaintPriorityLabels[complaint.priority]}
+                  </span>
+
+                  <span className="status-chip" data-tone="gray">
+                    <TypeIcon aria-hidden="true" className="size-3.5" />
+                    {complaintTypeLabels[complaint.type]}
+                  </span>
+                </div>
+
+                <h2
+                  id="complaint-details-title"
+                  className="mt-5 max-w-4xl text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
+                >
+                  {complaint.subject}
+                </h2>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-xl border border-white/52 bg-white/34 px-3 py-2 text-xs font-black text-[var(--color-charcoal)]/58">
+                    <MessageSquareText
+                      aria-hidden="true"
+                      className="size-4 text-[var(--color-deep-plum)]"
+                    />
+                    Case #{complaint.id.slice(-8).toUpperCase()}
+                  </span>
+
+                  <span className="inline-flex items-center gap-2 rounded-xl border border-white/52 bg-white/34 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/58">
+                    <CalendarDays
+                      aria-hidden="true"
+                      className="size-4 text-[var(--color-rosewood)]"
+                    />
+                    Created {formatDateTime(complaint.createdAt)}
+                  </span>
+                </div>
+
+                <p className="mt-5 max-w-3xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62 sm:text-base">
+                  Review the complaint details, connected records, support conversation and complete
+                  case timeline from one workspace.
+                </p>
               </div>
 
-              <h2
-                id="complaint-details-title"
-                className="max-w-3xl text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
+              <button
+                type="button"
+                className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Close complaint details"
+                disabled={isReplyPending || isClosePending}
+                onClick={onClose}
               >
-                {complaint.subject}
-              </h2>
-
-              <p className="mt-3 text-sm font-bold text-[var(--color-charcoal)]/48">
-                Case #{complaint.id.slice(-8).toUpperCase()}
-              </p>
+                <X aria-hidden="true" className="size-5" />
+              </button>
             </div>
 
-            <button
-              type="button"
-              className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28"
-              aria-label="Close complaint details"
-              disabled={isReplyPending || isClosePending}
-              onClick={onClose}
-            >
-              <X className="size-5" />
-            </button>
-          </div>
+            <div className="mt-8 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+              <section className="group/complaint-overview relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(240,231,246,0.48))] p-6 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:shadow-[0_26px_66px_rgba(31,27,29,0.10)]">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl transition duration-500 group-hover/complaint-overview:scale-125 group-hover/complaint-overview:bg-[rgba(183,167,200,0.30)]"
+                />
 
-          <div className="mt-7 flex flex-wrap items-center gap-2">
-            <span className="status-chip" data-tone={getStatusTone(complaint.status)}>
-              <CircleAlert className="size-3.5" />
-              {complaintStatusLabels[complaint.status]}
-            </span>
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-24 left-[16%] size-52 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl"
+                />
 
-            <span className="status-chip" data-tone={getPriorityTone(complaint.priority)}>
-              <ShieldAlert className="size-3.5" />
-              {complaintPriorityLabels[complaint.priority]}
-            </span>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/complaint-overview:-translate-y-0.5 group-hover/complaint-overview:scale-105">
+                      <MessageSquareText aria-hidden="true" className="size-6" />
+                    </div>
 
-            <span className="status-chip" data-tone="gray">
-              <TypeIcon className="size-3.5" />
-              {complaintTypeLabels[complaint.type]}
-            </span>
-          </div>
+                    <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                      Case summary
+                    </span>
+                  </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-            <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-6">
-              <h3 className="text-sm font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
-                Complaint overview
-              </h3>
-
-              <p className="mt-5 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
-                {complaint.description}
-              </p>
-
-              {complaint.resolutionSummary ? (
-                <div className="mt-6 rounded-2xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] p-5">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
-                    Resolution
+                  <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Complaint overview
                   </p>
 
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                    {complaint.resolutionSummary}
-                  </p>
-                </div>
-              ) : null}
-
-              <div className="mt-7 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl bg-white/26 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                    Created
-                  </p>
-
-                  <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--color-near-black)]">
-                    <CalendarDays className="size-4" />
-                    {formatDateTime(complaint.createdAt)}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/26 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                    Last updated
-                  </p>
-
-                  <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--color-near-black)]">
-                    <Clock3 className="size-4" />
-                    {formatDateTime(complaint.updatedAt)}
-                  </p>
-                </div>
-
-                {complaint.resolvedAt ? (
-                  <div className="rounded-2xl bg-white/26 p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                      Resolved
-                    </p>
-
-                    <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--color-near-black)]">
-                      <CheckCircle2 className="size-4" />
-                      {formatDateTime(complaint.resolvedAt)}
-                    </p>
-                  </div>
-                ) : null}
-
-                {complaint.closedAt ? (
-                  <div className="rounded-2xl bg-white/26 p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                      Closed
-                    </p>
-
-                    <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--color-near-black)]">
-                      <ShieldAlert className="size-4" />
-                      {formatDateTime(complaint.closedAt)}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
-            </section>
-
-            <aside className="space-y-5">
-              <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/44">
-                  Respondent
-                </p>
-
-                <div className="mt-4 flex items-start gap-3">
-                  <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                    {complaint.respondent?.vendor ? (
-                      <Store className="size-5" />
-                    ) : (
-                      <UserRound className="size-5" />
-                    )}
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="truncate font-black text-[var(--color-near-black)]">
-                      {participantName}
-                    </p>
-
-                    <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/52">
-                      {complaint.respondent?.role ?? 'SYSTEM'}
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/44">
-                  Assigned administrator
-                </p>
-
-                {complaint.assignedAdmin ? (
-                  <div className="mt-4">
-                    <p className="font-black text-[var(--color-near-black)]">
-                      {complaint.assignedAdmin.firstName} {complaint.assignedAdmin.lastName}
-                    </p>
-
-                    <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/52">
-                      Managing this support case
-                    </p>
-                  </div>
-                ) : (
-                  <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                    Awaiting administrator assignment.
-                  </p>
-                )}
-              </section>
-
-              {complaint.booking ? (
-                <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.22)] text-[var(--color-deep-plum)]">
-                      <PackageCheck className="size-5" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/44">
-                        Related booking
-                      </p>
-
-                      <p className="mt-1 font-black text-[var(--color-near-black)]">
-                        {complaint.booking.event.name}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-3">
-                    <div className="rounded-2xl bg-white/26 p-4">
-                      <p className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                        Vendor
-                      </p>
-
-                      <p className="mt-2 font-black text-[var(--color-near-black)]">
-                        {complaint.booking.vendor.businessName}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/26 p-4">
-                      <p className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                        Service
-                      </p>
-
-                      <p className="mt-2 font-black text-[var(--color-near-black)]">
-                        {formatDateTime(complaint.booking.serviceStart)}
-                      </p>
-
-                      <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/52">
-                        {formatCurrency(complaint.booking.agreedCost)}
-                      </p>
-                    </div>
-
-                    <Link
-                      to={`/events/${complaint.booking.event.id}/bookings`}
-                      className="btn-secondary w-full justify-center text-sm font-bold"
-                    >
-                      View booking workspace
-                    </Link>
-                  </div>
-                </section>
-              ) : null}
-
-              {complaint.payment ? (
-                <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.22)] text-[var(--color-deep-plum)]">
-                      <CreditCard className="size-5" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/44">
-                        Related payment
-                      </p>
-
-                      <p className="mt-1 font-black text-[var(--color-near-black)]">
-                        {formatCurrency(complaint.payment.amount)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                    <div className="rounded-2xl bg-white/26 p-4">
-                      <p className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                        Method
-                      </p>
-
-                      <p className="mt-2 font-black text-[var(--color-near-black)]">
-                        {complaint.payment.method.replaceAll('_', ' ')}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/26 p-4">
-                      <p className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                        Reference
-                      </p>
-
-                      <p className="mt-2 break-all font-black text-[var(--color-near-black)]">
-                        {complaint.payment.referenceNumber || 'Not available'}
-                      </p>
-                    </div>
-                  </div>
-                </section>
-              ) : null}
-
-              {complaint.review ? (
-                <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                      <Star className="size-5 fill-current" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/44">
-                        Related review
-                      </p>
-
-                      <p className="mt-1 font-black text-[var(--color-near-black)]">
-                        {complaint.review.vendor.businessName}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl bg-white/26 p-4">
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: 5 }, (_, index) => (
-                        <Star
-                          key={index}
-                          className={`size-4 ${
-                            index < complaint.review!.overallRating
-                              ? 'fill-[var(--color-rosewood)] text-[var(--color-rosewood)]'
-                              : 'text-[var(--color-charcoal)]/20'
-                          }`}
-                        />
-                      ))}
-
-                      <span className="ml-2 text-sm font-black text-[var(--color-near-black)]">
-                        {complaint.review.overallRating}/5
-                      </span>
-                    </div>
-
-                    {complaint.review.comment ? (
-                      <p className="mt-3 line-clamp-4 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
-                        {complaint.review.comment}
-                      </p>
-                    ) : null}
-                  </div>
-                </section>
-              ) : null}
-
-              {complaint.quotationRequest ? (
-                <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.22)] text-[var(--color-deep-plum)]">
-                      <ReceiptText className="size-5" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/44">
-                        Related quotation
-                      </p>
-
-                      <p className="mt-1 font-black text-[var(--color-near-black)]">
-                        {complaint.quotationRequest.vendor.businessName}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl bg-white/26 p-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                      Event
-                    </p>
-
-                    <p className="mt-2 font-black text-[var(--color-near-black)]">
-                      {complaint.quotationRequest.event.name}
-                    </p>
-
-                    <p className="mt-2 line-clamp-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                      {complaint.quotationRequest.requirements}
-                    </p>
-                  </div>
-
-                  <Link
-                    to={`/events/${complaint.quotationRequest.event.id}/quotations`}
-                    className="btn-secondary mt-4 w-full justify-center text-sm font-bold"
-                  >
-                    View quotation workspace
-                  </Link>
-                </section>
-              ) : null}
-            </aside>
-          </div>
-
-          <div className="mt-6 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-            <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5 sm:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
-                    Conversation
-                  </p>
-
-                  <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                    Public complaint messages
+                  <h3 className="mt-3 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/complaint-overview:text-[var(--color-deep-plum)]">
+                    Reported concern
                   </h3>
-                </div>
 
-                <span className="status-chip w-fit" data-tone="gray">
-                  <MessageSquareText className="size-3.5" />
-                  {complaint.messages.length}{' '}
-                  {complaint.messages.length === 1 ? 'message' : 'messages'}
-                </span>
-              </div>
+                  <div className="mt-5 rounded-[1.45rem] border border-white/52 bg-white/34 p-5 transition duration-300 group-hover/complaint-overview:border-white/74 group-hover/complaint-overview:bg-white/46">
+                    <p className="whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+                      {complaint.description}
+                    </p>
+                  </div>
 
-              {complaint.messages.length > 0 ? (
-                <div className="mt-6 max-h-[32rem] space-y-4 overflow-y-auto pr-1">
-                  {complaint.messages.map((message) => {
-                    const isCurrentUser = message.authorId === currentUserId;
-                    const authorName = getPartyName(message.author);
+                  {complaint.resolutionSummary ? (
+                    <div className="mt-5 rounded-[1.45rem] border border-[rgba(89,133,113,0.18)] bg-[rgba(222,238,228,0.34)] p-5 transition duration-300 group-hover/complaint-overview:bg-[rgba(222,238,228,0.46)]">
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(89,133,113,0.14)] text-[#3f735d]">
+                          <CheckCircle2 aria-hidden="true" className="size-4" />
+                        </span>
 
-                    return (
-                      <article
-                        key={message.id}
-                        className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[88%] rounded-[1.4rem] px-4 py-3 sm:max-w-[76%] ${
-                            isCurrentUser
-                              ? 'bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-white'
-                              : 'border border-white/55 bg-white/30 text-[var(--color-charcoal)]'
-                          }`}
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                            <p
-                              className={`text-xs font-black uppercase tracking-[0.14em] ${
-                                isCurrentUser ? 'text-white/66' : 'text-[var(--color-deep-plum)]'
-                              }`}
-                            >
-                              {isCurrentUser ? 'You' : authorName}
-                            </p>
+                        <div className="min-w-0">
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#3f735d]">
+                            Resolution
+                          </p>
 
-                            <p
-                              className={`text-[0.7rem] font-bold ${
-                                isCurrentUser ? 'text-white/54' : 'text-[var(--color-charcoal)]/42'
-                              }`}
-                            >
-                              {formatDateTime(message.createdAt)}
-                            </p>
-                          </div>
-
-                          <p
-                            className={`mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 ${
-                              isCurrentUser ? 'text-white/82' : 'text-[var(--color-charcoal)]/68'
-                            }`}
-                          >
-                            {message.body}
+                          <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+                            {complaint.resolutionSummary}
                           </p>
                         </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="mt-6 rounded-[1.5rem] border border-dashed border-white/70 bg-white/18 p-7 text-center">
-                  <MessageSquareText className="mx-auto size-8 text-[var(--color-deep-plum)]" />
-
-                  <p className="mt-4 text-lg font-black text-[var(--color-near-black)]">
-                    No conversation yet
-                  </p>
-
-                  <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                    Public messages between participants will appear here.
-                  </p>
-                </div>
-              )}
-
-              {canReply ? (
-                <div className="mt-6 border-t border-white/55 pt-6">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Add a message
-                    </span>
-
-                    <textarea
-                      className="form-field min-h-32 resize-y"
-                      maxLength={5000}
-                      value={replyBody}
-                      disabled={isReplyPending || isClosePending}
-                      placeholder="Share additional information or respond to this support case."
-                      onChange={(event) => {
-                        setReplyValidationError(null);
-                        setReplyBody(event.target.value);
-                      }}
-                    />
-
-                    <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/46">
-                      {replyBody.length}/5000
-                    </p>
-                  </label>
-
-                  {replyValidationError || replyErrorMessage ? (
-                    <div
-                      role="alert"
-                      className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
-                    >
-                      {replyValidationError ?? replyErrorMessage}
+                      </div>
                     </div>
                   ) : null}
 
-                  <div className="mt-4 flex justify-end">
-                    <button
-                      type="button"
-                      className="btn-primary justify-center text-sm font-bold"
-                      disabled={isReplyPending || isClosePending}
-                      onClick={handleReplySubmit}
-                    >
-                      {isReplyPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                      ) : (
-                        <Send className="size-4" />
-                      )}
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-white/48 bg-white/30 p-4 transition duration-300 group-hover/complaint-overview:border-white/74 group-hover/complaint-overview:bg-white/44">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/complaint-overview:text-[var(--color-rosewood)]/72">
+                          Created
+                        </p>
 
-                      {isReplyPending ? 'Sending message...' : 'Send message'}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-6 rounded-2xl border border-white/55 bg-white/22 p-4">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/58">
-                    This complaint is complete, so no new messages can be added.
-                  </p>
-                </div>
-              )}
-            </section>
+                        <span className="grid size-8 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)] transition duration-300 group-hover/complaint-overview:-translate-y-0.5 group-hover/complaint-overview:scale-105">
+                          <CalendarDays aria-hidden="true" className="size-4" />
+                        </span>
+                      </div>
 
-            <aside className="space-y-5">
-              <section className="rounded-[1.7rem] border border-white/45 bg-white/18 p-5">
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
-                  Case timeline
-                </p>
+                      <p className="mt-3 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                        {formatDateTime(complaint.createdAt)}
+                      </p>
+                    </div>
 
-                {complaint.actions.length > 0 ? (
-                  <div className="mt-5 space-y-5">
-                    {complaint.actions.map((action, index) => {
-                      const ActionIcon = getActionIcon(action.action);
-                      const performerName = getPartyName(action.performedBy);
+                    <div className="rounded-2xl border border-white/48 bg-white/30 p-4 transition duration-300 group-hover/complaint-overview:border-white/74 group-hover/complaint-overview:bg-white/44">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/complaint-overview:text-[var(--color-rosewood)]/72">
+                          Last updated
+                        </p>
 
-                      return (
-                        <div key={action.id} className="relative flex gap-4">
-                          {index < complaint.actions.length - 1 ? (
-                            <div className="absolute left-[1.15rem] top-10 h-[calc(100%+0.25rem)] w-px bg-[rgba(93,58,85,0.16)]" />
-                          ) : null}
+                        <span className="grid size-8 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)] transition duration-300 group-hover/complaint-overview:-translate-y-0.5 group-hover/complaint-overview:scale-105">
+                          <Clock3 aria-hidden="true" className="size-4" />
+                        </span>
+                      </div>
 
-                          <div className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full bg-[rgba(183,167,200,0.28)] text-[var(--color-deep-plum)]">
-                            <ActionIcon className="size-4" />
-                          </div>
+                      <p className="mt-3 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                        {formatDateTime(complaint.updatedAt)}
+                      </p>
+                    </div>
 
-                          <div className="min-w-0 pb-1">
-                            <p className="font-black text-[var(--color-near-black)]">
-                              {getActionLabel(action.action)}
-                            </p>
+                    {complaint.resolvedAt ? (
+                      <div className="rounded-2xl border border-[rgba(89,133,113,0.16)] bg-[rgba(222,238,228,0.30)] p-4 transition duration-300 group-hover/complaint-overview:bg-[rgba(222,238,228,0.42)]">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[#3f735d]">
+                            Resolved
+                          </p>
 
-                            <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
-                              {formatDateTime(action.createdAt)}
-                            </p>
-
-                            {action.reason ? (
-                              <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
-                                {action.reason}
-                              </p>
-                            ) : null}
-
-                            <p className="mt-2 text-xs font-bold text-[var(--color-charcoal)]/42">
-                              By {performerName}
-                            </p>
-                          </div>
+                          <span className="grid size-8 place-items-center rounded-xl bg-[rgba(89,133,113,0.14)] text-[#3f735d]">
+                            <CheckCircle2 aria-hidden="true" className="size-4" />
+                          </span>
                         </div>
-                      );
-                    })}
+
+                        <p className="mt-3 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                          {formatDateTime(complaint.resolvedAt)}
+                        </p>
+                      </div>
+                    ) : null}
+
+                    {complaint.closedAt ? (
+                      <div className="rounded-2xl border border-[rgba(124,74,90,0.16)] bg-[rgba(245,225,230,0.28)] p-4 transition duration-300 group-hover/complaint-overview:bg-[rgba(245,225,230,0.40)]">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-muted-burgundy)]">
+                            Closed
+                          </p>
+
+                          <span className="grid size-8 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                            <ShieldAlert aria-hidden="true" className="size-4" />
+                          </span>
+                        </div>
+
+                        <p className="mt-3 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                          {formatDateTime(complaint.closedAt)}
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
-                ) : (
-                  <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                    No lifecycle activity is available yet.
-                  </p>
-                )}
+                </div>
               </section>
 
-              {canClose ? (
-                <section className="rounded-[1.7rem] border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.08)] p-5">
-                  <ShieldAlert className="size-6 text-[var(--color-muted-burgundy)]" />
+              <aside className="space-y-5">
+                <section className="group/respondent-card relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(240,231,246,0.44))] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_22px_58px_rgba(31,27,29,0.09)]">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/respondent-card:scale-125 group-hover/respondent-card:bg-[rgba(183,167,200,0.28)]"
+                  />
 
-                  <h3 className="mt-5 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                    Close this complaint
-                  </h3>
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/respondent-card:-translate-y-0.5 group-hover/respondent-card:scale-105">
+                        {complaint.respondent?.vendor ? (
+                          <Store aria-hidden="true" className="size-5" />
+                        ) : (
+                          <UserRound aria-hidden="true" className="size-5" />
+                        )}
+                      </div>
 
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
-                    Close the case when you no longer need administrator assistance.
-                  </p>
+                      <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                        Respondent
+                      </span>
+                    </div>
 
-                  {!isCloseFormOpen ? (
-                    <button
-                      type="button"
-                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
-                      disabled={isReplyPending || isClosePending}
-                      onClick={() => {
-                        setCloseValidationError(null);
-                        setIsCloseFormOpen(true);
-                      }}
-                    >
-                      <ShieldAlert className="size-4" />
-                      Close complaint
-                    </button>
+                    <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Involved party
+                    </p>
+
+                    <h3 className="mt-3 truncate text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/respondent-card:text-[var(--color-deep-plum)]">
+                      {participantName}
+                    </h3>
+
+                    <div className="mt-4 rounded-2xl border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/respondent-card:border-white/72 group-hover/respondent-card:bg-white/44">
+                      <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                        Account role
+                      </p>
+
+                      <p className="mt-2 text-sm font-black text-[var(--color-near-black)]">
+                        {complaint.respondent?.role ?? 'SYSTEM'}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="group/admin-card relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(220,235,242,0.42))] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_22px_58px_rgba(31,27,29,0.09)]">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -bottom-16 -left-14 size-40 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/admin-card:scale-125"
+                  />
+
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/admin-card:-translate-y-0.5 group-hover/admin-card:scale-105">
+                        <ShieldAlert aria-hidden="true" className="size-5" />
+                      </div>
+
+                      <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                        Support
+                      </span>
+                    </div>
+
+                    <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Assigned administrator
+                    </p>
+
+                    {complaint.assignedAdmin ? (
+                      <>
+                        <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/admin-card:text-[var(--color-deep-plum)]">
+                          {complaint.assignedAdmin.firstName} {complaint.assignedAdmin.lastName}
+                        </h3>
+
+                        <div className="mt-4 rounded-2xl border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/admin-card:border-white/72 group-hover/admin-card:bg-white/44">
+                          <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                            Managing this support case and coordinating the resolution process.
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="mt-4 rounded-2xl border border-dashed border-white/70 bg-white/24 p-4">
+                        <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                          Awaiting administrator assignment.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                {complaint.booking ? (
+                  <section className="group/related-booking relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(220,235,242,0.42))] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_22px_58px_rgba(31,27,29,0.09)]">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/related-booking:scale-125"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/related-booking:-translate-y-0.5 group-hover/related-booking:scale-105">
+                          <PackageCheck aria-hidden="true" className="size-5" />
+                        </div>
+
+                        <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                          Booking
+                        </span>
+                      </div>
+
+                      <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Related booking
+                      </p>
+
+                      <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/related-booking:text-[var(--color-deep-plum)]">
+                        {complaint.booking.event.name}
+                      </h3>
+
+                      <div className="mt-5 space-y-3">
+                        <div className="rounded-2xl border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/related-booking:border-white/72 group-hover/related-booking:bg-white/44">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                            Vendor
+                          </p>
+
+                          <p className="mt-2 font-black text-[var(--color-near-black)]">
+                            {complaint.booking.vendor.businessName}
+                          </p>
+                        </div>
+
+                        <div className="rounded-2xl border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/related-booking:border-white/72 group-hover/related-booking:bg-white/44">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                              Service
+                            </p>
+
+                            <CalendarDays
+                              aria-hidden="true"
+                              className="size-4 text-[var(--color-deep-plum)]"
+                            />
+                          </div>
+
+                          <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
+                            {formatDateTime(complaint.booking.serviceStart)}
+                          </p>
+
+                          <p className="mt-2 text-sm font-black text-[var(--color-rosewood)]">
+                            {formatCurrency(complaint.booking.agreedCost)}
+                          </p>
+                        </div>
+
+                        <Link
+                          to={`/events/${complaint.booking.event.id}/bookings`}
+                          className="group/open-related-booking btn-secondary w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
+                        >
+                          <PackageCheck
+                            aria-hidden="true"
+                            className="size-4 transition duration-300 group-hover/open-related-booking:scale-105"
+                          />
+                          View booking workspace
+                        </Link>
+                      </div>
+                    </div>
+                  </section>
+                ) : null}
+
+                {complaint.payment ? (
+                  <section className="group/related-payment relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(220,235,242,0.42))] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_22px_58px_rgba(31,27,29,0.09)]">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/related-payment:scale-125"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/related-payment:-translate-y-0.5 group-hover/related-payment:scale-105">
+                          <CreditCard aria-hidden="true" className="size-5" />
+                        </div>
+
+                        <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                          Payment
+                        </span>
+                      </div>
+
+                      <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Related payment
+                      </p>
+
+                      <h3 className="mt-3 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/related-payment:text-[var(--color-deep-plum)]">
+                        {formatCurrency(complaint.payment.amount)}
+                      </h3>
+
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                        <div className="rounded-2xl border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/related-payment:border-white/72 group-hover/related-payment:bg-white/44">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                            Method
+                          </p>
+
+                          <p className="mt-2 font-black capitalize text-[var(--color-near-black)]">
+                            {complaint.payment.method.replaceAll('_', ' ').toLowerCase()}
+                          </p>
+                        </div>
+
+                        <div className="rounded-2xl border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/related-payment:border-white/72 group-hover/related-payment:bg-white/44">
+                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                            Reference
+                          </p>
+
+                          <p className="mt-2 break-all font-black leading-6 text-[var(--color-near-black)]">
+                            {complaint.payment.referenceNumber || 'Not available'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                ) : null}
+
+                {complaint.review ? (
+                  <section className="group/related-review relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(249,235,229,0.44))] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_22px_58px_rgba(31,27,29,0.09)]">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(220,183,150,0.20)] blur-3xl transition duration-500 group-hover/related-review:scale-125"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(130,72,77,0.12)] text-[var(--color-rosewood)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/related-review:-translate-y-0.5 group-hover/related-review:scale-105">
+                          <Star aria-hidden="true" className="size-5 fill-current" />
+                        </div>
+
+                        <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                          Review
+                        </span>
+                      </div>
+
+                      <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Related review
+                      </p>
+
+                      <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/related-review:text-[var(--color-rosewood)]">
+                        {complaint.review.vendor.businessName}
+                      </h3>
+
+                      <div className="mt-5 rounded-[1.35rem] border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/related-review:border-white/72 group-hover/related-review:bg-white/44">
+                        <div className="flex flex-wrap items-center gap-1">
+                          {Array.from({ length: 5 }, (_, index) => (
+                            <Star
+                              key={index}
+                              aria-hidden="true"
+                              className={`size-4 ${
+                                index < complaint.review!.overallRating
+                                  ? 'fill-[var(--color-rosewood)] text-[var(--color-rosewood)]'
+                                  : 'text-[var(--color-charcoal)]/20'
+                              }`}
+                            />
+                          ))}
+
+                          <span className="ml-2 text-sm font-black text-[var(--color-near-black)]">
+                            {complaint.review.overallRating}/5
+                          </span>
+                        </div>
+
+                        {complaint.review.comment ? (
+                          <p className="mt-4 line-clamp-4 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
+                            {complaint.review.comment}
+                          </p>
+                        ) : (
+                          <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/50">
+                            No written review comment.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </section>
+                ) : null}
+
+                {complaint.quotationRequest ? (
+                  <section className="group/related-quotation relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(240,231,246,0.44))] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_22px_58px_rgba(31,27,29,0.09)]">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl transition duration-500 group-hover/related-quotation:scale-125"
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/related-quotation:-translate-y-0.5 group-hover/related-quotation:scale-105">
+                          <ReceiptText aria-hidden="true" className="size-5" />
+                        </div>
+
+                        <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                          Quotation
+                        </span>
+                      </div>
+
+                      <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Related quotation
+                      </p>
+
+                      <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/related-quotation:text-[var(--color-deep-plum)]">
+                        {complaint.quotationRequest.vendor.businessName}
+                      </h3>
+
+                      <div className="mt-5 rounded-[1.35rem] border border-white/50 bg-white/32 p-4 transition duration-300 group-hover/related-quotation:border-white/72 group-hover/related-quotation:bg-white/44">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                          Event
+                        </p>
+
+                        <p className="mt-2 font-black text-[var(--color-near-black)]">
+                          {complaint.quotationRequest.event.name}
+                        </p>
+
+                        <p className="mt-3 line-clamp-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                          {complaint.quotationRequest.requirements}
+                        </p>
+                      </div>
+
+                      <Link
+                        to={`/events/${complaint.quotationRequest.event.id}/quotations`}
+                        className="group/open-related-quotation btn-secondary mt-4 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
+                      >
+                        <ReceiptText
+                          aria-hidden="true"
+                          className="size-4 transition duration-300 group-hover/open-related-quotation:scale-105"
+                        />
+                        View quotation workspace
+                      </Link>
+                    </div>
+                  </section>
+                ) : null}
+              </aside>
+            </div>
+
+            <div className="mt-6 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+              <section className="group/conversation relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(240,231,246,0.46))] p-5 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:border-white/88 hover:shadow-[0_26px_66px_rgba(31,27,29,0.10)] sm:p-6">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/conversation:scale-125 group-hover/conversation:bg-[rgba(183,167,200,0.28)]"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-24 left-[12%] size-52 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl"
+                />
+
+                <div className="relative">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3">
+                        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/conversation:-translate-y-0.5 group-hover/conversation:scale-105">
+                          <MessageSquareText aria-hidden="true" className="size-6" />
+                        </div>
+
+                        <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                          {complaint.messages.length}{' '}
+                          {complaint.messages.length === 1 ? 'message' : 'messages'}
+                        </span>
+                      </div>
+
+                      <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Conversation
+                      </p>
+
+                      <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] transition duration-300 group-hover/conversation:text-[var(--color-deep-plum)]">
+                        Public complaint messages
+                      </h3>
+
+                      <p className="mt-3 max-w-xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
+                        Follow messages shared between participants and support while this case is
+                        being reviewed.
+                      </p>
+                    </div>
+
+                    <span className="status-chip w-fit" data-tone={canReply ? 'plum' : 'gray'}>
+                      {canReply ? (
+                        <Send aria-hidden="true" className="size-3.5" />
+                      ) : (
+                        <ShieldAlert aria-hidden="true" className="size-3.5" />
+                      )}
+
+                      {canReply ? 'Replies open' : 'Conversation closed'}
+                    </span>
+                  </div>
+
+                  {complaint.messages.length > 0 ? (
+                    <div className="mt-7 max-h-[32rem] space-y-4 overflow-y-auto rounded-[1.5rem] border border-white/50 bg-white/22 p-4 pr-2 sm:p-5 sm:pr-3">
+                      {complaint.messages.map((message) => {
+                        const isCurrentUser = message.authorId === currentUserId;
+                        const authorName = getPartyName(message.author);
+
+                        return (
+                          <article
+                            key={message.id}
+                            className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`relative max-w-[92%] overflow-hidden rounded-[1.45rem] px-4 py-4 shadow-[0_12px_30px_rgba(31,27,29,0.06)] sm:max-w-[78%] ${
+                                isCurrentUser
+                                  ? 'bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-white'
+                                  : 'border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.74),rgba(232,225,240,0.44))] text-[var(--color-charcoal)]'
+                              }`}
+                            >
+                              <div
+                                aria-hidden="true"
+                                className={`pointer-events-none absolute -right-8 -top-10 size-24 rounded-full blur-2xl ${
+                                  isCurrentUser ? 'bg-white/10' : 'bg-[rgba(183,167,200,0.16)]'
+                                }`}
+                              />
+
+                              <div className="relative">
+                                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                                  <p
+                                    className={`text-xs font-black uppercase tracking-[0.14em] ${
+                                      isCurrentUser
+                                        ? 'text-white/66'
+                                        : 'text-[var(--color-deep-plum)]'
+                                    }`}
+                                  >
+                                    {isCurrentUser ? 'You' : authorName}
+                                  </p>
+
+                                  <p
+                                    className={`text-[0.7rem] font-bold ${
+                                      isCurrentUser
+                                        ? 'text-white/54'
+                                        : 'text-[var(--color-charcoal)]/42'
+                                    }`}
+                                  >
+                                    {formatDateTime(message.createdAt)}
+                                  </p>
+                                </div>
+
+                                <p
+                                  className={`mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 ${
+                                    isCurrentUser
+                                      ? 'text-white/84'
+                                      : 'text-[var(--color-charcoal)]/70'
+                                  }`}
+                                >
+                                  {message.body}
+                                </p>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    <div className="mt-5">
+                    <div className="mt-7 rounded-[1.5rem] border border-dashed border-white/72 bg-white/24 p-8 text-center">
+                      <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(31,27,29,0.05)]">
+                        <MessageSquareText aria-hidden="true" className="size-7" />
+                      </div>
+
+                      <p className="mt-5 text-lg font-black text-[var(--color-near-black)]">
+                        No conversation yet
+                      </p>
+
+                      <p className="mx-auto mt-2 max-w-md text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                        Public messages between participants will appear here.
+                      </p>
+                    </div>
+                  )}
+
+                  {canReply ? (
+                    <div className="mt-7 rounded-[1.5rem] border border-white/52 bg-white/30 p-5">
                       <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Reason for closing
+                        <span className="flex items-center justify-between gap-4">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                            Add a message
+                          </span>
+
+                          <span className="text-xs font-black tabular-nums text-[var(--color-charcoal)]/44">
+                            {replyBody.length.toLocaleString('en-LK')} / 5,000
+                          </span>
                         </span>
 
                         <textarea
-                          className="form-field min-h-28 resize-y"
-                          maxLength={500}
-                          value={closeReason}
-                          disabled={isClosePending}
-                          placeholder="Optional reason for closing this complaint."
+                          className="form-field mt-2 min-h-32 resize-y transition duration-300 focus:bg-white/52"
+                          maxLength={5000}
+                          value={replyBody}
+                          disabled={isReplyPending || isClosePending}
+                          placeholder="Share additional information or respond to this support case."
                           onChange={(event) => {
-                            setCloseValidationError(null);
-                            setCloseReason(event.target.value);
+                            setReplyValidationError(null);
+                            setReplyBody(event.target.value);
                           }}
                         />
 
-                        <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/46">
-                          Optional. Minimum 5 characters when provided. {closeReason.length}/500
+                        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                          Keep your message clear and include any details that may help resolve the
+                          case.
                         </p>
                       </label>
 
-                      {closeValidationError || closeErrorMessage ? (
+                      {replyValidationError || replyErrorMessage ? (
                         <div
                           role="alert"
-                          className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+                          className="mt-4 rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
                         >
-                          {closeValidationError ?? closeErrorMessage}
+                          <div className="flex items-start gap-3">
+                            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                              <CircleAlert aria-hidden="true" className="size-4" />
+                            </span>
+
+                            <p className="text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]">
+                              {replyValidationError ?? replyErrorMessage}
+                            </p>
+                          </div>
                         </div>
                       ) : null}
 
-                      <div className="mt-4 flex flex-col-reverse gap-3">
+                      <div className="mt-5 flex justify-end">
                         <button
                           type="button"
-                          className="btn-secondary justify-center text-sm font-bold"
-                          disabled={isClosePending}
-                          onClick={() => {
-                            setCloseValidationError(null);
-                            setCloseReason('');
-                            setIsCloseFormOpen(false);
-                          }}
+                          className="group/send-complaint-message btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                          disabled={isReplyPending || isClosePending}
+                          onClick={handleReplySubmit}
                         >
-                          Keep complaint open
-                        </button>
-
-                        <button
-                          type="button"
-                          className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                          disabled={isClosePending}
-                          onClick={handleCloseSubmit}
-                        >
-                          {isClosePending ? (
+                          {isReplyPending ? (
                             <LoaderCircle className="size-4 animate-spin" />
                           ) : (
-                            <ShieldAlert className="size-4" />
+                            <Send
+                              aria-hidden="true"
+                              className="size-4 transition duration-300 group-hover/send-complaint-message:translate-x-0.5"
+                            />
                           )}
 
-                          {isClosePending ? 'Closing complaint...' : 'Confirm close'}
+                          {isReplyPending ? 'Sending message...' : 'Send message'}
                         </button>
                       </div>
                     </div>
+                  ) : (
+                    <div className="mt-7 rounded-[1.4rem] border border-white/55 bg-white/28 p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
+                          <ShieldAlert aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <p className="text-sm font-bold leading-6 text-[var(--color-charcoal)]/60">
+                          This complaint is complete, so no new messages can be added.
+                        </p>
+                      </div>
+                    </div>
                   )}
+                </div>
+              </section>
+
+              <aside className="space-y-5">
+                <section className="group/case-timeline relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(220,235,242,0.44))] p-5 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:border-white/88 hover:shadow-[0_26px_66px_rgba(31,27,29,0.10)] sm:p-6">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl transition duration-500 group-hover/case-timeline:scale-125"
+                  />
+
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/case-timeline:-translate-y-0.5 group-hover/case-timeline:scale-105">
+                        <Clock3 aria-hidden="true" className="size-6" />
+                      </div>
+
+                      <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
+                        {complaint.actions.length}{' '}
+                        {complaint.actions.length === 1 ? 'update' : 'updates'}
+                      </span>
+                    </div>
+
+                    <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Case timeline
+                    </p>
+
+                    <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] transition duration-300 group-hover/case-timeline:text-[var(--color-deep-plum)]">
+                      Support activity
+                    </h3>
+
+                    <p className="mt-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
+                      Follow status changes, assignments and resolution activity recorded for this
+                      case.
+                    </p>
+
+                    {complaint.actions.length > 0 ? (
+                      <div className="mt-7 space-y-5">
+                        {complaint.actions.map((action, index) => {
+                          const ActionIcon = getActionIcon(action.action);
+                          const performerName = getPartyName(action.performedBy);
+
+                          return (
+                            <article
+                              key={action.id}
+                              className="group/timeline-item relative flex gap-4"
+                            >
+                              {index < complaint.actions.length - 1 ? (
+                                <div
+                                  aria-hidden="true"
+                                  className="absolute left-[1.2rem] top-11 h-[calc(100%+0.25rem)] w-px bg-[linear-gradient(180deg,rgba(93,58,85,0.24),rgba(175,201,216,0.18))]"
+                                />
+                              ) : null}
+
+                              <div className="relative z-10 grid size-10 shrink-0 place-items-center rounded-full border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(220,235,242,0.60))] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/timeline-item:-translate-y-0.5 group-hover/timeline-item:scale-105">
+                                <ActionIcon aria-hidden="true" className="size-4" />
+                              </div>
+
+                              <div className="min-w-0 flex-1 rounded-[1.35rem] border border-white/48 bg-white/30 p-4 transition duration-300 group-hover/timeline-item:border-white/72 group-hover/timeline-item:bg-white/44">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                  <p className="font-black text-[var(--color-near-black)] transition duration-300 group-hover/timeline-item:text-[var(--color-deep-plum)]">
+                                    {getActionLabel(action.action)}
+                                  </p>
+
+                                  <span className="shrink-0 text-xs font-bold text-[var(--color-charcoal)]/46">
+                                    {formatDateTime(action.createdAt)}
+                                  </span>
+                                </div>
+
+                                {action.reason ? (
+                                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
+                                    {action.reason}
+                                  </p>
+                                ) : null}
+
+                                <div className="mt-3 flex items-center gap-2 text-xs font-bold text-[var(--color-charcoal)]/46">
+                                  <UserRound
+                                    aria-hidden="true"
+                                    className="size-3.5 text-[var(--color-rosewood)]"
+                                  />
+                                  By {performerName}
+                                </div>
+                              </div>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="mt-7 rounded-[1.45rem] border border-dashed border-white/72 bg-white/24 p-6 text-center">
+                        <Clock3 className="mx-auto size-7 text-[var(--color-deep-plum)]" />
+
+                        <p className="mt-4 text-sm font-black text-[var(--color-near-black)]">
+                          No timeline activity yet
+                        </p>
+
+                        <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                          Status and administrative updates will appear here.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </section>
-              ) : null}
-            </aside>
-          </div>
 
-          <div className="mt-7 flex flex-col-reverse gap-3 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs font-bold text-[var(--color-charcoal)]/44">
-              Last updated {formatDateTime(complaint.updatedAt)}
-            </p>
+                {canClose ? (
+                  <section className="group/close-complaint relative overflow-hidden rounded-[1.75rem] border border-[rgba(124,74,90,0.22)] bg-[linear-gradient(145deg,rgba(249,238,242,0.72),rgba(255,255,255,0.42))] p-5 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:border-[rgba(124,74,90,0.32)] hover:shadow-[0_26px_66px_rgba(124,74,90,0.12)] sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(210,146,160,0.20)] blur-3xl transition duration-500 group-hover/close-complaint:scale-125"
+                    />
 
-            <button
-              type="button"
-              className="btn-secondary justify-center text-sm font-bold"
-              disabled={isReplyPending || isClosePending}
-              onClick={onClose}
-            >
-              Close details
-            </button>
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/close-complaint:-translate-y-0.5 group-hover/close-complaint:scale-105">
+                          <ShieldAlert aria-hidden="true" className="size-6" />
+                        </div>
+
+                        <span className="rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.09)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-muted-burgundy)]">
+                          Case action
+                        </span>
+                      </div>
+
+                      <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-muted-burgundy)]">
+                        Close complaint
+                      </p>
+
+                      <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/close-complaint:text-[var(--color-muted-burgundy)]">
+                        No longer need support?
+                      </h3>
+
+                      <p className="mt-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
+                        Close the case when the concern has been addressed or administrator
+                        assistance is no longer required.
+                      </p>
+
+                      {!isCloseFormOpen ? (
+                        <button
+                          type="button"
+                          className="group/open-close-form mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.36)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_16px_34px_rgba(124,74,90,0.14)]"
+                          disabled={isReplyPending || isClosePending}
+                          onClick={() => {
+                            setCloseValidationError(null);
+                            setIsCloseFormOpen(true);
+                          }}
+                        >
+                          <ShieldAlert
+                            aria-hidden="true"
+                            className="size-4 transition duration-300 group-hover/open-close-form:scale-105"
+                          />
+                          Close complaint
+                        </button>
+                      ) : (
+                        <div className="mt-6 rounded-[1.45rem] border border-white/52 bg-white/34 p-5">
+                          <label className="block">
+                            <span className="flex items-center justify-between gap-4">
+                              <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                                Reason for closing
+                              </span>
+
+                              <span className="text-xs font-black tabular-nums text-[var(--color-charcoal)]/44">
+                                {closeReason.length.toLocaleString('en-LK')} / 500
+                              </span>
+                            </span>
+
+                            <textarea
+                              className="form-field mt-2 min-h-28 resize-y transition duration-300 focus:bg-white/52"
+                              maxLength={500}
+                              value={closeReason}
+                              disabled={isClosePending}
+                              placeholder="Optional reason for closing this complaint."
+                              onChange={(event) => {
+                                setCloseValidationError(null);
+                                setCloseReason(event.target.value);
+                              }}
+                            />
+
+                            <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                              Optional. Minimum 5 characters when a reason is provided.
+                            </p>
+                          </label>
+
+                          {closeValidationError || closeErrorMessage ? (
+                            <div
+                              role="alert"
+                              className="mt-4 rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                            >
+                              <div className="flex items-start gap-3">
+                                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                                  <CircleAlert aria-hidden="true" className="size-4" />
+                                </span>
+
+                                <p className="text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]">
+                                  {closeValidationError ?? closeErrorMessage}
+                                </p>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          <div className="mt-5 flex flex-col-reverse gap-3">
+                            <button
+                              type="button"
+                              className="btn-secondary justify-center text-sm font-bold"
+                              disabled={isClosePending}
+                              onClick={() => {
+                                setCloseValidationError(null);
+                                setCloseReason('');
+                                setIsCloseFormOpen(false);
+                              }}
+                            >
+                              Keep complaint open
+                            </button>
+
+                            <button
+                              type="button"
+                              className="group/confirm-close flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white shadow-[0_14px_32px_rgba(124,74,90,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(124,74,90,0.26)] disabled:cursor-not-allowed disabled:opacity-60"
+                              disabled={isClosePending}
+                              onClick={handleCloseSubmit}
+                            >
+                              {isClosePending ? (
+                                <LoaderCircle className="size-4 animate-spin" />
+                              ) : (
+                                <ShieldAlert
+                                  aria-hidden="true"
+                                  className="size-4 transition duration-300 group-hover/confirm-close:scale-105"
+                                />
+                              )}
+
+                              {isClosePending ? 'Closing complaint...' : 'Confirm close'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                ) : null}
+              </aside>
+            </div>
+
+            <div className="mt-7 flex flex-col-reverse gap-3 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs font-bold text-[var(--color-charcoal)]/44">
+                Last updated {formatDateTime(complaint.updatedAt)}
+              </p>
+
+              <button
+                type="button"
+                className="btn-secondary justify-center text-sm font-bold"
+                disabled={isReplyPending || isClosePending}
+                onClick={onClose}
+              >
+                Close details
+              </button>
+            </div>
           </div>
         </div>
       </div>

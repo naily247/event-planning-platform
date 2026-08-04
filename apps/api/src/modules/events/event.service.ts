@@ -27,6 +27,23 @@ type SelectedEvent = Prisma.EventGetPayload<{
   select: typeof eventSelect;
 }>;
 
+type PrismaEventType = Prisma.EventCreateInput['eventType'];
+
+const eventTypeMap: Record<CreateEventInput['eventType'], PrismaEventType> = {
+  Birthday: 'BIRTHDAY',
+  Wedding: 'WEDDING',
+  Graduation: 'GRADUATION',
+  Corporate: 'CORPORATE',
+  Party: 'PARTY',
+  'Baby Shower': 'BABY_SHOWER',
+  Engagement: 'ENGAGEMENT',
+  Festival: 'FESTIVAL',
+};
+
+const toEventType = (eventType: CreateEventInput['eventType']): PrismaEventType => {
+  return eventTypeMap[eventType];
+};
+
 const formatEvent = (event: SelectedEvent) => ({
   ...event,
   plannedBudget: event.plannedBudget?.toFixed(2) ?? null,
@@ -75,7 +92,7 @@ export const createCustomerEvent = async (ownerId: string, input: CreateEventInp
     data: {
       ownerId,
       name: input.name,
-      eventType: input.eventType,
+      eventType: toEventType(input.eventType),
       eventDate: new Date(input.eventDate),
       location: input.location,
       guestCount: input.guestCount ?? null,
@@ -161,7 +178,7 @@ export const updateCustomerEvent = async (
       }),
 
       ...(input.eventType !== undefined && {
-        eventType: input.eventType,
+        eventType: toEventType(input.eventType),
       }),
 
       ...(input.eventDate !== undefined && {

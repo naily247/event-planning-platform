@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, LoaderCircle, MessageSquareWarning, Plus } from 'lucide-react';
+import { AlertCircle, LoaderCircle, MessageSquareWarning, Plus, ShieldAlert } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { getCurrentUserId } from '../features/auth/auth.storage';
 
@@ -433,192 +433,427 @@ export function ComplaintsWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-[6%] top-5 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.26)] blur-3xl" />
-            <div className="pointer-events-none absolute right-[8%] top-12 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
+          <section className="relative overflow-hidden rounded-[2.75rem] border border-white/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.36),rgba(255,255,255,0.15))] px-7 py-10 shadow-[0_24px_80px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:px-10 lg:px-12">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-16 top-0 size-80 rounded-full bg-[rgba(183,167,200,0.26)] blur-3xl"
+            />
 
-            <div className="relative max-w-4xl">
-              <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                <MessageSquareWarning className="size-4" />
-                Support & resolution
-              </div>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute right-[-5%] top-[-12%] size-[28rem] rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl"
+            />
 
-              <h2 className="text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
-                Keep every concern visible until it is resolved.
-              </h2>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-[-24%] left-[32%] size-72 rounded-full bg-[rgba(245,214,218,0.18)] blur-3xl"
+            />
 
-              <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                Submit complaints against bookings, payments, reviews and quotations, then follow
-                the full support conversation from one event workspace.
-              </p>
-            </div>
-          </section>
-
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {summaryCards.map(({ label, value, helper }) => (
-              <article key={label} className="luxe-card p-6">
-                <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                  <MessageSquareWarning className="size-5" />
+            <div className="relative grid gap-10 lg:grid-cols-[1fr_360px] lg:items-center">
+              <div>
+                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+                  <MessageSquareWarning aria-hidden="true" className="size-4" />
+                  Support & resolution
                 </div>
 
-                <p className="mt-8 text-sm font-bold text-[var(--color-charcoal)]/58">{label}</p>
-
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {value}
-                </p>
-
-                <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/55">
-                  {helper}
-                </p>
-              </article>
-            ))}
-          </section>
-
-          <section className="mt-5 glass-card p-6 sm:p-7">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                  Support history
-                </p>
-
-                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                  Complaints linked to this event.
+                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.95] tracking-[-0.06em] text-[var(--color-near-black)] sm:text-6xl">
+                  Every concern,
+                  <br />
+                  clearly followed through.
                 </h2>
-              </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[34rem]">
-                <select
-                  className="form-field min-h-12"
-                  aria-label="Filter complaints by status"
-                  value={statusFilter}
-                  onChange={(event) => {
-                    setStatusFilter(event.target.value as ComplaintStatus | 'ALL');
-                    setPage(1);
-                  }}
-                >
-                  <option value="ALL">All statuses</option>
-
-                  {complaintStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status.replaceAll('_', ' ')}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  className="form-field min-h-12"
-                  aria-label="Filter complaints by type"
-                  value={typeFilter}
-                  onChange={(event) => {
-                    setTypeFilter(event.target.value as ComplaintType | 'ALL');
-                    setPage(1);
-                  }}
-                >
-                  <option value="ALL">All complaint types</option>
-
-                  {complaintTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type.replaceAll('_', ' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {filtersAreActive ? (
-              <button
-                type="button"
-                className="btn-secondary mt-4 text-sm font-bold"
-                onClick={clearFilters}
-              >
-                Clear filters
-              </button>
-            ) : null}
-
-            {complaints.length > 0 ? (
-              <div className="mt-8 space-y-4">
-                {complaints.map((complaint) => (
-                  <ComplaintCard
-                    key={complaint.id}
-                    complaint={complaint}
-                    onView={openComplaintDetails}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="mt-8 rounded-[1.5rem] border border-dashed border-white/70 bg-white/20 p-8 text-center">
-                <MessageSquareWarning className="mx-auto size-9 text-[var(--color-deep-plum)]" />
-
-                <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                  {filtersAreActive
-                    ? 'No complaints match these filters'
-                    : 'No complaints for this event'}
+                <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--color-charcoal)]/68">
+                  Submit complaints against bookings, payments, reviews and quotations, then follow
+                  every support update until the case is resolved.
                 </p>
 
-                <p className="mt-2 leading-7 text-[var(--color-charcoal)]/62">
-                  {filtersAreActive
-                    ? 'Change the status or complaint type filter to see other cases.'
-                    : 'Create a complaint when you need help with a booking, payment, review or quotation.'}
-                </p>
+                <div className="mt-10 flex flex-wrap gap-3">
+                  <div className="rounded-2xl border border-white/50 bg-white/30 px-5 py-4 backdrop-blur-xl">
+                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
+                      Active cases
+                    </p>
 
-                {filtersAreActive ? (
+                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {complaintSummary.active}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/50 bg-white/30 px-5 py-4 backdrop-blur-xl">
+                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
+                      Awaiting you
+                    </p>
+
+                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {complaintSummary.awaitingResponse}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <aside className="group/complaint-health relative overflow-hidden rounded-[2.2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.35)]">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-white/10 blur-3xl"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+                />
+
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/complaint-health:-translate-y-0.5 group-hover/complaint-health:scale-105">
+                      <MessageSquareWarning aria-hidden="true" className="size-6" />
+                    </div>
+
+                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur">
+                      {complaintSummary.active > 0 ? 'Cases active' : 'All settled'}
+                    </span>
+                  </div>
+
+                  <p className="mt-8 text-xs font-black uppercase tracking-[0.20em] text-white/48">
+                    Support status
+                  </p>
+
+                  <p className="mt-3 text-5xl font-black tracking-[-0.055em]">
+                    {complaintSummary.active}
+                  </p>
+
+                  <p className="mt-2 text-sm font-semibold text-white/58">
+                    {complaintSummary.active === 1 ? 'Active complaint' : 'Active complaints'}
+                  </p>
+
+                  <div className="mt-7 grid grid-cols-2 gap-3">
+                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/[0.12]">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Total
+                      </p>
+
+                      <p className="mt-2 text-2xl font-black">{complaintSummary.total}</p>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(142,151,115,0.16)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(142,151,115,0.22)]">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                        Completed
+                      </p>
+
+                      <p className="mt-2 text-2xl font-black">{complaintSummary.completed}</p>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
-                    className="btn-secondary mt-5 text-sm font-bold"
-                    onClick={clearFilters}
-                  >
-                    Clear filters
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn-primary mt-5 justify-center text-sm font-bold"
+                    className="group/hero-new-complaint mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/16 bg-white/12 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18 hover:shadow-[0_16px_34px_rgba(31,27,29,0.16)]"
                     onClick={() => {
                       createComplaintMutation.reset();
                       setIsCreateOpen(true);
                     }}
                   >
-                    <Plus className="size-4" />
-                    Submit first complaint
-                  </button>
-                )}
-              </div>
-            )}
-
-            {pagination && pagination.totalPages > 1 ? (
-              <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-white/55 bg-white/20 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-bold text-[var(--color-charcoal)]/62">
-                  Page {pagination.page} of {pagination.totalPages}
-                  <span className="ml-2 text-[var(--color-charcoal)]/44">
-                    ({pagination.total} {pagination.total === 1 ? 'complaint' : 'complaints'})
-                  </span>
-                </p>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    className="btn-secondary justify-center text-sm font-bold"
-                    disabled={!pagination.hasPreviousPage || complaintsQuery.isFetching}
-                    onClick={() => {
-                      setPage((currentPage) => Math.max(currentPage - 1, 1));
-                    }}
-                  >
-                    Previous
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn-secondary justify-center text-sm font-bold"
-                    disabled={!pagination.hasNextPage || complaintsQuery.isFetching}
-                    onClick={() => {
-                      setPage((currentPage) => currentPage + 1);
-                    }}
-                  >
-                    Next
+                    <Plus
+                      aria-hidden="true"
+                      className="size-4 transition duration-300 group-hover/hero-new-complaint:rotate-90"
+                    />
+                    New complaint
                   </button>
                 </div>
+              </aside>
+            </div>
+          </section>
+
+          <section className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {summaryCards.map(({ label, value, helper }) => (
+              <article
+                key={label}
+                className={`group/complaint-summary luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)] ${
+                  label === 'Total cases'
+                    ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(226,211,235,0.88))]'
+                    : label === 'Active'
+                      ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(239,215,223,0.86))]'
+                      : label === 'Awaiting you'
+                        ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(214,231,238,0.86))]'
+                        : 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(216,226,194,0.86))]'
+                }`}
+              >
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute -right-14 -top-14 size-40 rounded-full opacity-60 blur-3xl transition duration-500 group-hover/complaint-summary:scale-125 group-hover/complaint-summary:opacity-100 ${
+                    label === 'Total cases'
+                      ? 'bg-[rgba(164,126,184,0.34)]'
+                      : label === 'Active'
+                        ? 'bg-[rgba(170,100,117,0.30)]'
+                        : label === 'Awaiting you'
+                          ? 'bg-[rgba(130,179,201,0.34)]'
+                          : 'bg-[rgba(142,151,115,0.34)]'
+                  }`}
+                />
+
+                <div className="relative">
+                  <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/complaint-summary:-translate-y-0.5 group-hover/complaint-summary:scale-110 group-hover/complaint-summary:bg-[rgba(183,167,200,0.34)]">
+                    <MessageSquareWarning
+                      aria-hidden="true"
+                      className="size-5 transition duration-300 group-hover/complaint-summary:rotate-[4deg]"
+                    />
+                  </div>
+
+                  <p className="mt-8 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/complaint-summary:text-[var(--color-rosewood)]/76">
+                    {label}
+                  </p>
+
+                  <p className="mt-3 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/complaint-summary:translate-x-0.5 group-hover/complaint-summary:text-[var(--color-deep-plum)] sm:text-[2.15rem]">
+                    {value}
+                  </p>
+
+                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55 transition duration-300 group-hover/complaint-summary:text-[var(--color-charcoal)]/68">
+                    {helper}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </section>
+
+          <section className="relative mt-5 overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.52),rgba(255,255,255,0.22))] p-6 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-7">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-24 left-[18%] size-52 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl"
+            />
+
+            <div className="relative">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
+                      <MessageSquareWarning aria-hidden="true" className="size-5" />
+                    </div>
+
+                    <span className="status-chip" data-tone="plum">
+                      {pagination?.total ?? complaints.length}{' '}
+                      {(pagination?.total ?? complaints.length) === 1 ? 'case' : 'cases'}
+                    </span>
+                  </div>
+
+                  <p className="mt-6 text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                    Support history
+                  </p>
+
+                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                    Complaints linked to this event.
+                  </h2>
+
+                  <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
+                    Filter by status or complaint type to focus on the support cases that matter
+                    right now.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="group/history-new-complaint btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                  onClick={() => {
+                    createComplaintMutation.reset();
+                    setIsCreateOpen(true);
+                  }}
+                >
+                  <Plus
+                    aria-hidden="true"
+                    className="size-4 transition duration-300 group-hover/history-new-complaint:rotate-90"
+                  />
+                  New complaint
+                </button>
               </div>
-            ) : null}
+
+              <div className="mt-7 rounded-[1.6rem] border border-white/56 bg-white/28 p-5 backdrop-blur-xl">
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <label className="space-y-2">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
+                      Case status
+                    </span>
+
+                    <select
+                      className="form-field min-h-12 transition duration-300 focus:bg-white/52"
+                      aria-label="Filter complaints by status"
+                      value={statusFilter}
+                      onChange={(event) => {
+                        setStatusFilter(event.target.value as ComplaintStatus | 'ALL');
+                        setPage(1);
+                      }}
+                    >
+                      <option value="ALL">All statuses</option>
+
+                      {complaintStatuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replaceAll('_', ' ')}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
+                      Complaint type
+                    </span>
+
+                    <select
+                      className="form-field min-h-12 transition duration-300 focus:bg-white/52"
+                      aria-label="Filter complaints by type"
+                      value={typeFilter}
+                      onChange={(event) => {
+                        setTypeFilter(event.target.value as ComplaintType | 'ALL');
+                        setPage(1);
+                      }}
+                    >
+                      <option value="ALL">All complaint types</option>
+
+                      {complaintTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type.replaceAll('_', ' ')}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-bold text-[var(--color-charcoal)]/52">
+                    Showing {complaints.length}{' '}
+                    {complaints.length === 1 ? 'complaint' : 'complaints'} on this page
+                  </p>
+
+                  {filtersAreActive ? (
+                    <button
+                      type="button"
+                      className="btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                      onClick={clearFilters}
+                    >
+                      Clear filters
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+              {complaints.length > 0 ? (
+                <div className="mt-8 space-y-4">
+                  {complaints.map((complaint) => (
+                    <ComplaintCard
+                      key={complaint.id}
+                      complaint={complaint}
+                      onView={openComplaintDetails}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.48),rgba(255,255,255,0.22))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                  />
+
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+                  />
+
+                  <div className="relative">
+                    <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
+                      <MessageSquareWarning aria-hidden="true" className="size-8" />
+                    </div>
+
+                    <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      {filtersAreActive
+                        ? 'No complaints match these filters'
+                        : 'No complaints for this event'}
+                    </p>
+
+                    <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                      {filtersAreActive
+                        ? 'Try changing the case status or complaint type to view other support records.'
+                        : 'Create a complaint when you need help with a booking, payment, review or quotation.'}
+                    </p>
+
+                    {filtersAreActive ? (
+                      <button
+                        type="button"
+                        className="btn-secondary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
+                        onClick={clearFilters}
+                      >
+                        Clear filters
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="group/first-complaint btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                        onClick={() => {
+                          createComplaintMutation.reset();
+                          setIsCreateOpen(true);
+                        }}
+                      >
+                        <Plus
+                          aria-hidden="true"
+                          className="size-4 transition duration-300 group-hover/first-complaint:rotate-90"
+                        />
+                        Submit first complaint
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {pagination && pagination.totalPages > 1 ? (
+                <div className="relative mt-8 overflow-hidden rounded-[1.5rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(228,238,243,0.32))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-xl sm:p-5">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                  />
+
+                  <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+                        <MessageSquareWarning aria-hidden="true" className="size-4" />
+                      </span>
+
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Page {pagination.page} of {pagination.totalPages}
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/50">
+                          {pagination.total} {pagination.total === 1 ? 'complaint' : 'complaints'}{' '}
+                          in total
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        className="btn-secondary min-w-28 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                        disabled={!pagination.hasPreviousPage || complaintsQuery.isFetching}
+                        onClick={() => {
+                          setPage((currentPage) => Math.max(currentPage - 1, 1));
+                        }}
+                      >
+                        Previous
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn-secondary min-w-28 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                        disabled={!pagination.hasNextPage || complaintsQuery.isFetching}
+                        onClick={() => {
+                          setPage((currentPage) => currentPage + 1);
+                        }}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </section>
         </main>
       </div>
@@ -657,22 +892,42 @@ export function ComplaintsWorkspacePage() {
 
       {selectedComplaintId && complaintDetailQuery.isLoading ? (
         <div
-          className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(31,27,29,0.56)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-[70] overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-label="Loading complaint details"
         >
-          <div className="glass-card grid min-h-72 w-full max-w-2xl place-items-center p-8 text-center">
-            <div>
-              <LoaderCircle className="mx-auto size-10 animate-spin text-[var(--color-deep-plum)]" />
+          <div className="grid min-h-full place-items-center">
+            <div className="relative w-full max-w-2xl overflow-hidden rounded-[2.15rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.90),rgba(240,231,246,0.84))] p-8 text-center shadow-[0_40px_110px_rgba(31,27,29,0.24)] backdrop-blur-3xl sm:p-10">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+              />
 
-              <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
-                Opening complaint details
-              </p>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+              />
 
-              <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                Loading the conversation and case timeline.
-              </p>
+              <div className="relative">
+                <div className="mx-auto grid size-16 place-items-center rounded-3xl border border-white/58 bg-white/34 text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-xl">
+                  <LoaderCircle className="size-8 animate-spin" />
+                </div>
+
+                <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                  Opening complaint details
+                </p>
+
+                <p className="mx-auto mt-3 max-w-md text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                  Loading the conversation, connected records and complete case timeline.
+                </p>
+
+                <div className="mx-auto mt-7 max-w-sm space-y-3">
+                  <div className="h-3 animate-pulse rounded-full bg-[rgba(183,167,200,0.22)]" />
+                  <div className="mx-auto h-3 w-4/5 animate-pulse rounded-full bg-[rgba(175,201,216,0.22)]" />
+                  <div className="mx-auto h-3 w-3/5 animate-pulse rounded-full bg-white/44" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -680,45 +935,74 @@ export function ComplaintsWorkspacePage() {
 
       {selectedComplaintId && complaintDetailQuery.isError ? (
         <div
-          className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(31,27,29,0.56)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-[70] overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="complaint-detail-error-title"
+          onClick={closeComplaintDetails}
         >
-          <div className="glass-card w-full max-w-2xl p-8 text-center">
-            <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
-              <AlertCircle className="size-7" />
-            </div>
-
-            <h2
-              id="complaint-detail-error-title"
-              className="mt-5 text-2xl font-black text-[var(--color-near-black)]"
+          <div className="grid min-h-full place-items-center">
+            <div
+              className="relative w-full max-w-2xl overflow-hidden rounded-[2.15rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.90),rgba(249,235,240,0.84))] p-8 text-center shadow-[0_40px_110px_rgba(31,27,29,0.24)] backdrop-blur-3xl sm:p-10"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
             >
-              Complaint details unavailable
-            </h2>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-[rgba(210,146,160,0.22)] blur-3xl"
+              />
 
-            <p className="mt-3 leading-7 text-[var(--color-charcoal)]/64">
-              The complaint conversation could not be loaded.
-            </p>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+              />
 
-            <div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row">
-              <button
-                type="button"
-                className="btn-secondary justify-center text-sm font-bold"
-                onClick={closeComplaintDetails}
-              >
-                Close
-              </button>
+              <div className="relative">
+                <div className="mx-auto grid size-16 place-items-center rounded-3xl border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.11)] text-[var(--color-muted-burgundy)] shadow-[0_14px_34px_rgba(124,74,90,0.08)]">
+                  <AlertCircle aria-hidden="true" className="size-8" />
+                </div>
 
-              <button
-                type="button"
-                className="btn-primary justify-center text-sm font-bold"
-                onClick={() => {
-                  void complaintDetailQuery.refetch();
-                }}
-              >
-                Try again
-              </button>
+                <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-muted-burgundy)]">
+                  Support case unavailable
+                </p>
+
+                <h2
+                  id="complaint-detail-error-title"
+                  className="mt-3 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+                >
+                  Complaint details could not be opened.
+                </h2>
+
+                <p className="mx-auto mt-4 max-w-md text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
+                  The complaint conversation and case timeline could not be loaded. Try again or
+                  return to the support history.
+                </p>
+
+                <div className="mt-7 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    className="btn-secondary justify-center text-sm font-bold"
+                    onClick={closeComplaintDetails}
+                  >
+                    Close
+                  </button>
+
+                  <button
+                    type="button"
+                    className="group/retry-complaint-details btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                    onClick={() => {
+                      void complaintDetailQuery.refetch();
+                    }}
+                  >
+                    <LoaderCircle
+                      aria-hidden="true"
+                      className="size-4 transition duration-300 group-hover/retry-complaint-details:rotate-12"
+                    />
+                    Try again
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -754,28 +1038,72 @@ export function ComplaintsWorkspacePage() {
 
       {selectedComplaint && !currentUserId ? (
         <div
-          className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(31,27,29,0.56)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-[70] overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="complaint-session-error-title"
+          onClick={closeComplaintDetails}
         >
-          <div className="glass-card w-full max-w-xl p-8 text-center">
-            <AlertCircle className="mx-auto size-9 text-[var(--color-muted-burgundy)]" />
-
-            <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
-              Session information unavailable
-            </p>
-
-            <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
-              Log in again so the complaint conversation can identify your messages correctly.
-            </p>
-
-            <button
-              type="button"
-              className="btn-secondary mt-6 justify-center text-sm font-bold"
-              onClick={closeComplaintDetails}
+          <div className="grid min-h-full place-items-center">
+            <div
+              className="relative w-full max-w-xl overflow-hidden rounded-[2.15rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.90),rgba(249,235,240,0.84))] p-8 text-center shadow-[0_40px_110px_rgba(31,27,29,0.24)] backdrop-blur-3xl sm:p-10"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
             >
-              Close
-            </button>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-[rgba(210,146,160,0.22)] blur-3xl"
+              />
+
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+              />
+
+              <div className="relative">
+                <div className="mx-auto grid size-16 place-items-center rounded-3xl border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.11)] text-[var(--color-muted-burgundy)] shadow-[0_14px_34px_rgba(124,74,90,0.08)]">
+                  <AlertCircle aria-hidden="true" className="size-8" />
+                </div>
+
+                <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-muted-burgundy)]">
+                  Session unavailable
+                </p>
+
+                <h2
+                  id="complaint-session-error-title"
+                  className="mt-3 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+                >
+                  We could not identify your session.
+                </h2>
+
+                <p className="mx-auto mt-4 max-w-md text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
+                  Log in again so the complaint conversation can correctly identify your messages
+                  and available case actions.
+                </p>
+
+                <div className="mt-7 rounded-[1.4rem] border border-white/54 bg-white/32 p-4">
+                  <div className="flex items-start gap-3 text-left">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                      <ShieldAlert aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                      Your complaint data has not been changed. Close this window and sign in again
+                      before continuing.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn-secondary mt-7 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)] sm:w-auto"
+                  onClick={closeComplaintDetails}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}

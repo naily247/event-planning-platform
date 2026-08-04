@@ -345,7 +345,7 @@ const createPublicVendorReview = async ({
     data: {
       ownerId: customer.id,
       name: `Reviewed Event ${createdAt.getTime()}`,
-      eventType: 'Wedding',
+      eventType: 'WEDDING',
       eventDate: new Date('2027-01-15T09:00:00.000Z'),
       location: 'Colombo',
     },
