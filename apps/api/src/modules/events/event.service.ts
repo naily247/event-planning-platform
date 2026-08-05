@@ -12,6 +12,7 @@ const eventSelect = {
   id: true,
   name: true,
   eventType: true,
+  invitationTemplate: true,
   eventDate: true,
   location: true,
   guestCount: true,
@@ -29,6 +30,8 @@ type SelectedEvent = Prisma.EventGetPayload<{
 
 type PrismaEventType = Prisma.EventCreateInput['eventType'];
 
+type PrismaInvitationTemplate = NonNullable<SelectedEvent['invitationTemplate']>;
+
 const eventTypeMap: Record<CreateEventInput['eventType'], PrismaEventType> = {
   Birthday: 'BIRTHDAY',
   Wedding: 'WEDDING',
@@ -38,10 +41,47 @@ const eventTypeMap: Record<CreateEventInput['eventType'], PrismaEventType> = {
   'Baby Shower': 'BABY_SHOWER',
   Engagement: 'ENGAGEMENT',
   Festival: 'FESTIVAL',
+  Anniversary: 'ANNIVERSARY',
+  Reception: 'RECEPTION',
+  'Product Launch': 'PRODUCT_LAUNCH',
+};
+
+const invitationTemplatePrefixMap: Record<PrismaEventType, string> = {
+  BIRTHDAY: 'BIRTHDAY_',
+  WEDDING: 'WEDDING_',
+  GRADUATION: 'GRADUATION_',
+  CORPORATE: 'CORPORATE_',
+  PARTY: 'PARTY_',
+  BABY_SHOWER: 'BABY_SHOWER_',
+  ENGAGEMENT: 'ENGAGEMENT_',
+  FESTIVAL: 'FESTIVAL_',
+  ANNIVERSARY: 'ANNIVERSARY_',
+  RECEPTION: 'RECEPTION_',
+  PRODUCT_LAUNCH: 'PRODUCT_LAUNCH_',
 };
 
 const toEventType = (eventType: CreateEventInput['eventType']): PrismaEventType => {
   return eventTypeMap[eventType];
+};
+
+const invitationTemplateMatchesEventType = (
+  eventType: PrismaEventType,
+  invitationTemplate: PrismaInvitationTemplate,
+) => {
+  return invitationTemplate.startsWith(invitationTemplatePrefixMap[eventType]);
+};
+
+const assertInvitationTemplateMatchesEventType = (
+  eventType: PrismaEventType,
+  invitationTemplate: PrismaInvitationTemplate | null,
+) => {
+  if (invitationTemplate && !invitationTemplateMatchesEventType(eventType, invitationTemplate)) {
+    throw new AppError(
+      400,
+      'Invitation template must match the selected event type',
+      'INVITATION_TEMPLATE_EVENT_TYPE_MISMATCH',
+    );
+  }
 };
 
 const formatEvent = (event: SelectedEvent) => ({
@@ -88,11 +128,17 @@ const getEventOrderBy = (
 };
 
 export const createCustomerEvent = async (ownerId: string, input: CreateEventInput) => {
+  const eventType = toEventType(input.eventType);
+  const invitationTemplate = input.invitationTemplate ?? null;
+
+  assertInvitationTemplateMatchesEventType(eventType, invitationTemplate);
+
   const event = await prisma.event.create({
     data: {
       ownerId,
       name: input.name,
-      eventType: toEventType(input.eventType),
+      eventType,
+      invitationTemplate,
       eventDate: new Date(input.eventDate),
       location: input.location,
       guestCount: input.guestCount ?? null,
@@ -168,6 +214,14 @@ export const updateCustomerEvent = async (
     throw new AppError(409, 'Completed or cancelled events cannot be edited', 'EVENT_NOT_EDITABLE');
   }
 
+  const nextEventType =
+    input.eventType !== undefined ? toEventType(input.eventType) : event.eventType;
+
+  const nextInvitationTemplate =
+    input.invitationTemplate !== undefined ? input.invitationTemplate : event.invitationTemplate;
+
+  assertInvitationTemplateMatchesEventType(nextEventType, nextInvitationTemplate);
+
   const updatedEvent = await prisma.event.update({
     where: {
       id: eventId,
@@ -178,7 +232,11 @@ export const updateCustomerEvent = async (
       }),
 
       ...(input.eventType !== undefined && {
-        eventType: toEventType(input.eventType),
+        eventType: nextEventType,
+      }),
+
+      ...(input.invitationTemplate !== undefined && {
+        invitationTemplate: input.invitationTemplate,
       }),
 
       ...(input.eventDate !== undefined && {

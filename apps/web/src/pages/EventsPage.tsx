@@ -22,46 +22,17 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { PageBackButton } from '../components/navigation/PageBackButton';
-import { api } from '../lib/api';
-
-type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
-
-type CustomerEvent = {
-  id: string;
-  name: string;
-  eventType: string;
-  eventDate: string;
-  location: string;
-  guestCount: number | null;
-  plannedBudget: string | null;
-  theme: string | null;
-  requirements: string | null;
-  status: EventStatus;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type EventPagination = {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-};
-
-type ApiSuccessResponse<T> = {
-  success: true;
-  data: T;
-};
-
-type EventsResponse = {
-  success: true;
-  data: CustomerEvent[];
-  meta: {
-    pagination: EventPagination;
-  };
-};
+import { InvitationTemplateSelector } from '../features/events/InvitationTemplateSelector';
+import {
+  createCustomerEvent,
+  eventInvitationTemplateOptions,
+  eventTypeOptions,
+  getCustomerEvents,
+  type CreateEventPayload,
+  type EventInvitationTemplate,
+  type EventStatus,
+  type EventTypeOption,
+} from '../features/events/event.api';
 
 type ApiErrorResponse = {
   success?: false;
@@ -71,19 +42,6 @@ type ApiErrorResponse = {
     code?: string;
   };
 };
-
-const eventTypeOptions = [
-  'Birthday',
-  'Wedding',
-  'Graduation',
-  'Corporate',
-  'Party',
-  'Baby Shower',
-  'Engagement',
-  'Festival',
-] as const;
-
-type EventTypeOption = (typeof eventTypeOptions)[number];
 
 type EventPreviewTheme = {
   eyebrow: string;
@@ -101,7 +59,7 @@ type EventPreviewTheme = {
     | 'festival';
 };
 
-const eventPreviewThemes: Record<EventTypeOption, EventPreviewTheme> = {
+const eventPreviewThemes: Partial<Record<EventTypeOption, EventPreviewTheme>> = {
   Birthday: {
     eyebrow: 'A joyful celebration',
     helper: 'Ribbon, confetti and playful stationery details.',
@@ -175,98 +133,99 @@ const eventPreviewThemes: Record<EventTypeOption, EventPreviewTheme> = {
   },
 };
 
-const createEventFormSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, 'Event name must be at least 3 characters.')
-    .max(120, 'Event name cannot exceed 120 characters.'),
+const createEventFormSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(3, 'Event name must be at least 3 characters.')
+      .max(120, 'Event name cannot exceed 120 characters.'),
 
-  eventType: z.enum(eventTypeOptions, {
-    message: 'Choose an event type.',
-  }),
+    eventType: z.enum(eventTypeOptions, {
+      message: 'Choose an event type.',
+    }),
 
-  eventDate: z
-    .string()
-    .min(1, 'Choose the event date and time.')
-    .refine(
+    invitationTemplate: z.union([z.literal(''), z.enum(eventInvitationTemplateOptions)]),
+
+    eventDate: z
+      .string()
+      .min(1, 'Choose the event date and time.')
+      .refine(
+        (value) => {
+          const date = new Date(value);
+
+          return Number.isFinite(date.getTime()) && date.getTime() > Date.now();
+        },
+        {
+          message: 'Event date must be in the future.',
+        },
+      ),
+
+    location: z
+      .string()
+      .trim()
+      .min(2, 'Location must be at least 2 characters.')
+      .max(200, 'Location cannot exceed 200 characters.'),
+
+    guestCount: z.string().refine(
       (value) => {
-        const date = new Date(value);
+        if (!value.trim()) {
+          return true;
+        }
 
-        return Number.isFinite(date.getTime()) && date.getTime() > Date.now();
+        const guestCount = Number(value);
+
+        return Number.isInteger(guestCount) && guestCount > 0 && guestCount <= 1_000_000;
       },
       {
-        message: 'Event date must be in the future.',
+        message: 'Guest count must be a positive whole number.',
       },
     ),
 
-  location: z
-    .string()
-    .trim()
-    .min(2, 'Location must be at least 2 characters.')
-    .max(200, 'Location cannot exceed 200 characters.'),
+    plannedBudget: z.string().refine(
+      (value) => {
+        if (!value.trim()) {
+          return true;
+        }
 
-  guestCount: z.string().refine(
-    (value) => {
-      if (!value.trim()) {
-        return true;
-      }
+        const budget = Number(value);
 
-      const guestCount = Number(value);
+        return Number.isFinite(budget) && budget > 0 && budget <= 9_999_999_999.99;
+      },
+      {
+        message: 'Planned budget must be greater than zero.',
+      },
+    ),
 
-      return Number.isInteger(guestCount) && guestCount > 0 && guestCount <= 1_000_000;
-    },
-    {
-      message: 'Guest count must be a positive whole number.',
-    },
-  ),
+    theme: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value.length === 0 || value.length >= 2,
+        'Theme must be at least 2 characters.',
+      )
+      .refine((value) => value.length <= 200, 'Theme cannot exceed 200 characters.'),
 
-  plannedBudget: z.string().refine(
-    (value) => {
-      if (!value.trim()) {
-        return true;
-      }
-
-      const budget = Number(value);
-
-      return Number.isFinite(budget) && budget > 0 && budget <= 9_999_999_999.99;
-    },
-    {
-      message: 'Planned budget must be greater than zero.',
-    },
-  ),
-
-  theme: z
-    .string()
-    .trim()
-    .refine(
-      (value) => value.length === 0 || value.length >= 2,
-      'Theme must be at least 2 characters.',
-    )
-    .refine((value) => value.length <= 200, 'Theme cannot exceed 200 characters.'),
-
-  requirements: z
-    .string()
-    .trim()
-    .refine(
-      (value) => value.length === 0 || value.length >= 10,
-      'Requirements must be at least 10 characters.',
-    )
-    .refine((value) => value.length <= 5000, 'Requirements cannot exceed 5000 characters.'),
-});
+    requirements: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value.length === 0 || value.length >= 10,
+        'Requirements must be at least 10 characters.',
+      )
+      .refine((value) => value.length <= 5000, 'Requirements cannot exceed 5000 characters.'),
+  })
+  .superRefine((values, ctx) => {
+    if (values.invitationTemplate === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['invitationTemplate'],
+        message: 'Choose an invitation design.',
+      });
+    }
+  });
 
 type CreateEventFormValues = z.infer<typeof createEventFormSchema>;
-
-type CreateEventPayload = {
-  name: string;
-  eventType: string;
-  eventDate: string;
-  location: string;
-  guestCount?: number;
-  plannedBudget?: number;
-  theme?: string;
-  requirements?: string;
-};
 
 const eventStatuses: Array<{ value: 'ALL' | EventStatus; label: string }> = [
   { value: 'ALL', label: 'All statuses' },
@@ -522,6 +481,7 @@ export function EventsPage() {
     defaultValues: {
       name: '',
       eventType: undefined,
+      invitationTemplate: '',
       eventDate: '',
       location: '',
       guestCount: '',
@@ -531,65 +491,72 @@ export function EventsPage() {
     },
   });
 
-const previewEventType = form.watch('eventType');
-const previewName = form.watch('name');
-const previewDate = form.watch('eventDate');
-const previewLocation = form.watch('location');
-const previewGuestCount = form.watch('guestCount');
-const previewBudget = form.watch('plannedBudget');
-const previewThemeName = form.watch('theme');
+  const previewEventType = form.watch('eventType');
+  const selectedInvitationTemplate = form.watch('invitationTemplate');
+  const previewName = form.watch('name');
+  const previewDate = form.watch('eventDate');
+  const previewLocation = form.watch('location');
+  const previewGuestCount = form.watch('guestCount');
+  const previewBudget = form.watch('plannedBudget');
+  const previewThemeName = form.watch('theme');
 
-const selectedPreviewType: EventTypeOption = eventTypeOptions.includes(
-  previewEventType as EventTypeOption,
-)
-  ? (previewEventType as EventTypeOption)
-  : 'Birthday';
+  const selectedPreviewType: EventTypeOption = eventTypeOptions.includes(
+    previewEventType as EventTypeOption,
+  )
+    ? (previewEventType as EventTypeOption)
+    : 'Birthday';
 
-const selectedPreviewTheme =
-  eventPreviewThemes[selectedPreviewType] ?? eventPreviewThemes.Birthday;
+  const defaultPreviewTheme: EventPreviewTheme = eventPreviewThemes.Birthday!;
 
-const previewFormattedDate =
-  previewDate && Number.isFinite(new Date(previewDate).getTime())
-    ? new Intl.DateTimeFormat('en-LK', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }).format(new Date(previewDate))
-    : 'Choose a date';
+  const selectedPreviewTheme: EventPreviewTheme =
+    eventPreviewThemes[selectedPreviewType] ?? defaultPreviewTheme;
 
-const previewFormattedBudget =
-  previewBudget && Number.isFinite(Number(previewBudget))
-    ? new Intl.NumberFormat('en-LK', {
-        style: 'currency',
-        currency: 'LKR',
-        maximumFractionDigits: 0,
-      }).format(Number(previewBudget))
-    : 'Budget not set';
+  const previewFormattedDate =
+    previewDate && Number.isFinite(new Date(previewDate).getTime())
+      ? new Intl.DateTimeFormat('en-LK', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }).format(new Date(previewDate))
+      : 'Choose a date';
+
+  const previewFormattedBudget =
+    previewBudget && Number.isFinite(Number(previewBudget))
+      ? new Intl.NumberFormat('en-LK', {
+          style: 'currency',
+          currency: 'LKR',
+          maximumFractionDigits: 0,
+        }).format(Number(previewBudget))
+      : 'Budget not set';
+
+  useEffect(() => {
+    if (!previewEventType) {
+      form.setValue('invitationTemplate', '', {
+        shouldValidate: false,
+        shouldDirty: false,
+      });
+
+      return;
+    }
+
+    form.setValue('invitationTemplate', '', {
+      shouldValidate: false,
+      shouldDirty: true,
+    });
+  }, [form, previewEventType]);
 
   const eventsQuery = useQuery({
     queryKey: ['customer', 'events'],
-    queryFn: async () => {
-      const response = await api.get<EventsResponse>('/events', {
-        params: {
-          page: 1,
-          limit: 20,
-          sort: 'upcoming',
-        },
-      });
-
-      return {
-        events: response.data.data,
-        pagination: response.data.meta.pagination,
-      };
-    },
+    queryFn: () =>
+      getCustomerEvents({
+        page: 1,
+        limit: 20,
+        sort: 'upcoming',
+      }),
   });
 
   const createEventMutation = useMutation({
-    mutationFn: async (payload: CreateEventPayload) => {
-      const response = await api.post<ApiSuccessResponse<CustomerEvent>>('/events', payload);
-
-      return response.data.data;
-    },
+    mutationFn: (payload: CreateEventPayload) => createCustomerEvent(payload),
 
     onSuccess: async () => {
       form.reset();
@@ -673,6 +640,7 @@ const previewFormattedBudget =
     createEventMutation.mutate({
       name: values.name.trim(),
       eventType: values.eventType,
+      invitationTemplate: values.invitationTemplate as EventInvitationTemplate,
       eventDate: new Date(values.eventDate).toISOString(),
       location: values.location.trim(),
 
@@ -2206,7 +2174,7 @@ const previewFormattedBudget =
           }}
         >
           <style>
-  {`
+            {`
     @keyframes eventPreviewSwap {
       0% {
         opacity: 0;
@@ -2231,7 +2199,7 @@ const previewFormattedBudget =
       }
     }
   `}
-</style>
+          </style>
           <div className="events-modal-panel mx-auto max-w-6xl">
             <div className="overflow-hidden rounded-[2.25rem] border border-white/62 bg-[rgba(251,247,243,0.94)] shadow-[0_34px_110px_rgba(31,27,29,0.24)] backdrop-blur-2xl">
               <div className="flex items-start justify-between gap-5 border-b border-white/65 px-6 py-6 sm:px-8">
@@ -2323,7 +2291,6 @@ const previewFormattedBudget =
 
                         <select
                           className="form-field"
-    
                           disabled={createEventMutation.isPending}
                           aria-invalid={Boolean(form.formState.errors.eventType)}
                           aria-describedby={
@@ -2353,6 +2320,43 @@ const previewFormattedBudget =
                       </label>
                     </div>
                   </section>
+
+                  {previewEventType ? (
+                    <InvitationTemplateSelector
+                      eventType={previewEventType}
+                      value={
+                        selectedInvitationTemplate
+                          ? (selectedInvitationTemplate as EventInvitationTemplate)
+                          : null
+                      }
+                      disabled={createEventMutation.isPending}
+                      onChange={(template) => {
+                        form.setValue('invitationTemplate', template, {
+                          shouldDirty: true,
+                          shouldTouch: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                    />
+                  ) : (
+                    <section className="border-t border-white/65 pt-7">
+                      <div className="rounded-[1.4rem] border border-dashed border-[rgba(93,58,85,0.20)] bg-white/26 p-5">
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Invitation design
+                        </p>
+
+                        <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/56">
+                          Choose an event type first to view its available invitation designs.
+                        </p>
+                      </div>
+                    </section>
+                  )}
+
+                  {form.formState.errors.invitationTemplate ? (
+                    <p className="-mt-4 text-sm font-bold text-[var(--color-muted-burgundy)]">
+                      {form.formState.errors.invitationTemplate.message}
+                    </p>
+                  ) : null}
 
                   <section className="border-t border-white/65 pt-7">
                     <div className="mb-5 flex items-center gap-3">
@@ -2638,9 +2642,9 @@ const previewFormattedBudget =
                       key={selectedPreviewType}
                       className="event-preview-swap group relative mt-7 min-h-[24rem] origin-center overflow-hidden rounded-[2rem] border border-white/72 p-6 shadow-[0_26px_80px_rgba(31,27,29,0.16)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-[0_32px_90px_rgba(31,27,29,0.20)] sm:p-7"
                       style={{
-  background: selectedPreviewTheme.background,
-  animation: 'eventPreviewSwap 420ms cubic-bezier(0.22, 1, 0.36, 1) both',
-}}
+                        background: selectedPreviewTheme.background,
+                        animation: 'eventPreviewSwap 420ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                      }}
                     >
                       <div
                         aria-hidden="true"

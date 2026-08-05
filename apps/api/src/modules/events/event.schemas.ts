@@ -12,6 +12,55 @@ export const eventTypeOptions = [
   'Baby Shower',
   'Engagement',
   'Festival',
+  'Anniversary',
+  'Reception',
+  'Product Launch',
+] as const;
+
+export const eventInvitationTemplateOptions = [
+  'BIRTHDAY_CONFETTI',
+  'BIRTHDAY_ELEGANT',
+  'BIRTHDAY_NEON',
+
+  'WEDDING_IVORY',
+  'WEDDING_BOTANICAL',
+  'WEDDING_GOLD',
+
+  'BABY_SHOWER_TEDDY',
+  'BABY_SHOWER_CLOUDS',
+  'BABY_SHOWER_STORYBOOK',
+
+  'GRADUATION_CLASSIC',
+  'GRADUATION_MODERN',
+  'GRADUATION_GALA',
+
+  'CORPORATE_MINIMAL',
+  'CORPORATE_PREMIUM',
+  'CORPORATE_EXECUTIVE',
+
+  'PARTY_RETRO',
+  'PARTY_NEON',
+  'PARTY_LUXE',
+
+  'ENGAGEMENT_ROMANCE',
+  'ENGAGEMENT_GARDEN',
+  'ENGAGEMENT_ROSE_GOLD',
+
+  'FESTIVAL_VIBRANT',
+  'FESTIVAL_TRADITIONAL',
+  'FESTIVAL_MODERN',
+
+  'ANNIVERSARY_CLASSIC',
+  'ANNIVERSARY_GOLDEN',
+  'ANNIVERSARY_ROMANTIC',
+
+  'RECEPTION_ELEGANT',
+  'RECEPTION_CRYSTAL',
+  'RECEPTION_GRAND',
+
+  'PRODUCT_LAUNCH_TECH',
+  'PRODUCT_LAUNCH_MINIMAL',
+  'PRODUCT_LAUNCH_PREMIUM',
 ] as const;
 
 export const eventSortOptions = ['upcoming', 'newest', 'oldest'] as const;
@@ -19,6 +68,34 @@ export const eventSortOptions = ['upcoming', 'newest', 'oldest'] as const;
 const eventTypeSchema = z.enum(eventTypeOptions, {
   message: 'Choose a supported event type',
 });
+
+const eventInvitationTemplateSchema = z.enum(eventInvitationTemplateOptions, {
+  message: 'Choose a supported invitation template',
+});
+
+type EventTypeOption = (typeof eventTypeOptions)[number];
+type EventInvitationTemplateOption = (typeof eventInvitationTemplateOptions)[number];
+
+const eventTypeTemplatePrefixes: Record<EventTypeOption, string> = {
+  Birthday: 'BIRTHDAY_',
+  Wedding: 'WEDDING_',
+  Graduation: 'GRADUATION_',
+  Corporate: 'CORPORATE_',
+  Party: 'PARTY_',
+  'Baby Shower': 'BABY_SHOWER_',
+  Engagement: 'ENGAGEMENT_',
+  Festival: 'FESTIVAL_',
+  Anniversary: 'ANNIVERSARY_',
+  Reception: 'RECEPTION_',
+  'Product Launch': 'PRODUCT_LAUNCH_',
+};
+
+const templateMatchesEventType = (
+  eventType: EventTypeOption,
+  invitationTemplate: EventInvitationTemplateOption,
+) => {
+  return invitationTemplate.startsWith(eventTypeTemplatePrefixes[eventType]);
+};
 
 const plannedBudgetSchema = z.coerce
   .number()
@@ -38,29 +115,44 @@ const eventDateSchema = z
   });
 
 export const createEventSchema = z.object({
-  body: z.object({
-    name: z.string().trim().min(3).max(120),
+  body: z
+    .object({
+      name: z.string().trim().min(3).max(120),
 
-    eventType: eventTypeSchema,
+      eventType: eventTypeSchema,
 
-    eventDate: eventDateSchema,
+      invitationTemplate: eventInvitationTemplateSchema.nullable().optional(),
 
-    location: z.string().trim().min(2).max(200),
+      eventDate: eventDateSchema,
 
-    guestCount: z.coerce
-      .number()
-      .int('Guest count must be a whole number')
-      .positive('Guest count must be greater than zero')
-      .max(1_000_000, 'Guest count is too large')
-      .nullable()
-      .optional(),
+      location: z.string().trim().min(2).max(200),
 
-    plannedBudget: plannedBudgetSchema.nullable().optional(),
+      guestCount: z.coerce
+        .number()
+        .int('Guest count must be a whole number')
+        .positive('Guest count must be greater than zero')
+        .max(1_000_000, 'Guest count is too large')
+        .nullable()
+        .optional(),
 
-    theme: z.string().trim().min(2).max(200).nullable().optional(),
+      plannedBudget: plannedBudgetSchema.nullable().optional(),
 
-    requirements: z.string().trim().min(10).max(5000).nullable().optional(),
-  }),
+      theme: z.string().trim().min(2).max(200).nullable().optional(),
+
+      requirements: z.string().trim().min(10).max(5000).nullable().optional(),
+    })
+    .superRefine((body, ctx) => {
+      if (
+        body.invitationTemplate &&
+        !templateMatchesEventType(body.eventType, body.invitationTemplate)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['invitationTemplate'],
+          message: 'Invitation template must match the selected event type',
+        });
+      }
+    }),
 });
 
 export const getCustomerEventsSchema = z.object({
@@ -92,6 +184,8 @@ export const updateCustomerEventSchema = z.object({
 
       eventType: eventTypeSchema.optional(),
 
+      invitationTemplate: eventInvitationTemplateSchema.nullable().optional(),
+
       eventDate: eventDateSchema.optional(),
 
       location: z.string().trim().min(2).max(200).optional(),
@@ -110,8 +204,27 @@ export const updateCustomerEventSchema = z.object({
 
       requirements: z.string().trim().min(10).max(5000).nullable().optional(),
     })
-    .refine((body) => Object.keys(body).length > 0, {
-      message: 'At least one event field must be provided',
+    .superRefine((body, ctx) => {
+      if (Object.keys(body).length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'At least one event field must be provided',
+        });
+
+        return;
+      }
+
+      if (
+        body.eventType &&
+        body.invitationTemplate &&
+        !templateMatchesEventType(body.eventType, body.invitationTemplate)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['invitationTemplate'],
+          message: 'Invitation template must match the selected event type',
+        });
+      }
     }),
 });
 
@@ -127,7 +240,7 @@ export const updateCustomerEventStatusSchema = z.object({
 
 export const deleteCustomerEventSchema = getCustomerEventSchema;
 
-export type EventTypeOption = (typeof eventTypeOptions)[number];
+export type { EventInvitationTemplateOption, EventTypeOption };
 
 export type CreateEventInput = z.infer<typeof createEventSchema>['body'];
 
