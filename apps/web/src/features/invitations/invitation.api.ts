@@ -1,5 +1,5 @@
 import { api } from '../../lib/api';
-
+import type { EventInvitationTemplate, EventTypeOption } from '../events/event.api';
 export const invitationStatuses = [
   'active',
   'expired',
@@ -94,7 +94,8 @@ export type PublicInvitation = {
   event: {
     id: string;
     name: string;
-    eventType: string;
+    eventType: EventTypeOption;
+    invitationTemplate: EventInvitationTemplate | null;
     eventDate: string;
     location: string;
     theme: string | null;

@@ -25,6 +25,7 @@ import {
   type PublicInvitation,
   type PublicRsvpStatus,
 } from '../features/invitations/invitation.api';
+import { InvitationHero } from '../features/events/InvitationHero';
 
 type ApiErrorResponse = {
   success?: false;
@@ -272,50 +273,13 @@ export function PublicInvitationPage() {
         </header>
 
         <main className="py-9 sm:py-11">
-          <section className="relative overflow-hidden rounded-[2.3rem] border border-white/30 px-1 py-4 sm:px-4 sm:py-8">
-            <div className="pointer-events-none absolute left-[4%] top-2 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.30)] blur-3xl" />
-            <div className="pointer-events-none absolute right-[4%] top-10 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.25)] blur-3xl" />
-
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.4fr] lg:items-end">
-              <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                  <Sparkles className="size-4" />
-                  You’re invited
-                </div>
-
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
-                  Hello {invitation.guest.firstName}, let’s celebrate together.
-                </h2>
-
-                <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                  Review the event details, confirm your attendance and share anything the host
-                  should know about your party.
-                </p>
-              </div>
-
-              <div className="glass-card relative overflow-hidden p-6">
-                <div className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full bg-[rgba(183,167,200,0.24)] blur-2xl" />
-
-                <div className="relative">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
-                    <Clock3 className="size-5" />
-                  </div>
-
-                  <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                    Invitation expires
-                  </p>
-
-                  <p className="mt-2 text-xl font-black leading-7 tracking-[-0.035em] text-[var(--color-near-black)]">
-                    {formatDateTime(invitation.invitation.expiresAt)}
-                  </p>
-
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                    Submit or update your response before this deadline.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
+          <InvitationHero
+            eventName={invitation.event.name}
+            eventType={invitation.event.eventType}
+            invitationTemplate={invitation.event.invitationTemplate}
+            guestFirstName={invitation.guest.firstName}
+            expiresAt={invitation.invitation.expiresAt}
+          />
 
           <section className="mt-7 grid gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
             <aside className="space-y-5 lg:sticky lg:top-6">

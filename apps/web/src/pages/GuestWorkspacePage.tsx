@@ -62,20 +62,23 @@ const guestFormSchema = z.object({
     .string()
     .trim()
     .refine(
-      (value) => value.length === 0 || z.string().email().safeParse(value).success,
-      'Enter a valid email address.',
+      (value) => value.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+      'Enter a valid email address, such as sample@gmail.com.',
     ),
 
   phone: z
     .string()
     .trim()
     .refine(
-      (value) => value.length === 0 || value.length >= 7,
-      'Phone number must contain at least 7 characters.',
-    )
-    .refine((value) => value.length <= 30, 'Phone number cannot exceed 30 characters.'),
+      (value) =>
+        value.length === 0 ||
+        /^0\d{9}$/.test(value) ||
+        /^94\d{9}$/.test(value) ||
+        /^\+94\d{9}$/.test(value),
+      'Enter 10 digits starting with 0, 11 digits starting with 94, or +94 followed by 9 digits.',
+    ),
 
-  groupName: z.string().trim().max(100, 'Group name cannot exceed 100 characters.'),
+  groupName: z.enum(['', 'Friends', 'Family', 'Partners', 'Others']),
 
   status: z.enum(guestStatuses),
 
@@ -145,6 +148,19 @@ const formatEventDate = (value: string) =>
 
 const formatGuestName = (guest: Guest) => `${guest.firstName} ${guest.lastName}`.trim();
 
+const normalizeGuestGroup = (groupName: string | null): GuestFormValues['groupName'] => {
+  switch (groupName) {
+    case 'Friends':
+    case 'Family':
+    case 'Partners':
+    case 'Others':
+      return groupName;
+
+    default:
+      return '';
+  }
+};
+
 export function GuestWorkspacePage() {
   const { eventId } = useParams<{ eventId: string }>();
 
@@ -161,6 +177,8 @@ export function GuestWorkspacePage() {
 
   const guestForm = useForm<GuestFormValues>({
     resolver: zodResolver(guestFormSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -380,7 +398,7 @@ export function GuestWorkspacePage() {
       lastName: guest.lastName,
       email: guest.email ?? '',
       phone: guest.phone ?? '',
-      groupName: guest.groupName ?? '',
+      groupName: normalizeGuestGroup(guest.groupName),
       status: guest.status,
       partySize: String(guest.partySize),
       mealPreference: guest.mealPreference ?? '',
@@ -566,37 +584,6 @@ export function GuestWorkspacePage() {
   const pagination = guestsQuery.data.pagination;
   const isGuestMutationPending = createGuestMutation.isPending || updateGuestMutation.isPending;
 
-  const summaryCards = [
-    {
-      label: 'Guest records',
-      value: guestSummary.summary.totalGuests,
-      helper: `${guestSummary.summary.totalExpectedAttendees} expected attendees`,
-      icon: UsersRound,
-      tone: 'bg-[rgba(183,167,200,0.26)] text-[var(--color-deep-plum)]',
-    },
-    {
-      label: 'Confirmed',
-      value: guestSummary.summary.confirmed,
-      helper: `${guestSummary.summary.confirmedAttendees} attending`,
-      icon: UserCheck,
-      tone: 'bg-[linear-gradient(145deg,rgba(142,151,115,0.30),rgba(214,222,190,0.42))] text-[#3d452f]',
-    },
-    {
-      label: 'Awaiting response',
-      value: guestSummary.summary.invited + guestSummary.summary.notInvited,
-      helper: `${guestSummary.summary.invited} already invited`,
-      icon: Clock3,
-      tone: 'bg-[rgba(175,201,216,0.34)] text-[#334954]',
-    },
-    {
-      label: 'Declined',
-      value: guestSummary.summary.declined,
-      helper: `${guestSummary.summary.maybe} marked maybe`,
-      icon: UserX,
-      tone: 'bg-[linear-gradient(145deg,rgba(142,92,103,0.20),rgba(226,196,202,0.40))] text-[var(--color-rosewood)]',
-    },
-  ];
-
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -625,211 +612,182 @@ export function GuestWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-[8%] top-8 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
-            <div className="pointer-events-none absolute right-[8%] top-14 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
+          <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
+            <img
+              src="/images/workspaces/shortcuts/guests.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.94] contrast-[0.99] transition duration-1000"
+            />
 
-            <div className="relative grid gap-7 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-              <div className="flex flex-col justify-center">
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+            />
+
+            <div className="relative flex min-h-[17rem] flex-col justify-between gap-3">
+              <div className="max-w-[35rem]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
                   <Sparkles aria-hidden="true" className="size-4" />
                   Guest planning
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl sm:leading-[0.98] lg:text-[3.65rem]">
-                  Keep every guest, response and party detail organised.
-                </h2>
+                <div className="mt-2.5 max-w-[32rem] rounded-[1.3rem] border border-white/44 bg-white/[0.15] px-5 py-3 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px]">
+                  <h2 className="max-w-[30rem] text-balance text-[2rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.2rem] lg:text-[2.35rem]">
+                    Keep every guest,
+                    <br />
+                    response and party detail organised.
+                  </h2>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/70 sm:text-lg sm:leading-8">
-                  Manage contact details, party sizes, groups, meal preferences, dietary needs and
-                  RSVP responses from one workspace.
-                </p>
+                  <p className="mt-2.5 max-w-[30rem] text-sm font-semibold leading-5.5 text-[var(--color-charcoal)]/70">
+                    Manage contacts, party sizes, groups, meal preferences, dietary needs and RSVP
+                    responses from one organised workspace.
+                  </p>
 
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <div className="soft-chip">
-                    <UsersRound
-                      aria-hidden="true"
-                      className="size-4 text-[var(--color-deep-plum)]"
-                    />
-                    {guestSummary.summary.totalExpectedAttendees} expected attendees
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      className="group/hero-add-guest btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      onClick={openGuestForm}
+                    >
+                      <UserRoundPlus
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/hero-add-guest:scale-105"
+                      />
+                      Add guest
+                    </button>
+
+                    <span className="rounded-full border border-white/72 bg-white/46 px-4 py-2 text-xs font-black uppercase tracking-[0.13em] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                      <Clock3 aria-hidden="true" className="mr-1.5 inline size-3.5" />
+                      {formatEventDate(guestSummary.event.eventDate)}
+                    </span>
                   </div>
 
-                  <div className="soft-chip">
-                    <MailCheck
-                      aria-hidden="true"
-                      className="size-4 text-[var(--color-deep-plum)]"
-                    />
-                    {guestSummary.summary.respondedGuests} responses
-                  </div>
+                  <div className="mt-3 max-w-[26rem] rounded-[1.1rem] border border-white/56 bg-white/34 px-4 py-2.5 backdrop-blur-xl">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/48">
+                          RSVP response rate
+                        </p>
 
-                  <div className="soft-chip">
-                    <Clock3 aria-hidden="true" className="size-4 text-[var(--color-deep-plum)]" />
+                        <p className="mt-1 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/54">
+                          {guestSummary.summary.respondedGuests} of{' '}
+                          {guestSummary.summary.invitedGuests} invited guests responded
+                        </p>
+                      </div>
 
-                    {formatEventDate(guestSummary.event.eventDate)}
+                      <p className="text-sm font-black text-[var(--color-deep-plum)]">
+                        {guestSummary.summary.responseRate}%
+                      </p>
+                    </div>
+
+                    <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700"
+                        style={{
+                          width: `${Math.min(
+                            Math.max(guestSummary.summary.responseRate, 0),
+                            100,
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <aside className="group/response relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.28)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.32)] sm:p-7">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-white/10 blur-3xl"
-                />
+              <div className="grid max-w-[49rem] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <article className="group/guest-metric rounded-[1.3rem] border border-white/68 bg-white/40 px-4 py-3 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/guest-metric:scale-105">
+                    <UsersRound aria-hidden="true" className="size-4" />
+                  </span>
 
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-24 -left-20 size-56 rounded-full bg-[rgba(175,201,216,0.10)] blur-3xl"
-                />
+                  <p className="mt-2.5 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Guest records
+                  </p>
 
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/50">
-                        RSVP response rate
-                      </p>
+                  <p className="mt-1.5 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {guestSummary.summary.totalGuests}
+                  </p>
 
-                      <p className="mt-3 text-4xl font-black tracking-[-0.055em] sm:text-5xl">
-                        {guestSummary.summary.responseRate}%
-                      </p>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {guestSummary.summary.totalExpectedAttendees} expected attendees
+                  </p>
+                </article>
 
-                      <p className="mt-2 text-sm font-semibold text-white/58">
-                        {guestSummary.summary.respondedGuests} of{' '}
-                        {guestSummary.summary.invitedGuests} invited guests responded
-                      </p>
-                    </div>
+                <article className="group/guest-metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.50)] px-4 py-3 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#596449] transition duration-300 group-hover/guest-metric:scale-105">
+                    <UserCheck aria-hidden="true" className="size-4" />
+                  </span>
 
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/response:-translate-y-0.5 group-hover/response:scale-105">
-                      <MailCheck aria-hidden="true" className="size-5" />
-                    </span>
-                  </div>
+                  <p className="mt-2.5 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Confirmed
+                  </p>
 
-                  <div className="mt-7 h-2.5 overflow-hidden rounded-full bg-white/12">
-                    <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.24)] transition-[width] duration-700"
-                      style={{
-                        width: `${Math.min(Math.max(guestSummary.summary.responseRate, 0), 100)}%`,
-                      }}
-                    />
-                  </div>
+                  <p className="mt-1.5 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {guestSummary.summary.confirmed}
+                  </p>
 
-                  <div className="mt-7 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Confirmed
-                      </p>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {guestSummary.summary.confirmedAttendees} attending
+                  </p>
+                </article>
 
-                      <p className="mt-2 text-2xl font-black">{guestSummary.summary.confirmed}</p>
+                <article className="group/guest-metric rounded-[1.3rem] border border-white/68 bg-[rgba(240,247,250,0.48)] px-4 py-3 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954] transition duration-300 group-hover/guest-metric:scale-105">
+                    <Clock3 aria-hidden="true" className="size-4" />
+                  </span>
 
-                      <p className="mt-1 text-xs font-semibold text-white/48">
-                        {guestSummary.summary.confirmedAttendees} attending
-                      </p>
-                    </div>
+                  <p className="mt-2.5 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Awaiting response
+                  </p>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Awaiting
-                      </p>
+                  <p className="mt-1.5 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {guestSummary.summary.invited + guestSummary.summary.notInvited}
+                  </p>
 
-                      <p className="mt-2 text-2xl font-black">
-                        {guestSummary.summary.invited + guestSummary.summary.notInvited}
-                      </p>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {guestSummary.summary.invited} already invited
+                  </p>
+                </article>
 
-                      <p className="mt-1 text-xs font-semibold text-white/48">
-                        Still needs attention
-                      </p>
-                    </div>
+                <article className="group/guest-metric rounded-[1.3rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(249,235,240,0.52)] px-4 py-3 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] transition duration-300 group-hover/guest-metric:scale-105">
+                    <UserX aria-hidden="true" className="size-4" />
+                  </span>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Maybe
-                      </p>
+                  <p className="mt-2.5 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Declined
+                  </p>
 
-                      <p className="mt-2 text-2xl font-black">{guestSummary.summary.maybe}</p>
-                    </div>
+                  <p className="mt-1.5 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-muted-burgundy)]">
+                    {guestSummary.summary.declined}
+                  </p>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Declined
-                      </p>
-
-                      <p className="mt-2 text-2xl font-black">{guestSummary.summary.declined}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-5">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/42">
-                        Expected attendance
-                      </p>
-
-                      <p className="mt-1 text-sm font-black text-white/82">
-                        {guestSummary.summary.totalExpectedAttendees} people currently expected
-                      </p>
-                    </div>
-
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.22)] text-[#e7efd5]">
-                      <UsersRound aria-hidden="true" className="size-4" />
-                    </span>
-                  </div>
-                </div>
-              </aside>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {guestSummary.summary.maybe} marked maybe
+                  </p>
+                </article>
+              </div>
             </div>
           </section>
 
-          <section className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {summaryCards.map(({ label, value, helper, icon: Icon, tone }) => (
-              <article
-                key={label}
-                className={`group/guest-summary luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/95 hover:shadow-[0_30px_72px_rgba(31,27,29,0.14)] ${
-                  label === 'Guest records'
-                    ? 'bg-white/50 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(225,208,234,0.92))]'
-                    : label === 'Confirmed'
-                      ? 'bg-white/50 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(210,222,181,0.90))]'
-                      : label === 'Awaiting response'
-                        ? 'bg-white/50 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(198,223,234,0.92))]'
-                        : 'bg-white/50 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(232,196,205,0.92))]'
-                }`}
-              >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -right-16 -top-16 size-44 rounded-full blur-3xl opacity-50 transition duration-500 group-hover/guest-summary:scale-125 group-hover/guest-summary:opacity-100 ${
-                    label === 'Guest records'
-                      ? 'bg-[rgba(164,126,184,0.42)]'
-                      : label === 'Confirmed'
-                        ? 'bg-[rgba(142,151,115,0.40)]'
-                        : label === 'Awaiting response'
-                          ? 'bg-[rgba(130,179,201,0.42)]'
-                          : 'bg-[rgba(170,100,117,0.40)]'
-                  }`}
-                />
-
-                <div className="relative">
-                  <div
-                    className={`grid size-11 place-items-center rounded-2xl shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/guest-summary:-translate-y-0.5 group-hover/guest-summary:scale-110 group-hover/guest-summary:shadow-[0_14px_30px_rgba(31,27,29,0.12)] ${tone}`}
-                  >
-                    <Icon
-                      aria-hidden="true"
-                      className="size-5 transition duration-300 group-hover/guest-summary:rotate-[4deg]"
-                    />
-                  </div>
-
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/guest-summary:text-[var(--color-rosewood)]/74">
-                    {label}
-                  </p>
-
-                  <p className="mt-3 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/guest-summary:translate-x-0.5 group-hover/guest-summary:text-[var(--color-deep-plum)] sm:text-[2.15rem]">
-                    {value}
-                  </p>
-
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55 transition duration-300 group-hover/guest-summary:text-[var(--color-charcoal)]/68">
-                    {helper}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+          <section className="mt-7 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
             <article className="glass-card p-6 sm:p-7">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
@@ -1320,132 +1278,6 @@ export function GuestWorkspacePage() {
                 </div>
               </article>
 
-              <article className="group/rsvp relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_30px_82px_rgba(93,58,85,0.32)] sm:p-7">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-white/10 blur-3xl"
-                />
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-24 -left-20 size-56 rounded-full bg-[rgba(175,201,216,0.10)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/48">
-                        RSVP overview
-                      </p>
-
-                      <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
-                        Invitation health.
-                      </h2>
-
-                      <p className="mt-3 leading-7 text-white/64">
-                        See which guests have responded and where follow-up is still needed.
-                      </p>
-                    </div>
-
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/rsvp:-translate-y-0.5 group-hover/rsvp:scale-105">
-                      <MailCheck aria-hidden="true" className="size-5" />
-                    </span>
-                  </div>
-
-                  <div className="mt-7 rounded-[1.45rem] border border-white/12 bg-white/[0.07] p-5 backdrop-blur-xl">
-                    <div className="flex items-end justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.17em] text-white/44">
-                          Response rate
-                        </p>
-
-                        <p className="mt-2 text-4xl font-black tracking-[-0.055em]">
-                          {guestSummary.summary.responseRate}%
-                        </p>
-                      </div>
-
-                      <p className="text-right text-xs font-bold leading-5 text-white/46">
-                        {guestSummary.summary.respondedGuests}
-                        <br />
-                        responses
-                      </p>
-                    </div>
-
-                    <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/12">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.24)] transition-[width] duration-700"
-                        style={{
-                          width: `${Math.min(
-                            Math.max(guestSummary.summary.responseRate, 0),
-                            100,
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                    {(
-                      [
-                        {
-                          label: 'Not invited',
-                          value: guestSummary.summary.notInvited,
-                          tone: 'bg-white/[0.07]',
-                        },
-                        {
-                          label: 'Invited',
-                          value: guestSummary.summary.invited,
-                          tone: 'bg-[rgba(175,201,216,0.10)]',
-                        },
-                        {
-                          label: 'Confirmed',
-                          value: guestSummary.summary.confirmed,
-                          tone: 'bg-[rgba(142,151,115,0.18)]',
-                        },
-                        {
-                          label: 'Maybe',
-                          value: guestSummary.summary.maybe,
-                          tone: 'bg-[rgba(183,167,200,0.14)]',
-                        },
-                        {
-                          label: 'Declined',
-                          value: guestSummary.summary.declined,
-                          tone: 'bg-[rgba(142,92,103,0.16)]',
-                        },
-                      ] as const
-                    ).map(({ label, value, tone }) => (
-                      <div
-                        key={label}
-                        className={`rounded-[1.25rem] border border-white/10 px-4 py-3.5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white/18 ${tone}`}
-                      >
-                        <p className="text-xs font-black uppercase tracking-[0.15em] text-white/46">
-                          {label}
-                        </p>
-
-                        <p className="mt-2 text-xl font-black text-white/92">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-5">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/42">
-                        Follow-up needed
-                      </p>
-
-                      <p className="mt-1 text-sm font-black text-white/82">
-                        {guestSummary.summary.invited + guestSummary.summary.notInvited} guests
-                        still need attention
-                      </p>
-                    </div>
-
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-white/72">
-                      <Clock3 aria-hidden="true" className="size-4" />
-                    </span>
-                  </div>
-                </div>
-              </article>
-
               <article className="group/date relative overflow-hidden rounded-[1.75rem] border border-white/64 bg-white/30 p-5 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-white/42 hover:shadow-[0_24px_58px_rgba(31,27,29,0.09)]">
                 <div
                   aria-hidden="true"
@@ -1690,8 +1522,11 @@ export function GuestWorkspacePage() {
                           <input
                             className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
                             type="email"
-                            placeholder="guest@example.com"
+                            inputMode="email"
+                            autoComplete="email"
+                            placeholder="sample@gmail.com"
                             disabled={isGuestMutationPending}
+                            aria-invalid={Boolean(guestForm.formState.errors.email)}
                             {...guestForm.register('email')}
                           />
 
@@ -1721,13 +1556,45 @@ export function GuestWorkspacePage() {
                           <input
                             className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
                             type="tel"
-                            placeholder="+94 77 123 4567"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            placeholder="0771234567 or +94771234567"
                             disabled={isGuestMutationPending}
-                            {...guestForm.register('phone')}
+                            aria-invalid={Boolean(guestForm.formState.errors.phone)}
+                            {...guestForm.register('phone', {
+                              onChange: (event) => {
+                                const rawValue = event.target.value as string;
+                                const startsWithPlus = rawValue.startsWith('+');
+
+                                let nextValue = rawValue.replace(/[^\d+]/g, '');
+
+                                if (startsWithPlus) {
+                                  nextValue = `+${nextValue.replace(/\+/g, '')}`;
+                                } else {
+                                  nextValue = nextValue.replace(/\+/g, '');
+                                }
+
+                                if (nextValue.startsWith('+94')) {
+                                  nextValue = nextValue.slice(0, 12);
+                                } else if (nextValue.startsWith('94')) {
+                                  nextValue = nextValue.slice(0, 11);
+                                } else if (nextValue.startsWith('0')) {
+                                  nextValue = nextValue.slice(0, 10);
+                                } else {
+                                  nextValue = nextValue.slice(0, 11);
+                                }
+
+                                guestForm.setValue('phone', nextValue, {
+                                  shouldDirty: true,
+                                  shouldTouch: true,
+                                  shouldValidate: true,
+                                });
+                              },
+                            })}
                           />
 
                           <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                            Optional. Include the country code where useful.
+                            Use 0771234567, 94771234567 or +94771234567.
                           </p>
 
                           {guestForm.formState.errors.phone ? (
@@ -1780,13 +1647,17 @@ export function GuestWorkspacePage() {
                             Guest group
                           </span>
 
-                          <input
+                          <select
                             className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            type="text"
-                            placeholder="Family"
                             disabled={isGuestMutationPending}
                             {...guestForm.register('groupName')}
-                          />
+                          >
+                            <option value="">No group</option>
+                            <option value="Friends">Friends</option>
+                            <option value="Family">Family</option>
+                            <option value="Partners">Partners</option>
+                            <option value="Others">Others</option>
+                          </select>
                         </label>
 
                         <label className="block">

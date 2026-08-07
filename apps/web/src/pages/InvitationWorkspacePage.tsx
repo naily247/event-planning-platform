@@ -27,32 +27,20 @@ import {
   type InvitationStatusFilter,
   type InvitationWithLink,
 } from '../features/invitations/invitation.api';
-import { api } from '../lib/api';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getGuests, type Guest } from '../features/guests/guest.api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
-
-type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
-
-type CustomerEvent = {
-  id: string;
-  name: string;
-  eventType: string;
-  eventDate: string;
-  location: string;
-  guestCount: number | null;
-  plannedBudget: string | null;
-  theme: string | null;
-  requirements: string | null;
-  status: EventStatus;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type ApiSuccessResponse<T> = {
-  success: true;
-  data: T;
-};
+import { InvitationHero } from '../features/events/InvitationHero';
+import {
+  getCustomerEventById,
+  updateCustomerEvent,
+  type CustomerEvent,
+  type EventInvitationTemplate,
+} from '../features/events/event.api';
+import {
+  getDefaultInvitationTemplate,
+  getInvitationTemplatesForEventType,
+} from '../features/events/invitationTemplates';
 
 type ApiErrorResponse = {
   success?: false;
@@ -80,7 +68,7 @@ const formatEventDate = (value: string) =>
     dateStyle: 'long',
   }).format(new Date(value));
 
-const getEventStatusTone = (status: EventStatus) => {
+const getEventStatusTone = (status: CustomerEvent['status']) => {
   switch (status) {
     case 'ACTIVE':
       return 'blue';
@@ -140,13 +128,48 @@ export function InvitationWorkspacePage() {
   const [sort, setSort] = useState<InvitationSort>('newest');
   const [page, setPage] = useState(1);
 
+  const [selectedInvitationTemplate, setSelectedInvitationTemplate] =
+    useState<EventInvitationTemplate | null>(null);
+
   const eventQuery = useQuery({
     queryKey: ['customer', 'events', eventId],
     enabled: Boolean(eventId),
-    queryFn: async () => {
-      const response = await api.get<ApiSuccessResponse<CustomerEvent>>(`/events/${eventId}`);
+    queryFn: () => getCustomerEventById(eventId!),
+  });
 
-      return response.data.data;
+  useEffect(() => {
+    const event = eventQuery.data;
+
+    if (!event) {
+      return;
+    }
+
+    const defaultTemplate = getDefaultInvitationTemplate(event.eventType);
+
+    setSelectedInvitationTemplate(event.invitationTemplate ?? defaultTemplate?.id ?? null);
+  }, [eventQuery.data?.eventType, eventQuery.data?.id, eventQuery.data?.invitationTemplate]);
+
+  const updateInvitationDesignMutation = useMutation({
+    mutationFn: async () => {
+      if (!eventId || !selectedInvitationTemplate) {
+        throw new Error('Invitation design details are missing.');
+      }
+
+      return updateCustomerEvent(eventId, {
+        invitationTemplate: selectedInvitationTemplate,
+      });
+    },
+
+    onSuccess: async (updatedEvent) => {
+      const defaultTemplate = getDefaultInvitationTemplate(updatedEvent.eventType);
+
+      setSelectedInvitationTemplate(updatedEvent.invitationTemplate ?? defaultTemplate?.id ?? null);
+
+      queryClient.setQueryData(['customer', 'events', eventId], updatedEvent);
+
+      await queryClient.invalidateQueries({
+        queryKey: ['customer', 'events'],
+      });
     },
   });
 
@@ -440,6 +463,16 @@ export function InvitationWorkspacePage() {
   const invitations = invitationsQuery.data.invitations;
   const pagination = invitationsQuery.data.pagination ?? emptyPagination;
 
+  const invitationTemplates = getInvitationTemplatesForEventType(event.eventType);
+  const defaultInvitationTemplate = getDefaultInvitationTemplate(event.eventType);
+
+  const savedInvitationTemplate = event.invitationTemplate ?? defaultInvitationTemplate?.id ?? null;
+
+  const previewInvitationTemplate = selectedInvitationTemplate ?? savedInvitationTemplate;
+
+  const hasInvitationDesignChanges =
+    Boolean(previewInvitationTemplate) && previewInvitationTemplate !== savedInvitationTemplate;
+
   const activeInvitationsOnPage = invitations.filter((invitation) => invitation.isActive).length;
 
   const respondedInvitationsOnPage = invitations.filter(
@@ -483,195 +516,428 @@ export function InvitationWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-[8%] top-8 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl" />
-            <div className="pointer-events-none absolute right-[8%] top-14 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
+          <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
+            <img
+              src="/images/workspaces/shortcuts/invitations.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.94] contrast-[0.99] transition duration-1000"
+            />
 
-            <div className="relative grid gap-7 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-              <div className="flex flex-col justify-center">
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+            />
+
+            <div className="relative flex min-h-[17rem] flex-col justify-between gap-3">
+              <div className="max-w-[35rem]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
                   <Sparkles aria-hidden="true" className="size-4" />
                   Invitation planning
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl sm:leading-[0.98] lg:text-[3.65rem]">
-                  Send, manage and track every invitation.
-                </h2>
+                <div className="mt-2.5 max-w-[32rem] rounded-[1.3rem] border border-white/44 bg-white/[0.15] px-5 py-3 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px]">
+                  <h2 className="max-w-[30rem] text-balance text-[2rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.2rem] lg:text-[2.35rem]">
+                    Send, manage and track every invitation.
+                  </h2>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/70 sm:text-lg sm:leading-8">
-                  Generate secure invitation links, replace expired access, revoke compromised links
-                  and monitor guest responses from one workspace.
-                </p>
+                  <p className="mt-2.5 max-w-[30rem] text-sm font-semibold leading-[1.4rem] text-[var(--color-charcoal)]/70">
+                    Create secure guest links, replace expired access, revoke compromised
+                    invitations and monitor responses from one organised workspace.
+                  </p>
 
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <div className="soft-chip">
-                    <MailCheck
-                      aria-hidden="true"
-                      className="size-4 text-[var(--color-deep-plum)]"
-                    />
-                    {pagination.total} invitations created
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      className="group/hero-create-invitation btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      onClick={openCreateInvitationDialog}
+                    >
+                      <Plus
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/hero-create-invitation:rotate-90"
+                      />
+                      Create invitation
+                    </button>
+
+                    <span className="rounded-full border border-white/72 bg-white/46 px-4 py-2 text-xs font-black uppercase tracking-[0.13em] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                      <Send aria-hidden="true" className="mr-1.5 inline size-3.5" />
+                      {formatEventDate(event.eventDate)}
+                    </span>
                   </div>
 
-                  <div className="soft-chip">
-                    <Check aria-hidden="true" className="size-4 text-[var(--color-deep-plum)]" />
-                    {respondedInvitationsOnPage} responses shown
-                  </div>
+                  <div className="mt-3 max-w-[26rem] rounded-[1.1rem] border border-white/56 bg-white/34 px-4 py-2.5 backdrop-blur-xl">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/48">
+                          Response rate
+                        </p>
 
-                  <div className="soft-chip">
-                    <Send aria-hidden="true" className="size-4 text-[var(--color-deep-plum)]" />
+                        <p className="mt-1 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/54">
+                          {respondedInvitationsOnPage} of {invitations.length} invitations shown
+                          have responses
+                        </p>
+                      </div>
 
-                    {formatEventDate(event.eventDate)}
+                      <p className="text-sm font-black text-[var(--color-deep-plum)]">
+                        {pageResponseRate}%
+                      </p>
+                    </div>
+
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700"
+                        style={{
+                          width: `${Math.min(Math.max(pageResponseRate, 0), 100)}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-              <aside className="group/invitation-health relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.28)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.33)] sm:p-7">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-white/10 blur-3xl"
-                />
 
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-24 -left-20 size-56 rounded-full bg-[rgba(175,201,216,0.10)] blur-3xl"
-                />
+              <div className="grid max-w-[49rem] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <article className="group/invitation-metric rounded-[1.3rem] border border-white/68 bg-white/40 px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/invitation-metric:scale-105">
+                    <MailCheck aria-hidden="true" className="size-4" />
+                  </span>
 
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/50">
-                        Invitation health
-                      </p>
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Total invitations
+                  </p>
 
-                      <p className="mt-3 text-4xl font-black tracking-[-0.055em] sm:text-5xl">
-                        {pageResponseRate}%
-                      </p>
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {pagination.total}
+                  </p>
 
-                      <p className="mt-2 text-sm font-semibold text-white/58">
-                        response rate across the invitations shown
-                      </p>
-                    </div>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {invitations.length} shown on this page
+                  </p>
+                </article>
 
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/invitation-health:-translate-y-0.5 group-hover/invitation-health:scale-105">
-                      <MailCheck aria-hidden="true" className="size-5" />
+                <article className="group/invitation-metric rounded-[1.3rem] border border-white/68 bg-[rgba(240,247,250,0.48)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954] transition duration-300 group-hover/invitation-metric:scale-105">
+                    <Link2 aria-hidden="true" className="size-4" />
+                  </span>
+
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Active
+                  </p>
+
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {activeInvitationsOnPage}
+                  </p>
+
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Ready for guest access
+                  </p>
+                </article>
+
+                <article className="group/invitation-metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.50)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#596449] transition duration-300 group-hover/invitation-metric:scale-105">
+                    <Check aria-hidden="true" className="size-4" />
+                  </span>
+
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Responded
+                  </p>
+
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {respondedInvitationsOnPage}
+                  </p>
+
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Replies on this page
+                  </p>
+                </article>
+
+                <article className="group/invitation-metric rounded-[1.3rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(249,235,240,0.52)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="grid size-9 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] transition duration-300 group-hover/invitation-metric:scale-105">
+                      <Ban aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <span className="rounded-full border border-[rgba(124,74,90,0.14)] bg-white/38 px-2 py-1 text-[0.52rem] font-black uppercase tracking-[0.12em] text-[var(--color-muted-burgundy)]">
+                      Access status
                     </span>
                   </div>
 
-                  <div className="mt-7 h-2.5 overflow-hidden rounded-full bg-white/12">
-                    <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.24)] transition-[width] duration-700"
-                      style={{
-                        width: `${Math.min(Math.max(pageResponseRate, 0), 100)}%`,
-                      }}
-                    />
-                  </div>
-
-                  <div className="mt-7 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Active
-                      </p>
-
-                      <p className="mt-2 text-2xl font-black">{activeInvitationsOnPage}</p>
-
-                      <p className="mt-1 text-xs font-semibold text-white/48">
-                        Ready for guest access
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(142,151,115,0.16)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(142,151,115,0.22)]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Responded
-                      </p>
-
-                      <p className="mt-2 text-2xl font-black">{respondedInvitationsOnPage}</p>
-
-                      <p className="mt-1 text-xs font-semibold text-white/48">
-                        Guest replies received
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.07] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.11]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                  <div className="mt-2.5 grid grid-cols-2 divide-x divide-[rgba(124,74,90,0.12)]">
+                    <div className="pr-3">
+                      <p className="text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
                         Expired
                       </p>
 
-                      <p className="mt-2 text-2xl font-black">{expiredInvitationsOnPage}</p>
+                      <p className="mt-1 text-[1.45rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                        {expiredInvitationsOnPage}
+                      </p>
                     </div>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(142,92,103,0.18)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(142,92,103,0.24)]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
+                    <div className="pl-3">
+                      <p className="text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
                         Revoked
                       </p>
 
-                      <p className="mt-2 text-2xl font-black">{revokedInvitationsOnPage}</p>
+                      <p className="mt-1 text-[1.45rem] font-black tracking-[-0.05em] text-[var(--color-muted-burgundy)]">
+                        {revokedInvitationsOnPage}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-5">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/42">
-                        Current view
-                      </p>
-
-                      <p className="mt-1 text-sm font-black text-white/82">
-                        {invitations.length} of {pagination.total} invitations shown
-                      </p>
-                    </div>
-
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-white/72">
-                      <Link2 aria-hidden="true" className="size-4" />
-                    </span>
-                  </div>
-                </div>
-              </aside>
+                  <p className="mt-1.5 text-[0.66rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Links that no longer allow guest access
+                  </p>
+                </article>
+              </div>
             </div>
           </section>
 
-          <section className="mt-12 grid gap-5 sm:grid-cols-3">
-            <article className="group/inv-summary luxe-card relative overflow-hidden border-white/70 bg-white/48 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(236,226,242,0.78))] hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)]">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/inv-summary:scale-125 group-hover/inv-summary:bg-[rgba(183,167,200,0.30)]"
-              />
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42 transition duration-300 group-hover/inv-summary:text-[var(--color-rosewood)]">
-                Total invitations
-              </p>
+          <section className="mt-7">
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  Guest-facing design
+                </p>
 
-              <p className="mt-3 text-4xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/inv-summary:-translate-y-0.5 group-hover/inv-summary:text-[var(--color-deep-plum)]">
-                {pagination.total}
-              </p>
-            </article>
+                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                  Choose how your invitation should feel.
+                </h2>
 
-            <article className="group/inv-summary luxe-card relative overflow-hidden border-white/70 bg-white/48 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(236,226,242,0.78))] hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)]">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/inv-summary:scale-125 group-hover/inv-summary:bg-[rgba(183,167,200,0.30)]"
-              />
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42 transition duration-300 group-hover/inv-summary:text-[var(--color-rosewood)]">
-                Active on this page
-              </p>
+                <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                  Preview one of the three curated designs created for this event type. Selecting a
+                  design changes the preview only — nothing is saved until you apply it.
+                </p>
+              </div>
 
-              <p className="mt-3 text-4xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/inv-summary:-translate-y-0.5 group-hover/inv-summary:text-[var(--color-deep-plum)]">
-                {invitations.filter((invitation) => invitation.isActive).length}
-              </p>
-            </article>
+              <span
+                className="status-chip w-fit"
+                data-tone={hasInvitationDesignChanges ? 'plum' : 'green'}
+              >
+                <Sparkles aria-hidden="true" className="size-3.5" />
+                {hasInvitationDesignChanges ? 'Unsaved preview' : 'Design saved'}
+              </span>
+            </div>
 
-            <article className="group/inv-summary luxe-card relative overflow-hidden border-white/70 bg-white/48 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(236,226,242,0.78))] hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)]">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/inv-summary:scale-125 group-hover/inv-summary:bg-[rgba(183,167,200,0.30)]"
-              />
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42 transition duration-300 group-hover/inv-summary:text-[var(--color-rosewood)]">
-                Responded on this page
-              </p>
+            <InvitationHero
+              eventName={event.name}
+              eventType={event.eventType}
+              invitationTemplate={previewInvitationTemplate}
+              mode="preview"
+            />
 
-              <p className="mt-3 text-4xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/inv-summary:-translate-y-0.5 group-hover/inv-summary:text-[var(--color-deep-plum)]">
-                {invitations.filter((invitation) => invitation.hasResponded).length}
-              </p>
-            </article>
+            <div className="mt-6 rounded-[2rem] border border-white/62 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(242,234,246,0.42))] p-5 shadow-[0_20px_55px_rgba(31,27,29,0.06)] backdrop-blur-2xl sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Available designs
+                  </p>
+
+                  <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    Three curated looks for {event.eventType}.
+                  </h3>
+
+                  <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/54">
+                    Each design contains two coordinated artworks while keeping one stable template
+                    ID behind the scenes.
+                  </p>
+                </div>
+
+                <span className="rounded-full border border-white/66 bg-white/42 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)] shadow-[0_8px_22px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                  {invitationTemplates.length} designs
+                </span>
+              </div>
+
+              <div className="mt-6 grid gap-4 lg:grid-cols-3">
+                {invitationTemplates.map((template) => {
+                  const isSelected = previewInvitationTemplate === template.id;
+                  const isSaved = savedInvitationTemplate === template.id;
+                  const primaryArtwork = template.backgrounds[0];
+                  const companionArtwork = template.backgrounds[1];
+
+                  return (
+                    <button
+                      key={template.id}
+                      type="button"
+                      aria-pressed={isSelected}
+                      className={`group/template relative overflow-hidden rounded-[1.7rem] border text-left shadow-[0_16px_40px_rgba(31,27,29,0.06)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 ${
+                        isSelected
+                          ? 'border-[rgba(93,58,85,0.42)] bg-white/72 shadow-[0_22px_54px_rgba(93,58,85,0.14)] ring-2 ring-[rgba(93,58,85,0.12)]'
+                          : 'border-white/62 bg-white/38 hover:-translate-y-1 hover:border-white/88 hover:bg-white/58 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]'
+                      }`}
+                      onClick={() => {
+                        updateInvitationDesignMutation.reset();
+                        setSelectedInvitationTemplate(template.id);
+                      }}
+                    >
+                      <div className="relative aspect-[16/10] overflow-hidden">
+                        <img
+                          src={primaryArtwork.imagePath}
+                          alt={primaryArtwork.alt}
+                          className="size-full object-cover transition duration-700 group-hover/template:scale-[1.035]"
+                        />
+
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_38%,rgba(20,18,21,0.68)_100%)]"
+                        />
+
+                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+                          <div className="min-w-0">
+                            <p className="truncate text-lg font-black tracking-[-0.03em] text-white">
+                              {template.name}
+                            </p>
+
+                            <p className="mt-1 truncate text-xs font-bold uppercase tracking-[0.12em] text-white/72">
+                              {template.previewLabel}
+                            </p>
+                          </div>
+
+                          <div className="relative size-14 shrink-0 overflow-hidden rounded-xl border border-white/42 bg-white/16 shadow-[0_8px_22px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+                            <img
+                              src={companionArtwork.imagePath}
+                              alt=""
+                              aria-hidden="true"
+                              className="size-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                            {template.description}
+                          </p>
+
+                          <span
+                            className={`grid size-8 shrink-0 place-items-center rounded-full border transition duration-300 ${
+                              isSelected
+                                ? 'border-[rgba(93,58,85,0.24)] bg-[var(--color-deep-plum)] text-white'
+                                : 'border-white/66 bg-white/40 text-transparent'
+                            }`}
+                          >
+                            <Check aria-hidden="true" className="size-4" />
+                          </span>
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {isSelected ? (
+                            <span className="status-chip" data-tone="plum">
+                              Selected
+                            </span>
+                          ) : null}
+
+                          {isSaved ? (
+                            <span className="status-chip" data-tone="green">
+                              Saved design
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {updateInvitationDesignMutation.isError ? (
+                <div
+                  role="alert"
+                  className="mt-5 rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                      <CircleAlert aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                        Invitation design could not be saved
+                      </p>
+
+                      <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                        {updateInvitationDesignMutation.error instanceof Error &&
+                        !axios.isAxiosError(updateInvitationDesignMutation.error)
+                          ? updateInvitationDesignMutation.error.message
+                          : getApiErrorMessage(updateInvitationDesignMutation.error)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {updateInvitationDesignMutation.isSuccess && !hasInvitationDesignChanges ? (
+                <div className="mt-5 rounded-[1.35rem] border border-[rgba(142,151,115,0.24)] bg-[rgba(238,244,224,0.62)] p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#596449]">
+                      <Check aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        Invitation design saved
+                      </p>
+
+                      <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                        New and existing guest invitation links for this event will use this event
+                        design.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="mt-6 flex flex-col gap-4 border-t border-[rgba(93,58,85,0.09)] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-black text-[var(--color-near-black)]">
+                    {hasInvitationDesignChanges
+                      ? 'Your preview has unsaved changes.'
+                      : 'This is the currently saved event design.'}
+                  </p>
+
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                    Design changes are stored at event level and apply to its guest invitations.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn-primary min-w-40 justify-center text-sm font-bold"
+                  disabled={
+                    !hasInvitationDesignChanges ||
+                    !previewInvitationTemplate ||
+                    updateInvitationDesignMutation.isPending
+                  }
+                  onClick={() => {
+                    updateInvitationDesignMutation.mutate();
+                  }}
+                >
+                  {updateInvitationDesignMutation.isPending ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <Sparkles aria-hidden="true" className="size-4" />
+                  )}
+
+                  {updateInvitationDesignMutation.isPending ? 'Applying design...' : 'Apply design'}
+                </button>
+              </div>
+            </div>
           </section>
 
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+          <section className="mt-7 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
             <article className="glass-card p-6 sm:p-7">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
@@ -769,7 +1035,7 @@ export function InvitationWorkspacePage() {
                   {invitations.map((invitation) => (
                     <article
                       key={invitation.id}
-                      className="group/invitation relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.80),rgba(233,224,241,0.58))] hover:shadow-[0_28px_68px_rgba(31,27,29,0.11)] sm:p-6"
+                      className="group/invitation relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-4 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.80),rgba(233,224,241,0.58))] hover:shadow-[0_28px_68px_rgba(31,27,29,0.11)] sm:p-5"
                     >
                       <div
                         aria-hidden="true"
@@ -856,7 +1122,7 @@ export function InvitationWorkspacePage() {
                           </div>
                         </div>
 
-                        <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-5 text-sm sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="mt-5 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-4 text-sm sm:grid-cols-2 xl:grid-cols-3">
                           <div className="rounded-2xl border border-white/45 bg-white/22 p-4 transition duration-300 group-hover/invitation:border-white/72 group-hover/invitation:bg-white/38">
                             <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                               Guest status
@@ -1067,127 +1333,6 @@ export function InvitationWorkspacePage() {
                         {event.guestCount ?? 'Not set'}
                       </p>
                     </div>
-                  </div>
-                </div>
-              </article>
-
-              <article className="group/health relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_30px_82px_rgba(93,58,85,0.32)] sm:p-7">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-white/10 blur-3xl"
-                />
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-24 -left-20 size-56 rounded-full bg-[rgba(175,201,216,0.10)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/48">
-                        Invitation health
-                      </p>
-
-                      <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
-                        Current page status.
-                      </h2>
-
-                      <p className="mt-3 leading-7 text-white/64">
-                        See how the invitations currently shown are progressing.
-                      </p>
-                    </div>
-
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/health:-translate-y-0.5 group-hover/health:scale-105">
-                      <MailCheck aria-hidden="true" className="size-5" />
-                    </span>
-                  </div>
-
-                  <div className="mt-7 rounded-[1.45rem] border border-white/12 bg-white/[0.07] p-5 backdrop-blur-xl">
-                    <div className="flex items-end justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.17em] text-white/44">
-                          Response rate
-                        </p>
-
-                        <p className="mt-2 text-4xl font-black tracking-[-0.055em]">
-                          {pageResponseRate}%
-                        </p>
-                      </div>
-
-                      <p className="text-right text-xs font-bold leading-5 text-white/46">
-                        {respondedInvitationsOnPage}
-                        <br />
-                        responses
-                      </p>
-                    </div>
-
-                    <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/12">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.24)] transition-[width] duration-700"
-                        style={{
-                          width: `${Math.min(Math.max(pageResponseRate, 0), 100)}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.07] px-4 py-3.5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.11]">
-                      <p className="text-xs font-black uppercase tracking-[0.15em] text-white/46">
-                        Active
-                      </p>
-
-                      <p className="mt-2 text-xl font-black text-white/92">
-                        {activeInvitationsOnPage}
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.25rem] border border-white/10 bg-[rgba(142,151,115,0.18)] px-4 py-3.5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(142,151,115,0.24)]">
-                      <p className="text-xs font-black uppercase tracking-[0.15em] text-white/46">
-                        Responded
-                      </p>
-
-                      <p className="mt-2 text-xl font-black text-white/92">
-                        {respondedInvitationsOnPage}
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.07] px-4 py-3.5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.11]">
-                      <p className="text-xs font-black uppercase tracking-[0.15em] text-white/46">
-                        Expired
-                      </p>
-
-                      <p className="mt-2 text-xl font-black text-white/92">
-                        {expiredInvitationsOnPage}
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.25rem] border border-white/10 bg-[rgba(142,92,103,0.18)] px-4 py-3.5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(142,92,103,0.24)]">
-                      <p className="text-xs font-black uppercase tracking-[0.15em] text-white/46">
-                        Revoked
-                      </p>
-
-                      <p className="mt-2 text-xl font-black text-white/92">
-                        {revokedInvitationsOnPage}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-5">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/42">
-                        Current view
-                      </p>
-
-                      <p className="mt-1 text-sm font-black text-white/82">
-                        {invitations.length} of {pagination.total} invitations shown
-                      </p>
-                    </div>
-
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-white/72">
-                      <Link2 aria-hidden="true" className="size-4" />
-                    </span>
                   </div>
                 </div>
               </article>

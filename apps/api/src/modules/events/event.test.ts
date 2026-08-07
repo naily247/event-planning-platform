@@ -127,7 +127,7 @@ describe('Customer event management API', () => {
 
       expect(response.body.data).toMatchObject({
         name: 'Maya and Arjun Wedding',
-        eventType: 'Wedding',
+        eventType: 'WEDDING',
         location: 'Colombo',
         guestCount: 250,
         plannedBudget: '2500000.00',
@@ -152,6 +152,31 @@ describe('Customer event management API', () => {
       expect(response.body.success).toBe(false);
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
     });
+    it('creates the initial draft status history entry', async () => {
+  const registrationResponse = await registerCustomer(customerPayload);
+
+  const accessToken = registrationResponse.body.data.accessToken;
+
+  const createdEvent = await createEventRequest(accessToken);
+
+  const eventDetails = await request(app)
+    .get(`/api/v1/events/${createdEvent.body.data.id}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+
+  expect(eventDetails.status).toBe(200);
+
+  expect(eventDetails.body.data.statusHistory).toHaveLength(1);
+
+  expect(eventDetails.body.data.statusHistory[0]).toMatchObject({
+    previousStatus: null,
+    newStatus: 'DRAFT',
+    changedById: expect.any(String),
+  });
+
+  expect(eventDetails.body.data.statusHistory[0].changedAt).toEqual(
+    expect.any(String),
+  );
+});
   });
 
   describe('GET /api/v1/events', () => {
@@ -324,7 +349,57 @@ describe('Customer event management API', () => {
       expect(activeResponse.status).toBe(200);
       expect(activeResponse.body.data.status).toBe('ACTIVE');
     });
+it('records every status transition in chronological order', async () => {
+  const registrationResponse = await registerCustomer(customerPayload);
 
+  const accessToken = registrationResponse.body.data.accessToken;
+
+  const createdEvent = await createEventRequest(accessToken);
+
+  await request(app)
+    .patch(`/api/v1/events/${createdEvent.body.data.id}/status`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send({
+      status: 'PLANNING',
+    });
+
+  await request(app)
+    .patch(`/api/v1/events/${createdEvent.body.data.id}/status`)
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send({
+      status: 'ACTIVE',
+    });
+
+  const eventDetails = await request(app)
+    .get(`/api/v1/events/${createdEvent.body.data.id}`)
+    .set('Authorization', `Bearer ${accessToken}`);
+
+  expect(eventDetails.status).toBe(200);
+
+  const history = eventDetails.body.data.statusHistory;
+
+  expect(history).toHaveLength(3);
+
+  expect(history.map((entry: any) => entry.newStatus)).toEqual([
+    'DRAFT',
+    'PLANNING',
+    'ACTIVE',
+  ]);
+
+  expect(history[1]).toMatchObject({
+    previousStatus: 'DRAFT',
+    newStatus: 'PLANNING',
+  });
+
+  expect(history[2]).toMatchObject({
+    previousStatus: 'PLANNING',
+    newStatus: 'ACTIVE',
+  });
+
+  history.forEach((entry: any) => {
+    expect(entry.changedAt).toEqual(expect.any(String));
+  });
+});
     it('rejects an invalid status transition', async () => {
       const registrationResponse = await registerCustomer(customerPayload);
 

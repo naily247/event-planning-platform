@@ -735,43 +735,6 @@ export function BudgetWorkspacePage() {
 
   const budgetUsagePercentage = getBudgetUsagePercentage(summary);
 
-  const summaryCards = [
-    {
-      label: 'Planned budget',
-      value: formatCurrency(summary.summary.plannedBudget),
-      helper: 'Total event estimate',
-      icon: WalletCards,
-      tone: 'bg-[rgba(183,167,200,0.26)] text-[var(--color-deep-plum)]',
-    },
-    {
-      label: 'Committed',
-      value: formatCurrency(summary.summary.totalCommitted),
-      helper: 'Bookings and active expenses',
-      icon: CreditCard,
-      tone: 'bg-[rgba(175,201,216,0.34)] text-[#334954]',
-    },
-    {
-      label: 'Paid',
-      value: formatCurrency(summary.summary.totalPaid),
-      helper: 'Verified and paid costs',
-      icon: ReceiptText,
-      tone: 'bg-[rgba(142,151,115,0.24)] text-[#3d452f]',
-    },
-    {
-      label: summary.summary.isOverBudget ? 'Over budget' : 'Remaining',
-      value: summary.summary.isOverBudget
-        ? formatCurrency(summary.summary.overBudgetAmount)
-        : formatCurrency(summary.summary.remainingBudget),
-      helper: summary.summary.isOverBudget
-        ? 'Amount above planned budget'
-        : 'Available event budget',
-      icon: PiggyBank,
-      tone: summary.summary.isOverBudget
-        ? 'bg-[rgba(142,92,103,0.18)] text-[var(--color-rosewood)]'
-        : 'bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]',
-    },
-  ];
-
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -800,299 +763,205 @@ export function BudgetWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <style>
-            {`
-    @keyframes budgetHealthEnter {
-      0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.985);
-      }
+          <section className="relative isolate min-h-[27rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-7 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-8 sm:py-8 lg:px-10 lg:py-9">
+            <img
+              src="/images/workspaces/shortcuts/budget.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.94] contrast-[0.99] transition duration-1000"
+            />
 
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
+            />
 
-    @keyframes budgetIconFloat {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
+            />
 
-      50% {
-        transform: translateY(-5px);
-      }
-    }
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
+            />
 
-    @keyframes budgetProgressReveal {
-      0% {
-        transform: scaleX(0);
-      }
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+            />
 
-      100% {
-        transform: scaleX(1);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .budget-health-enter,
-      .budget-icon-float,
-      .budget-progress-reveal {
-        animation: none !important;
-      }
-    }
-  `}
-          </style>
-          <section className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-[4%] top-10 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.25)] blur-3xl" />
-            <div className="pointer-events-none absolute right-[7%] top-8 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
-
-            <div className="relative grid gap-7 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch">
-              <div className="flex flex-col justify-center">
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                  <Sparkles className="size-4" />
+            <div className="relative flex min-h-[21.5rem] flex-col justify-between gap-5">
+              <div className="max-w-[35rem]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                  <Sparkles aria-hidden="true" className="size-4" />
                   Financial planning
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl sm:leading-[0.98] lg:text-6xl">
-                  Keep every event cost clear and under control.
-                </h2>
+                <div className="mt-4 max-w-[33rem] rounded-[1.4rem] border border-white/44 bg-white/[0.15] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px] sm:px-6">
+                  <h2 className="max-w-[31rem] text-balance text-[2.15rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.35rem] lg:text-[2.5rem]">
+                    Keep every event cost clear and under control.
+                  </h2>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/70 sm:mt-6 sm:text-lg sm:leading-8">
-                  Track allocations, expenses, paid costs and vendor commitments from one organised
-                  financial workspace.
-                </p>
+                  <p className="mt-3 max-w-[31rem] text-sm font-semibold leading-6 text-[var(--color-charcoal)]/70">
+                    Track allocations, expenses, paid costs and vendor commitments from one
+                    organised financial workspace.
+                  </p>
 
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <div className="soft-chip">
-                    <CircleDollarSign className="size-4 text-[var(--color-deep-plum)]" />
-                    {summary.counts.budgetCategories} categories
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      className="group/hero-add-expense btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      onClick={openExpenseForm}
+                    >
+                      <Plus
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/hero-add-expense:rotate-90"
+                      />
+                      Add expense
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/56 hover:shadow-[0_14px_32px_rgba(31,27,29,0.09)]"
+                      onClick={openCategoryForm}
+                    >
+                      <WalletCards aria-hidden="true" className="size-4" />
+                      Add category
+                    </button>
+
+                    <span
+                      className="status-chip"
+                      data-tone={summary.summary.isOverBudget ? 'rose' : 'green'}
+                    >
+                      {summary.summary.isOverBudget ? 'Needs attention' : 'On track'}
+                    </span>
                   </div>
 
-                  <div className="soft-chip">
-                    <ReceiptText className="size-4 text-[var(--color-deep-plum)]" />
-                    {summary.counts.plannedExpenses + summary.counts.paidExpenses} expenses
-                  </div>
+                  <div className="mt-4 max-w-[27rem] rounded-[1.15rem] border border-white/56 bg-white/34 px-4 py-3 backdrop-blur-xl">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/48">
+                        Budget committed
+                      </p>
 
-                  <div className="soft-chip">
-                    <CreditCard className="size-4 text-[var(--color-deep-plum)]" />
-                    {formatCurrency(summary.summary.totalCommitted)} committed
+                      <p className="text-xs font-black text-[var(--color-deep-plum)]">
+                        {Math.round(budgetUsagePercentage)}%
+                      </p>
+                    </div>
+
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                      <div
+                        className={
+                          summary.summary.isOverBudget
+                            ? 'h-full rounded-full bg-[linear-gradient(90deg,var(--color-muted-burgundy),#cf98a5)] transition-[width] duration-700'
+                            : 'h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700'
+                        }
+                        style={{
+                          width: `${budgetUsagePercentage}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <aside className="budget-health-enter group/health relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.34)] sm:p-7 [animation:budgetHealthEnter_560ms_cubic-bezier(0.22,1,0.36,1)_both]">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-white/10 blur-3xl"
-                />
+              <div className="grid max-w-[49rem] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <article className="group/budget-metric rounded-[1.3rem] border border-white/68 bg-white/40 px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/budget-metric:scale-105">
+                    <WalletCards aria-hidden="true" className="size-4" />
+                  </span>
 
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/50">
-                        Budget health
-                      </p>
+                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Planned
+                  </p>
 
-                      <p className="mt-3 text-4xl font-black tracking-[-0.055em] sm:text-5xl">
-                        {Math.round(budgetUsagePercentage)}%
-                      </p>
+                  <p className="mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {formatCurrency(summary.summary.plannedBudget)}
+                  </p>
 
-                      <p className="mt-2 text-sm font-semibold text-white/58">
-                        of the planned budget committed
-                      </p>
-                    </div>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Total event estimate
+                  </p>
+                </article>
 
-                    <span className="budget-icon-float grid size-12 shrink-0 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/health:scale-105 [animation:budgetIconFloat_2.8s_ease-in-out_infinite]">
-                      <PiggyBank className="size-5" />
-                    </span>
-                  </div>
+                <article className="group/budget-metric rounded-[1.3rem] border border-white/68 bg-[rgba(240,247,250,0.46)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954] transition duration-300 group-hover/budget-metric:scale-105">
+                    <CreditCard aria-hidden="true" className="size-4" />
+                  </span>
 
-                  <div className="mt-7 h-2.5 overflow-hidden rounded-full bg-white/12">
-                    <div
-                      className="budget-progress-reveal h-full origin-left rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.28)] transition-[width] duration-700 [animation:budgetProgressReveal_900ms_cubic-bezier(0.22,1,0.36,1)_180ms_both]"
-                      style={{
-                        width: `${budgetUsagePercentage}%`,
-                      }}
-                    />
-                  </div>
+                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Committed
+                  </p>
 
-                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Planned
-                      </p>
+                  <p className="mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {formatCurrency(summary.summary.totalCommitted)}
+                  </p>
 
-                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
-                        {formatCurrency(summary.summary.plannedBudget)}
-                      </p>
-                    </div>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Bookings and expenses
+                  </p>
+                </article>
 
-                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Committed
-                      </p>
+                <article className="group/budget-metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.48)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#3d452f] transition duration-300 group-hover/budget-metric:scale-105">
+                    <ReceiptText aria-hidden="true" className="size-4" />
+                  </span>
 
-                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
-                        {formatCurrency(summary.summary.totalCommitted)}
-                      </p>
-                    </div>
+                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Paid
+                  </p>
 
-                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Paid
-                      </p>
+                  <p className="mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {formatCurrency(summary.summary.totalPaid)}
+                  </p>
 
-                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
-                        {formatCurrency(summary.summary.totalPaid)}
-                      </p>
-                    </div>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Verified paid costs
+                  </p>
+                </article>
 
-                    <div className="group/health-metric rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        {summary.summary.isOverBudget ? 'Over budget' : 'Remaining'}
-                      </p>
-
-                      <p className="mt-2 text-lg font-black transition duration-300 group-hover/health-metric:translate-x-0.5 group-hover/health-metric:text-white">
-                        {summary.summary.isOverBudget
-                          ? formatCurrency(summary.summary.overBudgetAmount)
-                          : formatCurrency(summary.summary.remainingBudget)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-5">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/42">
-                        Financial position
-                      </p>
-
-                      <p className="mt-1 text-sm font-black text-white/82">
-                        {summary.summary.isOverBudget
-                          ? 'Budget needs attention'
-                          : 'Budget remains within plan'}
-                      </p>
-                    </div>
-
-                    <span
-                      className={
-                        summary.summary.isOverBudget
-                          ? 'status-chip shrink-0 border-white/14 bg-white/10 text-white transition duration-300 group-hover/health:-translate-y-0.5 group-hover/health:bg-white/14'
-                          : 'status-chip shrink-0 border-white/14 bg-[rgba(142,151,115,0.22)] text-[#e7efd5] transition duration-300 group-hover/health:-translate-y-0.5 group-hover/health:bg-[rgba(142,151,115,0.30)]'
-                      }
-                    >
-                      {summary.summary.isOverBudget ? 'Over plan' : 'On track'}
-                    </span>
-                  </div>
-                </div>
-              </aside>
-            </div>
-          </section>
-
-          <section className="mt-12 grid gap-5 lg:grid-cols-[1.2fr_repeat(3,1fr)]">
-            {summaryCards.map(({ label, value, helper, icon: Icon, tone }) => (
-              <article
-                key={label}
-                className={`group/summary-card luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:shadow-[0_28px_68px_rgba(31,27,29,0.12)]
-    ${
-      label === 'Planned budget'
-        ? 'lg:row-span-2 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(247,241,249,0.96))]'
-        : 'bg-white/48'
-    }`}
-              >
-                {label === 'Planned budget' ? (
-                  <>
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-16 size-52 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl transition duration-500 group-hover/summary-card:scale-110 group-hover/summary-card:bg-[rgba(183,167,200,0.28)]"
-                    />
-
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -bottom-16 -left-16 size-44 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl transition duration-500 group-hover/summary-card:scale-110"
-                    />
-
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 220 220"
-                      className="pointer-events-none absolute -bottom-12 -right-10 size-48 opacity-[0.10] transition duration-500 group-hover/summary-card:rotate-6 group-hover/summary-card:scale-105"
-                      fill="none"
-                    >
-                      <circle
-                        cx="110"
-                        cy="110"
-                        r="78"
-                        stroke="rgba(93,58,85,0.72)"
-                        strokeWidth="2"
-                      />
-                      <circle
-                        cx="110"
-                        cy="110"
-                        r="52"
-                        stroke="rgba(142,92,103,0.58)"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M110 32V188M32 110H188"
-                        stroke="rgba(93,58,85,0.36)"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-                  </>
-                ) : null}
-                <div className="relative">
-                  <div
-                    className={`grid size-12 place-items-center rounded-2xl shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/summary-card:-translate-y-0.5 group-hover/summary-card:scale-105 ${tone}`}
+                <article
+                  className={
+                    summary.summary.isOverBudget
+                      ? 'group/budget-metric rounded-[1.3rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(249,235,240,0.52)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]'
+                      : 'group/budget-metric rounded-[1.3rem] border border-white/68 bg-[rgba(248,242,234,0.52)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]'
+                  }
+                >
+                  <span
+                    className={
+                      summary.summary.isOverBudget
+                        ? 'grid size-9 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] transition duration-300 group-hover/budget-metric:scale-105'
+                        : 'grid size-9 place-items-center rounded-xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)] transition duration-300 group-hover/budget-metric:scale-105'
+                    }
                   >
-                    <Icon
-                      aria-hidden="true"
-                      className="size-5 transition duration-300 group-hover/summary-card:rotate-[4deg]"
-                    />
-                  </div>
+                    <PiggyBank aria-hidden="true" className="size-4" />
+                  </span>
 
-                  <p className="mt-7 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/summary-card:text-[var(--color-rosewood)]/72">
-                    {label}
+                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    {summary.summary.isOverBudget ? 'Over budget' : 'Remaining'}
                   </p>
 
                   <p
-                    className={`mt-3 font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/summary-card:translate-x-0.5
-    ${
-      label === 'Planned budget'
-        ? 'text-4xl sm:text-[2.8rem]'
-        : 'text-3xl group-hover/summary-card:text-[var(--color-deep-plum)]'
-    }`}
+                    className={
+                      summary.summary.isOverBudget
+                        ? 'mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-muted-burgundy)]'
+                        : 'mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]'
+                    }
                   >
-                    {value}
+                    {summary.summary.isOverBudget
+                      ? formatCurrency(summary.summary.overBudgetAmount)
+                      : formatCurrency(summary.summary.remainingBudget)}
                   </p>
 
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58 transition duration-300 group-hover/summary-card:text-[var(--color-charcoal)]/68">
-                    {helper}
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {summary.summary.isOverBudget ? 'Amount above plan' : 'Available budget'}
                   </p>
-
-                  {label === 'Planned budget' ? (
-                    <div className="mt-8 rounded-[1.35rem] border border-white/60 bg-white/34 p-4 backdrop-blur-xl transition duration-300 group-hover/summary-card:bg-white/44">
-                      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/45">
-                        <span>Budget usage</span>
-                        <span>{Math.round(budgetUsagePercentage)}%</span>
-                      </div>
-
-                      <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)] shadow-inner">
-                        <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] shadow-[0_0_14px_rgba(142,92,103,0.24)] transition-[width,filter] duration-700 group-hover/summary-card:brightness-110"
-                          style={{
-                            width: `${budgetUsagePercentage}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </article>
-            ))}
+                </article>
+              </div>
+            </div>
           </section>
 
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+          <section className="mt-7 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
             <article className="glass-card p-6 sm:p-7">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>

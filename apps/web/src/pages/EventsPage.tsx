@@ -48,88 +48,107 @@ type EventPreviewTheme = {
   helper: string;
   background: string;
   accent: string;
-  decoration:
-    | 'birthday'
-    | 'wedding'
-    | 'graduation'
-    | 'corporate'
-    | 'party'
-    | 'baby'
-    | 'engagement'
-    | 'festival';
+  image: string;
 };
 
-const eventPreviewThemes: Partial<Record<EventTypeOption, EventPreviewTheme>> = {
+const eventPreviewThemes: Record<EventTypeOption, EventPreviewTheme> = {
   Birthday: {
     eyebrow: 'A joyful celebration',
-    helper: 'Ribbon, confetti and playful stationery details.',
+    helper: 'Balloons, cake and warm celebration details.',
     background:
       'linear-gradient(145deg, rgba(255,252,247,0.99), rgba(247,238,245,0.98) 55%, rgba(218,197,221,0.94))',
     accent: 'linear-gradient(90deg, rgba(183,167,200,1), rgba(214,190,209,1), rgba(93,58,85,1))',
-    decoration: 'birthday',
+    image: '/images/events/previews/birthday.png',
   },
 
   Wedding: {
     eyebrow: 'An elegant ceremony',
-    helper: 'Vellum stationery, botanical details and pearl accents.',
+    helper: 'Floral architecture, candlelight and timeless ceremony details.',
     background:
       'linear-gradient(145deg, rgba(255,252,247,0.99), rgba(250,239,242,0.98) 55%, rgba(225,202,211,0.94))',
     accent: 'linear-gradient(90deg, rgba(199,167,181,1), rgba(226,194,198,1), rgba(142,92,103,1))',
-    decoration: 'wedding',
+    image: '/images/events/previews/wedding.png',
   },
 
   Graduation: {
     eyebrow: 'A milestone achieved',
-    helper: 'Certificate layers, laurel details and warm gold foil.',
+    helper: 'Academic details, celebration staging and restrained metallic accents.',
     background:
       'linear-gradient(145deg, rgba(255,252,247,0.99), rgba(248,245,234,0.98) 55%, rgba(216,219,191,0.94))',
     accent: 'linear-gradient(90deg, rgba(210,207,175,1), rgba(190,188,144,1), rgba(113,117,76,1))',
-    decoration: 'graduation',
+    image: '/images/events/previews/graduation.png',
   },
 
   Corporate: {
     eyebrow: 'Executive planning',
-    helper: 'Structured grids, drafting lines and bronze details.',
+    helper: 'Structured staging, professional lighting and a focused event environment.',
     background:
       'linear-gradient(145deg, rgba(255,252,247,0.99), rgba(243,238,233,0.98) 55%, rgba(206,188,176,0.94))',
     accent: 'linear-gradient(90deg, rgba(188,165,148,1), rgba(157,126,108,1), rgba(88,67,61,1))',
-    decoration: 'corporate',
+    image: '/images/events/previews/corporate.png',
   },
 
   Party: {
     eyebrow: 'An evening to remember',
-    helper: 'Warm venue lights, ticket details and energetic trails.',
+    helper: 'Cocktail lighting, lounge details and energetic nightlife atmosphere.',
     background:
       'linear-gradient(145deg, rgba(255,252,247,0.99), rgba(249,239,236,0.98) 55%, rgba(227,199,190,0.94))',
     accent: 'linear-gradient(90deg, rgba(223,183,174,1), rgba(191,137,137,1), rgba(124,74,90,1))',
-    decoration: 'party',
+    image: '/images/events/previews/party.png',
   },
 
   'Baby Shower': {
     eyebrow: 'A gentle celebration',
-    helper: 'Scalloped stationery, warm stars and dreamy details.',
+    helper: 'Soft balloons, teddy details and a calm nursery-inspired atmosphere.',
     background:
       'linear-gradient(145deg, rgba(255,253,247,0.99), rgba(249,245,230,0.98) 55%, rgba(218,218,191,0.94))',
     accent: 'linear-gradient(90deg, rgba(234,221,181,1), rgba(199,193,151,1), rgba(135,139,94,1))',
-    decoration: 'baby',
+    image: '/images/events/previews/babyshower.png',
   },
 
   Engagement: {
     eyebrow: 'A promise begins',
-    helper: 'Champagne silk, interlocking rings and pearl highlights.',
+    helper: 'Champagne light, floral details and an intimate romantic setting.',
     background:
       'linear-gradient(145deg, rgba(255,253,248,0.99), rgba(250,245,231,0.98) 55%, rgba(231,213,174,0.94))',
     accent: 'linear-gradient(90deg, rgba(235,219,176,1), rgba(205,178,115,1), rgba(150,115,57,1))',
-    decoration: 'engagement',
+    image: '/images/events/previews/engagement.png',
   },
 
   Festival: {
     eyebrow: 'A glowing celebration',
-    helper: 'Hanging lights, festive arches and metallic warmth.',
+    helper: 'Lanterns, rich drapery and vibrant cultural celebration details.',
     background:
       'linear-gradient(145deg, rgba(255,252,246,0.99), rgba(250,237,224,0.98) 55%, rgba(223,183,157,0.94))',
     accent: 'linear-gradient(90deg, rgba(236,187,104,1), rgba(183,111,102,1), rgba(124,74,90,1))',
-    decoration: 'festival',
+    image: '/images/events/previews/festival.png',
+  },
+
+  Anniversary: {
+    eyebrow: 'A story worth celebrating',
+    helper: 'Keepsake memories, candlelight and an intimate milestone atmosphere.',
+    background:
+      'linear-gradient(145deg, rgba(255,252,247,0.99), rgba(247,239,234,0.98) 54%, rgba(214,194,180,0.94))',
+    accent: 'linear-gradient(90deg, rgba(217,194,167,1), rgba(179,143,112,1), rgba(105,72,58,1))',
+    image: '/images/events/previews/anniversary.png',
+  },
+
+  Reception: {
+    eyebrow: 'An evening of elegance',
+    helper: 'Crystal light, ballroom tables and refined formal-evening details.',
+    background:
+      'linear-gradient(145deg, rgba(253,252,255,0.99), rgba(235,238,247,0.98) 54%, rgba(190,202,221,0.94))',
+    accent: 'linear-gradient(90deg, rgba(204,215,232,1), rgba(139,164,193,1), rgba(68,91,122,1))',
+    image: '/images/events/previews/reception.png',
+  },
+
+  'Product Launch': {
+    eyebrow: 'Something new is arriving',
+    helper: 'Futuristic staging, focused lighting and a precise reveal environment.',
+    background:
+      'linear-gradient(145deg, rgba(246,249,253,0.99), rgba(224,232,242,0.98) 54%, rgba(145,166,193,0.94))',
+    accent: 'linear-gradient(90deg, rgba(125,205,235,1), rgba(96,132,188,1), rgba(53,61,93,1))',
+    image: '/images/events/previews/productlaunch.png',
   },
 };
 
@@ -257,151 +276,160 @@ const heroFeatures = [
   },
 ];
 type EventCardStyle = {
+  label: EventTypeOption;
   background: string;
   accent: string;
   glow: string;
   typeColor: string;
+  image: string;
+  imagePosition: string;
 };
 
-const eventCardStyles: Record<string, EventCardStyle> = {
-  wedding: {
-    background:
-      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(250,239,242,0.97) 56%, rgba(225,202,211,0.90) 100%)',
-    accent:
-      'linear-gradient(90deg, rgba(199,167,181,1) 0%, rgba(226,194,198,1) 48%, rgba(142,92,103,1) 100%)',
-    glow: 'rgba(199,167,181,0.24)',
-    typeColor: 'var(--color-rosewood)',
-  },
-
-  birthday: {
+const eventCardStyles: Record<EventTypeOption, EventCardStyle> = {
+  Birthday: {
+    label: 'Birthday',
     background:
       'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(247,238,245,0.97) 56%, rgba(218,197,221,0.90) 100%)',
     accent:
       'linear-gradient(90deg, rgba(183,167,200,1) 0%, rgba(214,190,209,1) 50%, rgba(93,58,85,1) 100%)',
     glow: 'rgba(183,167,200,0.26)',
     typeColor: 'var(--color-deep-plum)',
+    image: '/images/events/previews/birthday.png',
+    imagePosition: '70% center',
   },
 
-  graduation: {
+  Wedding: {
+    label: 'Wedding',
     background:
-      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(248,245,234,0.97) 56%, rgba(216,219,191,0.90) 100%)',
+      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(250,239,242,0.97) 56%, rgba(225,202,211,0.90) 100%)',
     accent:
-      'linear-gradient(90deg, rgba(210,207,175,1) 0%, rgba(190,188,144,1) 48%, rgba(113,117,76,1) 100%)',
-    glow: 'rgba(185,190,139,0.24)',
-    typeColor: '#74784f',
-  },
-
-  corporate: {
-    background:
-      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(243,238,233,0.97) 56%, rgba(206,188,176,0.90) 100%)',
-    accent:
-      'linear-gradient(90deg, rgba(188,165,148,1) 0%, rgba(157,126,108,1) 50%, rgba(88,67,61,1) 100%)',
-    glow: 'rgba(157,126,108,0.22)',
-    typeColor: '#755c50',
-  },
-
-  conference: {
-    background:
-      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(245,238,241,0.97) 56%, rgba(213,194,204,0.90) 100%)',
-    accent:
-      'linear-gradient(90deg, rgba(199,174,187,1) 0%, rgba(167,132,151,1) 50%, rgba(112,76,96,1) 100%)',
-    glow: 'rgba(167,132,151,0.23)',
-    typeColor: '#765065',
-  },
-
-  religious: {
-    background:
-      'linear-gradient(145deg, rgba(255,253,247,0.99) 0%, rgba(249,243,226,0.97) 56%, rgba(229,211,165,0.88) 100%)',
-    accent:
-      'linear-gradient(90deg, rgba(232,217,177,1) 0%, rgba(205,178,115,1) 50%, rgba(150,115,57,1) 100%)',
-    glow: 'rgba(205,178,115,0.22)',
-    typeColor: '#806638',
-  },
-
-  party: {
-    background:
-      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(249,239,236,0.97) 56%, rgba(227,199,190,0.90) 100%)',
-    accent:
-      'linear-gradient(90deg, rgba(223,183,174,1) 0%, rgba(191,137,137,1) 50%, rgba(124,74,90,1) 100%)',
-    glow: 'rgba(191,137,137,0.23)',
-    typeColor: 'var(--color-muted-burgundy)',
-  },
-
-  workshop: {
-    background:
-      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(245,245,235,0.97) 56%, rgba(207,211,180,0.90) 100%)',
-    accent:
-      'linear-gradient(90deg, rgba(210,214,187,1) 0%, rgba(171,179,136,1) 50%, rgba(103,111,71,1) 100%)',
-    glow: 'rgba(171,179,136,0.22)',
-    typeColor: '#687048',
-  },
-
-  default: {
-    background:
-      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(248,240,242,0.97) 56%, rgba(223,207,216,0.88) 100%)',
-    accent:
-      'linear-gradient(90deg, rgba(183,167,200,1) 0%, rgba(205,176,188,1) 50%, rgba(124,74,90,1) 100%)',
-    glow: 'rgba(183,167,200,0.23)',
+      'linear-gradient(90deg, rgba(199,167,181,1) 0%, rgba(226,194,198,1) 48%, rgba(142,92,103,1) 100%)',
+    glow: 'rgba(199,167,181,0.24)',
     typeColor: 'var(--color-rosewood)',
+    image: '/images/events/previews/wedding.png',
+    imagePosition: '70% center',
+  },
+
+  Graduation: {
+    label: 'Graduation',
+    background:
+      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(244,240,235,0.97) 56%, rgba(204,194,184,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(198,184,168,1) 0%, rgba(142,101,94,1) 50%, rgba(54,48,51,1) 100%)',
+    glow: 'rgba(142,101,94,0.23)',
+    typeColor: '#78544f',
+    image: '/images/events/previews/graduation.png',
+    imagePosition: '72% center',
+  },
+
+  Corporate: {
+    label: 'Corporate',
+    background:
+      'linear-gradient(145deg, rgba(250,252,255,0.99) 0%, rgba(234,240,246,0.97) 56%, rgba(185,201,217,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(166,190,211,1) 0%, rgba(91,126,157,1) 50%, rgba(42,57,74,1) 100%)',
+    glow: 'rgba(91,126,157,0.23)',
+    typeColor: '#445f78',
+    image: '/images/events/previews/corporate.png',
+    imagePosition: '72% center',
+  },
+
+  Party: {
+    label: 'Party',
+    background:
+      'linear-gradient(145deg, rgba(255,250,248,0.99) 0%, rgba(248,231,239,0.97) 55%, rgba(205,162,185,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(233,158,154,1) 0%, rgba(181,91,137,1) 48%, rgba(91,43,92,1) 100%)',
+    glow: 'rgba(181,91,137,0.25)',
+    typeColor: '#8d466c',
+    image: '/images/events/previews/party.png',
+    imagePosition: '72% center',
+  },
+
+  'Baby Shower': {
+    label: 'Baby Shower',
+    background:
+      'linear-gradient(145deg, rgba(255,253,247,0.99) 0%, rgba(246,245,230,0.97) 56%, rgba(206,216,194,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(234,221,181,1) 0%, rgba(181,198,169,1) 50%, rgba(104,126,103,1) 100%)',
+    glow: 'rgba(181,198,169,0.25)',
+    typeColor: '#65775f',
+    image: '/images/events/previews/babyshower.png',
+    imagePosition: '72% center',
+  },
+
+  Engagement: {
+    label: 'Engagement',
+    background:
+      'linear-gradient(145deg, rgba(255,253,248,0.99) 0%, rgba(250,242,229,0.97) 56%, rgba(226,201,167,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(235,219,176,1) 0%, rgba(205,178,115,1) 50%, rgba(150,115,57,1) 100%)',
+    glow: 'rgba(205,178,115,0.24)',
+    typeColor: '#856631',
+    image: '/images/events/previews/engagement.png',
+    imagePosition: '72% center',
+  },
+
+  Festival: {
+    label: 'Festival',
+    background:
+      'linear-gradient(145deg, rgba(255,251,245,0.99) 0%, rgba(249,231,216,0.97) 55%, rgba(220,166,142,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(236,187,104,1) 0%, rgba(183,111,102,1) 50%, rgba(124,74,90,1) 100%)',
+    glow: 'rgba(210,139,103,0.25)',
+    typeColor: '#975d51',
+    image: '/images/events/previews/festival.png',
+    imagePosition: '72% center',
+  },
+
+  Anniversary: {
+    label: 'Anniversary',
+    background:
+      'linear-gradient(145deg, rgba(255,252,247,0.99) 0%, rgba(247,239,234,0.97) 55%, rgba(214,194,180,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(217,194,167,1) 0%, rgba(179,143,112,1) 50%, rgba(105,72,58,1) 100%)',
+    glow: 'rgba(179,143,112,0.25)',
+    typeColor: '#755044',
+    image: '/images/events/previews/anniversary.png',
+    imagePosition: '72% center',
+  },
+
+  Reception: {
+    label: 'Reception',
+    background:
+      'linear-gradient(145deg, rgba(253,252,255,0.99) 0%, rgba(235,238,247,0.97) 55%, rgba(190,202,221,0.91) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(204,215,232,1) 0%, rgba(139,164,193,1) 50%, rgba(68,91,122,1) 100%)',
+    glow: 'rgba(139,164,193,0.25)',
+    typeColor: '#506d91',
+    image: '/images/events/previews/reception.png',
+    imagePosition: '72% center',
+  },
+
+  'Product Launch': {
+    label: 'Product Launch',
+    background:
+      'linear-gradient(145deg, rgba(248,251,255,0.99) 0%, rgba(226,235,246,0.97) 54%, rgba(151,172,204,0.92) 100%)',
+    accent:
+      'linear-gradient(90deg, rgba(125,205,235,1) 0%, rgba(96,132,188,1) 48%, rgba(53,61,93,1) 100%)',
+    glow: 'rgba(96,132,188,0.27)',
+    typeColor: '#465f91',
+    image: '/images/events/previews/productlaunch.png',
+    imagePosition: '74% center',
   },
 };
 
+const normalizeEventType = (eventType: string) =>
+  eventType.trim().replaceAll('_', ' ').replace(/\s+/g, ' ').toLowerCase();
+
 const getEventCardStyle = (eventType: string): EventCardStyle => {
-  const normalizedType = eventType.trim().toLowerCase();
+  const normalizedType = normalizeEventType(eventType);
 
-  if (normalizedType.includes('wedding')) {
-    return eventCardStyles.wedding;
-  }
+  const matchedEventType = eventTypeOptions.find(
+    (option) => option.toLowerCase() === normalizedType,
+  );
 
-  if (normalizedType.includes('birthday')) {
-    return eventCardStyles.birthday;
-  }
-
-  if (normalizedType.includes('graduation')) {
-    return eventCardStyles.graduation;
-  }
-
-  if (
-    normalizedType.includes('corporate') ||
-    normalizedType.includes('business') ||
-    normalizedType.includes('product launch')
-  ) {
-    return eventCardStyles.corporate;
-  }
-
-  if (
-    normalizedType.includes('conference') ||
-    normalizedType.includes('seminar') ||
-    normalizedType.includes('summit')
-  ) {
-    return eventCardStyles.conference;
-  }
-
-  if (
-    normalizedType.includes('religious') ||
-    normalizedType.includes('ceremony') ||
-    normalizedType.includes('pooja')
-  ) {
-    return eventCardStyles.religious;
-  }
-
-  if (
-    normalizedType.includes('party') ||
-    normalizedType.includes('celebration') ||
-    normalizedType.includes('engagement')
-  ) {
-    return eventCardStyles.party;
-  }
-
-  if (
-    normalizedType.includes('workshop') ||
-    normalizedType.includes('training') ||
-    normalizedType.includes('class')
-  ) {
-    return eventCardStyles.workshop;
-  }
-
-  return eventCardStyles.default;
+  return matchedEventType ? eventCardStyles[matchedEventType] : eventCardStyles.Birthday;
 };
 
 const getApiErrorMessage = (error: unknown) => {
@@ -506,10 +534,7 @@ export function EventsPage() {
     ? (previewEventType as EventTypeOption)
     : 'Birthday';
 
-  const defaultPreviewTheme: EventPreviewTheme = eventPreviewThemes.Birthday!;
-
-  const selectedPreviewTheme: EventPreviewTheme =
-    eventPreviewThemes[selectedPreviewType] ?? defaultPreviewTheme;
+  const selectedPreviewTheme = eventPreviewThemes[selectedPreviewType];
 
   const previewFormattedDate =
     previewDate && Number.isFinite(new Date(previewDate).getTime())
@@ -1007,17 +1032,6 @@ export function EventsPage() {
                 <div className="relative grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {filteredEvents.map((event, eventIndex) => {
                     const eventCardStyle = getEventCardStyle(event.eventType);
-                    const normalizedEventType = event.eventType.trim().toLowerCase();
-                    const isBirthdayEvent = normalizedEventType.includes('birthday');
-                    const isWeddingEvent = normalizedEventType.includes('wedding');
-                    const isGraduationEvent = normalizedEventType.includes('graduation');
-                    const isCorporateEvent = normalizedEventType.includes('corporate');
-                    const isEngagementEvent = normalizedEventType.includes('engagement');
-                    const isFestivalEvent = normalizedEventType.includes('festival');
-                    const isPartyEvent = normalizedEventType.includes('party');
-                    const isBabyShowerEvent =
-                      normalizedEventType.includes('baby shower') ||
-                      normalizedEventType.includes('babyshower');
 
                     return (
                       <article
@@ -1035,1013 +1049,48 @@ export function EventsPage() {
                           }}
                           aria-label={`Open ${event.name} event workspace`}
                         >
+                          <img
+                            src={eventCardStyle.image}
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 size-full object-cover transition duration-1000 group-hover:scale-[1.035]"
+                            style={{
+                              objectPosition: eventCardStyle.imagePosition,
+                              filter: 'saturate(0.88) contrast(0.94)',
+                            }}
+                          />
+
                           <div
                             aria-hidden="true"
-                            className="pointer-events-none absolute inset-x-0 top-0 h-1.5 shadow-[0_4px_18px_rgba(93,58,85,0.10)]"
+                            className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,248,0.99)_0%,rgba(255,252,248,0.97)_22%,rgba(255,252,248,0.88)_43%,rgba(255,252,248,0.60)_62%,rgba(255,252,248,0.24)_79%,rgba(255,252,248,0.07)_100%)]"
+                          />
+
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,transparent_42%,rgba(31,27,29,0.10)_100%)]"
+                          />
+
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-0 left-0 w-[72%] bg-[radial-gradient(ellipse_at_left,rgba(255,252,248,0.32)_0%,rgba(255,252,248,0.13)_58%,transparent_84%)]"
+                          />
+
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 top-0 z-[4] h-1.5 shadow-[0_4px_18px_rgba(93,58,85,0.10)]"
                             style={{
                               background: eventCardStyle.accent,
                             }}
                           />
-                          <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-y-0 right-0 w-[45%] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.30))] opacity-70 transition duration-700 group-hover:w-[52%] group-hover:opacity-100"
-                          />
 
                           <div
                             aria-hidden="true"
-                            className="pointer-events-none absolute -right-16 -top-14 size-40 rounded-full blur-3xl transition duration-700 group-hover:scale-125 group-hover:opacity-100"
+                            className="pointer-events-none absolute -right-16 -top-14 z-[3] size-40 rounded-full blur-3xl opacity-38 transition duration-700 group-hover:scale-125 group-hover:opacity-60"
                             style={{
                               backgroundColor: eventCardStyle.glow,
-                              opacity:
-                                isBirthdayEvent ||
-                                isWeddingEvent ||
-                                isGraduationEvent ||
-                                isCorporateEvent ||
-                                isEngagementEvent ||
-                                isFestivalEvent ||
-                                isPartyEvent ||
-                                isBabyShowerEvent
-                                  ? 0.38
-                                  : 0.72,
                             }}
                           />
-
-                          {isBirthdayEvent ? (
-                            <>
-                              {/* Birthday — translucent washi tape */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -right-5 top-7 z-[2] h-11 w-40 rotate-[8deg] border-y border-white/35 bg-[linear-gradient(90deg,rgba(225,196,218,0.18),rgba(216,166,188,0.58),rgba(237,196,178,0.42))] shadow-[0_8px_22px_rgba(93,58,85,0.08)] backdrop-blur-[2px] transition duration-700 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:rotate-[5deg]"
-                              >
-                                <div className="absolute inset-y-0 left-3 w-px bg-white/38" />
-                                <div className="absolute inset-y-0 right-4 w-px bg-white/28" />
-                              </div>
-
-                              {/* Birthday — flowing celebration ribbon */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 360 240"
-                                className="pointer-events-none absolute -bottom-7 -right-6 z-[2] h-[78%] w-[72%] overflow-visible opacity-75 transition duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:scale-[1.04] group-hover:opacity-100"
-                                fill="none"
-                              >
-                                <path
-                                  d="M342 26C276 7 259 76 298 104C332 129 322 181 261 184C191 188 206 112 150 111C84 109 91 194 20 213"
-                                  stroke="rgba(124,74,90,0.34)"
-                                  strokeWidth="4"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M349 46C291 35 278 91 309 116C337 139 317 165 280 166C230 167 231 131 192 132C149 133 140 185 91 193"
-                                  stroke="rgba(222,163,178,0.42)"
-                                  strokeWidth="9"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M343 28C282 14 260 72 297 101"
-                                  stroke="rgba(255,255,255,0.58)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-
-                              {/* Birthday — elegant confetti pieces */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[3] opacity-75 transition duration-500 group-hover:opacity-100"
-                              >
-                                <span className="absolute right-[21%] top-[30%] h-1.5 w-4 rotate-[24deg] rounded-full bg-[rgba(124,74,90,0.42)] transition duration-700 group-hover:-translate-y-2 group-hover:rotate-[42deg]" />
-
-                                <span className="absolute right-[10%] top-[45%] size-2 rotate-12 rounded-[0.15rem] border border-[rgba(93,58,85,0.36)] transition duration-700 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:rotate-45" />
-
-                                <span className="absolute right-[34%] top-[54%] h-3 w-1.5 rotate-[-28deg] rounded-full bg-[rgba(226,173,164,0.48)] transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2 group-hover:rotate-[-48deg]" />
-
-                                <span className="absolute bottom-[21%] right-[18%] h-1.5 w-5 rotate-[-14deg] rounded-full bg-[rgba(183,167,200,0.56)] transition duration-700 group-hover:translate-x-2 group-hover:-translate-y-1" />
-
-                                <span className="absolute bottom-[30%] right-[40%] size-2 rotate-45 bg-[rgba(255,255,255,0.72)] shadow-[0_0_12px_rgba(255,255,255,0.82)] transition duration-700 group-hover:scale-125 group-hover:rotate-90" />
-
-                                <span className="absolute right-[44%] top-[28%] text-sm font-black text-[rgba(124,74,90,0.34)] transition duration-700 group-hover:-translate-y-1 group-hover:rotate-12">
-                                  ✦
-                                </span>
-
-                                <span className="absolute bottom-[13%] right-[9%] text-xs font-black text-[rgba(208,143,157,0.42)] transition duration-700 group-hover:translate-x-1 group-hover:-translate-y-2">
-                                  ✦
-                                </span>
-                              </div>
-
-                              {/* Birthday — folded paper corner */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-0 z-[2] size-20 overflow-hidden opacity-80"
-                              >
-                                <div className="absolute -bottom-8 -right-8 size-20 rotate-45 border border-white/48 bg-[linear-gradient(135deg,rgba(255,255,255,0.66),rgba(221,196,214,0.54))] shadow-[-8px_-8px_22px_rgba(93,58,85,0.07)] transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
-                              </div>
-                            </>
-                          ) : null}
-
-                          {isWeddingEvent ? (
-                            <>
-                              {/* Wedding — veil sweep */}
-                              {/* Wedding — translucent vellum sheet */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -right-8 bottom-5 z-[2] h-[72%] w-[62%] rotate-[-4deg] rounded-[1.4rem] border border-white/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.42),rgba(243,218,226,0.16))] shadow-[-12px_14px_34px_rgba(124,74,90,0.06)] backdrop-blur-[1px] transition duration-700 group-hover:-translate-x-2 group-hover:-translate-y-1 group-hover:rotate-[-2deg]"
-                              />
-
-                              {/* Wedding — embossed inner frame */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-[1.05rem] z-[3] rounded-[1.3rem] border border-[rgba(124,74,90,0.10)] opacity-70 transition duration-500 group-hover:border-[rgba(124,74,90,0.18)] group-hover:opacity-100"
-                              />
-
-                              {/* Wedding — pressed botanical corner */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 240 280"
-                                className="pointer-events-none absolute -bottom-6 -right-3 z-[4] h-[76%] w-44 opacity-65 transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2 group-hover:rotate-[-2deg] group-hover:opacity-95"
-                                fill="none"
-                              >
-                                <path
-                                  d="M191 270C160 226 143 184 145 141C147 97 163 59 205 18"
-                                  stroke="rgba(124,74,90,0.26)"
-                                  strokeWidth="2.4"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M154 208C132 194 114 174 102 150"
-                                  stroke="rgba(124,74,90,0.20)"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M160 145C140 129 126 108 119 84"
-                                  stroke="rgba(124,74,90,0.20)"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-
-                                <ellipse
-                                  cx="118"
-                                  cy="162"
-                                  rx="18"
-                                  ry="8"
-                                  transform="rotate(-34 118 162)"
-                                  fill="rgba(214,177,190,0.30)"
-                                />
-
-                                <ellipse
-                                  cx="136"
-                                  cy="112"
-                                  rx="17"
-                                  ry="7.5"
-                                  transform="rotate(29 136 112)"
-                                  fill="rgba(214,177,190,0.26)"
-                                />
-
-                                <ellipse
-                                  cx="170"
-                                  cy="69"
-                                  rx="18"
-                                  ry="8"
-                                  transform="rotate(-27 170 69)"
-                                  fill="rgba(238,213,218,0.44)"
-                                />
-
-                                <ellipse
-                                  cx="169"
-                                  cy="216"
-                                  rx="18"
-                                  ry="8"
-                                  transform="rotate(24 169 216)"
-                                  fill="rgba(238,213,218,0.36)"
-                                />
-
-                                <circle cx="197" cy="39" r="4.5" fill="rgba(255,255,255,0.82)" />
-                                <circle cx="157" cy="134" r="3.5" fill="rgba(255,255,255,0.72)" />
-                                <circle cx="181" cy="191" r="4" fill="rgba(255,255,255,0.76)" />
-                              </svg>
-
-                              {/* Wedding — wax seal */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-7 right-7 z-[5] grid size-14 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[radial-gradient(circle_at_35%_30%,rgba(248,220,227,0.95),rgba(184,126,145,0.62)_62%,rgba(124,74,90,0.38)_100%)] shadow-[0_10px_24px_rgba(124,74,90,0.16)] transition duration-700 group-hover:-translate-y-1 group-hover:rotate-[-4deg] group-hover:scale-105"
-                              >
-                                <span className="text-sm font-black text-white/85">✦</span>
-                              </div>
-
-                              {/* Wedding — botanical branch */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 220 260"
-                                className="pointer-events-none absolute -right-4 top-10 z-[3] h-[72%] w-40 opacity-55 transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:rotate-[-2deg] group-hover:opacity-85"
-                                fill="none"
-                              >
-                                <path
-                                  d="M184 246C136 205 115 163 118 119C121 77 147 45 190 18"
-                                  stroke="rgba(124,74,90,0.28)"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M130 176C111 166 96 151 87 132"
-                                  stroke="rgba(124,74,90,0.22)"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M145 114C128 99 119 82 117 62"
-                                  stroke="rgba(124,74,90,0.22)"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-
-                                <ellipse
-                                  cx="101"
-                                  cy="143"
-                                  rx="14"
-                                  ry="7"
-                                  transform="rotate(-35 101 143)"
-                                  fill="rgba(212,175,190,0.28)"
-                                />
-
-                                <ellipse
-                                  cx="126"
-                                  cy="93"
-                                  rx="13"
-                                  ry="6.5"
-                                  transform="rotate(32 126 93)"
-                                  fill="rgba(212,175,190,0.26)"
-                                />
-
-                                <ellipse
-                                  cx="154"
-                                  cy="54"
-                                  rx="14"
-                                  ry="7"
-                                  transform="rotate(-26 154 54)"
-                                  fill="rgba(238,213,218,0.42)"
-                                />
-
-                                <ellipse
-                                  cx="146"
-                                  cy="195"
-                                  rx="15"
-                                  ry="7"
-                                  transform="rotate(26 146 195)"
-                                  fill="rgba(238,213,218,0.34)"
-                                />
-                              </svg>
-
-                              {/* Wedding — pressed petal */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-8 right-[31%] z-[3] h-16 w-11 rotate-[18deg] rounded-[58%_42%_68%_32%/62%_38%_62%_38%] bg-[linear-gradient(145deg,rgba(242,213,218,0.50),rgba(204,160,176,0.16))] blur-[0.2px] transition duration-700 group-hover:-translate-y-2 group-hover:rotate-[11deg]"
-                              />
-
-                              {/* Wedding — pearl highlights */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[3] transition duration-500"
-                              >
-                                <span className="absolute right-[18%] top-[24%] size-2 rounded-full bg-white/85 shadow-[0_0_10px_rgba(255,255,255,0.92)] transition duration-700 group-hover:-translate-y-1 group-hover:scale-125" />
-
-                                <span className="absolute right-[27%] top-[38%] size-1.5 rounded-full bg-white/72 shadow-[0_0_8px_rgba(255,255,255,0.82)] transition duration-700 group-hover:translate-x-1 group-hover:-translate-y-1" />
-
-                                <span className="absolute bottom-[26%] right-[12%] size-2.5 rounded-full border border-white/75 bg-[rgba(255,249,247,0.68)] shadow-[0_0_12px_rgba(255,255,255,0.70)] transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
-
-                                <span className="absolute bottom-[16%] right-[43%] size-1.5 rounded-full bg-[rgba(241,215,220,0.82)] transition duration-700 group-hover:-translate-y-2" />
-                              </div>
-                            </>
-                          ) : null}
-                          {isGraduationEvent ? (
-                            <>
-                              {/* Graduation — layered certificate sheets */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-6 right-3 z-[2] h-36 w-52 rotate-[5deg] rounded-[1.15rem] border border-white/42 bg-[linear-gradient(145deg,rgba(255,255,255,0.42),rgba(221,214,177,0.20))] shadow-[0_16px_34px_rgba(113,117,76,0.08)] transition duration-700 group-hover:-translate-x-2 group-hover:-translate-y-1 group-hover:rotate-[8deg]"
-                              />
-
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-2 right-8 z-[3] h-36 w-52 rotate-[-3deg] rounded-[1.15rem] border border-white/54 bg-[linear-gradient(145deg,rgba(255,255,255,0.64),rgba(238,231,198,0.34))] shadow-[0_18px_42px_rgba(113,117,76,0.10)] backdrop-blur-[1px] transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2 group-hover:rotate-[-1deg]"
-                              >
-                                <div className="absolute left-5 top-5 h-1.5 w-20 rounded-full bg-[rgba(113,117,76,0.18)]" />
-
-                                <div className="absolute left-5 top-9 h-1 w-28 rounded-full bg-[rgba(113,117,76,0.11)]" />
-
-                                <div className="absolute left-5 top-13 h-1 w-24 rounded-full bg-[rgba(113,117,76,0.09)]" />
-
-                                <div className="absolute inset-x-5 bottom-5 border-t border-[rgba(113,117,76,0.12)]" />
-                              </div>
-
-                              {/* Graduation — gold foil strip */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -right-9 top-9 z-[4] h-10 w-44 rotate-[7deg] bg-[linear-gradient(90deg,rgba(255,244,200,0.12),rgba(214,185,105,0.66),rgba(255,235,171,0.36))] shadow-[0_8px_22px_rgba(150,115,57,0.12)] transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:rotate-[4deg]"
-                              />
-
-                              {/* Graduation — laurel branch */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 220 260"
-                                className="pointer-events-none absolute -right-2 top-[20%] z-[5] h-[68%] w-40 opacity-68 transition duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2 group-hover:rotate-[-2deg] group-hover:opacity-100"
-                                fill="none"
-                              >
-                                <path
-                                  d="M176 246C137 205 117 162 119 117C121 74 145 41 190 16"
-                                  stroke="rgba(113,117,76,0.34)"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                />
-
-                                <ellipse
-                                  cx="128"
-                                  cy="181"
-                                  rx="15"
-                                  ry="7"
-                                  transform="rotate(-33 128 181)"
-                                  fill="rgba(181,184,129,0.34)"
-                                />
-
-                                <ellipse
-                                  cx="119"
-                                  cy="139"
-                                  rx="15"
-                                  ry="7"
-                                  transform="rotate(28 119 139)"
-                                  fill="rgba(181,184,129,0.30)"
-                                />
-
-                                <ellipse
-                                  cx="135"
-                                  cy="101"
-                                  rx="15"
-                                  ry="7"
-                                  transform="rotate(-28 135 101)"
-                                  fill="rgba(214,207,158,0.42)"
-                                />
-
-                                <ellipse
-                                  cx="160"
-                                  cy="61"
-                                  rx="16"
-                                  ry="7"
-                                  transform="rotate(24 160 61)"
-                                  fill="rgba(214,207,158,0.38)"
-                                />
-
-                                <ellipse
-                                  cx="154"
-                                  cy="213"
-                                  rx="16"
-                                  ry="7"
-                                  transform="rotate(27 154 213)"
-                                  fill="rgba(238,226,181,0.34)"
-                                />
-                              </svg>
-
-                              {/* Graduation — embossed seal */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-6 right-8 z-[6] grid size-16 place-items-center rounded-full border border-[rgba(150,115,57,0.18)] bg-[radial-gradient(circle_at_35%_30%,rgba(255,241,190,0.96),rgba(204,168,83,0.72)_58%,rgba(132,103,53,0.44)_100%)] shadow-[0_12px_28px_rgba(150,115,57,0.18)] transition duration-700 group-hover:-translate-y-1 group-hover:rotate-[-5deg] group-hover:scale-105"
-                              >
-                                <span className="text-base font-black text-white/88">✦</span>
-                              </div>
-
-                              {/* Graduation — academic ribbon tails */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-[4.7rem] z-[5] h-14 w-5 rotate-[5deg] bg-[linear-gradient(180deg,rgba(147,122,63,0.64),rgba(100,83,49,0.28))] transition duration-700 group-hover:-translate-y-1 group-hover:rotate-[2deg]"
-                                style={{
-                                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%)',
-                                }}
-                              />
-
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-[3.3rem] z-[5] h-12 w-5 rotate-[-5deg] bg-[linear-gradient(180deg,rgba(214,185,105,0.74),rgba(140,109,57,0.30))] transition duration-700 group-hover:-translate-y-2 group-hover:rotate-[-2deg]"
-                                style={{
-                                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%)',
-                                }}
-                              />
-
-                              {/* Graduation — tiny foil sparkles */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[6] opacity-80 transition duration-500 group-hover:opacity-100"
-                              >
-                                <span className="absolute right-[18%] top-[24%] text-sm font-black text-[rgba(150,115,57,0.50)] transition duration-700 group-hover:-translate-y-2 group-hover:rotate-12">
-                                  ✦
-                                </span>
-
-                                <span className="absolute right-[37%] top-[42%] text-[0.62rem] font-black text-white/82 drop-shadow-[0_0_8px_rgba(255,255,255,0.78)] transition duration-700 group-hover:scale-125">
-                                  ✦
-                                </span>
-
-                                <span className="absolute bottom-[22%] right-[29%] size-1.5 rounded-full bg-[rgba(214,185,105,0.62)] transition duration-700 group-hover:-translate-y-1" />
-                              </div>
-                            </>
-                          ) : null}
-                          {isBabyShowerEvent ? (
-                            <>
-                              {/* Baby Shower — scalloped stationery layer */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-5 right-3 z-[2] h-36 w-52 rotate-[-3deg] rounded-[1.35rem] border border-white/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.56),rgba(235,225,200,0.28))] shadow-[0_16px_38px_rgba(113,117,76,0.08)] backdrop-blur-[1px] transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-1deg]"
-                              >
-                                <div className="absolute inset-x-0 -top-3 flex justify-center gap-1.5">
-                                  {Array.from({ length: 7 }).map((_, scallopIndex) => (
-                                    <span
-                                      key={scallopIndex}
-                                      className="size-6 rounded-full border border-white/46 bg-[rgba(255,251,240,0.72)]"
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-
-                              {/* Baby Shower — cloud paper forms */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -right-7 top-[38%] z-[3] h-24 w-44 opacity-72 transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:opacity-100"
-                              >
-                                <span className="absolute bottom-0 left-2 h-12 w-36 rounded-full border border-white/52 bg-[rgba(255,252,244,0.64)] shadow-[0_12px_26px_rgba(113,117,76,0.06)]" />
-
-                                <span className="absolute bottom-5 left-7 size-16 rounded-full border border-white/48 bg-[rgba(255,252,244,0.72)]" />
-
-                                <span className="absolute bottom-4 left-[4.7rem] size-20 rounded-full border border-white/48 bg-[rgba(255,252,244,0.68)]" />
-
-                                <span className="absolute bottom-3 right-3 size-14 rounded-full border border-white/48 bg-[rgba(255,252,244,0.62)]" />
-                              </div>
-
-                              {/* Baby Shower — crescent moon */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute right-[13%] top-[19%] z-[5] size-20 rounded-full bg-[linear-gradient(145deg,rgba(238,221,173,0.90),rgba(196,174,116,0.52))] shadow-[0_12px_28px_rgba(150,115,57,0.14)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2 group-hover:rotate-[-6deg] group-hover:scale-105"
-                              >
-                                <span className="absolute -right-2 -top-1 size-[4.8rem] rounded-full bg-[rgba(250,243,226,0.96)]" />
-                              </div>
-
-                              {/* Baby Shower — hanging star threads */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 240 260"
-                                className="pointer-events-none absolute -right-1 top-2 z-[4] h-[74%] w-44 overflow-visible opacity-70 transition-all duration-700 group-hover:-translate-y-1 group-hover:opacity-100"
-                                fill="none"
-                              >
-                                <path
-                                  d="M74 0V82"
-                                  stroke="rgba(150,115,57,0.22)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M132 0V112"
-                                  stroke="rgba(150,115,57,0.18)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M186 0V68"
-                                  stroke="rgba(150,115,57,0.20)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M74 82L78 91L88 92L80 98L82 108L74 103L65 108L68 98L60 92L70 91Z"
-                                  fill="rgba(214,185,105,0.52)"
-                                />
-
-                                <path
-                                  d="M132 112L136 121L146 122L138 128L140 138L132 133L123 138L126 128L118 122L128 121Z"
-                                  fill="rgba(183,167,200,0.42)"
-                                />
-
-                                <path
-                                  d="M186 68L190 77L200 78L192 84L194 94L186 89L177 94L180 84L172 78L182 77Z"
-                                  fill="rgba(214,185,105,0.46)"
-                                />
-                              </svg>
-
-                              {/* Baby Shower — tiny dreamy sparkles */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[6] opacity-78 transition-opacity duration-500 group-hover:opacity-100"
-                              >
-                                <span className="absolute right-[34%] top-[24%] text-sm font-black text-[rgba(150,115,57,0.46)] transition-all duration-700 group-hover:-translate-y-2 group-hover:rotate-12">
-                                  ✦
-                                </span>
-
-                                <span className="absolute right-[12%] top-[47%] text-xs font-black text-white/88 drop-shadow-[0_0_9px_rgba(255,255,255,0.86)] transition-all duration-700 group-hover:scale-125">
-                                  ✦
-                                </span>
-
-                                <span className="absolute bottom-[25%] right-[38%] size-1.5 rounded-full bg-[rgba(183,167,200,0.52)] transition-all duration-700 group-hover:-translate-y-1" />
-
-                                <span className="absolute bottom-[18%] right-[15%] size-2 rounded-full bg-[rgba(214,185,105,0.48)] shadow-[0_0_10px_rgba(214,185,105,0.34)] transition-all duration-700 group-hover:-translate-y-2 group-hover:scale-110" />
-                              </div>
-
-                              {/* Baby Shower — soft folded paper corner */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-0 z-[4] size-20 overflow-hidden opacity-80"
-                              >
-                                <div className="absolute -bottom-9 -right-9 size-24 rotate-45 border border-white/42 bg-[linear-gradient(135deg,rgba(255,249,224,0.82),rgba(203,205,166,0.42))] shadow-[-8px_-8px_22px_rgba(113,117,76,0.08)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
-                              </div>
-                            </>
-                          ) : null}
-                          {isCorporateEvent ? (
-                            <>
-                              {/* Corporate — blueprint grid */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[2] opacity-40 transition-opacity duration-500 group-hover:opacity-65"
-                                style={{
-                                  backgroundImage: `
-          linear-gradient(rgba(88,67,61,0.08) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(88,67,61,0.08) 1px, transparent 1px)
-        `,
-                                  backgroundSize: '28px 28px',
-                                  maskImage:
-                                    'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 40%, black 70%, black 100%)',
-                                  WebkitMaskImage:
-                                    'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 40%, black 70%, black 100%)',
-                                }}
-                              />
-
-                              {/* Corporate — architectural guide lines */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute right-7 top-8 z-[3] h-[58%] w-[46%] opacity-55 transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:opacity-85"
-                              >
-                                <span className="absolute left-0 top-0 h-px w-full bg-[rgba(88,67,61,0.24)]" />
-
-                                <span className="absolute left-0 top-[36%] h-px w-[82%] bg-[rgba(88,67,61,0.18)]" />
-
-                                <span className="absolute left-[22%] top-0 h-full w-px bg-[rgba(88,67,61,0.18)]" />
-
-                                <span className="absolute right-[16%] top-[14%] h-[74%] w-px bg-[rgba(88,67,61,0.16)]" />
-
-                                <span className="absolute left-[22%] top-[36%] size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[rgba(88,67,61,0.28)] bg-white/50" />
-
-                                <span className="absolute right-[16%] top-[14%] size-2 translate-x-1/2 -translate-y-1/2 rounded-full border border-[rgba(88,67,61,0.26)] bg-white/46" />
-                              </div>
-
-                              {/* Corporate — bronze drafting strip */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -right-8 top-9 z-[4] h-8 w-48 rotate-[6deg] bg-[linear-gradient(90deg,rgba(188,165,148,0.12),rgba(157,126,108,0.66),rgba(88,67,61,0.24))] shadow-[0_8px_20px_rgba(88,67,61,0.10)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:rotate-[3deg]"
-                              />
-
-                              {/* Corporate — floating information panel */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-4 right-5 z-[5] h-32 w-48 rotate-[-3deg] rounded-[1.05rem] border border-white/46 bg-[linear-gradient(145deg,rgba(255,255,255,0.42),rgba(188,165,148,0.14))] shadow-[0_18px_42px_rgba(88,67,61,0.10)] backdrop-blur-[2px] transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-1deg]"
-                              >
-                                <div className="absolute left-4 top-4 h-1.5 w-20 rounded-full bg-[rgba(88,67,61,0.20)]" />
-
-                                <div className="absolute left-4 top-8 h-1 w-28 rounded-full bg-[rgba(88,67,61,0.12)]" />
-
-                                <div className="absolute left-4 top-12 h-1 w-24 rounded-full bg-[rgba(88,67,61,0.10)]" />
-
-                                <div className="absolute inset-x-4 bottom-8 grid grid-cols-3 gap-2">
-                                  <span className="h-5 rounded-md border border-[rgba(88,67,61,0.12)] bg-white/26" />
-                                  <span className="h-5 rounded-md border border-[rgba(88,67,61,0.12)] bg-white/22" />
-                                  <span className="h-5 rounded-md border border-[rgba(88,67,61,0.12)] bg-white/18" />
-                                </div>
-
-                                <span className="absolute bottom-3 right-4 text-[0.52rem] font-black uppercase tracking-[0.18em] text-[rgba(88,67,61,0.34)]">
-                                  Brief
-                                </span>
-                              </div>
-
-                              {/* Corporate — measurement ticks */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-7 right-[15.5rem] z-[4] flex h-4 items-end gap-1 opacity-65 transition-all duration-700 group-hover:-translate-y-1 group-hover:opacity-90"
-                              >
-                                {Array.from({ length: 9 }).map((_, tickIndex) => (
-                                  <span
-                                    key={tickIndex}
-                                    className={`w-px bg-[rgba(88,67,61,0.34)] ${
-                                      tickIndex % 3 === 0
-                                        ? 'h-4'
-                                        : tickIndex % 2 === 0
-                                          ? 'h-3'
-                                          : 'h-2'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-
-                              {/* Corporate — drafting angle */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 180 180"
-                                className="pointer-events-none absolute -bottom-3 -right-1 z-[3] size-36 opacity-45 transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:opacity-70"
-                                fill="none"
-                              >
-                                <path
-                                  d="M18 162L162 18"
-                                  stroke="rgba(88,67,61,0.28)"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M70 162L162 70"
-                                  stroke="rgba(88,67,61,0.18)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M18 162H70"
-                                  stroke="rgba(88,67,61,0.22)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M162 18V70"
-                                  stroke="rgba(88,67,61,0.22)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-
-                              {/* Corporate — folded blueprint corner */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-0 z-[6] size-20 overflow-hidden opacity-78"
-                              >
-                                <div className="absolute -bottom-9 -right-9 size-24 rotate-45 border border-white/36 bg-[linear-gradient(135deg,rgba(227,216,207,0.76),rgba(120,96,84,0.34))] shadow-[-8px_-8px_22px_rgba(88,67,61,0.09)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
-                              </div>
-                            </>
-                          ) : null}
-                          {isEngagementEvent ? (
-                            <>
-                              {/* Engagement — champagne silk sweep */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 420 250"
-                                className="pointer-events-none absolute -bottom-10 -right-8 z-[2] h-[80%] w-[78%] overflow-visible opacity-70 transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:scale-[1.035] group-hover:opacity-100"
-                                fill="none"
-                              >
-                                <path
-                                  d="M411 42C337 18 313 70 337 112C361 154 334 205 267 201C199 197 191 135 130 140C80 144 52 181 13 217"
-                                  stroke="rgba(255,248,231,0.72)"
-                                  strokeWidth="20"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M411 42C337 18 313 70 337 112C361 154 334 205 267 201C199 197 191 135 130 140C80 144 52 181 13 217"
-                                  stroke="rgba(205,178,115,0.26)"
-                                  strokeWidth="3"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M394 66C342 49 327 89 347 119C366 147 346 174 304 175"
-                                  stroke="rgba(255,255,255,0.58)"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-
-                              {/* Engagement — interlocking rings */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute right-[8%] top-[18%] z-[5] h-32 w-44 transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2 group-hover:rotate-[-2deg]"
-                              >
-                                <span className="absolute left-3 top-5 size-24 rounded-full border-[5px] border-[rgba(197,165,95,0.62)] shadow-[0_8px_20px_rgba(150,115,57,0.14),inset_0_0_10px_rgba(255,255,255,0.42)]" />
-
-                                <span className="absolute right-2 top-8 size-24 rounded-full border-[5px] border-[rgba(224,201,145,0.74)] shadow-[0_8px_22px_rgba(150,115,57,0.16),inset_0_0_10px_rgba(255,255,255,0.50)]" />
-
-                                <span className="absolute right-[2.9rem] top-3 size-5 rotate-45 border border-white/72 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(222,210,183,0.72))] shadow-[0_0_16px_rgba(255,255,255,0.82)] transition-all duration-700 group-hover:-translate-y-1 group-hover:scale-110 group-hover:rotate-90" />
-                              </div>
-
-                              {/* Engagement — floating proposal card */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-3 right-8 z-[4] h-28 w-44 rotate-[-4deg] rounded-[1.1rem] border border-white/52 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(235,218,182,0.20))] shadow-[0_18px_42px_rgba(150,115,57,0.10)] backdrop-blur-[2px] transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-1deg]"
-                              >
-                                <div className="absolute left-4 top-4 h-1.5 w-20 rounded-full bg-[rgba(150,115,57,0.18)]" />
-
-                                <div className="absolute left-4 top-8 h-1 w-28 rounded-full bg-[rgba(150,115,57,0.10)]" />
-
-                                <div className="absolute left-4 top-12 h-1 w-24 rounded-full bg-[rgba(150,115,57,0.08)]" />
-
-                                <span className="absolute bottom-4 right-4 text-[0.56rem] font-black uppercase tracking-[0.17em] text-[rgba(150,115,57,0.38)]">
-                                  A promise
-                                </span>
-                              </div>
-
-                              {/* Engagement — pearl highlights */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[6] opacity-82 transition-opacity duration-500 group-hover:opacity-100"
-                              >
-                                <span className="absolute right-[17%] top-[25%] size-2.5 rounded-full bg-white/88 shadow-[0_0_12px_rgba(255,255,255,0.90)] transition-all duration-700 group-hover:-translate-y-2 group-hover:scale-125" />
-
-                                <span className="absolute right-[34%] top-[39%] size-2 rounded-full border border-white/76 bg-[rgba(255,250,239,0.72)] shadow-[0_0_10px_rgba(255,255,255,0.76)] transition-all duration-700 group-hover:translate-x-1 group-hover:-translate-y-1" />
-
-                                <span className="absolute bottom-[27%] right-[12%] size-3 rounded-full bg-[rgba(244,227,190,0.72)] shadow-[0_0_12px_rgba(244,227,190,0.54)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2" />
-
-                                <span className="absolute bottom-[18%] right-[39%] size-1.5 rounded-full bg-white/78 transition-all duration-700 group-hover:-translate-y-1" />
-                              </div>
-
-                              {/* Engagement — restrained diamond sparkles */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[7]"
-                              >
-                                <span className="absolute right-[15%] top-[17%] text-base font-black text-[rgba(150,115,57,0.54)] drop-shadow-[0_0_8px_rgba(255,238,192,0.58)] transition-all duration-700 group-hover:-translate-y-2 group-hover:rotate-12">
-                                  ✦
-                                </span>
-
-                                <span className="absolute right-[43%] top-[34%] text-[0.65rem] font-black text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.86)] transition-all duration-700 group-hover:scale-125 group-hover:rotate-45">
-                                  ✦
-                                </span>
-
-                                <span className="absolute bottom-[24%] right-[19%] text-xs font-black text-[rgba(205,178,115,0.56)] transition-all duration-700 group-hover:-translate-y-2 group-hover:-rotate-12">
-                                  ✦
-                                </span>
-                              </div>
-
-                              {/* Engagement — champagne folded corner */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-0 z-[5] size-20 overflow-hidden opacity-82"
-                              >
-                                <div className="absolute -bottom-9 -right-9 size-24 rotate-45 border border-white/40 bg-[linear-gradient(135deg,rgba(255,245,218,0.84),rgba(188,151,86,0.36))] shadow-[-8px_-8px_24px_rgba(150,115,57,0.09)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
-                              </div>
-                            </>
-                          ) : null}
-                          {isFestivalEvent ? (
-                            <>
-                              {/* Festival — layered decorative arches */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-20 -right-16 z-[2] size-64 rounded-t-full border-[18px] border-b-0 border-[rgba(176,105,78,0.14)] transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:scale-105"
-                              />
-
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-14 -right-10 z-[3] size-52 rounded-t-full border-[11px] border-b-0 border-[rgba(211,165,95,0.20)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1"
-                              />
-
-                              {/* Festival — hanging ornament threads */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 360 230"
-                                className="pointer-events-none absolute -right-5 top-0 z-[4] h-[62%] w-[68%] overflow-visible opacity-82 transition-all duration-700 group-hover:-translate-y-2 group-hover:opacity-100"
-                                fill="none"
-                              >
-                                <path
-                                  d="M28 0V74"
-                                  stroke="rgba(124,74,90,0.24)"
-                                  strokeWidth="1.5"
-                                />
-
-                                <path
-                                  d="M118 0V103"
-                                  stroke="rgba(150,115,57,0.22)"
-                                  strokeWidth="1.5"
-                                />
-
-                                <path
-                                  d="M211 0V67"
-                                  stroke="rgba(124,74,90,0.22)"
-                                  strokeWidth="1.5"
-                                />
-
-                                <path
-                                  d="M302 0V91"
-                                  stroke="rgba(150,115,57,0.22)"
-                                  strokeWidth="1.5"
-                                />
-
-                                <path
-                                  d="M28 74C14 85 14 109 28 122C42 109 42 85 28 74Z"
-                                  fill="rgba(173,103,86,0.52)"
-                                />
-
-                                <path
-                                  d="M118 103C100 116 100 144 118 160C136 144 136 116 118 103Z"
-                                  fill="rgba(213,165,95,0.58)"
-                                />
-
-                                <path
-                                  d="M211 67C196 80 196 105 211 119C226 105 226 80 211 67Z"
-                                  fill="rgba(153,88,111,0.48)"
-                                />
-
-                                <path
-                                  d="M302 91C286 105 286 131 302 146C318 131 318 105 302 91Z"
-                                  fill="rgba(221,176,104,0.54)"
-                                />
-                              </svg>
-
-                              {/* Festival — glowing light strand */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 420 130"
-                                className="pointer-events-none absolute -right-4 top-[27%] z-[5] h-28 w-[72%] overflow-visible opacity-86 transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-1 group-hover:opacity-100"
-                                fill="none"
-                              >
-                                <path
-                                  d="M8 39C82 88 143 15 210 58C274 99 339 29 412 66"
-                                  stroke="rgba(124,74,90,0.30)"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                />
-
-                                {[
-                                  [38, 54],
-                                  [104, 48],
-                                  [171, 49],
-                                  [239, 67],
-                                  [305, 55],
-                                  [372, 59],
-                                ].map(([cx, cy], lightIndex) => (
-                                  <g key={lightIndex}>
-                                    <circle
-                                      cx={cx}
-                                      cy={cy}
-                                      r="7"
-                                      fill={
-                                        lightIndex % 2 === 0
-                                          ? 'rgba(236,187,104,0.72)'
-                                          : 'rgba(183,111,102,0.64)'
-                                      }
-                                    />
-                                    <circle
-                                      cx={cx}
-                                      cy={cy}
-                                      r="15"
-                                      fill={
-                                        lightIndex % 2 === 0
-                                          ? 'rgba(236,187,104,0.12)'
-                                          : 'rgba(183,111,102,0.10)'
-                                      }
-                                    />
-                                  </g>
-                                ))}
-                              </svg>
-
-                              {/* Festival — translucent celebration panel */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-5 right-5 z-[4] h-28 w-44 rotate-[-5deg] rounded-[1.1rem] border border-white/48 bg-[linear-gradient(145deg,rgba(255,255,255,0.46),rgba(215,161,112,0.20))] shadow-[0_18px_42px_rgba(124,74,90,0.10)] backdrop-blur-[2px] transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-2deg]"
-                              >
-                                <div className="absolute left-4 top-4 h-1.5 w-20 rounded-full bg-[rgba(124,74,90,0.20)]" />
-
-                                <div className="absolute left-4 top-8 h-1 w-28 rounded-full bg-[rgba(124,74,90,0.11)]" />
-
-                                <div className="absolute left-4 top-12 h-1 w-24 rounded-full bg-[rgba(124,74,90,0.09)]" />
-
-                                <span className="absolute bottom-4 right-4 text-[0.56rem] font-black uppercase tracking-[0.17em] text-[rgba(124,74,90,0.38)]">
-                                  Celebrate
-                                </span>
-                              </div>
-
-                              {/* Festival — metallic dust */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[6] opacity-82 transition-opacity duration-500 group-hover:opacity-100"
-                              >
-                                <span className="absolute right-[16%] top-[19%] size-2 rounded-full bg-[rgba(236,187,104,0.72)] shadow-[0_0_14px_rgba(236,187,104,0.58)] transition-all duration-700 group-hover:-translate-y-2 group-hover:scale-125" />
-
-                                <span className="absolute right-[32%] top-[34%] text-sm font-black text-[rgba(150,115,57,0.58)] transition-all duration-700 group-hover:-translate-y-2 group-hover:rotate-12">
-                                  ✦
-                                </span>
-
-                                <span className="absolute bottom-[25%] right-[12%] text-base font-black text-[rgba(153,88,111,0.54)] transition-all duration-700 group-hover:-translate-y-2 group-hover:-rotate-12">
-                                  ✦
-                                </span>
-
-                                <span className="absolute bottom-[18%] right-[38%] size-1.5 rounded-full bg-[rgba(255,239,198,0.82)] shadow-[0_0_10px_rgba(255,239,198,0.74)] transition-all duration-700 group-hover:-translate-y-1" />
-
-                                <span className="absolute right-[43%] top-[22%] h-1.5 w-4 rotate-[24deg] rounded-full bg-[rgba(173,103,86,0.44)] transition-all duration-700 group-hover:-translate-y-2 group-hover:rotate-45" />
-                              </div>
-
-                              {/* Festival — metallic folded corner */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-0 z-[5] size-20 overflow-hidden opacity-84"
-                              >
-                                <div className="absolute -bottom-9 -right-9 size-24 rotate-45 border border-white/40 bg-[linear-gradient(135deg,rgba(255,236,190,0.84),rgba(154,88,89,0.42))] shadow-[-8px_-8px_24px_rgba(124,74,90,0.10)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
-                              </div>
-                            </>
-                          ) : null}
-                          {isPartyEvent ? (
-                            <>
-                              {/* Party — diagonal evening spotlight */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -right-20 -top-24 z-[2] h-[150%] w-[72%] rotate-[15deg] bg-[linear-gradient(100deg,transparent_0%,rgba(255,255,255,0.04)_26%,rgba(241,179,155,0.24)_48%,rgba(158,89,119,0.20)_66%,transparent_100%)] blur-lg transition-all duration-700 group-hover:-translate-x-4 group-hover:rotate-[10deg]"
-                              />
-
-                              {/* Party — glowing light trails */}
-                              <svg
-                                aria-hidden="true"
-                                viewBox="0 0 420 250"
-                                className="pointer-events-none absolute -bottom-10 -right-7 z-[3] h-[78%] w-[78%] overflow-visible opacity-80 transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:scale-[1.04] group-hover:opacity-100"
-                                fill="none"
-                              >
-                                <path
-                                  d="M412 31C338 12 332 77 365 102C396 125 378 173 327 177C265 181 262 124 210 130C150 136 166 201 89 215C58 220 31 218 9 211"
-                                  stroke="rgba(124,74,90,0.42)"
-                                  strokeWidth="4"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M406 54C351 44 346 91 372 111C395 129 377 155 342 157C299 160 297 133 261 136C218 139 212 178 169 185"
-                                  stroke="rgba(226,150,128,0.52)"
-                                  strokeWidth="8"
-                                  strokeLinecap="round"
-                                />
-
-                                <path
-                                  d="M406 32C349 20 337 72 364 98"
-                                  stroke="rgba(255,255,255,0.72)"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-
-                              {/* Party — glass ticket card */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-4 right-7 z-[4] h-28 w-44 rotate-[-7deg] rounded-[1.05rem] border border-white/42 bg-[linear-gradient(135deg,rgba(255,255,255,0.30),rgba(194,121,144,0.20))] shadow-[0_18px_42px_rgba(93,58,85,0.12)] backdrop-blur-[2px] transition-all duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-3deg]"
-                              >
-                                <div className="absolute inset-y-3 left-[34%] border-l border-dashed border-[rgba(124,74,90,0.22)]" />
-
-                                <div className="absolute left-4 top-4 h-1.5 w-14 rounded-full bg-[rgba(124,74,90,0.22)]" />
-
-                                <div className="absolute left-4 top-8 h-1 w-9 rounded-full bg-[rgba(124,74,90,0.14)]" />
-
-                                <div className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-white/40 bg-white/18 text-[0.62rem] font-black text-[rgba(124,74,90,0.48)]">
-                                  E
-                                </div>
-
-                                <span className="absolute bottom-4 right-4 text-[0.56rem] font-black uppercase tracking-[0.17em] text-[rgba(124,74,90,0.38)]">
-                                  Admit one
-                                </span>
-                              </div>
-
-                              {/* Party — warm bokeh lights */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[3] opacity-80 transition-opacity duration-500 group-hover:opacity-100"
-                              >
-                                <span className="absolute right-[11%] top-[18%] size-8 rounded-full bg-[rgba(255,205,155,0.26)] blur-sm shadow-[0_0_24px_rgba(255,205,155,0.34)] transition-all duration-700 group-hover:-translate-y-2 group-hover:scale-110" />
-
-                                <span className="absolute right-[31%] top-[28%] size-4 rounded-full bg-[rgba(213,138,166,0.30)] blur-[1px] shadow-[0_0_18px_rgba(213,138,166,0.36)] transition-all duration-700 group-hover:translate-x-1 group-hover:-translate-y-1" />
-
-                                <span className="absolute bottom-[28%] right-[17%] size-6 rounded-full bg-[rgba(255,229,181,0.30)] blur-[2px] shadow-[0_0_20px_rgba(255,229,181,0.38)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-2" />
-
-                                <span className="absolute bottom-[19%] right-[42%] size-3 rounded-full bg-[rgba(176,105,143,0.34)] blur-[1px] transition-all duration-700 group-hover:scale-125" />
-                              </div>
-
-                              {/* Party — metallic starbursts */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 z-[5]"
-                              >
-                                <span className="absolute right-[19%] top-[24%] text-lg font-black text-[rgba(146,94,69,0.54)] drop-shadow-[0_0_8px_rgba(255,220,180,0.52)] transition-all duration-700 group-hover:-translate-y-2 group-hover:rotate-12 group-hover:scale-110">
-                                  ✦
-                                </span>
-
-                                <span className="absolute right-[40%] top-[38%] text-xs font-black text-white/85 drop-shadow-[0_0_10px_rgba(255,255,255,0.88)] transition-all duration-700 group-hover:scale-125 group-hover:rotate-45">
-                                  ✦
-                                </span>
-
-                                <span className="absolute bottom-[24%] right-[10%] text-sm font-black text-[rgba(204,132,132,0.52)] transition-all duration-700 group-hover:-translate-y-2 group-hover:-rotate-12">
-                                  ✦
-                                </span>
-                              </div>
-
-                              {/* Party — metallic folded corner */}
-                              <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute bottom-0 right-0 z-[4] size-20 overflow-hidden opacity-85"
-                              >
-                                <div className="absolute -bottom-9 -right-9 size-24 rotate-45 bg-[linear-gradient(135deg,rgba(255,236,205,0.82),rgba(181,111,126,0.44))] shadow-[-8px_-8px_24px_rgba(124,74,90,0.10)] transition-all duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
-                              </div>
-                            </>
-                          ) : null}
-                          <div className="relative z-10 flex w-full flex-col">
+                          <div className="relative z-10 flex w-full flex-col drop-shadow-[0_1px_0_rgba(255,255,255,0.24)]">
                             <div className="flex items-start justify-between gap-4">
                               <div className="min-w-0">
                                 <p
@@ -2050,7 +1099,7 @@ export function EventsPage() {
                                     color: eventCardStyle.typeColor,
                                   }}
                                 >
-                                  {event.eventType}
+                                  {eventCardStyle.label}
                                 </p>
 
                                 <h3 className="mt-2 line-clamp-2 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
@@ -2640,210 +1689,47 @@ export function EventsPage() {
 
                     <div
                       key={selectedPreviewType}
-                      className="event-preview-swap group relative mt-7 min-h-[24rem] origin-center overflow-hidden rounded-[2rem] border border-white/72 p-6 shadow-[0_26px_80px_rgba(31,27,29,0.16)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-[0_32px_90px_rgba(31,27,29,0.20)] sm:p-7"
+                      className="event-preview-swap group relative mt-7 min-h-[24rem] origin-center overflow-hidden rounded-[2rem] border border-white/72 shadow-[0_26px_80px_rgba(31,27,29,0.16)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-[0_32px_90px_rgba(31,27,29,0.20)]"
                       style={{
                         background: selectedPreviewTheme.background,
                         animation: 'eventPreviewSwap 420ms cubic-bezier(0.22, 1, 0.36, 1) both',
                       }}
                     >
-                      <div
+                      <img
+                        src={selectedPreviewTheme.image}
+                        alt=""
                         aria-hidden="true"
-                        className="absolute inset-x-0 top-0 h-1.5"
+                        className="pointer-events-none absolute inset-0 size-full object-cover object-center transition duration-1000 group-hover:scale-[1.025]"
                         style={{
-                          background: selectedPreviewTheme.accent,
+                          objectPosition: '72% center',
+                          filter: 'saturate(0.92) contrast(0.96)',
                         }}
                       />
 
                       <div
                         aria-hidden="true"
-                        className="absolute -right-16 -top-16 size-52 rounded-full bg-white/34 blur-3xl transition duration-700 group-hover:scale-125"
+                        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,248,0.99)_0%,rgba(255,252,248,0.97)_22%,rgba(255,252,248,0.88)_42%,rgba(255,252,248,0.56)_61%,rgba(255,252,248,0.18)_79%,rgba(255,252,248,0.04)_100%)]"
                       />
 
-                      {selectedPreviewTheme.decoration === 'birthday' ? (
-                        <>
-                          <div className="pointer-events-none absolute -right-5 top-10 h-10 w-44 rotate-[8deg] border-y border-white/38 bg-[linear-gradient(90deg,rgba(225,196,218,0.18),rgba(216,166,188,0.58),rgba(237,196,178,0.42))]" />
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,transparent_45%,rgba(31,27,29,0.08)_100%)]"
+                      />
 
-                          <svg
-                            aria-hidden="true"
-                            viewBox="0 0 300 180"
-                            className="pointer-events-none absolute -bottom-4 -right-4 h-44 w-[72%] opacity-70"
-                            fill="none"
-                          >
-                            <path
-                              d="M292 24C235 7 221 61 251 83C280 105 267 143 219 145C167 148 175 91 130 91C77 91 81 153 18 163"
-                              stroke="rgba(124,74,90,0.34)"
-                              strokeWidth="5"
-                              strokeLinecap="round"
-                            />
-                          </svg>
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 left-0 w-[64%] bg-[radial-gradient(ellipse_at_left,rgba(255,252,248,0.38)_0%,rgba(255,252,248,0.14)_56%,transparent_82%)]"
+                      />
 
-                          <span className="absolute right-[21%] top-[35%] text-lg text-[rgba(124,74,90,0.38)]">
-                            ✦
-                          </span>
-                        </>
-                      ) : null}
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-0 z-[3] h-1.5"
+                        style={{
+                          background: selectedPreviewTheme.accent,
+                        }}
+                      />
 
-                      {selectedPreviewTheme.decoration === 'wedding' ? (
-                        <>
-                          <div className="pointer-events-none absolute -right-6 bottom-8 h-[68%] w-[58%] rotate-[-4deg] rounded-[1.4rem] border border-white/52 bg-white/22 backdrop-blur-[1px]" />
-
-                          <svg
-                            aria-hidden="true"
-                            viewBox="0 0 180 240"
-                            className="pointer-events-none absolute -bottom-4 right-0 h-[70%] w-36 opacity-65"
-                            fill="none"
-                          >
-                            <path
-                              d="M145 230C116 188 101 149 103 108C105 68 121 38 157 14"
-                              stroke="rgba(124,74,90,0.28)"
-                              strokeWidth="2.5"
-                            />
-                            <ellipse
-                              cx="110"
-                              cy="142"
-                              rx="16"
-                              ry="7"
-                              transform="rotate(-32 110 142)"
-                              fill="rgba(214,177,190,0.34)"
-                            />
-                            <ellipse
-                              cx="130"
-                              cy="87"
-                              rx="16"
-                              ry="7"
-                              transform="rotate(28 130 87)"
-                              fill="rgba(238,213,218,0.48)"
-                            />
-                          </svg>
-
-                          <div className="pointer-events-none absolute bottom-9 right-8 grid size-14 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,rgba(248,220,227,0.95),rgba(184,126,145,0.62)_62%,rgba(124,74,90,0.38))] text-white/85 shadow-lg">
-                            ✦
-                          </div>
-                        </>
-                      ) : null}
-
-                      {selectedPreviewTheme.decoration === 'graduation' ? (
-                        <>
-                          <div className="pointer-events-none absolute -bottom-4 right-4 h-36 w-52 rotate-[5deg] rounded-[1.1rem] border border-white/42 bg-white/22" />
-
-                          <div className="pointer-events-none absolute bottom-2 right-8 h-36 w-52 rotate-[-3deg] rounded-[1.1rem] border border-white/56 bg-white/42 shadow-lg">
-                            <div className="absolute left-5 top-5 h-1.5 w-20 rounded-full bg-[rgba(113,117,76,0.18)]" />
-                            <div className="absolute left-5 top-9 h-1 w-28 rounded-full bg-[rgba(113,117,76,0.11)]" />
-                          </div>
-
-                          <div className="pointer-events-none absolute bottom-7 right-9 grid size-16 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,rgba(255,241,190,0.96),rgba(204,168,83,0.72)_58%,rgba(132,103,53,0.44))] text-white/90 shadow-lg">
-                            ✦
-                          </div>
-                        </>
-                      ) : null}
-
-                      {selectedPreviewTheme.decoration === 'corporate' ? (
-                        <>
-                          <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-0 opacity-45"
-                            style={{
-                              backgroundImage: `
-                          linear-gradient(rgba(88,67,61,0.08) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(88,67,61,0.08) 1px, transparent 1px)
-                        `,
-                              backgroundSize: '26px 26px',
-                            }}
-                          />
-
-                          <div className="pointer-events-none absolute bottom-6 right-6 h-32 w-48 rotate-[-3deg] rounded-[1.05rem] border border-white/48 bg-white/30 p-4 shadow-lg backdrop-blur-[2px]">
-                            <div className="h-1.5 w-20 rounded-full bg-[rgba(88,67,61,0.20)]" />
-                            <div className="mt-3 h-1 w-28 rounded-full bg-[rgba(88,67,61,0.12)]" />
-                            <div className="mt-3 h-1 w-24 rounded-full bg-[rgba(88,67,61,0.10)]" />
-                          </div>
-                        </>
-                      ) : null}
-
-                      {selectedPreviewTheme.decoration === 'party' ? (
-                        <>
-                          <div className="pointer-events-none absolute -right-14 -top-20 h-[140%] w-[68%] rotate-[14deg] bg-[linear-gradient(100deg,transparent,rgba(255,220,195,0.38),rgba(158,89,119,0.14),transparent)] blur-lg" />
-
-                          <div className="pointer-events-none absolute bottom-5 right-7 h-28 w-44 rotate-[-7deg] rounded-[1rem] border border-white/44 bg-white/28 shadow-lg backdrop-blur-[2px]">
-                            <div className="absolute inset-y-3 left-[34%] border-l border-dashed border-[rgba(124,74,90,0.22)]" />
-                            <span className="absolute bottom-4 right-4 text-[0.56rem] font-black uppercase tracking-[0.17em] text-[rgba(124,74,90,0.38)]">
-                              Admit one
-                            </span>
-                          </div>
-
-                          <span className="pointer-events-none absolute right-[18%] top-[26%] text-xl text-[rgba(146,94,69,0.54)]">
-                            ✦
-                          </span>
-                        </>
-                      ) : null}
-
-                      {selectedPreviewTheme.decoration === 'baby' ? (
-                        <>
-                          <div className="pointer-events-none absolute right-[13%] top-[20%] size-20 rounded-full bg-[linear-gradient(145deg,rgba(238,221,173,0.90),rgba(196,174,116,0.52))] shadow-lg">
-                            <span className="absolute -right-2 -top-1 size-[4.8rem] rounded-full bg-[rgba(250,243,226,0.96)]" />
-                          </div>
-
-                          <div className="pointer-events-none absolute bottom-12 right-3 h-24 w-44 opacity-80">
-                            <span className="absolute bottom-0 left-2 h-12 w-36 rounded-full bg-white/58" />
-                            <span className="absolute bottom-5 left-7 size-16 rounded-full bg-white/68" />
-                            <span className="absolute bottom-4 left-[4.7rem] size-20 rounded-full bg-white/62" />
-                          </div>
-
-                          <span className="pointer-events-none absolute right-[36%] top-[31%] text-base text-[rgba(150,115,57,0.48)]">
-                            ✦
-                          </span>
-                        </>
-                      ) : null}
-
-                      {selectedPreviewTheme.decoration === 'engagement' ? (
-                        <>
-                          <div className="pointer-events-none absolute right-[8%] top-[20%] h-32 w-44">
-                            <span className="absolute left-3 top-5 size-24 rounded-full border-[5px] border-[rgba(197,165,95,0.62)]" />
-                            <span className="absolute right-2 top-8 size-24 rounded-full border-[5px] border-[rgba(224,201,145,0.74)]" />
-                            <span className="absolute right-[2.9rem] top-3 size-5 rotate-45 border border-white/72 bg-white/78 shadow-[0_0_16px_rgba(255,255,255,0.82)]" />
-                          </div>
-
-                          <div className="pointer-events-none absolute bottom-5 right-8 h-28 w-44 rotate-[-4deg] rounded-[1.1rem] border border-white/54 bg-white/34 shadow-lg backdrop-blur-[2px]">
-                            <span className="absolute bottom-4 right-4 text-[0.56rem] font-black uppercase tracking-[0.17em] text-[rgba(150,115,57,0.38)]">
-                              A promise
-                            </span>
-                          </div>
-                        </>
-                      ) : null}
-
-                      {selectedPreviewTheme.decoration === 'festival' ? (
-                        <>
-                          <svg
-                            aria-hidden="true"
-                            viewBox="0 0 320 190"
-                            className="pointer-events-none absolute -right-2 top-0 h-[58%] w-[70%] opacity-88"
-                            fill="none"
-                          >
-                            <path d="M35 0V70" stroke="rgba(124,74,90,0.24)" />
-                            <path d="M125 0V95" stroke="rgba(150,115,57,0.22)" />
-                            <path d="M220 0V64" stroke="rgba(124,74,90,0.22)" />
-                            <path
-                              d="M35 70C21 82 21 104 35 117C49 104 49 82 35 70Z"
-                              fill="rgba(173,103,86,0.58)"
-                            />
-                            <path
-                              d="M125 95C108 108 108 134 125 149C142 134 142 108 125 95Z"
-                              fill="rgba(213,165,95,0.62)"
-                            />
-                            <path
-                              d="M220 64C205 77 205 101 220 115C235 101 235 77 220 64Z"
-                              fill="rgba(153,88,111,0.52)"
-                            />
-                          </svg>
-
-                          <div className="pointer-events-none absolute -bottom-16 -right-12 size-52 rounded-t-full border-[14px] border-b-0 border-[rgba(211,165,95,0.20)]" />
-
-                          <span className="pointer-events-none absolute right-[22%] top-[36%] text-lg text-[rgba(150,115,57,0.58)]">
-                            ✦
-                          </span>
-                        </>
-                      ) : null}
-
-                      <div className="relative z-10 flex min-h-[20rem] flex-col">
+                      <div className="relative z-10 flex min-h-[24rem] flex-col p-6 sm:p-7">
                         <div>
                           <p
                             className="text-xs font-black uppercase tracking-[0.22em]"
@@ -2854,35 +1740,35 @@ export function EventsPage() {
                             {selectedPreviewType}
                           </p>
 
-                          <h4 className="mt-3 max-w-[78%] text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                          <h4 className="mt-3 max-w-[72%] text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                             {previewName.trim() || 'Your event name'}
                           </h4>
 
-                          <p className="mt-3 max-w-[72%] text-sm leading-6 text-[var(--color-charcoal)]/58">
+                          <p className="mt-3 max-w-[66%] text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
                             {selectedPreviewTheme.eyebrow}
                           </p>
                         </div>
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                          <span className="rounded-full border border-white/72 bg-white/54 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/70">
+                        <div className="mt-6 flex max-w-[76%] flex-wrap gap-2">
+                          <span className="rounded-full border border-white/82 bg-white/72 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
                             {previewFormattedDate}
                           </span>
 
-                          <span className="max-w-40 truncate rounded-full border border-white/72 bg-white/54 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/70">
+                          <span className="max-w-40 truncate rounded-full border border-white/82 bg-white/72 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
                             {previewLocation.trim() || 'Choose a location'}
                           </span>
 
-                          <span className="rounded-full border border-white/72 bg-white/54 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/70">
-                            {previewGuestCount.trim()
+                          <span className="rounded-full border border-white/82 bg-white/72 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
+                            {previewGuestCount.trim() && Number.isFinite(Number(previewGuestCount))
                               ? `${Number(previewGuestCount).toLocaleString('en-LK')} guests`
                               : 'Guests not set'}
                           </span>
                         </div>
 
-                        <div className="mt-auto border-t border-white/66 pt-5">
+                        <div className="mt-auto max-w-[78%] rounded-[1.25rem] border border-white/74 bg-white/64 p-4 shadow-[0_14px_32px_rgba(31,27,29,0.07)] backdrop-blur-xl">
                           <div className="grid gap-4 sm:grid-cols-2">
-                            <div>
-                              <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                            <div className="min-w-0">
+                              <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
                                 Theme
                               </p>
 
@@ -2891,8 +1777,8 @@ export function EventsPage() {
                               </p>
                             </div>
 
-                            <div>
-                              <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                            <div className="min-w-0">
+                              <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
                                 Planned budget
                               </p>
 
@@ -2904,7 +1790,6 @@ export function EventsPage() {
                         </div>
                       </div>
                     </div>
-
                     <div className="mt-5 rounded-[1.4rem] border border-white/56 bg-white/32 p-4 backdrop-blur-xl">
                       <p className="text-sm font-black text-[var(--color-near-black)]">
                         {selectedPreviewType} identity

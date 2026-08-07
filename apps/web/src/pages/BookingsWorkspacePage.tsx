@@ -676,32 +676,10 @@ export function BookingsWorkspacePage() {
   const committedCount =
     bookingCounts.CONFIRMED + bookingCounts.DEPOSIT_PENDING + bookingCounts.ACTIVE;
 
-  const summaryCards = [
-    {
-      label: 'Total bookings',
-      value: totalBookings,
-      helper: `${bookingCounts.AWAITING_VENDOR_CONFIRMATION} awaiting vendor response`,
-      icon: PackageCheck,
-    },
-    {
-      label: 'Committed services',
-      value: committedCount,
-      helper: 'Confirmed, deposit pending or active',
-      icon: CheckCircle2,
-    },
-    {
-      label: 'Deposit pending',
-      value: bookingCounts.DEPOSIT_PENDING,
-      helper: 'Bookings waiting for deposit progress',
-      icon: WalletCards,
-    },
-    {
-      label: 'Completed',
-      value: bookingCounts.COMPLETED,
-      helper: `${bookingCounts.CANCELLED + bookingCounts.REJECTED} cancelled or rejected`,
-      icon: Sparkles,
-    },
-  ];
+  const bookingProgress =
+    totalBookings > 0
+      ? Math.round(((committedCount + bookingCounts.COMPLETED) / totalBookings) * 100)
+      : 0;
 
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
@@ -732,178 +710,208 @@ export function BookingsWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden rounded-[2.75rem] border border-white/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.34),rgba(255,255,255,0.14))] px-7 py-10 shadow-[0_24px_80px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:px-10 lg:px-12">
-            <div className="pointer-events-none absolute -left-16 top-0 h-80 w-80 rounded-full bg-[rgba(183,167,200,0.26)] blur-3xl" />
+          <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
+            <img
+              src="/images/workspaces/shortcuts/bookings.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.94] contrast-[0.99] transition duration-1000"
+            />
 
-            <div className="pointer-events-none absolute right-[-5%] top-[-10%] h-[28rem] w-[28rem] rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
+            />
 
-            <div className="pointer-events-none absolute bottom-[-20%] left-1/3 h-72 w-72 rounded-full bg-[rgba(255,228,210,0.18)] blur-3xl" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
+            />
 
-            <div className="relative grid gap-10 lg:grid-cols-[1fr_360px] lg:items-center">
-              <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                  <Sparkles className="size-4" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+            />
+
+            <div className="relative flex min-h-[17rem] flex-col justify-between gap-3">
+              <div className="max-w-[35rem]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                  <Sparkles aria-hidden="true" className="size-4" />
                   Vendor commitments
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.95] tracking-[-0.06em] text-[var(--color-near-black)] sm:text-6xl">
-                  Every confirmed booking,
-                  <br />
-                  beautifully organised.
-                </h2>
+                <div className="mt-2.5 max-w-[32rem] rounded-[1.3rem] border border-white/44 bg-white/[0.15] px-5 py-3 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px]">
+                  <h2 className="max-w-[30rem] text-balance text-[2rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.2rem] lg:text-[2.35rem]">
+                    Every vendor commitment,
+                    <br />
+                    clearly organised.
+                  </h2>
 
-                <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--color-charcoal)]/68">
-                  Follow confirmations, deposits, payment progress, completed services and vendor
-                  commitments throughout the entire event planning journey.
-                </p>
+                  <p className="mt-2.5 max-w-[30rem] text-sm font-semibold leading-[1.4rem] text-[var(--color-charcoal)]/70">
+                    Follow confirmations, deposits, active services, completed work and payment
+                    progress from one organised booking workspace.
+                  </p>
 
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <div className="rounded-2xl border border-white/50 bg-white/28 px-5 py-4 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Active bookings
-                    </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <Link
+                      to={`/events/${eventId}/quotations`}
+                      className="group/hero-open-quotations btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                    >
+                      <ReceiptText
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/hero-open-quotations:scale-105"
+                      />
+                      Open quotations
+                    </Link>
 
-                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {committedCount}
-                    </p>
+                    <span className="rounded-full border border-white/72 bg-white/46 px-4 py-2 text-xs font-black uppercase tracking-[0.13em] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                      <CalendarClock aria-hidden="true" className="mr-1.5 inline size-3.5" />
+                      {formatLongDate(eventDetails.eventDate)}
+                    </span>
                   </div>
 
-                  <div className="rounded-2xl border border-white/50 bg-white/28 px-5 py-4 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Total vendors
-                    </p>
+                  <div className="mt-3 max-w-[26rem] rounded-[1.1rem] border border-white/56 bg-white/34 px-4 py-2.5 backdrop-blur-xl">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/48">
+                          Commitment progress
+                        </p>
 
-                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {totalBookings}
-                    </p>
+                        <p className="mt-1 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/54">
+                          Confirmed, active or completed services
+                        </p>
+                      </div>
+
+                      <p className="text-sm font-black text-[var(--color-deep-plum)]">
+                        {bookingProgress}%
+                      </p>
+                    </div>
+
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700"
+                        style={{
+                          width: `${Math.min(Math.max(bookingProgress, 0), 100)}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="relative">
-                <div className="absolute -right-8 -top-6 h-28 w-28 rounded-full bg-[rgba(255,255,255,0.25)] blur-2xl" />
+              <div className="grid max-w-[49rem] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <article className="group/booking-metric rounded-[1.3rem] border border-white/68 bg-white/40 px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/booking-metric:scale-105">
+                    <PackageCheck aria-hidden="true" className="size-4" />
+                  </span>
 
-                <div className="relative overflow-hidden rounded-[2.2rem] border border-white/50 bg-[linear-gradient(155deg,rgba(93,58,85,0.98),rgba(124,74,90,0.96))] p-7 text-white shadow-[0_24px_70px_rgba(93,58,85,0.30)]">
-                  <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Total bookings
+                  </p>
 
-                  <div className="absolute -bottom-14 -left-10 h-44 w-44 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {totalBookings}
+                  </p>
 
-                  <div className="relative">
-                    <div className="flex items-center justify-between">
-                      <div className="grid size-12 place-items-center rounded-2xl bg-white/12">
-                        <PackageCheck className="size-6 text-[var(--color-powder-blue)]" />
-                      </div>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {bookingCounts.AWAITING_VENDOR_CONFIRMATION} awaiting vendor response
+                  </p>
+                </article>
 
-                      <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-white/80">
-                        Event ready
-                      </span>
-                    </div>
+                <article className="group/booking-metric rounded-[1.3rem] border border-white/68 bg-[rgba(240,247,250,0.48)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954] transition duration-300 group-hover/booking-metric:scale-105">
+                    <CheckCircle2 aria-hidden="true" className="size-4" />
+                  </span>
 
-                    <h3 className="mt-8 text-3xl font-black tracking-[-0.04em]">
-                      Booking overview
-                    </h3>
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Committed services
+                  </p>
 
-                    <p className="mt-3 leading-7 text-white/72">
-                      Keep every vendor commitment visible—from confirmation to final service
-                      delivery.
-                    </p>
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {committedCount}
+                  </p>
 
-                    <div className="mt-8 space-y-3">
-                      {[
-                        {
-                          label: 'Confirmed',
-                          value: bookingCounts.CONFIRMED,
-                        },
-                        {
-                          label: 'Deposit pending',
-                          value: bookingCounts.DEPOSIT_PENDING,
-                        },
-                        {
-                          label: 'Completed',
-                          value: bookingCounts.COMPLETED,
-                        },
-                      ].map((item) => (
-                        <div
-                          key={item.label}
-                          className="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-4 backdrop-blur-xl"
-                        >
-                          <span className="font-bold text-white/82">{item.label}</span>
+                  <p className="mt-1 text-[0.64rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {bookingCounts.CONFIRMED} confirmed · {bookingCounts.DEPOSIT_PENDING} deposit ·{' '}
+                    {bookingCounts.ACTIVE} active
+                  </p>
+                </article>
 
-                          <span className="text-xl font-black">{item.value}</span>
-                        </div>
-                      ))}
-                    </div>
+                <article className="group/booking-metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.50)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#596449] transition duration-300 group-hover/booking-metric:scale-105">
+                    <Sparkles aria-hidden="true" className="size-4" />
+                  </span>
 
-                    <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 px-5 py-5">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/58">
-                        Event
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Completed
+                  </p>
+
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {bookingCounts.COMPLETED}
+                  </p>
+
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Vendor services successfully delivered
+                  </p>
+                </article>
+
+                <article className="group/booking-metric rounded-[1.3rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(249,235,240,0.52)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="grid size-9 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] transition duration-300 group-hover/booking-metric:scale-105">
+                      <CircleAlert aria-hidden="true" className="size-4" />
+                    </span>
+
+                    <span className="rounded-full border border-[rgba(124,74,90,0.14)] bg-white/38 px-2 py-1 text-[0.52rem] font-black uppercase tracking-[0.12em] text-[var(--color-muted-burgundy)]">
+                      Exceptions
+                    </span>
+                  </div>
+
+                  <div className="mt-2.5 grid grid-cols-3 divide-x divide-[rgba(124,74,90,0.12)]">
+                    <div className="pr-2">
+                      <p className="text-[0.48rem] font-black uppercase tracking-[0.09em] text-[var(--color-charcoal)]/46">
+                        Cancelled
                       </p>
 
-                      <p className="mt-2 font-black">{formatLongDate(eventDetails.eventDate)}</p>
+                      <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[var(--color-muted-burgundy)]">
+                        {bookingCounts.CANCELLED}
+                      </p>
+                    </div>
 
-                      <p className="mt-2 flex items-center gap-2 text-sm text-white/68">
-                        <MapPin className="size-4" />
-                        {eventDetails.location}
+                    <div className="px-2">
+                      <p className="text-[0.48rem] font-black uppercase tracking-[0.09em] text-[var(--color-charcoal)]/46">
+                        Rejected
+                      </p>
+
+                      <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[var(--color-muted-burgundy)]">
+                        {bookingCounts.REJECTED}
+                      </p>
+                    </div>
+
+                    <div className="pl-2">
+                      <p className="text-[0.48rem] font-black uppercase tracking-[0.09em] text-[var(--color-charcoal)]/46">
+                        Disputed
+                      </p>
+
+                      <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[var(--color-deep-plum)]">
+                        {bookingCounts.DISPUTED}
                       </p>
                     </div>
                   </div>
-                </div>
+
+                  <p className="mt-1.5 text-[0.66rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Bookings requiring historical or support context
+                  </p>
+                </article>
               </div>
             </div>
           </section>
 
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {summaryCards.map(({ label, value, helper, icon: Icon }) => (
-              <article
-                key={label}
-                className={`group/booking-summary luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)] ${
-                  label === 'Total bookings'
-                    ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(226,211,235,0.88))]'
-                    : label === 'Committed services'
-                      ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(214,231,238,0.86))]'
-                      : label === 'Deposit pending'
-                        ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(239,225,198,0.86))]'
-                        : 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(216,226,194,0.86))]'
-                }`}
-              >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -right-14 -top-14 size-40 rounded-full opacity-60 blur-3xl transition duration-500 group-hover/booking-summary:scale-125 group-hover/booking-summary:opacity-100 ${
-                    label === 'Total bookings'
-                      ? 'bg-[rgba(164,126,184,0.34)]'
-                      : label === 'Committed services'
-                        ? 'bg-[rgba(130,179,201,0.34)]'
-                        : label === 'Deposit pending'
-                          ? 'bg-[rgba(208,170,103,0.30)]'
-                          : 'bg-[rgba(142,151,115,0.34)]'
-                  }`}
-                />
-
-                <div className="relative">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/booking-summary:-translate-y-0.5 group-hover/booking-summary:scale-110 group-hover/booking-summary:bg-[rgba(183,167,200,0.34)]">
-                    <Icon
-                      aria-hidden="true"
-                      className="size-5 transition duration-300 group-hover/booking-summary:rotate-[4deg]"
-                    />
-                  </div>
-
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/booking-summary:text-[var(--color-rosewood)]/76">
-                    {label}
-                  </p>
-
-                  <p className="mt-3 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/booking-summary:translate-x-0.5 group-hover/booking-summary:text-[var(--color-deep-plum)] sm:text-[2.15rem]">
-                    {value}
-                  </p>
-
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55 transition duration-300 group-hover/booking-summary:text-[var(--color-charcoal)]/68">
-                    {helper}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_0.28fr]">
+          <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
             <article className="glass-card p-6 sm:p-7">
               <div>
                 <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
@@ -989,7 +997,7 @@ export function BookingsWorkspacePage() {
                     return (
                       <article
                         key={booking.id}
-                        className="group/booking relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-5 shadow-[0_18px_50px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(229,221,239,0.56))] hover:shadow-[0_30px_72px_rgba(31,27,29,0.12)] sm:p-6"
+                        className="group/booking relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-4 shadow-[0_18px_50px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(229,221,239,0.56))] hover:shadow-[0_30px_72px_rgba(31,27,29,0.12)] sm:p-5"
                       >
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent" />
                         <div
@@ -1033,7 +1041,7 @@ export function BookingsWorkspacePage() {
                               {booking.vendor.businessName}
                             </Link>
 
-                            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.15fr_1fr_1.25fr_1fr]">
+                            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.15fr_1fr_1.25fr_1fr]">
                               <div className="rounded-2xl border border-white/45 bg-white/30 p-4 transition duration-300 group-hover/booking:border-white/74 group-hover/booking:bg-white/44">
                                 <div className="flex items-center justify-between gap-3">
                                   <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/booking:text-[var(--color-rosewood)]/72">
@@ -1224,70 +1232,6 @@ export function BookingsWorkspacePage() {
             </article>
 
             <aside className="space-y-5">
-              <article className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
-                <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl bg-white/14 backdrop-blur">
-                      <PackageCheck className="size-6 text-[var(--color-powder-blue)]" />
-                    </div>
-
-                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur">
-                      {committedCount} committed
-                    </span>
-                  </div>
-
-                  <h2 className="mt-7 text-3xl font-black tracking-[-0.045em]">Booking progress</h2>
-
-                  <p className="mt-3 leading-7 text-white/68">
-                    Follow every vendor commitment from confirmation and deposit readiness through
-                    active service delivery and completion.
-                  </p>
-
-                  <div className="mt-8 space-y-3">
-                    {[
-                      {
-                        label: 'Awaiting response',
-                        value: bookingCounts.AWAITING_VENDOR_CONFIRMATION,
-                        helper: 'Vendor decision pending',
-                      },
-                      {
-                        label: 'Deposit pending',
-                        value: bookingCounts.DEPOSIT_PENDING,
-                        helper: 'Payment action required',
-                      },
-                      {
-                        label: 'Active',
-                        value: bookingCounts.ACTIVE,
-                        helper: 'Service is committed',
-                      },
-                      {
-                        label: 'Completed',
-                        value: bookingCounts.COMPLETED,
-                        helper: 'Service delivered',
-                      },
-                    ].map(({ label, value, helper }) => (
-                      <div
-                        key={label}
-                        className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur"
-                      >
-                        <div>
-                          <p className="text-sm font-black text-white/88">{label}</p>
-
-                          <p className="mt-1 text-xs font-semibold text-white/48">{helper}</p>
-                        </div>
-
-                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/12 text-lg font-black">
-                          {value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </article>
-
               <article className="glass-card p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
