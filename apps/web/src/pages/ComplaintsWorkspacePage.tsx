@@ -369,29 +369,6 @@ export function ComplaintsWorkspacePage() {
     );
   }
 
-  const summaryCards = [
-    {
-      label: 'Total cases',
-      value: complaintSummary.total,
-      helper: 'Complaints connected to this event',
-    },
-    {
-      label: 'Active',
-      value: complaintSummary.active,
-      helper: 'Cases still requiring attention',
-    },
-    {
-      label: 'Awaiting you',
-      value: complaintSummary.awaitingResponse,
-      helper: 'Cases waiting for your response',
-    },
-    {
-      label: 'Completed',
-      value: complaintSummary.completed,
-      helper: 'Resolved, dismissed or closed cases',
-    },
-  ];
-
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -433,186 +410,154 @@ export function ComplaintsWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden rounded-[2.75rem] border border-white/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.36),rgba(255,255,255,0.15))] px-7 py-10 shadow-[0_24px_80px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:px-10 lg:px-12">
+          <section className="relative isolate min-h-[27rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-7 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-8 sm:py-8 lg:px-10 lg:py-9">
+            {' '}
+            <img
+              src="/images/workspaces/shortcuts/complaints.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.96] contrast-[0.99] transition duration-1000"
+            />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -left-16 top-0 size-80 rounded-full bg-[rgba(183,167,200,0.26)] blur-3xl"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
             />
-
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute right-[-5%] top-[-12%] size-[28rem] rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
             />
-
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute bottom-[-24%] left-[32%] size-72 rounded-full bg-[rgba(245,214,218,0.18)] blur-3xl"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
             />
-
-            <div className="relative grid gap-10 lg:grid-cols-[1fr_360px] lg:items-center">
-              <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-32 left-[20%] -z-10 size-[26rem] rounded-full bg-[rgba(245,214,218,0.16)] blur-3xl"
+            />
+            <div className="relative flex min-h-[21.5rem] flex-col justify-between gap-5">
+              <div className="max-w-[35rem]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
                   <MessageSquareWarning aria-hidden="true" className="size-4" />
                   Support & resolution
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.95] tracking-[-0.06em] text-[var(--color-near-black)] sm:text-6xl">
-                  Every concern,
-                  <br />
-                  clearly followed through.
-                </h2>
+                <div className="mt-4 max-w-[33rem] rounded-[1.4rem] border border-white/44 bg-white/[0.15] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px] sm:px-6">
+                  <h2 className="max-w-[31rem] text-balance text-[2.15rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.35rem] lg:text-[2.5rem]">
+                    Every concern,
+                    <br />
+                    clearly followed through.
+                  </h2>
 
-                <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--color-charcoal)]/68">
-                  Submit complaints against bookings, payments, reviews and quotations, then follow
-                  every support update until the case is resolved.
-                </p>
+                  <p className="mt-3 max-w-[31rem] text-sm font-semibold leading-6 text-[var(--color-charcoal)]/70">
+                    Submit complaints against bookings, payments, reviews and quotations, then
+                    follow every support update until the case is resolved.
+                  </p>
 
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <div className="rounded-2xl border border-white/50 bg-white/30 px-5 py-4 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Active cases
-                    </p>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      className="group/hero-new-complaint btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      onClick={() => {
+                        createComplaintMutation.reset();
+                        setIsCreateOpen(true);
+                      }}
+                    >
+                      <Plus
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/hero-new-complaint:rotate-90"
+                      />
+                      New complaint
+                    </button>
 
-                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {complaintSummary.active}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/50 bg-white/30 px-5 py-4 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Awaiting you
-                    </p>
-
-                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {complaintSummary.awaitingResponse}
-                    </p>
+                    <span className="rounded-full border border-white/72 bg-white/46 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                      {complaintSummary.total} {complaintSummary.total === 1 ? 'case' : 'cases'}{' '}
+                      recorded
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <aside className="group/complaint-health relative overflow-hidden rounded-[2.2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.35)]">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-white/10 blur-3xl"
-                />
+              <div className="grid max-w-[43rem] gap-3 sm:grid-cols-3">
+                <article className="group/metric rounded-[1.3rem] border border-white/68 bg-white/38 px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/54 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="grid size-9 place-items-center rounded-xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] transition duration-300 group-hover/metric:scale-105">
+                      <MessageSquareWarning aria-hidden="true" className="size-4" />
+                    </span>
 
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/complaint-health:-translate-y-0.5 group-hover/complaint-health:scale-105">
-                      <MessageSquareWarning aria-hidden="true" className="size-6" />
-                    </div>
-
-                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur">
-                      {complaintSummary.active > 0 ? 'Cases active' : 'All settled'}
+                    <span
+                      className={
+                        complaintSummary.active > 0
+                          ? 'rounded-full border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.10)] px-2 py-1 text-[0.54rem] font-black uppercase tracking-[0.12em] text-[var(--color-muted-burgundy)]'
+                          : 'rounded-full border border-[rgba(142,151,115,0.18)] bg-[rgba(142,151,115,0.12)] px-2 py-1 text-[0.54rem] font-black uppercase tracking-[0.12em] text-[#586047]'
+                      }
+                    >
+                      {complaintSummary.active > 0 ? 'Active' : 'Settled'}
                     </span>
                   </div>
 
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.20em] text-white/48">
-                    Support status
+                  <p className="mt-3 text-[0.6rem] font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/46">
+                    Active cases
                   </p>
 
-                  <p className="mt-3 text-5xl font-black tracking-[-0.055em]">
+                  <p className="mt-1.5 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                     {complaintSummary.active}
                   </p>
 
-                  <p className="mt-2 text-sm font-semibold text-white/58">
-                    {complaintSummary.active === 1 ? 'Active complaint' : 'Active complaints'}
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+                    Still requiring attention
+                  </p>
+                </article>
+
+                <article className="group/metric rounded-[1.3rem] border border-white/68 bg-[rgba(246,239,248,0.44)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)] transition duration-300 group-hover/metric:scale-105">
+                    <AlertCircle aria-hidden="true" className="size-4" />
+                  </span>
+
+                  <p className="mt-3 text-[0.6rem] font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/46">
+                    Awaiting you
                   </p>
 
-                  <div className="mt-7 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Total
-                      </p>
+                  <p className="mt-1.5 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {complaintSummary.awaitingResponse}
+                  </p>
 
-                      <p className="mt-2 text-2xl font-black">{complaintSummary.total}</p>
-                    </div>
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+                    Waiting for your reply
+                  </p>
+                </article>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(142,151,115,0.16)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(142,151,115,0.22)]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Completed
-                      </p>
+                <article className="group/metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.46)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.18)] text-[#586047] transition duration-300 group-hover/metric:scale-105">
+                      <ShieldAlert aria-hidden="true" className="size-4" />
+                    </span>
 
-                      <p className="mt-2 text-2xl font-black">{complaintSummary.completed}</p>
-                    </div>
+                    <span className="rounded-full border border-white/72 bg-white/44 px-2 py-1 text-[0.54rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/54">
+                      Resolved
+                    </span>
                   </div>
 
-                  <button
-                    type="button"
-                    className="group/hero-new-complaint mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/16 bg-white/12 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18 hover:shadow-[0_16px_34px_rgba(31,27,29,0.16)]"
-                    onClick={() => {
-                      createComplaintMutation.reset();
-                      setIsCreateOpen(true);
-                    }}
-                  >
-                    <Plus
-                      aria-hidden="true"
-                      className="size-4 transition duration-300 group-hover/hero-new-complaint:rotate-90"
-                    />
-                    New complaint
-                  </button>
-                </div>
-              </aside>
+                  <p className="mt-3 text-[0.6rem] font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/46">
+                    Completed cases
+                  </p>
+
+                  <p className="mt-1.5 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {complaintSummary.completed}
+                  </p>
+
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+                    Resolved, dismissed or closed
+                  </p>
+                </article>
+              </div>
             </div>
           </section>
 
-          <section className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {summaryCards.map(({ label, value, helper }) => (
-              <article
-                key={label}
-                className={`group/complaint-summary luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)] ${
-                  label === 'Total cases'
-                    ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(226,211,235,0.88))]'
-                    : label === 'Active'
-                      ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(239,215,223,0.86))]'
-                      : label === 'Awaiting you'
-                        ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(214,231,238,0.86))]'
-                        : 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(216,226,194,0.86))]'
-                }`}
-              >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -right-14 -top-14 size-40 rounded-full opacity-60 blur-3xl transition duration-500 group-hover/complaint-summary:scale-125 group-hover/complaint-summary:opacity-100 ${
-                    label === 'Total cases'
-                      ? 'bg-[rgba(164,126,184,0.34)]'
-                      : label === 'Active'
-                        ? 'bg-[rgba(170,100,117,0.30)]'
-                        : label === 'Awaiting you'
-                          ? 'bg-[rgba(130,179,201,0.34)]'
-                          : 'bg-[rgba(142,151,115,0.34)]'
-                  }`}
-                />
-
-                <div className="relative">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/complaint-summary:-translate-y-0.5 group-hover/complaint-summary:scale-110 group-hover/complaint-summary:bg-[rgba(183,167,200,0.34)]">
-                    <MessageSquareWarning
-                      aria-hidden="true"
-                      className="size-5 transition duration-300 group-hover/complaint-summary:rotate-[4deg]"
-                    />
-                  </div>
-
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/complaint-summary:text-[var(--color-rosewood)]/76">
-                    {label}
-                  </p>
-
-                  <p className="mt-3 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/complaint-summary:translate-x-0.5 group-hover/complaint-summary:text-[var(--color-deep-plum)] sm:text-[2.15rem]">
-                    {value}
-                  </p>
-
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55 transition duration-300 group-hover/complaint-summary:text-[var(--color-charcoal)]/68">
-                    {helper}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <section className="relative mt-5 overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.52),rgba(255,255,255,0.22))] p-6 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-7">
+          <section className="relative mt-7 overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.52),rgba(255,255,255,0.22))] p-6 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-7">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"

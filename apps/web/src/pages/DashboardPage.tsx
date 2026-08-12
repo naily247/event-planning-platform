@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useCurrentUser } from '../features/auth/useCurrentUser';
 import axios from 'axios';
 import {
   ArrowRight,
@@ -24,6 +25,7 @@ import { clearAuthTokens } from '../features/auth/auth.storage';
 import { HeroAtmosphere } from '../components/ui/HeroAtmosphere';
 import { api } from '../lib/api';
 import { CustomerWorkspaceFooter } from '../components/ui/CustomerWorkspaceFooter';
+import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 
 type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
@@ -40,15 +42,6 @@ type BookingStatus =
 type EventTaskStatus = 'TODO' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 type GuestStatus = 'NOT_INVITED' | 'INVITED' | 'CONFIRMED' | 'DECLINED' | 'MAYBE';
-
-type CurrentUser = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'CUSTOMER' | 'VENDOR' | 'ADMIN';
-  status: 'ACTIVE' | 'PENDING_VERIFICATION' | 'SUSPENDED' | 'DEACTIVATED';
-};
 
 type DashboardEvent = {
   id: string;
@@ -283,14 +276,7 @@ const getEventCountdownLabel = (eventDate: string) => {
 export function DashboardPage() {
   const navigate = useNavigate();
 
-  const currentUserQuery = useQuery({
-    queryKey: ['auth', 'me'],
-    queryFn: async () => {
-      const response = await api.get<ApiSuccessResponse<CurrentUser>>('/auth/me');
-
-      return response.data.data;
-    },
-  });
+  const currentUserQuery = useCurrentUser();
 
   const dashboardQuery = useQuery({
     queryKey: ['dashboard', 'customer'],
@@ -549,52 +535,10 @@ export function DashboardPage() {
       ) : null}
 
       <div className="relative z-10 mx-auto max-w-7xl">
-        <header className="glass-card relative z-30 flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/" className="group flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl transition duration-300 group-hover:-translate-y-0.5 group-hover:bg-white/45">
-              <CalendarDays className="size-5 text-[var(--color-deep-plum)] transition duration-300 group-hover:scale-105" />
-            </span>
-
-            <span className="flex flex-col leading-none">
-              <span className="text-base font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                Eventure
-              </span>
-
-              <span className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Customer workspace
-              </span>
-            </span>
-          </Link>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/notifications"
-              className="soft-chip text-sm font-bold transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-            >
-              <Bell className="size-4" />
-              {dashboard.notifications.unreadCount}{' '}
-              {dashboard.notifications.unreadCount === 1 ? 'unread update' : 'unread updates'}
-            </Link>
-
-            <Link to="/vendors" className="btn-secondary text-sm font-bold">
-              Browse vendors
-            </Link>
-
-            <Link to="/events" className="btn-primary text-sm font-bold">
-              <Plus className="size-4" />
-              My events
-            </Link>
-
-            <button
-              type="button"
-              className="btn-secondary text-sm font-bold"
-              onClick={handleLogout}
-            >
-              <LogOut className="size-4" />
-              Log out
-            </button>
-          </div>
-        </header>
+        <CustomerWorkspaceHeader
+          user={user}
+          unreadNotificationCount={dashboard.notifications.unreadCount}
+        />
 
         <main className="relative z-10 py-10">
           <section className="group/hero relative isolate overflow-visible rounded-[2.35rem] border border-white/20 bg-[linear-gradient(128deg,rgba(73,43,68,0.99),rgba(112,61,78,0.97)_48%,rgba(98,77,110,0.95))] text-[#fffaf5] shadow-[0_30px_90px_rgba(93,58,85,0.28)] animate-[heroFloat_2s_ease-in-out_infinite] transition-[transform,box-shadow] duration-500 ease-out hover:!translate-y-[-0.55rem] hover:shadow-[0_38px_110px_rgba(93,58,85,0.36)]">

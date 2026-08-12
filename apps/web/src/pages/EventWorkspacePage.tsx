@@ -32,9 +32,22 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../lib/api';
+import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { useCurrentUser } from '../features/auth/useCurrentUser';
+import { eventTypeOptions } from '../features/events/event.api';
 
 type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+
+type EventStatusHistoryEntry = {
+  id: string;
+  previousStatus: EventStatus | null;
+  newStatus: EventStatus;
+  changedById: string | null;
+  note: string | null;
+  changedAt: string;
+};
+
 type SnapshotCardKey = 'date' | 'location' | 'guests' | 'budget' | 'theme';
 
 type CustomerEvent = {
@@ -50,6 +63,7 @@ type CustomerEvent = {
   status: EventStatus;
   createdAt: string;
   updatedAt: string;
+  statusHistory: EventStatusHistoryEntry[];
 };
 
 type UpdateEventPayload = {
@@ -294,98 +308,175 @@ const workspaceSections = [
     path: (eventId: string) => `/events/${eventId}/mood-board`,
   },
 ];
+
+const workspaceSectionDescriptions: Record<string, string> = {
+  Budget: 'Track planned spending, allocations, expenses and remaining funds.',
+  Tasks: 'Organise planning work, priorities, deadlines and completion progress.',
+  Guests: 'Manage the guest list, attendance details and invitation readiness.',
+  Invitations: 'Create invitations, monitor delivery and keep track of RSVP responses.',
+  Quotations: 'Review vendor requests, compare responses and manage quotation decisions.',
+  Bookings: 'Follow confirmed services, vendor commitments and booking progress.',
+  Reviews: 'Share verified feedback for vendors after completed services.',
+  Complaints: 'Raise and follow service concerns connected to this event.',
+  Documents: 'Keep contracts, receipts, reference files and event documents together.',
+  'Mood board': 'Collect visual inspiration, themes, colours and creative references.',
+};
+
+const workspaceShortcutImages: Record<string, string> = {
+  Budget: '/images/workspaces/shortcuts/budget.png',
+  Tasks: '/images/workspaces/shortcuts/tasks.png',
+  Guests: '/images/workspaces/shortcuts/guests.png',
+  Invitations: '/images/workspaces/shortcuts/invitations.png',
+  Quotations: '/images/workspaces/shortcuts/quotations.png',
+  Bookings: '/images/workspaces/shortcuts/bookings.png',
+  Reviews: '/images/workspaces/shortcuts/reviews.png',
+  Complaints: '/images/workspaces/shortcuts/complaints.png',
+  Documents: '/images/workspaces/shortcuts/documents.png',
+  'Mood board': '/images/workspaces/shortcuts/moodboard.png',
+};
+
 type WorkspaceHeroTheme = {
+  label: string;
   background: string;
   accent: string;
   softGlow: string;
-  motif:
-    | 'birthday'
-    | 'wedding'
-    | 'graduation'
-    | 'corporate'
-    | 'party'
-    | 'baby'
-    | 'engagement'
-    | 'festival'
-    | 'default';
+  image: string;
+  imagePosition: string;
 };
 
 const workspaceHeroThemes: Record<string, WorkspaceHeroTheme> = {
   birthday: {
+    label: 'Birthday',
     background:
-      'linear-gradient(118deg, rgba(255,250,246,0.98) 0%, rgba(248,239,245,0.96) 54%, rgba(226,207,224,0.88) 100%)',
-    accent: 'rgba(183,167,200,0.30)',
-    softGlow: 'rgba(220,177,194,0.22)',
-    motif: 'birthday',
+      'linear-gradient(118deg, rgba(255,250,246,0.99) 0%, rgba(248,239,245,0.97) 54%, rgba(226,207,224,0.90) 100%)',
+    accent: 'rgba(183,167,200,0.26)',
+    softGlow: 'rgba(220,177,194,0.20)',
+    image: '/images/events/previews/birthday.png',
+    imagePosition: '72% center',
   },
 
   wedding: {
+    label: 'Wedding',
     background:
-      'linear-gradient(118deg, rgba(255,251,247,0.98) 0%, rgba(250,240,242,0.96) 54%, rgba(231,208,215,0.88) 100%)',
-    accent: 'rgba(199,167,181,0.28)',
-    softGlow: 'rgba(230,196,201,0.20)',
-    motif: 'wedding',
+      'linear-gradient(118deg, rgba(255,251,247,0.99) 0%, rgba(250,240,242,0.97) 54%, rgba(231,208,215,0.90) 100%)',
+    accent: 'rgba(199,167,181,0.24)',
+    softGlow: 'rgba(230,196,201,0.18)',
+    image: '/images/events/previews/wedding.png',
+    imagePosition: '72% center',
   },
 
   graduation: {
+    label: 'Graduation',
     background:
-      'linear-gradient(118deg, rgba(255,251,244,0.98) 0%, rgba(248,245,232,0.96) 54%, rgba(218,219,190,0.88) 100%)',
-    accent: 'rgba(190,188,144,0.28)',
-    softGlow: 'rgba(214,185,105,0.18)',
-    motif: 'graduation',
+      'linear-gradient(118deg, rgba(255,251,244,0.99) 0%, rgba(244,240,235,0.97) 54%, rgba(204,194,184,0.90) 100%)',
+    accent: 'rgba(142,101,94,0.22)',
+    softGlow: 'rgba(198,184,168,0.18)',
+    image: '/images/events/previews/graduation.png',
+    imagePosition: '72% center',
   },
 
   corporate: {
+    label: 'Corporate',
     background:
-      'linear-gradient(118deg, rgba(255,251,247,0.98) 0%, rgba(243,238,233,0.96) 54%, rgba(209,192,181,0.88) 100%)',
-    accent: 'rgba(157,126,108,0.26)',
-    softGlow: 'rgba(188,165,148,0.18)',
-    motif: 'corporate',
+      'linear-gradient(118deg, rgba(250,252,255,0.99) 0%, rgba(234,240,246,0.97) 54%, rgba(185,201,217,0.90) 100%)',
+    accent: 'rgba(91,126,157,0.22)',
+    softGlow: 'rgba(166,190,211,0.18)',
+    image: '/images/events/previews/corporate.png',
+    imagePosition: '72% center',
   },
 
   party: {
+    label: 'Party',
     background:
-      'linear-gradient(118deg, rgba(255,250,246,0.98) 0%, rgba(250,239,236,0.96) 54%, rgba(230,200,190,0.88) 100%)',
-    accent: 'rgba(191,137,137,0.28)',
-    softGlow: 'rgba(223,154,143,0.20)',
-    motif: 'party',
+      'linear-gradient(118deg, rgba(255,250,248,0.99) 0%, rgba(248,231,239,0.97) 54%, rgba(205,162,185,0.90) 100%)',
+    accent: 'rgba(181,91,137,0.22)',
+    softGlow: 'rgba(233,158,154,0.18)',
+    image: '/images/events/previews/party.png',
+    imagePosition: '72% center',
   },
 
   'baby shower': {
+    label: 'Baby Shower',
     background:
-      'linear-gradient(118deg, rgba(255,252,245,0.98) 0%, rgba(249,245,230,0.96) 54%, rgba(218,218,191,0.88) 100%)',
-    accent: 'rgba(199,193,151,0.26)',
-    softGlow: 'rgba(234,221,181,0.20)',
-    motif: 'baby',
+      'linear-gradient(118deg, rgba(255,253,247,0.99) 0%, rgba(246,245,230,0.97) 54%, rgba(206,216,194,0.90) 100%)',
+    accent: 'rgba(181,198,169,0.22)',
+    softGlow: 'rgba(234,221,181,0.18)',
+    image: '/images/events/previews/babyshower.png',
+    imagePosition: '72% center',
   },
 
   engagement: {
+    label: 'Engagement',
     background:
-      'linear-gradient(118deg, rgba(255,252,246,0.98) 0%, rgba(250,245,231,0.96) 54%, rgba(231,213,174,0.88) 100%)',
-    accent: 'rgba(205,178,115,0.26)',
-    softGlow: 'rgba(235,219,176,0.20)',
-    motif: 'engagement',
+      'linear-gradient(118deg, rgba(255,253,248,0.99) 0%, rgba(250,242,229,0.97) 54%, rgba(226,201,167,0.90) 100%)',
+    accent: 'rgba(205,178,115,0.22)',
+    softGlow: 'rgba(235,219,176,0.18)',
+    image: '/images/events/previews/engagement.png',
+    imagePosition: '72% center',
   },
 
   festival: {
+    label: 'Festival',
     background:
-      'linear-gradient(118deg, rgba(255,250,244,0.98) 0%, rgba(250,237,224,0.96) 54%, rgba(225,187,160,0.88) 100%)',
-    accent: 'rgba(183,111,102,0.26)',
-    softGlow: 'rgba(236,187,104,0.20)',
-    motif: 'festival',
+      'linear-gradient(118deg, rgba(255,251,245,0.99) 0%, rgba(249,231,216,0.97) 54%, rgba(220,166,142,0.90) 100%)',
+    accent: 'rgba(183,111,102,0.22)',
+    softGlow: 'rgba(236,187,104,0.18)',
+    image: '/images/events/previews/festival.png',
+    imagePosition: '72% center',
+  },
+
+  anniversary: {
+    label: 'Anniversary',
+    background:
+      'linear-gradient(118deg, rgba(255,252,247,0.99) 0%, rgba(247,239,234,0.97) 54%, rgba(214,194,180,0.90) 100%)',
+    accent: 'rgba(179,143,112,0.22)',
+    softGlow: 'rgba(217,194,167,0.18)',
+    image: '/images/events/previews/anniversary.png',
+    imagePosition: '72% center',
+  },
+
+  reception: {
+    label: 'Reception',
+    background:
+      'linear-gradient(118deg, rgba(253,252,255,0.99) 0%, rgba(235,238,247,0.97) 54%, rgba(190,202,221,0.90) 100%)',
+    accent: 'rgba(139,164,193,0.22)',
+    softGlow: 'rgba(204,215,232,0.18)',
+    image: '/images/events/previews/reception.png',
+    imagePosition: '72% center',
+  },
+
+  'product launch': {
+    label: 'Product Launch',
+    background:
+      'linear-gradient(118deg, rgba(248,251,255,0.99) 0%, rgba(226,235,246,0.97) 54%, rgba(151,172,204,0.91) 100%)',
+    accent: 'rgba(96,132,188,0.24)',
+    softGlow: 'rgba(125,205,235,0.18)',
+    image: '/images/events/previews/productlaunch.png',
+    imagePosition: '74% center',
   },
 
   default: {
+    label: 'Event',
     background:
-      'linear-gradient(118deg, rgba(255,250,246,0.98) 0%, rgba(247,239,242,0.96) 54%, rgba(224,211,220,0.88) 100%)',
-    accent: 'rgba(183,167,200,0.26)',
+      'linear-gradient(118deg, rgba(255,250,246,0.99) 0%, rgba(247,239,242,0.97) 54%, rgba(224,211,220,0.90) 100%)',
+    accent: 'rgba(183,167,200,0.24)',
     softGlow: 'rgba(205,176,188,0.18)',
-    motif: 'default',
+    image: '/images/events/previews/birthday.png',
+    imagePosition: '72% center',
   },
 };
 
+const normalizeWorkspaceEventType = (eventType: string) =>
+  eventType.trim().replaceAll('_', ' ').replace(/\s+/g, ' ').toLowerCase();
+
+const getWorkspaceEventTypeLabel = (eventType: string) => {
+  const normalizedType = normalizeWorkspaceEventType(eventType);
+
+  return eventTypeOptions.find((option) => option.toLowerCase() === normalizedType) ?? eventType;
+};
+
 const getWorkspaceHeroTheme = (eventType: string) => {
-  const normalizedType = eventType.trim().toLowerCase();
+  const normalizedType = normalizeWorkspaceEventType(eventType);
 
   return workspaceHeroThemes[normalizedType] ?? workspaceHeroThemes.default;
 };
@@ -479,6 +570,54 @@ const formatUpdatedAt = (value: string) =>
     minute: '2-digit',
   }).format(new Date(value));
 
+const formatJourneyDate = (value: string) =>
+  new Intl.DateTimeFormat('en-LK', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(value));
+
+const getEventStageReachedAt = (event: CustomerEvent, stage: EventStatus): string | null => {
+  const historyEntry = event.statusHistory.find((entry) => entry.newStatus === stage);
+
+  if (historyEntry) {
+    return historyEntry.changedAt;
+  }
+
+  if (stage === 'DRAFT') {
+    return event.createdAt;
+  }
+
+  return null;
+};
+
+const getEventStageDateLabel = (event: CustomerEvent, stage: EventStatus): string => {
+  const reachedAt = getEventStageReachedAt(event, stage);
+
+  if (!reachedAt) {
+    return 'Not reached';
+  }
+
+  switch (stage) {
+    case 'DRAFT':
+      return `Created ${formatJourneyDate(reachedAt)}`;
+
+    case 'PLANNING':
+      return `Planning started ${formatJourneyDate(reachedAt)}`;
+
+    case 'ACTIVE':
+      return `Activated ${formatJourneyDate(reachedAt)}`;
+
+    case 'COMPLETED':
+      return `Completed ${formatJourneyDate(reachedAt)}`;
+
+    case 'CANCELLED':
+      return `Cancelled ${formatJourneyDate(reachedAt)}`;
+  }
+};
+
 const toLocalDateTimeInput = (value: string) => {
   const date = new Date(value);
   const timezoneOffset = date.getTimezoneOffset() * 60_000;
@@ -495,7 +634,7 @@ const getMinimumDateTime = () => {
 
 const getEditFormValues = (event: CustomerEvent): EditEventFormValues => ({
   name: event.name,
-  eventType: event.eventType,
+  eventType: getWorkspaceEventTypeLabel(event.eventType),
   eventDate: toLocalDateTimeInput(event.eventDate),
   location: event.location,
   guestCount: event.guestCount === null ? '' : String(event.guestCount),
@@ -523,7 +662,7 @@ const buildUpdatePayload = (
     payload.name = name;
   }
 
-  if (eventType !== event.eventType) {
+  if (normalizeWorkspaceEventType(eventType) !== normalizeWorkspaceEventType(event.eventType)) {
     payload.eventType = eventType;
   }
 
@@ -578,6 +717,8 @@ export function EventWorkspacePage() {
       requirements: '',
     },
   });
+
+  const currentUserQuery = useCurrentUser();
 
   const eventQuery = useQuery({
     queryKey: ['customer', 'events', eventId],
@@ -774,6 +915,7 @@ export function EventWorkspacePage() {
     );
   }
 
+  const currentUser = currentUserQuery.data;
   const event = eventQuery.data;
   const workspaceHeroTheme = getWorkspaceHeroTheme(event.eventType);
   const isEventEditable = event.status !== 'COMPLETED' && event.status !== 'CANCELLED';
@@ -793,64 +935,96 @@ export function EventWorkspacePage() {
 
   const currentLifecycleIndex = eventLifecycleStages.indexOf(event.status);
 
-  const getSnapshotCardStackClass = (card: SnapshotCardKey, restingZIndex: string) =>
-    activeSnapshotCard === card
-      ? 'z-50 scale-[1.025] rotate-0 shadow-[0_34px_78px_rgba(31,27,29,0.24)]'
-      : `${restingZIndex} scale-100`;
-
-  const getStatusButtonClassName = (tone: EventStatusAction['tone']) => {
-    if (tone === 'primary') {
-      return 'btn-primary w-full justify-center text-sm font-bold';
-    }
-
-    if (tone === 'danger') {
-      return 'w-full rounded-2xl border border-[rgba(124,74,90,0.28)] bg-[rgba(124,74,90,0.12)] px-4 py-3 text-sm font-black text-[#fffaf5] transition hover:bg-[rgba(124,74,90,0.22)] disabled:cursor-not-allowed disabled:opacity-60';
-    }
-
-    return 'w-full rounded-2xl border border-white/24 bg-white/12 px-4 py-3 text-sm font-black text-[#fffaf5] backdrop-blur transition hover:bg-white/18 disabled:cursor-not-allowed disabled:opacity-60';
-  };
-
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <PageBackButton fallback="/events" label="Events" className="shrink-0" />
+        <div className="space-y-4">
+          {currentUser ? (
+            <CustomerWorkspaceHeader user={currentUser} unreadNotificationCount={0} />
+          ) : null}
 
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Event workspace
-              </p>
+          <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <PageBackButton fallback="/events" label="Events" className="shrink-0" />
 
-              <p className="mt-1 font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                {event.name}
-              </p>
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  Event workspace
+                </p>
+
+                <p className="mt-1 font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                  {event.name}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            className="btn-secondary text-sm font-bold"
-            disabled={!isEventEditable}
-            title={
-              isEventEditable
-                ? 'Edit event details'
-                : 'Completed or cancelled events cannot be edited'
-            }
-            onClick={openEditForm}
-          >
-            <Pencil className="size-4" />
-            Edit event
-          </button>
-        </header>
+            <button
+              type="button"
+              className="btn-secondary text-sm font-bold"
+              disabled={!isEventEditable}
+              title={
+                isEventEditable
+                  ? 'Edit event details'
+                  : 'Completed or cancelled events cannot be edited'
+              }
+              onClick={openEditForm}
+            >
+              <Pencil className="size-4" />
+              Edit event
+            </button>
+          </header>
+        </div>
 
         <main className="py-10">
           <section
-            className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/68 px-5 pb-8 pt-6 shadow-[0_22px_64px_rgba(31,27,29,0.10)] sm:px-7 sm:pb-9 sm:pt-7 lg:px-9 lg:pb-10 lg:pt-8"
+            className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/68 px-5 pb-8 pt-6 shadow-[0_22px_64px_rgba(31,27,29,0.10)] sm:px-7 sm:pb-9 sm:pt-7 lg:min-h-[34rem] lg:px-9 lg:pb-10 lg:pt-8"
             style={{
               background: workspaceHeroTheme.background,
             }}
+            onClick={(mouseEvent) => {
+              const clickedElement = mouseEvent.target;
+
+              if (!(clickedElement instanceof Element)) {
+                return;
+              }
+
+              const clickedProtectedContent = clickedElement.closest(
+                '[data-hero-content="true"], [data-snapshot-card="true"]',
+              );
+
+              if (clickedProtectedContent) {
+                return;
+              }
+
+              setActiveSnapshotCard('theme');
+            }}
           >
+            <img
+              src={workspaceHeroTheme.image}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 size-full object-cover transition duration-1000"
+              style={{
+                objectPosition: workspaceHeroTheme.imagePosition,
+                filter: 'saturate(0.90) contrast(0.95)',
+              }}
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,248,0.99)_0%,rgba(255,252,248,0.97)_20%,rgba(255,252,248,0.88)_39%,rgba(255,252,248,0.60)_57%,rgba(255,252,248,0.24)_73%,rgba(255,252,248,0.06)_88%,transparent_100%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.12)_0%,transparent_46%,rgba(31,27,29,0.10)_100%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 w-[67%] bg-[radial-gradient(ellipse_at_left,rgba(255,252,248,0.42)_0%,rgba(255,252,248,0.17)_54%,transparent_82%)]"
+            />
+
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -left-28 -top-32 size-[28rem] rounded-full blur-3xl"
@@ -861,160 +1035,46 @@ export function EventWorkspacePage() {
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -bottom-36 right-[4%] size-[30rem] rounded-full blur-3xl"
+              className="pointer-events-none absolute -bottom-36 left-[8%] size-[30rem] rounded-full blur-3xl"
               style={{
                 backgroundColor: workspaceHeroTheme.softGlow,
               }}
             />
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 right-0 w-[46%] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.24))]"
-            />
-
-            {workspaceHeroTheme.motif === 'birthday' ? (
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 420 220"
-                className="pointer-events-none absolute -bottom-8 right-2 h-48 w-[44%] opacity-[0.16]"
-                fill="none"
-              >
-                <path
-                  d="M410 30C335 9 315 71 350 99C384 126 365 177 302 179C231 181 236 116 177 120C115 124 117 188 28 205"
-                  stroke="rgba(93,58,85,0.72)"
-                  strokeWidth="7"
-                  strokeLinecap="round"
-                />
-              </svg>
-            ) : null}
-
-            {workspaceHeroTheme.motif === 'wedding' ? (
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 220 260"
-                className="pointer-events-none absolute -bottom-3 right-3 h-[78%] w-44 opacity-[0.16]"
-                fill="none"
-              >
-                <path
-                  d="M184 246C136 205 115 163 118 119C121 77 147 45 190 18"
-                  stroke="rgba(124,74,90,0.74)"
-                  strokeWidth="3"
-                />
-                <ellipse
-                  cx="126"
-                  cy="93"
-                  rx="16"
-                  ry="7"
-                  transform="rotate(32 126 93)"
-                  fill="rgba(212,175,190,0.72)"
-                />
-                <ellipse
-                  cx="146"
-                  cy="195"
-                  rx="17"
-                  ry="8"
-                  transform="rotate(26 146 195)"
-                  fill="rgba(238,213,218,0.84)"
-                />
-              </svg>
-            ) : null}
-
-            {workspaceHeroTheme.motif === 'graduation' ? (
+            <div className="relative grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
               <div
-                aria-hidden="true"
-                className="pointer-events-none absolute bottom-5 right-5 h-40 w-56 rotate-[-4deg] rounded-[1.4rem] border border-[rgba(150,115,57,0.12)] bg-white/14 opacity-70"
+                data-hero-content="true"
+                className="lg:order-2 lg:flex lg:min-h-[25rem] lg:items-center lg:justify-end"
               >
-                <div className="absolute left-6 top-6 h-1.5 w-24 rounded-full bg-[rgba(113,117,76,0.16)]" />
-                <div className="absolute left-6 top-11 h-1 w-32 rounded-full bg-[rgba(113,117,76,0.10)]" />
-              </div>
-            ) : null}
+                <div className="w-full lg:max-w-[31rem]">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/48 bg-white/28 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_30px_rgba(31,27,29,0.08)] backdrop-blur-2xl">
+                      <Sparkles aria-hidden="true" className="size-4" />
+                      {workspaceHeroTheme.label}
+                    </div>
 
-            {workspaceHeroTheme.motif === 'corporate' ? (
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 right-0 w-[48%] opacity-[0.15]"
-                style={{
-                  backgroundImage: `
-          linear-gradient(rgba(88,67,61,0.20) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(88,67,61,0.20) 1px, transparent 1px)
-        `,
-                  backgroundSize: '30px 30px',
-                }}
-              />
-            ) : null}
-
-            {workspaceHeroTheme.motif === 'party' ? (
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-20 -top-24 h-[150%] w-[42%] rotate-[14deg] bg-[linear-gradient(100deg,transparent,rgba(255,220,195,0.28),rgba(158,89,119,0.12),transparent)] opacity-60 blur-xl"
-              />
-            ) : null}
-
-            {workspaceHeroTheme.motif === 'baby' ? (
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute bottom-5 right-5 h-24 w-48 opacity-30"
-              >
-                <span className="absolute bottom-0 left-2 h-12 w-40 rounded-full bg-white/72" />
-                <span className="absolute bottom-5 left-8 size-16 rounded-full bg-white/76" />
-                <span className="absolute bottom-4 right-3 size-20 rounded-full bg-white/68" />
-              </div>
-            ) : null}
-
-            {workspaceHeroTheme.motif === 'engagement' ? (
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute right-10 top-10 h-36 w-48 opacity-[0.16]"
-              >
-                <span className="absolute left-3 top-5 size-24 rounded-full border-[5px] border-[rgba(197,165,95,0.88)]" />
-                <span className="absolute right-2 top-8 size-24 rounded-full border-[5px] border-[rgba(224,201,145,0.92)]" />
-              </div>
-            ) : null}
-
-            {workspaceHeroTheme.motif === 'festival' ? (
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 340 190"
-                className="pointer-events-none absolute right-0 top-0 h-[60%] w-[38%] opacity-[0.18]"
-                fill="none"
-              >
-                <path d="M38 0V70" stroke="rgba(124,74,90,0.82)" />
-                <path d="M132 0V96" stroke="rgba(150,115,57,0.78)" />
-                <path
-                  d="M38 70C24 82 24 104 38 117C52 104 52 82 38 70Z"
-                  fill="rgba(173,103,86,0.88)"
-                />
-                <path
-                  d="M132 96C115 109 115 135 132 150C149 135 149 109 132 96Z"
-                  fill="rgba(213,165,95,0.92)"
-                />
-              </svg>
-            ) : null}
-
-            <div className="relative grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-              <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="soft-chip text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                    <Sparkles className="size-4" />
-                    {event.eventType}
+                    <span
+                      className="status-chip border-white/42 bg-white/24 shadow-[0_10px_30px_rgba(31,27,29,0.08)] backdrop-blur-2xl"
+                      data-tone={getStatusTone(event.status)}
+                    >
+                      {event.status.replaceAll('_', ' ')}
+                    </span>
                   </div>
 
-                  <span className="status-chip" data-tone={getStatusTone(event.status)}>
-                    {event.status.replaceAll('_', ' ')}
-                  </span>
+                  <h1 className="mt-5 max-w-[30rem] text-balance text-4xl font-black leading-[1.01] tracking-[-0.05em] text-[var(--color-near-black)] drop-shadow-[0_1px_0_rgba(255,255,255,0.28)] sm:text-[2.8rem] lg:text-[3.05rem]">
+                    {event.name}
+                  </h1>
+
+                  <div className="mt-5 max-w-[29rem] rounded-[1.35rem] border border-white/38 bg-white/18 px-5 py-4 shadow-[0_14px_38px_rgba(31,27,29,0.08)] backdrop-blur-2xl">
+                    <p className="text-pretty text-base font-semibold leading-7 text-[var(--color-charcoal)]/76">
+                      {event.requirements ??
+                        'Coordinate vendors, budgets, guests and every important milestone from one organised workspace.'}
+                    </p>
+                  </div>
                 </div>
-
-                <h1 className="mt-4 max-w-4xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:mt-5 sm:text-5xl sm:leading-[0.98] lg:text-[3.5rem]">
-                  {event.name}
-                </h1>
-
-                <p className="mt-4 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/70 sm:mt-5 sm:text-lg sm:leading-8">
-                  {event.requirements ??
-                    'Coordinate vendors, budgets, guests and every important milestone from one organised workspace.'}
-                </p>
               </div>
 
-              <aside className="relative min-h-[21rem] lg:min-h-[22rem]">
+              <aside className="relative min-h-[21rem] lg:order-1 lg:min-h-[23rem]">
                 <div className="mb-4 flex items-center justify-between gap-4 lg:absolute lg:left-4 lg:top-0 lg:z-40 lg:mb-0">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
@@ -1028,7 +1088,7 @@ export function EventWorkspacePage() {
                 </div>
 
                 {/* Mobile and tablet: readable stacked layout */}
-                <div className="grid gap-3 sm:grid-cols-2 lg:hidden">
+                <div data-snapshot-card="true" className="grid gap-3 sm:grid-cols-2 lg:hidden">
                   <article className="rounded-[1.55rem] border border-white/72 bg-white/48 p-5 shadow-[0_16px_38px_rgba(31,27,29,0.10)] backdrop-blur-2xl">
                     <span className="grid size-10 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
                       <CalendarDays aria-hidden="true" className="size-4" />
@@ -1107,8 +1167,9 @@ export function EventWorkspacePage() {
                 </div>
 
                 {/* Desktop: intentionally scattered and overlapping composition */}
-                <div className="relative hidden h-[22rem] lg:block">
+                <div className="relative hidden h-[23rem] lg:block">
                   <article
+                    data-snapshot-card="true"
                     role="button"
                     tabIndex={0}
                     aria-pressed={activeSnapshotCard === 'date'}
@@ -1119,10 +1180,10 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('date');
                       }
                     }}
-                    className={`group/snapshot-card absolute left-[4%] top-[3.8rem] w-[58%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(248,231,228,0.58))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute left-[3%] top-[2.8rem] w-[59%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(248,231,228,0.58))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'date'
-                        ? 'z-50 -translate-y-1.5 scale-[1.03] rotate-0 opacity-100 shadow-[0_34px_78px_rgba(31,27,29,0.24)]'
-                        : 'z-20 scale-100 rotate-[-2deg] opacity-[0.86] shadow-[0_24px_58px_rgba(31,27,29,0.15)]'
+                        ? 'z-50 -translate-y-3 translate-x-1 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
+                        : 'z-20 -translate-x-1 translate-y-1 scale-[0.975] rotate-[-6deg] opacity-[0.74] brightness-[0.95] shadow-[0_18px_44px_rgba(31,27,29,0.12)]'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -1149,6 +1210,7 @@ export function EventWorkspacePage() {
                   </article>
 
                   <article
+                    data-snapshot-card="true"
                     role="button"
                     tabIndex={0}
                     aria-pressed={activeSnapshotCard === 'location'}
@@ -1159,10 +1221,10 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('location');
                       }
                     }}
-                    className={`group/snapshot-card absolute right-[0%] top-[5.7rem] w-[46%] cursor-pointer rounded-[1.65rem] border border-white/74 bg-[linear-gradient(145deg,rgba(248,244,251,0.90),rgba(220,207,230,0.76))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute right-[4%] top-[5.1rem] w-[47%] cursor-pointer rounded-[1.65rem] border border-white/74 bg-[linear-gradient(145deg,rgba(248,244,251,0.90),rgba(220,207,230,0.76))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'location'
-                        ? 'z-50 -translate-y-1.5 scale-[1.03] rotate-0 opacity-100 shadow-[0_34px_78px_rgba(31,27,29,0.24)]'
-                        : 'z-30 translate-y-1 scale-100 rotate-[2deg] opacity-[0.86] shadow-[0_24px_56px_rgba(31,27,29,0.16)]'
+                        ? 'z-50 -translate-y-3 -translate-x-2 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
+                        : 'z-30 translate-x-2 translate-y-2 scale-[0.965] rotate-[6.5deg] opacity-[0.72] brightness-[0.94] shadow-[0_18px_46px_rgba(31,27,29,0.13)]'
                     }`}
                   >
                     <span
@@ -1185,6 +1247,7 @@ export function EventWorkspacePage() {
                   </article>
 
                   <article
+                    data-snapshot-card="true"
                     role="button"
                     tabIndex={0}
                     aria-pressed={activeSnapshotCard === 'guests'}
@@ -1195,10 +1258,10 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('guests');
                       }
                     }}
-                    className={`group/snapshot-card absolute bottom-[1.4rem] left-[1%] w-[38%] cursor-pointer rounded-[1.6rem] border border-white/72 bg-[linear-gradient(145deg,rgba(250,250,242,0.76),rgba(222,222,195,0.60))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute bottom-[2.6rem] left-[8%] w-[38%] cursor-pointer rounded-[1.6rem] border border-white/72 bg-[linear-gradient(145deg,rgba(250,250,242,0.76),rgba(222,222,195,0.60))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'guests'
-                        ? 'z-50 -translate-y-1.5 scale-[1.03] rotate-0 opacity-100 shadow-[0_34px_78px_rgba(31,27,29,0.24)]'
-                        : 'z-10 -translate-x-1 scale-100 rotate-[2.5deg] opacity-[0.84] shadow-[0_20px_48px_rgba(31,27,29,0.13)]'
+                        ? 'z-50 -translate-y-3 translate-x-2 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
+                        : 'z-10 -translate-x-2 translate-y-3 scale-[0.95] rotate-[5.5deg] opacity-[0.68] brightness-[0.93] shadow-[0_16px_40px_rgba(31,27,29,0.11)]'
                     }`}
                   >
                     <span
@@ -1223,6 +1286,7 @@ export function EventWorkspacePage() {
                   </article>
 
                   <article
+                    data-snapshot-card="true"
                     role="button"
                     tabIndex={0}
                     aria-pressed={activeSnapshotCard === 'budget'}
@@ -1233,10 +1297,10 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('budget');
                       }
                     }}
-                    className={`group/snapshot-card absolute bottom-[0.7rem] right-[3%] w-[57%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,250,246,0.82),rgba(239,214,207,0.68))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute bottom-[1.6rem] right-[5%] w-[54%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,250,246,0.82),rgba(239,214,207,0.68))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'budget'
-                        ? 'z-50 -translate-y-1.5 scale-[1.03] rotate-0 opacity-100 shadow-[0_34px_78px_rgba(31,27,29,0.24)]'
-                        : 'z-40 translate-y-1 scale-100 rotate-[-2.5deg] opacity-[0.88] shadow-[0_26px_62px_rgba(31,27,29,0.18)]'
+                        ? 'z-50 -translate-y-3 -translate-x-2 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
+                        : 'z-40 -translate-x-1 -translate-y-1 scale-[0.985] rotate-[2.5deg] opacity-[0.80] brightness-[0.97] shadow-[0_24px_58px_rgba(31,27,29,0.17)]'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -1263,6 +1327,7 @@ export function EventWorkspacePage() {
                   </article>
 
                   <article
+                    data-snapshot-card="true"
                     role="button"
                     tabIndex={0}
                     aria-pressed={activeSnapshotCard === 'theme'}
@@ -1273,10 +1338,10 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('theme');
                       }
                     }}
-                    className={`group/snapshot-card absolute bottom-[7.2rem] left-[22%] w-[40%] cursor-pointer rounded-[1.5rem] border border-white/78 bg-[linear-gradient(135deg,rgba(255,255,255,0.84),rgba(235,222,228,0.72))] px-5 py-4 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute top-[9.4rem] left-[18%] w-[42%] cursor-pointer rounded-[1.5rem] border border-white/78 bg-[linear-gradient(135deg,rgba(255,255,255,0.84),rgba(235,222,228,0.72))] px-5 py-4 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'theme'
-                        ? 'z-50 -translate-y-1.5 scale-[1.03] rotate-0 opacity-100 shadow-[0_34px_78px_rgba(31,27,29,0.24)]'
-                        : 'z-[35] translate-x-1 -translate-y-0.5 scale-100 rotate-[1deg] opacity-[0.88] shadow-[0_22px_52px_rgba(31,27,29,0.16)]'
+                        ? 'z-50 -translate-y-3 translate-x-1 scale-[1.07] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.30)] ring-1 ring-white/75'
+                        : 'z-[35] -translate-x-2 translate-y-1 scale-[0.955] rotate-[-3.5deg] opacity-[0.72] brightness-[0.94] shadow-[0_18px_46px_rgba(31,27,29,0.13)]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -1306,258 +1371,122 @@ export function EventWorkspacePage() {
             </div>
           </section>
 
-          <nav
-            className="glass-card relative z-20 mt-5 overflow-hidden border-white/72 bg-white/38 p-2.5 shadow-[0_18px_48px_rgba(31,27,29,0.09)] backdrop-blur-xl sm:mt-6 sm:p-3.5"
-            aria-label="Event workspace sections"
-          >
-            <div className="snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-0.5 pb-2 [scrollbar-width:thin] [scrollbar-color:rgba(93,58,85,0.28)_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[rgba(93,58,85,0.24)] hover:[&::-webkit-scrollbar-thumb]:bg-[rgba(93,58,85,0.38)]">
-              <div className="flex min-w-max items-center gap-2 pr-3">
-                {workspaceSections.map(({ label, icon: Icon, path }) => {
-                  const isActive = label === 'Overview';
+          <section className="mt-7">
+            <article className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-[#fffaf5] shadow-[0_24px_68px_rgba(93,58,85,0.24)]">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-white/10 blur-3xl"
+              />
 
-                  return (
-                    <Link
-                      key={label}
-                      to={path(event.id)}
-                      aria-current={isActive ? 'page' : undefined}
-                      className={
-                        isActive
-                          ? 'group relative flex min-w-[7.75rem] shrink-0 snap-start items-center gap-3 overflow-hidden rounded-[1.25rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] px-3 py-3 text-[#fffaf5] shadow-[0_16px_35px_rgba(93,58,85,0.24)] transition duration-300 sm:min-w-[8.5rem] sm:px-4 sm:py-3.5'
-                          : 'group relative flex min-w-[7.75rem] shrink-0 snap-start items-center gap-3 overflow-hidden rounded-[1.25rem] border border-white/52 bg-white/28 px-3 py-3 text-[var(--color-charcoal)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/80 hover:bg-white/48 hover:shadow-[0_14px_30px_rgba(31,27,29,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/35 sm:min-w-[8.5rem] sm:px-4 sm:py-3.5'
-                      }
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={
-                          isActive
-                            ? 'pointer-events-none absolute inset-x-5 bottom-0 h-0.5 rounded-full bg-white/72'
-                            : 'pointer-events-none absolute inset-x-1/2 bottom-0 h-0.5 rounded-full bg-[var(--color-deep-plum)]/55 transition-all duration-300 group-hover:inset-x-5'
-                        }
-                      />
-                      {isActive ? (
-                        <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_48%)]" />
-                      ) : null}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-32 -left-24 size-72 rounded-full bg-[rgba(175,201,216,0.11)] blur-3xl"
+              />
 
-                      <span
-                        className={
-                          isActive
-                            ? 'relative grid size-9 shrink-0 place-items-center rounded-xl bg-white/14 text-[var(--color-powder-blue)]'
-                            : 'relative grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)] transition duration-300 group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-[rgba(93,58,85,0.16)]'
-                        }
-                      >
-                        <Icon aria-hidden="true" className="size-4" />
+              <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_0.82fr] lg:items-stretch lg:p-9">
+                <div className="flex flex-col">
+                  <div className="flex flex-wrap items-start justify-between gap-5">
+                    <div className="flex items-center gap-4">
+                      <span className="grid size-13 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] backdrop-blur-xl">
+                        {event.status === 'COMPLETED' ? (
+                          <CheckCircle2 aria-hidden="true" className="size-6" />
+                        ) : event.status === 'CANCELLED' ? (
+                          <Ban aria-hidden="true" className="size-6" />
+                        ) : (
+                          <Sparkles aria-hidden="true" className="size-6" />
+                        )}
                       </span>
 
-                      <span className="relative text-sm font-black">{label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </nav>
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.22em] text-white/52">
+                          Planning status
+                        </p>
 
-          <section className="mt-7 grid items-stretch gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-            <article className="glass-card overflow-hidden border-white/72 bg-white/30 shadow-[0_22px_64px_rgba(31,27,29,0.10)] backdrop-blur-2xl">
-              <div className="border-b border-white/45 px-6 py-7 sm:px-8 sm:py-8">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                      Event overview
-                    </p>
+                        <h2 className="mt-2 text-3xl font-black tracking-[-0.045em] sm:text-4xl">
+                          {event.status.replaceAll('_', ' ')}
+                        </h2>
+                      </div>
+                    </div>
 
-                    <h2 className="mt-3 max-w-2xl text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl sm:tracking-[-0.045em]">
-                      Everything important, clearly organised.
-                    </h2>
-
-                    <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/58">
-                      Review the information guiding this event and update it whenever the plan
-                      changes.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="btn-secondary shrink-0 self-start text-sm font-bold sm:self-auto"
-                    disabled={!isEventEditable}
-                    title={
-                      isEventEditable
-                        ? 'Edit event details'
-                        : 'Completed or cancelled events cannot be edited'
-                    }
-                    onClick={openEditForm}
-                  >
-                    <Pencil className="size-4" />
-                    Update details
-                  </button>
-                </div>
-              </div>
-
-              <div className="divide-y divide-white/45 px-6 sm:px-8">
-                <div className="group/overview grid gap-4 py-5 transition duration-300 hover:bg-white/18 sm:grid-cols-[13rem_1fr] sm:items-center sm:px-3">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.12)] text-[var(--color-rosewood)] transition duration-300 group-hover/overview:-translate-y-0.5 group-hover/overview:scale-105">
-                      <CalendarDays className="size-4" />
-                    </span>
-
-                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
-                      Date and time
-                    </p>
-                  </div>
-
-                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
-                    {formatEventDate(event.eventDate)}
-                  </p>
-                </div>
-
-                <div className="group/overview grid gap-4 py-6 transition duration-300 hover:bg-white/18 sm:grid-cols-[13rem_1fr] sm:items-center sm:px-3">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[#405966] transition duration-300 group-hover/overview:-translate-y-0.5 group-hover/overview:scale-105">
-                      <MapPin className="size-4" />
-                    </span>
-
-                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">Location</p>
-                  </div>
-
-                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
-                    {event.location}
-                  </p>
-                </div>
-
-                <div className="group/overview grid gap-4 py-6 transition duration-300 hover:bg-white/18 sm:grid-cols-[13rem_1fr] sm:items-center sm:px-3">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.18)] text-[#586047] transition duration-300 group-hover/overview:-translate-y-0.5 group-hover/overview:scale-105">
-                      <UsersRound className="size-4" />
-                    </span>
-
-                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
-                      Estimated guests
-                    </p>
-                  </div>
-
-                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
-                    {event.guestCount
-                      ? `${event.guestCount.toLocaleString('en-GB')} guests`
-                      : 'Not set'}
-                  </p>
-                </div>
-
-                <div className="group/overview grid gap-4 py-6 transition duration-300 hover:bg-white/18 sm:grid-cols-[13rem_1fr] sm:items-center sm:px-3">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)] transition duration-300 group-hover/overview:-translate-y-0.5 group-hover/overview:scale-105">
-                      <WalletCards className="size-4" />
-                    </span>
-
-                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
-                      Planned budget
-                    </p>
-                  </div>
-
-                  <p className="font-black text-[var(--color-near-black)] sm:text-right">
-                    {formatCurrency(event.plannedBudget)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid border-t border-white/45 lg:grid-cols-2">
-                <div className="group/detail border-b border-white/45 p-6 transition duration-300 hover:bg-white/16 sm:p-8 lg:border-b-0 lg:border-r">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
-                      <Sparkles className="size-4" />
-                    </span>
-
-                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
-                      Theme and creative direction
-                    </p>
-                  </div>
-
-                  <p className="mt-5 text-xl font-black leading-7 tracking-[-0.035em] text-[var(--color-near-black)]">
-                    {event.theme ?? 'No theme added yet'}
-                  </p>
-                </div>
-
-                <div className="group/detail p-6 transition duration-300 hover:bg-white/16 sm:p-8">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-10 place-items-center rounded-xl bg-[rgba(142,92,103,0.12)] text-[var(--color-rosewood)]">
-                      <FileText className="size-4" />
-                    </span>
-
-                    <p className="text-sm font-black text-[var(--color-charcoal)]/62">
-                      Planning requirements
-                    </p>
-                  </div>
-
-                  <p className="mt-5 leading-7 text-[var(--color-charcoal)]/70">
-                    {event.requirements ??
-                      'No additional planning requirements have been added yet.'}
-                  </p>
-                </div>
-              </div>
-            </article>
-
-            <aside className="h-full overflow-hidden rounded-[1.6rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-[#fffaf5] shadow-[0_24px_64px_rgba(93,58,85,0.24)] sm:rounded-[2rem]">
-              <div className="relative flex h-full min-h-[31rem] flex-col overflow-hidden p-6 sm:p-7">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-white/10 blur-3xl"
-                />
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-24 -left-20 size-56 rounded-full bg-[rgba(175,201,216,0.10)] blur-3xl"
-                />
-
-                <div className="relative flex h-full flex-col">
-                  <div className="flex items-start justify-between gap-4">
-                    <span className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] backdrop-blur">
-                      {event.status === 'COMPLETED' ? (
-                        <CheckCircle2 aria-hidden="true" className="size-5" />
-                      ) : event.status === 'CANCELLED' ? (
-                        <Ban aria-hidden="true" className="size-5" />
-                      ) : (
-                        <Sparkles aria-hidden="true" className="size-5" />
-                      )}
-                    </span>
-
-                    <span className="rounded-full border border-white/16 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/76">
+                    <span className="rounded-full border border-white/16 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white/78 backdrop-blur-xl">
                       {event.status.replaceAll('_', ' ')}
                     </span>
                   </div>
 
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.22em] text-white/52">
-                    Planning status
-                  </p>
-
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
-                    {event.status.replaceAll('_', ' ')}
-                  </h2>
-
-                  <p className="mt-4 max-w-sm leading-7 text-white/66">
+                  <p className="mt-6 max-w-2xl text-base font-semibold leading-7 text-white/68">
                     {getEventStatusMessage(event.status)}
                   </p>
 
-                  <div className="mt-6 border-t border-white/12 pt-5">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-white/42">
-                      Last updated
-                    </p>
+                  <div className="mt-7 grid gap-4 border-t border-white/12 pt-6 sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-white/42">
+                        Last updated
+                      </p>
 
-                    <p className="mt-2 text-sm font-bold text-white/68">
-                      {formatUpdatedAt(event.updatedAt)}
-                    </p>
+                      <p className="mt-2 text-sm font-bold text-white/72">
+                        {formatUpdatedAt(event.updatedAt)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-white/42">
+                        Event type
+                      </p>
+
+                      <p className="mt-2 text-sm font-bold text-white/72">
+                        {workspaceHeroTheme.label}
+                      </p>
+                    </div>
                   </div>
 
+                  <div className="mt-auto flex flex-col gap-3 pt-8 sm:flex-row sm:flex-wrap">
+                    {isEventEditable ? (
+                      <button
+                        type="button"
+                        className="flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(31,27,29,0.24)]"
+                        onClick={openEditForm}
+                      >
+                        <Pencil aria-hidden="true" className="size-4" />
+                        Update details
+                      </button>
+                    ) : (
+                      <div className="flex items-start gap-3 rounded-[1.25rem] border border-white/12 bg-white/[0.06] px-4 py-3.5 backdrop-blur-xl">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-white/70">
+                          {event.status === 'COMPLETED' ? (
+                            <CheckCircle2 aria-hidden="true" className="size-4" />
+                          ) : (
+                            <Ban aria-hidden="true" className="size-4" />
+                          )}
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-white/84">
+                            Event details are read-only
+                          </p>
+
+                          <p className="mt-1 text-xs font-semibold leading-5 text-white/48">
+                            Completed and cancelled events cannot be edited.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-[1.6rem] border border-white/14 bg-white/[0.08] p-5 backdrop-blur-2xl sm:p-6">
                   {primaryStatusAction ? (
-                    <div className="mt-6 rounded-[1.4rem] border border-white/14 bg-white/[0.08] p-4 backdrop-blur-xl">
+                    <>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-white/46">
                         Recommended next step
                       </p>
 
-                      <p className="mt-2 text-sm font-semibold leading-6 text-white/62">
+                      <p className="mt-3 text-sm font-semibold leading-6 text-white/64">
                         {primaryStatusAction.description}
                       </p>
 
                       <button
                         type="button"
-                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_14px_32px_rgba(31,27,29,0.16)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(31,27,29,0.22)] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_14px_32px_rgba(31,27,29,0.16)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(31,27,29,0.22)] disabled:cursor-not-allowed disabled:opacity-60"
                         disabled={updateEventStatusMutation.isPending}
                         onClick={() => {
                           updateEventStatusMutation.reset();
@@ -1598,63 +1527,53 @@ export function EventWorkspacePage() {
                           })}
                         </div>
                       ) : null}
-                    </div>
+                    </>
                   ) : (
-                    <div className="mt-6 rounded-[1.4rem] border border-white/12 bg-white/[0.06] p-4">
-                      <div className="flex items-start gap-3">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-white/70">
-                          {event.status === 'COMPLETED' ? (
-                            <CheckCircle2 aria-hidden="true" className="size-4" />
-                          ) : (
-                            <Ban aria-hidden="true" className="size-4" />
-                          )}
-                        </span>
+                    <div className="flex h-full min-h-[13rem] flex-col justify-between">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-white/46">
+                          Final event status
+                        </p>
 
+                        <p className="mt-3 text-lg font-black text-white/86">
+                          {event.status.replaceAll('_', ' ')}
+                        </p>
+
+                        <p className="mt-2 text-sm font-semibold leading-6 text-white/54">
+                          No further lifecycle actions are available for this event.
+                        </p>
+                      </div>
+
+                      <div className="mt-6 flex items-center justify-between gap-4 rounded-[1.25rem] border border-white/12 bg-black/[0.08] p-4">
                         <div>
-                          <p className="text-sm font-black text-white/84">Final event status</p>
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-white/40">
+                            Current stage
+                          </p>
 
-                          <p className="mt-1 text-xs font-semibold leading-5 text-white/48">
-                            No further lifecycle actions are available for this event.
+                          <p className="mt-2 text-base font-black text-white/84">
+                            {event.status.replaceAll('_', ' ')}
                           </p>
                         </div>
+
+                        <span
+                          className={
+                            event.status === 'COMPLETED'
+                              ? 'grid size-11 place-items-center rounded-2xl bg-[rgba(142,151,115,0.22)] text-[#dce7c5]'
+                              : 'grid size-11 place-items-center rounded-2xl bg-white/10 text-white/68'
+                          }
+                        >
+                          {event.status === 'COMPLETED' ? (
+                            <CheckCircle2 aria-hidden="true" className="size-5" />
+                          ) : (
+                            <Ban aria-hidden="true" className="size-5" />
+                          )}
+                        </span>
                       </div>
                     </div>
                   )}
-
-                  <div className="mt-auto rounded-[1.4rem] border border-white/12 bg-black/[0.08] p-4 backdrop-blur-xl">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-white/42">
-                          Current stage
-                        </p>
-
-                        <p className="mt-2 text-lg font-black text-white/88">
-                          {event.status.replaceAll('_', ' ')}
-                        </p>
-                      </div>
-
-                      <span
-                        className={
-                          event.status === 'COMPLETED'
-                            ? 'grid size-11 place-items-center rounded-2xl bg-[rgba(142,151,115,0.22)] text-[#dce7c5]'
-                            : event.status === 'CANCELLED'
-                              ? 'grid size-11 place-items-center rounded-2xl bg-white/10 text-white/68'
-                              : 'grid size-11 place-items-center rounded-2xl bg-[rgba(175,201,216,0.16)] text-[var(--color-powder-blue)]'
-                        }
-                      >
-                        {event.status === 'COMPLETED' ? (
-                          <CheckCircle2 aria-hidden="true" className="size-5" />
-                        ) : event.status === 'CANCELLED' ? (
-                          <Ban aria-hidden="true" className="size-5" />
-                        ) : (
-                          <PlayCircle aria-hidden="true" className="size-5" />
-                        )}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
-            </aside>
+            </article>
           </section>
 
           <section className="mt-6 space-y-6">
@@ -1672,7 +1591,7 @@ export function EventWorkspacePage() {
                       </p>
 
                       <p className="mt-1 text-sm font-bold text-[var(--color-charcoal)]/52">
-                        Follow the event through each lifecycle stage.
+                        Follow the event through each lifecycle milestone.
                       </p>
                     </div>
                   </div>
@@ -1680,7 +1599,7 @@ export function EventWorkspacePage() {
                   <h2 className="mt-5 max-w-2xl text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl sm:tracking-[-0.045em]">
                     {event.status === 'CANCELLED'
                       ? 'Planning has stopped for this event.'
-                      : 'See exactly where this event stands.'}
+                      : 'See exactly when each stage was reached.'}
                   </h2>
                 </div>
 
@@ -1691,21 +1610,76 @@ export function EventWorkspacePage() {
 
               {event.status === 'CANCELLED' ? (
                 <div className="p-6 sm:p-8">
-                  <div className="rounded-[1.6rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] p-5 sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
-                        <Ban aria-hidden="true" className="size-5" />
-                      </span>
+                  <div className="grid gap-5 lg:grid-cols-[1fr_0.72fr]">
+                    <div className="rounded-[1.6rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] p-5 sm:p-6">
+                      <div className="flex items-start gap-4">
+                        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
+                          <Ban aria-hidden="true" className="size-5" />
+                        </span>
 
-                      <div>
-                        <p className="text-lg font-black text-[var(--color-near-black)]">
-                          Event cancelled
-                        </p>
+                        <div>
+                          <p className="text-lg font-black text-[var(--color-near-black)]">
+                            Event cancelled
+                          </p>
 
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/62">
-                          This event no longer follows the active planning lifecycle. Its existing
-                          information remains available for reference.
-                        </p>
+                          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/62">
+                            This event no longer follows the active planning lifecycle. Its existing
+                            information remains available for reference.
+                          </p>
+
+                          <p className="mt-4 text-sm font-black text-[var(--color-muted-burgundy)]">
+                            {getEventStageDateLabel(event, 'CANCELLED')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-[1.6rem] border border-white/58 bg-white/28 p-5 backdrop-blur-xl sm:p-6">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
+                        Journey before cancellation
+                      </p>
+
+                      <div className="mt-5 space-y-4">
+                        {(['DRAFT', 'PLANNING', 'ACTIVE'] as EventStatus[]).map((stage) => {
+                          const reachedAt = getEventStageReachedAt(event, stage);
+
+                          return (
+                            <div
+                              key={stage}
+                              className="flex items-start justify-between gap-4 border-b border-white/45 pb-4 last:border-b-0 last:pb-0"
+                            >
+                              <div>
+                                <p
+                                  className={
+                                    reachedAt
+                                      ? 'text-sm font-black text-[var(--color-near-black)]'
+                                      : 'text-sm font-black text-[var(--color-charcoal)]/34'
+                                  }
+                                >
+                                  {stage}
+                                </p>
+
+                                <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                                  {getEventStageDateLabel(event, stage)}
+                                </p>
+                              </div>
+
+                              <span
+                                className={
+                                  reachedAt
+                                    ? 'grid size-8 shrink-0 place-items-center rounded-full bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]'
+                                    : 'grid size-8 shrink-0 place-items-center rounded-full bg-white/34 text-[var(--color-charcoal)]/24'
+                                }
+                              >
+                                {reachedAt ? (
+                                  <CheckCircle2 aria-hidden="true" className="size-4" />
+                                ) : (
+                                  <span className="size-1.5 rounded-full bg-current" />
+                                )}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1737,6 +1711,7 @@ export function EventWorkspacePage() {
                       {eventLifecycleStages.map((stage, stageIndex) => {
                         const isReached = stageIndex <= currentLifecycleIndex;
                         const isCurrent = stage === event.status;
+                        const reachedAt = getEventStageReachedAt(event, stage);
 
                         return (
                           <div
@@ -1747,7 +1722,7 @@ export function EventWorkspacePage() {
                                 : 'group/stage relative rounded-[1.45rem] border border-white/54 bg-white/24 p-4 transition duration-300 hover:-translate-y-0.5 hover:bg-white/38 sm:border-transparent sm:bg-transparent sm:p-0'
                             }
                           >
-                            <div className="relative z-10 flex items-center gap-4 sm:flex-col sm:text-center">
+                            <div className="relative z-10 flex items-start gap-4 sm:flex-col sm:items-center sm:text-center">
                               <span
                                 className={
                                   isCurrent
@@ -1792,6 +1767,16 @@ export function EventWorkspacePage() {
                                         ? 'Active coordination'
                                         : 'Event finished'}
                                 </p>
+
+                                <p
+                                  className={
+                                    reachedAt
+                                      ? 'mt-3 text-xs font-black leading-5 text-[var(--color-deep-plum)]/76'
+                                      : 'mt-3 text-xs font-bold leading-5 text-[var(--color-charcoal)]/30'
+                                  }
+                                >
+                                  {getEventStageDateLabel(event, stage)}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -1824,21 +1809,173 @@ export function EventWorkspacePage() {
             </article>
 
             <section className="space-y-5">
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                  Available actions
-                </p>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                    Workspace shortcuts
+                  </p>
 
-                <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                  Continue managing this event.
-                </h2>
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    Continue planning from here.
+                  </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/58">
-                  Choose the next action based on the current stage of your event.
-                </p>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/58">
+                    Jump directly into the part of this event that needs your attention.
+                  </p>
+                </div>
+
+                <span className="w-fit rounded-full border border-white/68 bg-white/36 px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[var(--color-deep-plum)] shadow-[0_8px_22px_rgba(31,27,29,0.06)] backdrop-blur-xl">
+                  {event.status.replaceAll('_', ' ')} event
+                </span>
               </div>
 
-              <div className="grid gap-5 lg:grid-cols-2">{/* Action cards go here */}</div>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                {workspaceSections
+                  .filter(({ label }) => {
+                    if (label === 'Overview') {
+                      return false;
+                    }
+
+                    if (label === 'Reviews' && event.status !== 'COMPLETED') {
+                      return false;
+                    }
+
+                    return true;
+                  })
+                  .map(({ label, icon: Icon, path }, sectionIndex) => {
+                    const shortcutImage = workspaceShortcutImages[label];
+
+                    return (
+                      <Link
+                        key={label}
+                        to={path(event.id)}
+                        className="group relative isolate min-h-[12.5rem] overflow-hidden rounded-[1.55rem] border border-white/72 bg-[rgba(255,252,248,0.76)] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.08)] transition duration-300 hover:-translate-y-1 hover:border-white/95 hover:shadow-[0_26px_62px_rgba(31,27,29,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 xl:min-h-[14rem]"
+                        style={{
+                          animationDelay: `${Math.min(sectionIndex, 8) * 55}ms`,
+                        }}
+                      >
+                        <img
+                          src={shortcutImage}
+                          alt=""
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.04] object-cover object-[72%_center] opacity-[0.82] blur-[1.2px] saturate-[0.88] transition duration-700 group-hover:scale-[1.08] group-hover:opacity-[0.92] group-hover:blur-[0.7px]"
+                        />
+
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,252,248,0.99)_0%,rgba(255,252,248,0.96)_26%,rgba(255,252,248,0.84)_48%,rgba(255,252,248,0.54)_70%,rgba(255,252,248,0.16)_100%)]"
+                        />
+
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.12)_0%,rgba(255,252,248,0.04)_38%,rgba(255,252,248,0.80)_100%)]"
+                        />
+
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -right-10 -top-12 -z-10 size-36 rounded-full bg-white/18 blur-3xl transition duration-700 group-hover:scale-125 group-hover:bg-white/26"
+                        />
+
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-x-5 bottom-0 h-px origin-left scale-x-0 bg-[linear-gradient(90deg,var(--color-deep-plum),transparent)] transition-transform duration-500 group-hover:scale-x-100"
+                        />
+
+                        <div className="relative flex h-full flex-col">
+                          <div className="flex items-start justify-between gap-4">
+                            <span className="grid size-10 place-items-center rounded-[0.95rem] border border-white/72 bg-white/48 text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[3deg] group-hover:scale-105 group-hover:bg-white/64">
+                              <Icon aria-hidden="true" className="size-[1.05rem]" />
+                            </span>
+
+                            <span className="grid size-9 place-items-center rounded-full border border-white/72 bg-white/42 text-[var(--color-charcoal)]/52 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-xl transition duration-300 group-hover:translate-x-1 group-hover:bg-white/68 group-hover:text-[var(--color-deep-plum)]">
+                              <ArrowLeft aria-hidden="true" className="size-4 rotate-180" />
+                            </span>
+                          </div>
+
+                          <div className="mt-5">
+                            <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)] drop-shadow-[0_1px_0_rgba(255,255,255,0.36)]">
+                              {label}
+                            </p>
+
+                            <p className="mt-2 text-sm font-semibold leading-5 text-[var(--color-charcoal)]/66">
+                              {workspaceSectionDescriptions[label]}
+                            </p>
+                          </div>
+
+                          <p className="mt-auto pt-4 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]/78 transition duration-300 group-hover:text-[var(--color-deep-plum)]">
+                            Open workspace
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+              </div>
+
+              {event.status !== 'COMPLETED' ? (
+                <div className="flex items-start gap-3 rounded-[1.35rem] border border-white/58 bg-white/22 px-4 py-3.5 backdrop-blur-xl">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                    <Star aria-hidden="true" className="size-4" />
+                  </span>
+
+                  <p className="pt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                    Reviews become available after the event is completed and eligible vendor
+                    services can receive verified feedback.
+                  </p>
+                </div>
+              ) : null}
+              <article className="overflow-hidden rounded-[1.65rem] border border-white/58 bg-white/22 shadow-[0_14px_38px_rgba(31,27,29,0.06)] backdrop-blur-2xl">
+                <div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <div className="flex items-start gap-4">
+                    <span
+                      className={
+                        canDeleteEvent
+                          ? 'grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)]'
+                          : 'grid size-11 shrink-0 place-items-center rounded-2xl bg-white/32 text-[var(--color-charcoal)]/42'
+                      }
+                    >
+                      <Trash2 aria-hidden="true" className="size-5" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
+                        Event controls
+                      </p>
+
+                      <h3 className="mt-2 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        {canDeleteEvent
+                          ? 'Remove this event permanently'
+                          : 'Deletion is unavailable at this stage'}
+                      </h3>
+
+                      <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                        {canDeleteEvent
+                          ? 'Delete this event only when it is no longer needed. This action cannot be undone.'
+                          : event.status === 'COMPLETED'
+                            ? 'Completed events are preserved as part of your planning and service history.'
+                            : 'Only draft or cancelled events can be deleted. Events already in progress must remain available for their connected workflows.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {canDeleteEvent ? (
+                    <button
+                      type="button"
+                      className="flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.08)] px-4 py-3 text-sm font-black text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.13)] hover:shadow-[0_14px_32px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                      onClick={() => {
+                        deleteEventMutation.reset();
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 aria-hidden="true" className="size-4" />
+                      Delete event
+                    </button>
+                  ) : (
+                    <span className="shrink-0 rounded-full border border-white/62 bg-white/32 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+                      Protected
+                    </span>
+                  )}
+                </div>
+              </article>
             </section>
           </section>
         </main>
@@ -1909,12 +2046,17 @@ export function EventWorkspacePage() {
                       Event type
                     </span>
 
-                    <input
+                    <select
                       className="form-field"
-                      type="text"
                       disabled={updateEventMutation.isPending}
                       {...form.register('eventType')}
-                    />
+                    >
+                      {eventTypeOptions.map((eventTypeOption) => (
+                        <option key={eventTypeOption} value={eventTypeOption}>
+                          {eventTypeOption}
+                        </option>
+                      ))}
+                    </select>
 
                     {form.formState.errors.eventType ? (
                       <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
@@ -2191,6 +2333,12 @@ export function EventWorkspacePage() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-event-title"
+          onMouseDown={(mouseEvent) => {
+            if (mouseEvent.target === mouseEvent.currentTarget && !deleteEventMutation.isPending) {
+              setIsDeleteDialogOpen(false);
+              deleteEventMutation.reset();
+            }
+          }}
         >
           <div className="glass-card w-full max-w-lg p-6 sm:p-8">
             <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">

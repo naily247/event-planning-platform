@@ -1,6 +1,7 @@
 import { PaymentStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
+import { canMutateEventWorkspace, getWorkspaceLockedMessage } from '../events/event.lifecycle.js';
 import type {
   CreateBudgetCategoryInput,
   CreateExpenseInput,
@@ -82,6 +83,20 @@ const getOwnedEvent = async (ownerId: string, eventId: string) => {
 
   if (!event) {
     throw new AppError(404, 'Event not found', 'EVENT_NOT_FOUND');
+  }
+
+  return event;
+};
+
+const assertBudgetIsEditable = async (ownerId: string, eventId: string) => {
+  const event = await getOwnedEvent(ownerId, eventId);
+
+  if (!canMutateEventWorkspace(event.status, 'BUDGET')) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(event.status, 'BUDGET'),
+      'EVENT_BUDGET_LOCKED',
+    );
   }
 
   return event;
@@ -193,7 +208,7 @@ export const createBudgetCategory = async (
   eventId: string,
   input: CreateBudgetCategoryInput,
 ) => {
-  await getOwnedEvent(ownerId, eventId);
+  await assertBudgetIsEditable(ownerId, eventId);
 
   try {
     const category = await prisma.eventBudgetCategory.create({
@@ -244,6 +259,7 @@ export const updateBudgetCategory = async (
   categoryId: string,
   input: UpdateBudgetCategoryInput,
 ) => {
+  await assertBudgetIsEditable(ownerId, eventId);
   await getOwnedBudgetCategory(ownerId, eventId, categoryId);
 
   try {
@@ -284,6 +300,7 @@ export const deleteBudgetCategory = async (
   eventId: string,
   categoryId: string,
 ) => {
+  await assertBudgetIsEditable(ownerId, eventId);
   await getOwnedBudgetCategory(ownerId, eventId, categoryId);
 
   await prisma.eventBudgetCategory.delete({
@@ -298,7 +315,7 @@ export const createExpense = async (
   eventId: string,
   input: CreateExpenseInput,
 ) => {
-  await getOwnedEvent(ownerId, eventId);
+  await assertBudgetIsEditable(ownerId, eventId);
 
   if (input.budgetCategoryId) {
     await validateBudgetCategoryForEvent(ownerId, eventId, input.budgetCategoryId);
@@ -361,6 +378,8 @@ export const updateExpense = async (
   expenseId: string,
   input: UpdateExpenseInput,
 ) => {
+  await assertBudgetIsEditable(ownerId, eventId);
+
   const existingExpense = await getOwnedExpense(ownerId, eventId, expenseId);
 
   if (input.budgetCategoryId) {
@@ -427,6 +446,7 @@ export const updateExpense = async (
 };
 
 export const deleteExpense = async (ownerId: string, eventId: string, expenseId: string) => {
+  await assertBudgetIsEditable(ownerId, eventId);
   await getOwnedExpense(ownerId, eventId, expenseId);
 
   await prisma.expense.delete({

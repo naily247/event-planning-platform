@@ -20,6 +20,13 @@ import type {
   CreateCustomerBookingReviewInput,
 } from './booking.schemas.js';
 import { createNotification } from '../notifications/notification.service.js';
+import {
+  canCancelBookingForEvent,
+  canCompleteBookingForEvent,
+  canManageBookingWorkflow,
+  canReviewEvent,
+  getWorkspaceLockedMessage,
+} from '../events/event.lifecycle.js';
 
 const bookingSelect = {
   id: true,
@@ -354,6 +361,44 @@ const getVendorProfileId = async (vendorUserId: string) => {
   return vendor.id;
 };
 
+const assertBookingWorkflowAvailable = (eventStatus: EventStatus) => {
+  if (canManageBookingWorkflow(eventStatus)) {
+    return;
+  }
+
+  throw new AppError(
+    409,
+    getWorkspaceLockedMessage(eventStatus, 'BOOKINGS'),
+    'EVENT_BOOKINGS_LOCKED',
+  );
+};
+
+const assertBookingCancellationAvailable = (eventStatus: EventStatus) => {
+  if (canCancelBookingForEvent(eventStatus)) {
+    return;
+  }
+
+  throw new AppError(
+    409,
+    eventStatus === EventStatus.COMPLETED
+      ? 'This event is completed and its bookings are now read-only.'
+      : 'Booking cancellation is unavailable for this event.',
+    'EVENT_BOOKING_CANCELLATION_LOCKED',
+  );
+};
+
+const assertBookingCompletionAvailable = (eventStatus: EventStatus) => {
+  if (canCompleteBookingForEvent(eventStatus)) {
+    return;
+  }
+
+  throw new AppError(
+    409,
+    'A booking can only be completed while the event is active.',
+    'EVENT_BOOKING_COMPLETION_LOCKED',
+  );
+};
+
 const getOwnedCustomerBooking = async (customerId: string, bookingId: string) => {
   const booking = await prisma.booking.findFirst({
     where: {
@@ -372,6 +417,7 @@ const getOwnedCustomerBooking = async (customerId: string, bookingId: string) =>
         select: {
           id: true,
           name: true,
+          status: true,
         },
       },
 
@@ -408,6 +454,7 @@ const getOwnedVendorBooking = async (vendorId: string, bookingId: string) => {
           id: true,
           name: true,
           ownerId: true,
+          status: true,
         },
       },
 
@@ -585,6 +632,8 @@ export const cancelCustomerBooking = async (
 ) => {
   const existingBooking = await getOwnedCustomerBooking(customerId, bookingId);
 
+  assertBookingCancellationAvailable(existingBooking.event.status);
+
   ensureBookingCanBeCancelledByCustomer(existingBooking.status);
 
   const cancellationTime = new Date();
@@ -715,6 +764,8 @@ export const confirmVendorBooking = async (
 
   const existingBooking = await getOwnedVendorBooking(vendorId, bookingId);
 
+  assertBookingWorkflowAvailable(existingBooking.event.status);
+
   ensureBookingAwaitsVendorResponse(existingBooking.status);
 
   await ensureVendorHasNoScheduleConflict({
@@ -786,6 +837,8 @@ export const rejectVendorBooking = async (
 
   const existingBooking = await getOwnedVendorBooking(vendorId, bookingId);
 
+  assertBookingWorkflowAvailable(existingBooking.event.status);
+
   ensureBookingAwaitsVendorResponse(existingBooking.status);
 
   await prisma.$transaction(async (tx) => {
@@ -842,6 +895,8 @@ export const cancelVendorBooking = async (
   const vendorId = await getVendorProfileId(vendorUserId);
 
   const existingBooking = await getOwnedVendorBooking(vendorId, bookingId);
+
+  assertBookingCancellationAvailable(existingBooking.event.status);
 
   ensureBookingCanBeCancelledByVendor(existingBooking.status);
 
@@ -916,6 +971,7 @@ export const completeVendorBooking = async (vendorUserId: string, bookingId: str
           id: true,
           name: true,
           ownerId: true,
+          status: true,
         },
       },
 
@@ -930,6 +986,8 @@ export const completeVendorBooking = async (vendorUserId: string, bookingId: str
   if (!booking) {
     throw new AppError(404, 'Booking not found.', 'VENDOR_BOOKING_NOT_FOUND');
   }
+
+  assertBookingCompletionAvailable(booking.event.status);
 
   ensureBookingCanBeCompletedByVendor(booking.status);
 
@@ -1023,6 +1081,12 @@ export const createCustomerBookingReview = async (
       status: true,
       vendorId: true,
 
+      event: {
+        select: {
+          status: true,
+        },
+      },
+
       review: {
         select: {
           id: true,
@@ -1043,6 +1107,14 @@ export const createCustomerBookingReview = async (
 
   if (!booking) {
     throw new AppError(404, 'Booking not found', 'CUSTOMER_BOOKING_NOT_FOUND');
+  }
+
+  if (!canReviewEvent(booking.event.status)) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(booking.event.status, 'REVIEWS'),
+      'EVENT_REVIEWS_LOCKED',
+    );
   }
 
   if (booking.status !== BookingStatus.COMPLETED) {
@@ -1175,16 +1247,7 @@ export const createCustomerBooking = async (
     );
   }
 
-  if (
-    quotation.quotationRequest.event.status !== EventStatus.PLANNING &&
-    quotation.quotationRequest.event.status !== EventStatus.ACTIVE
-  ) {
-    throw new AppError(
-      409,
-      'Bookings can only be created for planning or active events',
-      'EVENT_NOT_AVAILABLE_FOR_BOOKING',
-    );
-  }
+  assertBookingWorkflowAvailable(quotation.quotationRequest.event.status);
 
   const serviceStart = new Date(input.serviceStart);
 

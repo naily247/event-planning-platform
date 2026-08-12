@@ -36,6 +36,7 @@ import {
 } from '../features/moodBoards/moodBoard.api';
 import { getPublicVendors, type PublicVendor } from '../features/vendors/vendor.api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -148,6 +149,18 @@ export function MoodBoardWorkspacePage() {
     queryFn: () => getMoodBoardSummary(eventId!),
   });
 
+  const moodBoardEventStatus = summaryQuery.data?.event.status;
+
+  const isMoodBoardEditable =
+    moodBoardEventStatus !== undefined
+      ? canManageWorkspace(moodBoardEventStatus, 'MOOD_BOARD')
+      : false;
+
+  const moodBoardLockedMessage =
+    moodBoardEventStatus !== undefined && !isMoodBoardEditable
+      ? getWorkspaceLockedMessage(moodBoardEventStatus, 'MOOD_BOARD')
+      : null;
+
   const itemsQuery = useQuery({
     queryKey: [
       'customer',
@@ -176,6 +189,18 @@ export function MoodBoardWorkspacePage() {
       }),
   });
 
+  const previewItemsQuery = useQuery({
+    queryKey: ['customer', 'events', eventId, 'mood-board', 'preview-items'],
+    enabled: Boolean(eventId),
+    queryFn: () =>
+      getMoodBoardItems(eventId!, {
+        page: 1,
+        limit: 12,
+        hasImage: true,
+        sort: 'newest',
+      }),
+  });
+
   const vendorsQuery = useQuery({
     queryKey: ['public', 'vendors', 'mood-board-options'],
     queryFn: () =>
@@ -197,6 +222,12 @@ export function MoodBoardWorkspacePage() {
 
   const createMoodBoardItemMutation = useMutation({
     mutationFn: async () => {
+      if (!isMoodBoardEditable) {
+        throw new Error(
+          moodBoardLockedMessage ?? 'Mood-board changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId) {
         throw new Error('Event ID is missing.');
       }
@@ -278,12 +309,21 @@ export function MoodBoardWorkspacePage() {
         queryClient.invalidateQueries({
           queryKey: ['customer', 'events', eventId, 'mood-board', 'items'],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'events', eventId, 'mood-board', 'preview-items'],
+        }),
       ]);
     },
   });
 
   const updateMoodBoardItemMutation = useMutation({
     mutationFn: async () => {
+      if (!isMoodBoardEditable) {
+        throw new Error(
+          moodBoardLockedMessage ?? 'Mood-board changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !itemToEdit) {
         throw new Error('Mood-board item details are missing.');
       }
@@ -379,12 +419,21 @@ export function MoodBoardWorkspacePage() {
         queryClient.invalidateQueries({
           queryKey: ['customer', 'events', eventId, 'mood-board', 'items'],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'events', eventId, 'mood-board', 'preview-items'],
+        }),
       ]);
     },
   });
 
   const deleteMoodBoardItemMutation = useMutation({
     mutationFn: async () => {
+      if (!isMoodBoardEditable) {
+        throw new Error(
+          moodBoardLockedMessage ?? 'Mood-board changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !itemToDelete) {
         throw new Error('Mood-board item details are missing.');
       }
@@ -403,11 +452,18 @@ export function MoodBoardWorkspacePage() {
         queryClient.invalidateQueries({
           queryKey: ['customer', 'events', eventId, 'mood-board', 'items'],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'events', eventId, 'mood-board', 'preview-items'],
+        }),
       ]);
     },
   });
 
   const openDeleteDialog = (item: MoodBoardItem) => {
+    if (!isMoodBoardEditable) {
+      return;
+    }
+
     deleteMoodBoardItemMutation.reset();
     setItemToDelete(item);
     setIsDeleteDialogOpen(true);
@@ -424,6 +480,10 @@ export function MoodBoardWorkspacePage() {
   };
 
   const openEditDialog = (item: MoodBoardItem) => {
+    if (!isMoodBoardEditable) {
+      return;
+    }
+
     updateMoodBoardItemMutation.reset();
 
     setItemToEdit(item);
@@ -448,6 +508,10 @@ export function MoodBoardWorkspacePage() {
   };
 
   const openCreateDialog = () => {
+    if (!isMoodBoardEditable) {
+      return;
+    }
+
     createMoodBoardItemMutation.reset();
     setCreationMode('upload');
     setSelectedImage(null);
@@ -562,7 +626,68 @@ export function MoodBoardWorkspacePage() {
 
   const moodBoardSummary = summaryQuery.data;
   const items = itemsQuery.data.items;
+
+  const eventStatus = moodBoardSummary.event.status;
+
+  const isReadOnly = eventStatus === 'COMPLETED' || eventStatus === 'CANCELLED';
+
+  const canEdit = eventStatus === 'DRAFT' || eventStatus === 'PLANNING' || eventStatus === 'ACTIVE';
   const pagination = itemsQuery.data.pagination;
+
+  const previewItems = (previewItemsQuery.data?.items ?? [])
+    .filter((item) => Boolean(item.imageUrl))
+    .slice(0, 6);
+
+  const previewLayouts = [
+    {
+      top: '3%',
+      left: '3%',
+      width: '42%',
+      height: '42%',
+      rotation: '-4deg',
+      zIndex: 3,
+    },
+    {
+      top: '8%',
+      right: '2%',
+      width: '47%',
+      height: '48%',
+      rotation: '3deg',
+      zIndex: 2,
+    },
+    {
+      bottom: '4%',
+      left: '5%',
+      width: '38%',
+      height: '43%',
+      rotation: '3deg',
+      zIndex: 5,
+    },
+    {
+      bottom: '2%',
+      left: '34%',
+      width: '37%',
+      height: '39%',
+      rotation: '-3deg',
+      zIndex: 6,
+    },
+    {
+      bottom: '7%',
+      right: '1%',
+      width: '34%',
+      height: '38%',
+      rotation: '4deg',
+      zIndex: 4,
+    },
+    {
+      top: '29%',
+      left: '29%',
+      width: '35%',
+      height: '36%',
+      rotation: '-1.5deg',
+      zIndex: 7,
+    },
+  ] as const;
 
   const activeCategoryCount = Object.values(moodBoardSummary.summary.categoryCounts).filter(
     (count) => count > 0,
@@ -570,33 +695,6 @@ export function MoodBoardWorkspacePage() {
 
   const filtersAreActive =
     Boolean(searchQuery) || Boolean(categoryFilter) || visualFilter !== 'all' || sort !== 'newest';
-
-  const summaryCards = [
-    {
-      label: 'Inspiration items',
-      value: moodBoardSummary.summary.totalItems,
-      helper: `${activeCategoryCount} active categories`,
-      icon: Images,
-    },
-    {
-      label: 'Visual references',
-      value: moodBoardSummary.summary.itemsWithImages,
-      helper: 'Items with saved images',
-      icon: Image,
-    },
-    {
-      label: 'External sources',
-      value: moodBoardSummary.summary.itemsWithSources,
-      helper: 'Items with reference links',
-      icon: Link2,
-    },
-    {
-      label: 'Linked vendors',
-      value: moodBoardSummary.summary.linkedVendorItems,
-      helper: 'Ideas connected to vendors',
-      icon: Store,
-    },
-  ];
 
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
@@ -629,206 +727,327 @@ export function MoodBoardWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden rounded-[2.75rem] border border-white/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.38),rgba(255,255,255,0.16))] px-7 py-10 shadow-[0_24px_80px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:px-10 lg:px-12">
-            <div
+          <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
+            <img
+              src="/images/workspaces/shortcuts/moodboard.png"
+              alt=""
               aria-hidden="true"
-              className="pointer-events-none absolute -left-16 top-0 size-80 rounded-full bg-[rgba(183,167,200,0.28)] blur-3xl"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.94] contrast-[0.99] transition duration-1000"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute right-[-5%] top-[-14%] size-[29rem] rounded-full bg-[rgba(175,201,216,0.25)] blur-3xl"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute bottom-[-28%] left-[32%] size-72 rounded-full bg-[rgba(255,228,210,0.20)] blur-3xl"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
             />
 
-            <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
-              <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+            />
+
+            <div className="relative flex min-h-[17rem] flex-col justify-between gap-3">
+              <div className="max-w-[35rem]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
                   <Sparkles aria-hidden="true" className="size-4" />
                   Creative direction
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.95] tracking-[-0.06em] text-[var(--color-near-black)] sm:text-6xl">
-                  Shape the look and
-                  <br />
-                  feeling of your event.
-                </h2>
+                <div className="mt-2.5 max-w-[32rem] rounded-[1.3rem] border border-white/44 bg-white/[0.15] px-5 py-3 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px]">
+                  <h2 className="max-w-[30rem] text-balance text-[2rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.2rem] lg:text-[2.35rem]">
+                    Shape the look and
+                    <br />
+                    feeling of your event.
+                  </h2>
 
-                <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--color-charcoal)]/68">
-                  Collect visual references, organise colour ideas and connect creative decisions to
-                  the vendors who can bring them to life.
-                </p>
+                  <p className="mt-2.5 max-w-[30rem] text-sm font-semibold leading-[1.4rem] text-[var(--color-charcoal)]/70">
+                    Collect visual references, organise colour ideas and connect every creative
+                    decision to the event you are planning.
+                  </p>
 
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    className="group/hero-inspiration btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                    onClick={openCreateDialog}
-                  >
-                    <Plus
-                      aria-hidden="true"
-                      className="size-4 transition duration-300 group-hover/hero-inspiration:rotate-90"
-                    />
-                    Add inspiration
-                  </button>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      disabled={!canEdit}
+                      className="group/hero-add-inspiration btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      onClick={() => {
+                        if (!canEdit) return;
+                        openCreateDialog();
+                      }}
+                    >
+                      <Plus
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/hero-add-inspiration:rotate-90"
+                      />
+                      Add inspiration
+                    </button>
 
-                  <div className="rounded-2xl border border-white/52 bg-white/30 px-5 py-3 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                      Ideas collected
-                    </p>
-
-                    <p className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {moodBoardSummary.summary.totalItems}
-                    </p>
+                    <span className="rounded-full border border-white/72 bg-white/46 px-4 py-2 text-xs font-black uppercase tracking-[0.13em] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                      <Palette aria-hidden="true" className="mr-1.5 inline size-3.5" />
+                      {formatEventDate(moodBoardSummary.event.eventDate)}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <aside className="group/mood-health relative overflow-hidden rounded-[2.2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.35)]">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-white/10 blur-3xl"
-                />
+              <div className="grid max-w-[49rem] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <article className="group/mood-metric rounded-[1.3rem] border border-white/68 bg-white/40 px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/mood-metric:scale-105">
+                    <Images aria-hidden="true" className="size-4" />
+                  </span>
 
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/mood-health:-translate-y-0.5 group-hover/mood-health:scale-105">
-                      <Palette aria-hidden="true" className="size-6" />
-                    </div>
-
-                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur">
-                      {activeCategoryCount} {activeCategoryCount === 1 ? 'category' : 'categories'}
-                    </span>
-                  </div>
-
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.20em] text-white/48">
-                    Event date
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Inspiration items
                   </p>
 
-                  <p className="mt-3 text-2xl font-black tracking-[-0.04em]">
-                    {formatEventDate(moodBoardSummary.event.eventDate)}
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {moodBoardSummary.summary.totalItems}
                   </p>
 
-                  <div className="mt-7 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Images
-                      </p>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    {activeCategoryCount} active categories
+                  </p>
+                </article>
 
-                      <p className="mt-2 text-2xl font-black">
-                        {moodBoardSummary.summary.itemsWithImages}
-                      </p>
-                    </div>
+                <article className="group/mood-metric rounded-[1.3rem] border border-white/68 bg-[rgba(240,247,250,0.48)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954] transition duration-300 group-hover/mood-metric:scale-105">
+                    <Image aria-hidden="true" className="size-4" />
+                  </span>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Sources
-                      </p>
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Visual references
+                  </p>
 
-                      <p className="mt-2 text-2xl font-black">
-                        {moodBoardSummary.summary.itemsWithSources}
-                      </p>
-                    </div>
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {moodBoardSummary.summary.itemsWithImages}
+                  </p>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(183,167,200,0.14)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(183,167,200,0.20)]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Vendors
-                      </p>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Items with saved images
+                  </p>
+                </article>
 
-                      <p className="mt-2 text-2xl font-black">
-                        {moodBoardSummary.summary.linkedVendorItems}
-                      </p>
-                    </div>
+                <article className="group/mood-metric rounded-[1.3rem] border border-white/68 bg-[rgba(249,242,231,0.50)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(220,183,150,0.24)] text-[var(--color-rosewood)] transition duration-300 group-hover/mood-metric:scale-105">
+                    <Link2 aria-hidden="true" className="size-4" />
+                  </span>
 
-                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(255,228,210,0.12)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(255,228,210,0.18)]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Total ideas
-                      </p>
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    External sources
+                  </p>
 
-                      <p className="mt-2 text-2xl font-black">
-                        {moodBoardSummary.summary.totalItems}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {moodBoardSummary.summary.itemsWithSources}
+                  </p>
 
-                  <div className="mt-6 rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2
-                        aria-hidden="true"
-                        className="size-4 text-[var(--color-powder-blue)]"
-                      />
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Saved reference links
+                  </p>
+                </article>
 
-                      <p className="text-sm font-black text-white/82">
-                        Creative direction is actively taking shape
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </aside>
+                <article className="group/mood-metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.50)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#596449] transition duration-300 group-hover/mood-metric:scale-105">
+                    <Store aria-hidden="true" className="size-4" />
+                  </span>
+
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Linked vendors
+                  </p>
+
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {moodBoardSummary.summary.linkedVendorItems}
+                  </p>
+
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Ideas connected to vendors
+                  </p>
+                </article>
+              </div>
             </div>
           </section>
 
-          <section className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {summaryCards.map(({ label, value, helper, icon: Icon }) => (
-              <article
-                key={label}
-                className={`group/mood-summary luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)] ${
-                  label === 'Inspiration items'
-                    ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(226,211,235,0.88))]'
-                    : label === 'Visual references'
-                      ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(214,231,238,0.86))]'
-                      : label === 'External sources'
-                        ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(240,231,246,0.86))]'
-                        : 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(239,224,211,0.86))]'
-                }`}
-              >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -right-14 -top-14 size-40 rounded-full opacity-60 blur-3xl transition duration-500 group-hover/mood-summary:scale-125 group-hover/mood-summary:opacity-100 ${
-                    label === 'Inspiration items'
-                      ? 'bg-[rgba(164,126,184,0.34)]'
-                      : label === 'Visual references'
-                        ? 'bg-[rgba(130,179,201,0.34)]'
-                        : label === 'External sources'
-                          ? 'bg-[rgba(183,167,200,0.34)]'
-                          : 'bg-[rgba(210,146,160,0.30)]'
-                  }`}
-                />
+          {moodBoardLockedMessage ? (
+            <div className="mt-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
 
-                <div className="relative">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/mood-summary:-translate-y-0.5 group-hover/mood-summary:scale-110 group-hover/mood-summary:bg-[rgba(183,167,200,0.34)]">
-                    <Icon
-                      aria-hidden="true"
-                      className="size-5 transition duration-300 group-hover/mood-summary:rotate-[4deg]"
-                    />
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Mood board is read-only
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {moodBoardLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          <section className="relative mt-7 overflow-hidden rounded-[2.25rem] border border-white/64 bg-[linear-gradient(145deg,rgba(255,255,255,0.50),rgba(239,230,244,0.30))] p-5 shadow-[0_22px_64px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:p-7">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-28 left-[18%] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+            />
+
+            <div className="relative">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
+                      <Images aria-hidden="true" className="size-5" />
+                    </span>
+
+                    <span className="status-chip" data-tone="plum">
+                      {moodBoardSummary.summary.itemsWithImages}{' '}
+                      {moodBoardSummary.summary.itemsWithImages === 1
+                        ? 'visual reference'
+                        : 'visual references'}
+                    </span>
                   </div>
 
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/mood-summary:text-[var(--color-rosewood)]/76">
-                    {label}
+                  <p className="mt-5 text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                    Live mood board
                   </p>
 
-                  <p className="mt-3 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/mood-summary:translate-x-0.5 group-hover/mood-summary:text-[var(--color-deep-plum)] sm:text-[2.15rem]">
-                    {value}
-                  </p>
+                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                    Your visual direction, collected together.
+                  </h2>
 
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55 transition duration-300 group-hover/mood-summary:text-[var(--color-charcoal)]/68">
-                    {helper}
+                  <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
+                    A living preview of the images shaping this event. Titles remain visible so
+                    every reference keeps its meaning.
                   </p>
                 </div>
-              </article>
-            ))}
+
+                <button
+                  type="button"
+                  className="group/preview-add-inspiration btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                  disabled={!isMoodBoardEditable}
+                  title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
+                  onClick={openCreateDialog}
+                >
+                  <Plus
+                    aria-hidden="true"
+                    className="size-4 transition duration-300 group-hover/preview-add-inspiration:rotate-90"
+                  />
+                  Add inspiration
+                </button>
+              </div>
+
+              <div className="relative mt-6 min-h-[23rem] overflow-hidden rounded-[1.85rem] border border-white/72 bg-[linear-gradient(145deg,rgba(255,255,255,0.60),rgba(244,235,247,0.36))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_18px_46px_rgba(31,27,29,0.08)] sm:min-h-[28rem] sm:p-5">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_1px_1px,rgba(93,58,85,0.10)_1px,transparent_0)] [background-size:24px_24px]"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -left-20 -top-20 size-64 rounded-full bg-[rgba(255,228,210,0.18)] blur-3xl"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-24 -right-20 size-72 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                />
+
+                {previewItems.length > 0 ? (
+                  <div className="relative mx-auto h-[21rem] w-full max-w-5xl sm:h-[26rem]">
+                    {previewItems.map((item, index) => {
+                      const layout = previewLayouts[index];
+
+                      return (
+                        <article
+                          key={item.id}
+                          className="group/preview-item absolute overflow-hidden rounded-[1.1rem] border-[4px] border-white/90 bg-white shadow-[0_16px_38px_rgba(31,27,29,0.20)] transition-all duration-500 hover:z-30 hover:scale-[1.04] hover:rotate-0 hover:shadow-[0_24px_54px_rgba(31,27,29,0.26)]"
+                          style={{
+                            top: 'top' in layout ? layout.top : undefined,
+                            bottom: 'bottom' in layout ? layout.bottom : undefined,
+                            left: 'left' in layout ? layout.left : undefined,
+                            right: 'right' in layout ? layout.right : undefined,
+                            width: layout.width,
+                            height: layout.height,
+                            zIndex: layout.zIndex,
+                            transform: `rotate(${layout.rotation})`,
+                          }}
+                        >
+                          <img
+                            src={item.imageUrl!}
+                            alt={item.title}
+                            className="size-full object-cover transition duration-500 group-hover/preview-item:scale-[1.045]"
+                          />
+
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.46)] via-transparent to-transparent"
+                          />
+
+                          <span className="absolute bottom-2 left-2 right-2 truncate rounded-full border border-white/52 bg-[rgba(255,255,255,0.78)] px-3 py-1.5 text-[0.65rem] font-black text-[var(--color-near-black)] shadow-[0_8px_20px_rgba(31,27,29,0.16)] backdrop-blur-xl sm:text-xs">
+                            {item.title}
+                          </span>
+                        </article>
+                      );
+                    })}
+
+                    {moodBoardSummary.summary.itemsWithImages > previewItems.length ? (
+                      <span className="absolute right-3 top-3 z-40 rounded-full border border-white/76 bg-white/78 px-3.5 py-2 text-[0.65rem] font-black uppercase tracking-[0.13em] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.13)] backdrop-blur-xl">
+                        +{moodBoardSummary.summary.itemsWithImages - previewItems.length} more
+                      </span>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="relative grid min-h-[21rem] place-items-center px-5 text-center sm:min-h-[26rem]">
+                    <div>
+                      <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.07)]">
+                        <Images aria-hidden="true" className="size-8" />
+                      </div>
+
+                      <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Your visual preview is ready to grow.
+                      </p>
+
+                      <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
+                        Add inspiration with an uploaded image or image URL. Your references will
+                        appear here as a scattered visual collection.
+                      </p>
+
+                      <button
+                        type="button"
+                        className="group/empty-preview-add btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                        disabled={!isMoodBoardEditable}
+                        title={
+                          !isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined
+                        }
+                        onClick={openCreateDialog}
+                      >
+                        <Plus
+                          aria-hidden="true"
+                          className="size-4 transition duration-300 group-hover/empty-preview-add:rotate-90"
+                        />
+                        Add first inspiration
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </section>
 
-          <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <section className="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
             <article className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(255,255,255,0.22))] p-6 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-7">
               <div
                 aria-hidden="true"
@@ -869,6 +1088,8 @@ export function MoodBoardWorkspacePage() {
                   <button
                     type="button"
                     className="group/add-board-inspiration btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                    disabled={!isMoodBoardEditable}
+                    title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
                     onClick={openCreateDialog}
                   >
                     <Plus
@@ -1036,11 +1257,11 @@ export function MoodBoardWorkspacePage() {
                 ) : null}
 
                 {items.length > 0 ? (
-                  <div className="mt-8 columns-1 gap-5 sm:columns-2 xl:columns-3">
+                  <div className="mt-8 grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {items.map((item) => (
                       <article
                         key={item.id}
-                        className="group/mood-item relative mb-5 break-inside-avoid overflow-hidden rounded-[1.7rem] border border-white/62 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(255,255,255,0.24))] shadow-[0_16px_42px_rgba(31,27,29,0.055)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/88 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(240,231,246,0.58))] hover:shadow-[0_28px_68px_rgba(31,27,29,0.13)]"
+                        className="group min-w-0 overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/34 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/85 hover:bg-white/48 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]"
                       >
                         <div
                           aria-hidden="true"
@@ -1100,8 +1321,14 @@ export function MoodBoardWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="group/edit-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.08)]"
+                                className="group/edit-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                 aria-label={`Edit ${item.title}`}
+                                disabled={!isMoodBoardEditable}
+                                title={
+                                  !isMoodBoardEditable
+                                    ? (moodBoardLockedMessage ?? undefined)
+                                    : undefined
+                                }
                                 onClick={() => {
                                   openEditDialog(item);
                                 }}
@@ -1114,8 +1341,14 @@ export function MoodBoardWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="group/delete-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.10)]"
+                                className="group/delete-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.10)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                 aria-label={`Delete ${item.title}`}
+                                disabled={!isMoodBoardEditable}
+                                title={
+                                  !isMoodBoardEditable
+                                    ? (moodBoardLockedMessage ?? undefined)
+                                    : undefined
+                                }
                                 onClick={() => {
                                   openDeleteDialog(item);
                                 }}
@@ -1213,6 +1446,10 @@ export function MoodBoardWorkspacePage() {
                         <button
                           type="button"
                           className="group/first-inspiration btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                          disabled={!isMoodBoardEditable}
+                          title={
+                            !isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined
+                          }
                           onClick={openCreateDialog}
                         >
                           <Plus
@@ -1372,6 +1609,8 @@ export function MoodBoardWorkspacePage() {
                   <button
                     type="button"
                     className="group/add-another-idea btn-secondary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
+                    disabled={!isMoodBoardEditable}
+                    title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
                     onClick={openCreateDialog}
                   >
                     <Plus
@@ -1386,7 +1625,7 @@ export function MoodBoardWorkspacePage() {
           </section>
         </main>
       </div>
-      {isCreateDialogOpen ? (
+      {isCreateDialogOpen && isMoodBoardEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2151,7 +2390,7 @@ export function MoodBoardWorkspacePage() {
           </div>
         </div>
       ) : null}
-      {isEditDialogOpen && itemToEdit ? (
+      {isEditDialogOpen && isMoodBoardEditable && itemToEdit ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2614,7 +2853,7 @@ export function MoodBoardWorkspacePage() {
         </div>
       ) : null}
 
-      {isDeleteDialogOpen && itemToDelete ? (
+      {isDeleteDialogOpen && isMoodBoardEditable && itemToDelete ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"

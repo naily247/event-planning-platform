@@ -1,6 +1,7 @@
 import { EventTaskPriority, EventTaskStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
+import { canMutateEventWorkspace, getWorkspaceLockedMessage } from '../events/event.lifecycle.js';
 import type {
   CreateEventTaskInput,
   EventTaskQueryInput,
@@ -67,6 +68,16 @@ const getOwnedEvent = async (ownerId: string, eventId: string) => {
 
   if (!event) {
     throw new AppError(404, 'Event not found', 'EVENT_NOT_FOUND');
+  }
+
+  return event;
+};
+
+const assertTasksAreEditable = async (ownerId: string, eventId: string) => {
+  const event = await getOwnedEvent(ownerId, eventId);
+
+  if (!canMutateEventWorkspace(event.status, 'TASKS')) {
+    throw new AppError(409, getWorkspaceLockedMessage(event.status, 'TASKS'), 'EVENT_TASKS_LOCKED');
   }
 
   return event;
@@ -219,7 +230,7 @@ export const createEventTask = async (
   eventId: string,
   input: CreateEventTaskInput,
 ) => {
-  await getOwnedEvent(ownerId, eventId);
+  await assertTasksAreEditable(ownerId, eventId);
 
   const status = input.status ?? EventTaskStatus.TODO;
 
@@ -307,6 +318,7 @@ export const updateEventTask = async (
   taskId: string,
   input: UpdateEventTaskInput,
 ) => {
+  await assertTasksAreEditable(ownerId, eventId);
   await getOwnedEventTask(ownerId, eventId, taskId);
 
   const task = await prisma.eventTask.update({
@@ -344,6 +356,8 @@ export const updateEventTaskStatus = async (
   taskId: string,
   input: UpdateEventTaskStatusInput,
 ) => {
+  await assertTasksAreEditable(ownerId, eventId);
+
   const existingTask = await getOwnedEventTask(ownerId, eventId, taskId);
 
   if (existingTask.status === input.status) {
@@ -368,6 +382,7 @@ export const updateEventTaskStatus = async (
 };
 
 export const deleteEventTask = async (ownerId: string, eventId: string, taskId: string) => {
+  await assertTasksAreEditable(ownerId, eventId);
   await getOwnedEventTask(ownerId, eventId, taskId);
 
   await prisma.eventTask.delete({

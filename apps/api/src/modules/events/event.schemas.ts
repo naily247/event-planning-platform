@@ -121,8 +121,6 @@ export const createEventSchema = z.object({
 
       eventType: eventTypeSchema,
 
-      invitationTemplate: eventInvitationTemplateSchema.nullable().optional(),
-
       eventDate: eventDateSchema,
 
       location: z.string().trim().min(2).max(200),
@@ -141,18 +139,6 @@ export const createEventSchema = z.object({
 
       requirements: z.string().trim().min(10).max(5000).nullable().optional(),
     })
-    .superRefine((body, ctx) => {
-      if (
-        body.invitationTemplate &&
-        !templateMatchesEventType(body.eventType, body.invitationTemplate)
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['invitationTemplate'],
-          message: 'Invitation template must match the selected event type',
-        });
-      }
-    }),
 });
 
 export const getCustomerEventsSchema = z.object({
@@ -185,6 +171,27 @@ export const updateCustomerEventSchema = z.object({
       eventType: eventTypeSchema.optional(),
 
       invitationTemplate: eventInvitationTemplateSchema.nullable().optional(),
+
+      invitationArtwork: z.coerce
+  .number()
+  .int('Invitation artwork must be a whole number')
+  .min(1, 'Invitation artwork must be option 1 or 2')
+  .max(2, 'Invitation artwork must be option 1 or 2')
+  .nullable()
+  .optional(),
+
+invitationFont: z.string().trim().min(1).max(80).nullable().optional(),
+
+invitationGradient: z.string().trim().min(1).max(120).nullable().optional(),
+
+invitationAccentColor: z
+  .string()
+  .trim()
+  .regex(/^#[0-9A-Fa-f]{6}$/, 'Invitation accent colour must be a valid hex colour')
+  .nullable()
+  .optional(),
+
+invitationArtworkPosition: z.string().trim().min(1).max(80).nullable().optional(),
 
       eventDate: eventDateSchema.optional(),
 

@@ -4,6 +4,7 @@ import { requireAuth } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
 import { validate } from '../../middleware/validate.js';
 import {
+  confirmCustomerInvitationDesignHandler,
   createCustomerEventHandler,
   deleteCustomerEventHandler,
   getCustomerEventByIdHandler,
@@ -33,6 +34,13 @@ eventRouter.patch(
   ...customerOnly,
   validate(updateCustomerEventStatusSchema),
   updateCustomerEventStatusHandler,
+);
+
+eventRouter.patch(
+  '/:eventId/invitation-design/confirm',
+  ...customerOnly,
+  validate(getCustomerEventSchema),
+  confirmCustomerInvitationDesignHandler,
 );
 
 eventRouter.get(

@@ -30,6 +30,7 @@ import {
 } from '../features/reviews/review.api';
 import { api } from '../lib/api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -120,6 +121,16 @@ export function ReviewsWorkspacePage() {
     },
   });
 
+  const reviewEventStatus = eventQuery.data?.status;
+
+  const isReviewEditable =
+    reviewEventStatus !== undefined ? canManageWorkspace(reviewEventStatus, 'REVIEWS') : false;
+
+  const reviewLockedMessage =
+    reviewEventStatus !== undefined && !isReviewEditable
+      ? getWorkspaceLockedMessage(reviewEventStatus, 'REVIEWS')
+      : null;
+
   const reviewsQuery = useQuery({
     queryKey: [
       'customer',
@@ -200,6 +211,10 @@ export function ReviewsWorkspacePage() {
       reviewId: string;
       input: UpdateCustomerReviewInput;
     }) => {
+      if (!isReviewEditable) {
+        throw new Error(reviewLockedMessage ?? 'Review changes are unavailable for this event.');
+      }
+
       return updateCustomerReview(reviewId, input);
     },
 
@@ -214,6 +229,10 @@ export function ReviewsWorkspacePage() {
 
   const deleteReviewMutation = useMutation({
     mutationFn: async (reviewId: string) => {
+      if (!isReviewEditable) {
+        throw new Error(reviewLockedMessage ?? 'Review changes are unavailable for this event.');
+      }
+
       await deleteCustomerReview(reviewId);
 
       return reviewId;
@@ -235,6 +254,10 @@ export function ReviewsWorkspacePage() {
   };
 
   const openEditReview = (review: CustomerReview) => {
+    if (!isReviewEditable) {
+      return;
+    }
+
     updateReviewMutation.reset();
     setSelectedReview(null);
     setReviewToEdit(review);
@@ -250,6 +273,10 @@ export function ReviewsWorkspacePage() {
   };
 
   const openDeleteReview = (review: CustomerReview) => {
+    if (!isReviewEditable) {
+      return;
+    }
+
     deleteReviewMutation.reset();
     setReviewToDelete(review);
   };
@@ -264,7 +291,7 @@ export function ReviewsWorkspacePage() {
   };
 
   const handleUpdateReview = (input: ReviewFormInput | UpdateCustomerReviewInput) => {
-    if (!reviewToEdit) {
+    if (!isReviewEditable || !reviewToEdit) {
       return;
     }
 
@@ -293,6 +320,10 @@ export function ReviewsWorkspacePage() {
   const averageRating = useMemo(() => {
     return formatAverageRating(reviewSummary?.averageRating ?? null);
   }, [reviewSummary?.averageRating]);
+
+  const averageRatingPercentage = reviewSummary?.averageRating
+    ? Math.min(Math.max((reviewSummary.averageRating / 5) * 100, 0), 100)
+    : 0;
 
   if (isLoading) {
     return (
@@ -363,33 +394,6 @@ export function ReviewsWorkspacePage() {
   const reviews = reviewsQuery.data.reviews;
   const pagination = reviewsQuery.data.pagination;
 
-  const summaryCards = [
-    {
-      label: 'Total reviews',
-      value: reviewSummary.total,
-      helper: 'Verified feedback from completed bookings',
-      icon: MessageSquareText,
-    },
-    {
-      label: 'Average rating',
-      value: averageRating,
-      helper: 'Average overall score for this event',
-      icon: Star,
-    },
-    {
-      label: 'Published',
-      value: reviewSummary.published,
-      helper: 'Currently visible vendor feedback',
-      icon: Sparkles,
-    },
-    {
-      label: 'Moderated',
-      value: reviewSummary.hidden,
-      helper: 'Reviews hidden by platform moderation',
-      icon: ShieldAlert,
-    },
-  ];
-
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -419,67 +423,196 @@ export function ReviewsWorkspacePage() {
         </header>
 
         <main className="py-10">
-          <section className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-[7%] top-8 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.28)] blur-3xl" />
-            <div className="pointer-events-none absolute right-[8%] top-14 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl" />
+          <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
+            <img
+              src="/images/workspaces/shortcuts/reviews.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.94] contrast-[0.99] transition duration-1000"
+            />
 
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.42fr] lg:items-end">
-              <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                  <Sparkles className="size-4" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+            />
+
+            <div className="relative flex min-h-[17rem] flex-col justify-between gap-3">
+              <div className="max-w-[35rem]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                  <Sparkles aria-hidden="true" className="size-4" />
                   Verified experiences
                 </div>
 
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
-                  Keep every completed vendor experience documented.
-                </h2>
+                <div className="mt-2.5 max-w-[32rem] rounded-[1.3rem] border border-white/44 bg-white/[0.15] px-5 py-3 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px]">
+                  <h2 className="max-w-[30rem] text-balance text-[2rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.2rem] lg:text-[2.35rem]">
+                    Capture every completed
+                    <br />
+                    vendor experience.
+                  </h2>
 
-                <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                  Review your submitted ratings, update written feedback and keep track of any
-                  moderation decisions connected to this event.
-                </p>
+                  <p className="mt-2.5 max-w-[30rem] text-sm font-semibold leading-[1.4rem] text-[var(--color-charcoal)]/70">
+                    Review completed services, update your feedback whenever needed and keep track
+                    of moderation decisions from one organised workspace.
+                  </p>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <Link
+                      to={`/events/${eventId}/bookings`}
+                      className="group/hero-open-bookings btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                    >
+                      <Store
+                        aria-hidden="true"
+                        className="size-4 transition duration-300 group-hover/hero-open-bookings:scale-105"
+                      />
+                      Open bookings
+                    </Link>
+
+                    <span className="rounded-full border border-white/72 bg-white/46 px-4 py-2 text-xs font-black uppercase tracking-[0.13em] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                      <Star aria-hidden="true" className="mr-1.5 inline size-3.5 fill-current" />
+                      {formatLongDate(eventDetails.eventDate)}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 max-w-[26rem] rounded-[1.1rem] border border-white/56 bg-white/34 px-4 py-2.5 backdrop-blur-xl">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/48">
+                          Average satisfaction
+                        </p>
+
+                        <p className="mt-1 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/54">
+                          Based on {reviewSummary.total}{' '}
+                          {reviewSummary.total === 1 ? 'submitted review' : 'submitted reviews'}
+                        </p>
+                      </div>
+
+                      <p className="text-sm font-black text-[var(--color-deep-plum)]">
+                        {averageRating} / 5
+                      </p>
+                    </div>
+
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700"
+                        style={{
+                          width: `${averageRatingPercentage}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="glass-card p-5">
-                <Star className="size-6 fill-current text-[var(--color-rosewood)]" />
+              <div className="grid max-w-[49rem] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <article className="group/review-metric rounded-[1.3rem] border border-white/68 bg-white/40 px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/review-metric:scale-105">
+                    <MessageSquareText aria-hidden="true" className="size-4" />
+                  </span>
 
-                <p className="mt-6 text-sm font-bold text-[var(--color-charcoal)]/58">
-                  Event review score
-                </p>
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Total reviews
+                  </p>
 
-                <p className="mt-2 text-4xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {averageRating}
-                </p>
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {reviewSummary.total}
+                  </p>
 
-                <p className="mt-3 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                  Based on {reviewSummary.total}{' '}
-                  {reviewSummary.total === 1 ? 'submitted review' : 'submitted reviews'}
-                </p>
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Verified completed-booking feedback
+                  </p>
+                </article>
+
+                <article className="group/review-metric rounded-[1.3rem] border border-white/68 bg-[rgba(249,242,231,0.50)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(220,183,150,0.24)] text-[var(--color-rosewood)] transition duration-300 group-hover/review-metric:scale-105">
+                    <Star aria-hidden="true" className="size-4 fill-current" />
+                  </span>
+
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Average rating
+                  </p>
+
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {averageRating}
+                  </p>
+
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Overall event satisfaction
+                  </p>
+                </article>
+
+                <article className="group/review-metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.50)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#596449] transition duration-300 group-hover/review-metric:scale-105">
+                    <Sparkles aria-hidden="true" className="size-4" />
+                  </span>
+
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Published
+                  </p>
+
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                    {reviewSummary.published}
+                  </p>
+
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Currently visible vendor feedback
+                  </p>
+                </article>
+
+                <article className="group/review-metric rounded-[1.3rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(249,235,240,0.52)] px-4 py-2.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] transition duration-300 group-hover/review-metric:scale-105">
+                    <ShieldAlert aria-hidden="true" className="size-4" />
+                  </span>
+
+                  <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                    Moderated
+                  </p>
+
+                  <p className="mt-1 text-[1.75rem] font-black tracking-[-0.05em] text-[var(--color-muted-burgundy)]">
+                    {reviewSummary.hidden}
+                  </p>
+
+                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                    Hidden after platform moderation
+                  </p>
+                </article>
               </div>
             </div>
           </section>
 
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {summaryCards.map(({ label, value, helper, icon: Icon }) => (
-              <article key={label} className="luxe-card p-6">
-                <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                  <Icon className="size-5" />
-                </div>
+          {reviewLockedMessage ? (
+            <div className="mt-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
 
-                <p className="mt-8 text-sm font-bold text-[var(--color-charcoal)]/58">{label}</p>
-
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {value}
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Review changes are unavailable
                 </p>
 
-                <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/55">
-                  {helper}
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {reviewLockedMessage}
                 </p>
-              </article>
-            ))}
-          </section>
+              </div>
+            </div>
+          ) : null}
 
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_0.28fr]">
+          <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
             <article className="glass-card p-6 sm:p-7">
               <div>
                 <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
@@ -545,8 +678,8 @@ export function ReviewsWorkspacePage() {
                       key={review.id}
                       review={review}
                       onView={openReviewDetails}
-                      onEdit={openEditReview}
-                      onDelete={openDeleteReview}
+                      onEdit={isReviewEditable ? openEditReview : undefined}
+                      onDelete={isReviewEditable ? openDeleteReview : undefined}
                     />
                   ))}
                 </div>
@@ -620,51 +753,74 @@ export function ReviewsWorkspacePage() {
               ) : null}
             </article>
             <aside className="space-y-5">
-              <article className="rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
-                <Star className="size-6 fill-current text-[var(--color-powder-blue)]" />
-
-                <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">Review quality</h2>
-
-                <p className="mt-3 leading-7 text-white/68">
-                  Ratings remain connected to completed bookings, so every review represents a real
-                  vendor experience.
-                </p>
-
-                <div className="mt-8 space-y-3">
-                  {[
-                    {
-                      label: '5-star reviews',
-                      value: reviewSummary.reviews.filter((review) => review.overallRating === 5)
-                        .length,
-                    },
-                    {
-                      label: '4-star reviews',
-                      value: reviewSummary.reviews.filter((review) => review.overallRating === 4)
-                        .length,
-                    },
-                    {
-                      label: 'Published',
-                      value: reviewSummary.published,
-                    },
-                    {
-                      label: 'Moderated',
-                      value: reviewSummary.hidden,
-                    },
-                  ].map(({ label, value }) => (
-                    <div
-                      key={label}
-                      className="flex items-center justify-between rounded-2xl bg-white/14 px-4 py-3 backdrop-blur"
-                    >
-                      <span className="text-sm font-bold text-white/72">{label}</span>
-
-                      <span className="text-lg font-black">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </article>
-
               <article className="glass-card p-6">
                 <ShieldAlert className="size-6 text-[var(--color-deep-plum)]" />
+
+                <article className="glass-card p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(220,183,150,0.20)] text-[var(--color-rosewood)]">
+                      <Star aria-hidden="true" className="size-6 fill-current" />
+                    </div>
+
+                    <span className="rounded-full border border-white/60 bg-white/30 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/52">
+                      {reviewSummary.total} total
+                    </span>
+                  </div>
+
+                  <h2 className="mt-6 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    Rating distribution
+                  </h2>
+
+                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                    See how your completed vendor experiences are distributed across each rating.
+                  </p>
+
+                  <div className="mt-6 space-y-3">
+                    {[5, 4, 3, 2, 1].map((rating) => {
+                      const ratingCount = reviewSummary.reviews.filter(
+                        (review) => review.overallRating === rating,
+                      ).length;
+
+                      const ratingPercentage =
+                        reviewSummary.reviews.length > 0
+                          ? (ratingCount / reviewSummary.reviews.length) * 100
+                          : 0;
+
+                      return (
+                        <div
+                          key={rating}
+                          className="rounded-2xl border border-white/52 bg-white/28 px-4 py-3"
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-black text-[var(--color-near-black)]">
+                                {rating}
+                              </span>
+
+                              <Star
+                                aria-hidden="true"
+                                className="size-4 fill-[var(--color-rosewood)] text-[var(--color-rosewood)]"
+                              />
+                            </div>
+
+                            <span className="text-sm font-black text-[var(--color-deep-plum)]">
+                              {ratingCount}
+                            </span>
+                          </div>
+
+                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
+                            <div
+                              className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-rosewood),var(--color-muted-burgundy))] transition-[width] duration-700"
+                              style={{
+                                width: `${Math.min(Math.max(ratingPercentage, 0), 100)}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </article>
 
                 <h2 className="mt-6 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                   Moderation transparency
@@ -673,7 +829,10 @@ export function ReviewsWorkspacePage() {
                 <div className="mt-4 space-y-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
                   <p>Hidden reviews remain visible to you inside this workspace.</p>
                   <p>The moderation reason and moderation date are shown when available.</p>
-                  <p>You can still edit or delete your own review after moderation.</p>
+                  <p>
+                    Moderated reviews remain manageable while review changes are available for the
+                    event.
+                  </p>
                 </div>
               </article>
 
@@ -701,11 +860,11 @@ export function ReviewsWorkspacePage() {
           onClose={() => {
             setSelectedReview(null);
           }}
-          onEdit={openEditReview}
+          onEdit={isReviewEditable ? openEditReview : undefined}
         />
       ) : null}
 
-      {reviewToEdit ? (
+      {reviewToEdit && isReviewEditable ? (
         <ReviewFormDialog
           mode="edit"
           review={reviewToEdit}
@@ -720,7 +879,7 @@ export function ReviewsWorkspacePage() {
         />
       ) : null}
 
-      {reviewToDelete ? (
+      {reviewToDelete && isReviewEditable ? (
         <div
           className="fixed inset-0 z-[70] grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.56)] px-4 py-8 backdrop-blur-md"
           role="dialog"

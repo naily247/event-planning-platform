@@ -2,6 +2,7 @@ import { MoodBoardCategory, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { deleteCloudinaryAsset } from '../../services/cloudinary.service.js';
 import { AppError } from '../../utils/AppError.js';
+import { canMutateEventWorkspace, getWorkspaceLockedMessage } from '../events/event.lifecycle.js';
 import type {
   CreateMoodBoardItemInput,
   ListMoodBoardItemsQuery,
@@ -73,6 +74,20 @@ const getOwnedEvent = async (ownerId: string, eventId: string) => {
 
   if (!event) {
     throw new AppError(404, 'Event not found', 'EVENT_NOT_FOUND');
+  }
+
+  return event;
+};
+
+const assertMoodBoardIsEditable = async (ownerId: string, eventId: string) => {
+  const event = await getOwnedEvent(ownerId, eventId);
+
+  if (!canMutateEventWorkspace(event.status, 'MOOD_BOARD')) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(event.status, 'MOOD_BOARD'),
+      'EVENT_MOOD_BOARD_LOCKED',
+    );
   }
 
   return event;
@@ -195,7 +210,7 @@ export const createMoodBoardItem = async (
   eventId: string,
   input: CreateMoodBoardItemInput,
 ) => {
-  await getOwnedEvent(ownerId, eventId);
+  await assertMoodBoardIsEditable(ownerId, eventId);
   await ensureVendorExists(input.vendorId);
 
   const imageUrl = normalizeOptionalUrl(input.imageUrl) ?? null;
@@ -327,6 +342,8 @@ export const updateMoodBoardItem = async (
   itemId: string,
   input: UpdateMoodBoardItemInput,
 ) => {
+  await assertMoodBoardIsEditable(ownerId, eventId);
+
   const existingItem = await getOwnedMoodBoardItem(ownerId, eventId, itemId);
 
   if (input.vendorId !== undefined) {
@@ -398,6 +415,8 @@ export const updateMoodBoardItem = async (
 };
 
 export const deleteMoodBoardItem = async (ownerId: string, eventId: string, itemId: string) => {
+  await assertMoodBoardIsEditable(ownerId, eventId);
+
   const existingItem = await getOwnedMoodBoardItem(ownerId, eventId, itemId);
 
   await prisma.moodBoardItem.delete({

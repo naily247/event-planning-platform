@@ -15,7 +15,7 @@ import type { CustomerReview } from './review.api';
 type ReviewDetailsDialogProps = {
   review: CustomerReview;
   onClose: () => void;
-  onEdit: (review: CustomerReview) => void;
+  onEdit?: (review: CustomerReview) => void;
 };
 
 const formatDateTime = (value: string) =>
@@ -232,16 +232,17 @@ export function ReviewDetailsDialog({ review, onClose, onEdit }: ReviewDetailsDi
             >
               Close
             </button>
-
-            <button
-              type="button"
-              className="btn-primary justify-center text-sm font-bold"
-              onClick={() => {
-                onEdit(review);
-              }}
-            >
-              Edit review
-            </button>
+            {onEdit ? (
+              <button
+                type="button"
+                className="btn-primary justify-center text-sm font-bold"
+                onClick={() => {
+                  onEdit?.(review);
+                }}
+              >
+                Edit review
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

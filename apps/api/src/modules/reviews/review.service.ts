@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
+import { canReviewEvent, getWorkspaceLockedMessage } from '../events/event.lifecycle.js';
 import type { GetCustomerReviewsQuery, UpdateCustomerReviewInput } from './review.schemas.js';
 
 const reviewSelect = {
@@ -25,6 +26,7 @@ const reviewSelect = {
           id: true,
           name: true,
           eventDate: true,
+          status: true,
         },
       },
     },
@@ -82,6 +84,43 @@ const getReviewOrderBy = (
         createdAt: 'desc',
       };
   }
+};
+
+const getOwnedCustomerReviewForMutation = async (customerId: string, reviewId: string) => {
+  const review = await prisma.review.findFirst({
+    where: {
+      id: reviewId,
+      customerId,
+    },
+
+    select: {
+      id: true,
+
+      booking: {
+        select: {
+          event: {
+            select: {
+              status: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!review) {
+    throw new AppError(404, 'Review not found', 'CUSTOMER_REVIEW_NOT_FOUND');
+  }
+
+  if (!canReviewEvent(review.booking.event.status)) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(review.booking.event.status, 'REVIEWS'),
+      'EVENT_REVIEWS_LOCKED',
+    );
+  }
+
+  return review;
 };
 
 export const getCustomerReviews = async (customerId: string, query: GetCustomerReviewsQuery) => {
@@ -159,20 +198,7 @@ export const updateCustomerReview = async (
   reviewId: string,
   input: UpdateCustomerReviewInput,
 ) => {
-  const existingReview = await prisma.review.findFirst({
-    where: {
-      id: reviewId,
-      customerId,
-    },
-
-    select: {
-      id: true,
-    },
-  });
-
-  if (!existingReview) {
-    throw new AppError(404, 'Review not found', 'CUSTOMER_REVIEW_NOT_FOUND');
-  }
+  const existingReview = await getOwnedCustomerReviewForMutation(customerId, reviewId);
 
   try {
     return await prisma.review.update({
@@ -210,20 +236,7 @@ export const updateCustomerReview = async (
 };
 
 export const deleteCustomerReview = async (customerId: string, reviewId: string) => {
-  const existingReview = await prisma.review.findFirst({
-    where: {
-      id: reviewId,
-      customerId,
-    },
-
-    select: {
-      id: true,
-    },
-  });
-
-  if (!existingReview) {
-    throw new AppError(404, 'Review not found', 'CUSTOMER_REVIEW_NOT_FOUND');
-  }
+  const existingReview = await getOwnedCustomerReviewForMutation(customerId, reviewId);
 
   try {
     await prisma.review.delete({

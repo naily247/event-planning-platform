@@ -1,8 +1,9 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { GuestStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
-import { sendInvitationEmail } from '../communications/email.service.js';
 import { AppError } from '../../utils/AppError.js';
+import { sendInvitationEmail } from '../communications/email.service.js';
+import { canMutateEventWorkspace, getWorkspaceLockedMessage } from '../events/event.lifecycle.js';
 import type {
   CreateInvitationBody,
   InvitationListQuery,
@@ -74,9 +75,13 @@ const publicInvitationSelect = {
           id: true,
           name: true,
           eventType: true,
+          invitationTemplate: true,
+          invitationArtwork: true,
+          invitationFont: true,
           eventDate: true,
           location: true,
           theme: true,
+          status: true,
         },
       },
     },
@@ -105,10 +110,20 @@ const buildInvitationUrl = (rawToken: string) => {
 
 const isInvitationExpired = (expiresAt: Date) => expiresAt.getTime() <= Date.now();
 
+const hasEventStarted = (eventDate: Date) => eventDate.getTime() <= Date.now();
+
+const isInvitationWorkflowClosed = (
+  eventStatus: SelectedPublicInvitation['guest']['event']['status'],
+  eventDate: Date,
+) => {
+  return !canMutateEventWorkspace(eventStatus, 'INVITATIONS') || hasEventStarted(eventDate);
+};
+
 const isGuestResponded = (status: GuestStatus) => respondedGuestStatuses.includes(status);
 
 const formatInvitation = (invitation: SelectedInvitation) => {
   const expired = isInvitationExpired(invitation.expiresAt);
+
   const revoked = invitation.revokedAt !== null;
 
   return {
@@ -125,9 +140,13 @@ const formatPublicInvitation = (invitation: SelectedPublicInvitation) => ({
     id: invitation.guest.event.id,
     name: invitation.guest.event.name,
     eventType: invitation.guest.event.eventType,
+    invitationTemplate: invitation.guest.event.invitationTemplate,
+    invitationArtwork: invitation.guest.event.invitationArtwork,
+    invitationFont: invitation.guest.event.invitationFont,
     eventDate: invitation.guest.event.eventDate,
     location: invitation.guest.event.location,
     theme: invitation.guest.event.theme,
+    status: invitation.guest.event.status,
   },
 
   guest: {
@@ -152,6 +171,7 @@ const getOwnedEvent = async (ownerId: string, eventId: string) => {
       id: eventId,
       ownerId,
     },
+
     select: {
       id: true,
       name: true,
@@ -159,11 +179,38 @@ const getOwnedEvent = async (ownerId: string, eventId: string) => {
       eventDate: true,
       location: true,
       theme: true,
+      status: true,
+      invitationTemplate: true,
+      invitationArtwork: true,
+      invitationFont: true,
+      invitationDesignConfirmedAt: true,
     },
   });
 
   if (!event) {
     throw new AppError(404, 'Event not found', 'EVENT_NOT_FOUND');
+  }
+
+  return event;
+};
+
+const assertInvitationsAreEditable = async (ownerId: string, eventId: string) => {
+  const event = await getOwnedEvent(ownerId, eventId);
+
+  if (!canMutateEventWorkspace(event.status, 'INVITATIONS')) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(event.status, 'INVITATIONS'),
+      'EVENT_INVITATIONS_LOCKED',
+    );
+  }
+
+  if (hasEventStarted(event.eventDate)) {
+    throw new AppError(
+      409,
+      'This event has already started. Invitation activity is now closed.',
+      'EVENT_INVITATIONS_CLOSED',
+    );
   }
 
   return event;
@@ -181,6 +228,7 @@ const getOwnedGuest = async (ownerId: string, eventId: string, guestId: string) 
         ownerId,
       },
     },
+
     select: {
       id: true,
       eventId: true,
@@ -290,6 +338,7 @@ const getPublicInvitationByToken = async (rawToken: string) => {
     where: {
       tokenHash,
     },
+
     select: publicInvitationSelect,
   });
 
@@ -304,6 +353,13 @@ const getPublicInvitationByToken = async (rawToken: string) => {
   if (isInvitationExpired(invitation.expiresAt)) {
     throw new AppError(410, 'The invitation has expired', 'INVITATION_EXPIRED');
   }
+  if (isInvitationWorkflowClosed(invitation.guest.event.status, invitation.guest.event.eventDate)) {
+    throw new AppError(
+      410,
+      'Guest responses for this event are now closed.',
+      'INVITATION_EVENT_CLOSED',
+    );
+  }
 
   return invitation;
 };
@@ -314,12 +370,23 @@ export const createInvitation = async (
   guestId: string,
   input: CreateInvitationBody,
 ) => {
+  const event = await assertInvitationsAreEditable(ownerId, eventId);
+
+  if (!event.invitationTemplate) {
+    throw new AppError(
+      409,
+      'Choose and apply an invitation design before creating the first invitation',
+      'INVITATION_DESIGN_REQUIRED',
+    );
+  }
+
   const guest = await getOwnedGuest(ownerId, eventId, guestId);
 
   const existingInvitation = await prisma.eventInvitation.findUnique({
     where: {
       guestId: guest.id,
     },
+
     select: {
       id: true,
     },
@@ -334,8 +401,14 @@ export const createInvitation = async (
   }
 
   const rawToken = generateRawToken();
+
   const tokenHash = hashInvitationToken(rawToken);
-  const expiresAt = calculateExpiryDate(input.expiresInDays);
+
+  const requestedExpiry = calculateExpiryDate(input.expiresInDays);
+
+  const expiresAt =
+    requestedExpiry.getTime() > event.eventDate.getTime() ? event.eventDate : requestedExpiry;
+
   const now = new Date();
 
   const invitation = await prisma.$transaction(async (transaction) => {
@@ -346,6 +419,7 @@ export const createInvitation = async (
         expiresAt,
         lastSentAt: now,
       },
+
       select: invitationSelect,
     });
 
@@ -353,6 +427,7 @@ export const createInvitation = async (
       where: {
         id: guest.id,
       },
+
       data: {
         status: GuestStatus.INVITED,
         invitedAt: now,
@@ -360,10 +435,23 @@ export const createInvitation = async (
       },
     });
 
+    await transaction.event.updateMany({
+      where: {
+        id: eventId,
+        ownerId,
+        invitationDesignConfirmedAt: null,
+      },
+
+      data: {
+        invitationDesignConfirmedAt: now,
+      },
+    });
+
     return transaction.eventInvitation.findUniqueOrThrow({
       where: {
         id: createdInvitation.id,
       },
+
       select: invitationSelect,
     });
   });
@@ -376,8 +464,11 @@ export const createInvitation = async (
         email: guest.email,
         name: `${guest.firstName} ${guest.lastName ?? ''}`.trim(),
       },
+
       eventName: guest.event.name,
+
       guestName: guest.firstName,
+
       invitationUrl,
     });
   }
@@ -395,12 +486,15 @@ export const regenerateInvitation = async (
   guestId: string,
   input: RegenerateInvitationBody,
 ) => {
+  const event = await assertInvitationsAreEditable(ownerId, eventId);
+
   const guest = await getOwnedGuest(ownerId, eventId, guestId);
 
   const existingInvitation = await prisma.eventInvitation.findUnique({
     where: {
       guestId: guest.id,
     },
+
     select: {
       id: true,
     },
@@ -411,8 +505,14 @@ export const regenerateInvitation = async (
   }
 
   const rawToken = generateRawToken();
+
   const tokenHash = hashInvitationToken(rawToken);
-  const expiresAt = calculateExpiryDate(input.expiresInDays);
+
+  const requestedExpiry = calculateExpiryDate(input.expiresInDays);
+
+  const expiresAt =
+    requestedExpiry.getTime() > event.eventDate.getTime() ? event.eventDate : requestedExpiry;
+
   const now = new Date();
 
   const invitation = await prisma.$transaction(async (transaction) => {
@@ -420,6 +520,7 @@ export const regenerateInvitation = async (
       where: {
         id: existingInvitation.id,
       },
+
       data: {
         tokenHash,
         expiresAt,
@@ -432,6 +533,7 @@ export const regenerateInvitation = async (
       where: {
         id: guest.id,
       },
+
       data: {
         status: GuestStatus.INVITED,
         invitedAt: now,
@@ -443,6 +545,7 @@ export const regenerateInvitation = async (
       where: {
         id: existingInvitation.id,
       },
+
       select: invitationSelect,
     });
   });
@@ -455,8 +558,11 @@ export const regenerateInvitation = async (
         email: guest.email,
         name: `${guest.firstName} ${guest.lastName ?? ''}`.trim(),
       },
+
       eventName: guest.event.name,
+
       guestName: guest.firstName,
+
       invitationUrl,
     });
   }
@@ -469,12 +575,15 @@ export const regenerateInvitation = async (
 };
 
 export const revokeInvitation = async (ownerId: string, eventId: string, guestId: string) => {
+  await assertInvitationsAreEditable(ownerId, eventId);
+
   const guest = await getOwnedGuest(ownerId, eventId, guestId);
 
   const invitation = await prisma.eventInvitation.findUnique({
     where: {
       guestId: guest.id,
     },
+
     select: {
       id: true,
       revokedAt: true,
@@ -497,9 +606,11 @@ export const revokeInvitation = async (ownerId: string, eventId: string, guestId
     where: {
       id: invitation.id,
     },
+
     data: {
       revokedAt: new Date(),
     },
+
     select: invitationSelect,
   });
 
@@ -513,6 +624,7 @@ export const getInvitation = async (ownerId: string, eventId: string, guestId: s
     where: {
       guestId: guest.id,
     },
+
     select: invitationSelect,
   });
 
@@ -531,6 +643,7 @@ export const getEventInvitations = async (
   await getOwnedEvent(ownerId, eventId);
 
   const { status, search, page, limit, sort } = query;
+
   const now = new Date();
 
   const guestWhere: Prisma.GuestWhereInput = {
@@ -645,6 +758,7 @@ export const submitPublicRsvp = async (rawToken: string, input: PublicRsvpBody) 
     where: {
       tokenHash,
     },
+
     select: {
       id: true,
       expiresAt: true,
@@ -654,6 +768,13 @@ export const submitPublicRsvp = async (rawToken: string, input: PublicRsvpBody) 
         select: {
           id: true,
           invitedAt: true,
+
+          event: {
+            select: {
+              status: true,
+              eventDate: true,
+            },
+          },
         },
       },
     },
@@ -671,12 +792,17 @@ export const submitPublicRsvp = async (rawToken: string, input: PublicRsvpBody) 
     throw new AppError(410, 'The invitation has expired', 'INVITATION_EXPIRED');
   }
 
+  if (isInvitationWorkflowClosed(invitation.guest.event.status, invitation.guest.event.eventDate)) {
+    throw new AppError(409, 'Guest responses for this event are now closed.', 'EVENT_RSVP_LOCKED');
+  }
+
   const now = new Date();
 
   await prisma.guest.update({
     where: {
       id: invitation.guest.id,
     },
+
     data: {
       status: input.status,
       partySize: input.partySize,
@@ -690,6 +816,7 @@ export const submitPublicRsvp = async (rawToken: string, input: PublicRsvpBody) 
       }),
 
       invitedAt: invitation.guest.invitedAt ?? now,
+
       respondedAt: now,
     },
   });
@@ -698,6 +825,7 @@ export const submitPublicRsvp = async (rawToken: string, input: PublicRsvpBody) 
     where: {
       id: invitation.id,
     },
+
     select: publicInvitationSelect,
   });
 

@@ -1,9 +1,9 @@
 
-import { z } from 'zod'; // Store phone numbers in E.164 format so international numbers
+import { z } from 'zod'; 
 import {
   parsePhoneNumberFromString,
   type CountryCode, 
-} from 'libphonenumber-js';   // remain consistent across profiles, quotations and bookings.
+} from 'libphonenumber-js';  
 const emailSchema = z
   .string()
   .trim()

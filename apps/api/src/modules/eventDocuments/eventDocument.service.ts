@@ -6,6 +6,7 @@ import {
   deleteCloudinaryAssets,
 } from '../../services/cloudinary.service.js';
 import { AppError } from '../../utils/AppError.js';
+import { canMutateEventWorkspace, getWorkspaceLockedMessage } from '../events/event.lifecycle.js';
 import type {
   AddEventDocumentFilesInput,
   CreateEventDocumentInput,
@@ -94,6 +95,20 @@ const getOwnedEvent = async (ownerId: string, eventId: string) => {
 
   if (!event) {
     throw new AppError(404, 'Event not found', 'EVENT_NOT_FOUND');
+  }
+
+  return event;
+};
+
+const assertDocumentsAreEditable = async (ownerId: string, eventId: string) => {
+  const event = await getOwnedEvent(ownerId, eventId);
+
+  if (!canMutateEventWorkspace(event.status, 'DOCUMENTS')) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(event.status, 'DOCUMENTS'),
+      'EVENT_DOCUMENTS_LOCKED',
+    );
   }
 
   return event;
@@ -190,65 +205,23 @@ const getEventDocumentOrderBy = (
 ): Prisma.EventDocumentOrderByWithRelationInput[] => {
   switch (sort) {
     case 'oldest':
-      return [
-        {
-          createdAt: 'asc',
-        },
-        {
-          id: 'asc',
-        },
-      ];
+      return [{ createdAt: 'asc' }, { id: 'asc' }];
 
     case 'title_asc':
-      return [
-        {
-          title: 'asc',
-        },
-        {
-          createdAt: 'asc',
-        },
-      ];
+      return [{ title: 'asc' }, { createdAt: 'asc' }];
 
     case 'title_desc':
-      return [
-        {
-          title: 'desc',
-        },
-        {
-          createdAt: 'desc',
-        },
-      ];
+      return [{ title: 'desc' }, { createdAt: 'desc' }];
 
     case 'category_asc':
-      return [
-        {
-          category: 'asc',
-        },
-        {
-          title: 'asc',
-        },
-      ];
+      return [{ category: 'asc' }, { title: 'asc' }];
 
     case 'category_desc':
-      return [
-        {
-          category: 'desc',
-        },
-        {
-          title: 'asc',
-        },
-      ];
+      return [{ category: 'desc' }, { title: 'asc' }];
 
     case 'newest':
     default:
-      return [
-        {
-          createdAt: 'desc',
-        },
-        {
-          id: 'desc',
-        },
-      ];
+      return [{ createdAt: 'desc' }, { id: 'desc' }];
   }
 };
 
@@ -269,7 +242,8 @@ export const createEventDocument = async (
   eventId: string,
   input: CreateEventDocumentInput,
 ) => {
-  await getOwnedEvent(ownerId, eventId);
+  await assertDocumentsAreEditable(ownerId, eventId);
+
   await ensureVendorExists(input.vendorId);
 
   try {
@@ -415,6 +389,8 @@ export const updateEventDocument = async (
   documentId: string,
   input: UpdateEventDocumentInput,
 ) => {
+  await assertDocumentsAreEditable(ownerId, eventId);
+
   await getOwnedEventDocument(ownerId, eventId, documentId);
 
   if (input.vendorId !== undefined) {
@@ -449,6 +425,8 @@ export const updateEventDocument = async (
 };
 
 export const deleteEventDocument = async (ownerId: string, eventId: string, documentId: string) => {
+  await assertDocumentsAreEditable(ownerId, eventId);
+
   const document = await getOwnedEventDocument(ownerId, eventId, documentId);
 
   await prisma.eventDocument.delete({
@@ -466,6 +444,8 @@ export const addEventDocumentFiles = async (
   documentId: string,
   input: AddEventDocumentFilesInput,
 ) => {
+  await assertDocumentsAreEditable(ownerId, eventId);
+
   const document = await getOwnedEventDocument(ownerId, eventId, documentId);
 
   ensureDocumentFileLimit(document.files.length, input.files.length);
@@ -501,6 +481,8 @@ export const replaceEventDocumentFile = async (
   fileId: string,
   input: ReplaceEventDocumentFileInput,
 ) => {
+  await assertDocumentsAreEditable(ownerId, eventId);
+
   const existingFile = await getOwnedEventDocumentFile(ownerId, eventId, documentId, fileId);
 
   const replacementFile = normalizeFileInput(input.file);
@@ -532,6 +514,8 @@ export const deleteEventDocumentFile = async (
   documentId: string,
   fileId: string,
 ) => {
+  await assertDocumentsAreEditable(ownerId, eventId);
+
   const document = await getOwnedEventDocument(ownerId, eventId, documentId);
 
   const file = document.files.find((documentFile) => documentFile.id === fileId);
