@@ -51,6 +51,7 @@ import {
 import { ReviewFormDialog } from '../features/reviews/ReviewFormDialog';
 import { getCustomerReviews } from '../features/reviews/review.api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 import { api } from '../lib/api';
 
@@ -272,6 +273,16 @@ export function BookingsWorkspacePage() {
     },
   });
 
+  const bookingEventStatus = eventQuery.data?.status;
+
+  const isBookingWorkspaceMutable =
+    bookingEventStatus !== undefined ? canManageWorkspace(bookingEventStatus, 'BOOKINGS') : false;
+
+  const bookingWorkspaceLockedMessage =
+    bookingEventStatus !== undefined && !isBookingWorkspaceMutable
+      ? getWorkspaceLockedMessage(bookingEventStatus, 'BOOKINGS')
+      : null;
+
   const bookingsQuery = useQuery({
     queryKey: [
       'customer',
@@ -402,6 +413,12 @@ export function BookingsWorkspacePage() {
 
   const cancelBookingMutation = useMutation({
     mutationFn: async () => {
+      if (!isBookingWorkspaceMutable) {
+        throw new Error(
+          bookingWorkspaceLockedMessage ?? 'Booking changes are unavailable for this event.',
+        );
+      }
+
       if (!bookingToCancel) {
         throw new Error('Booking details are missing.');
       }
@@ -433,6 +450,11 @@ export function BookingsWorkspacePage() {
 
   const submitPaymentMutation = useMutation({
     mutationFn: async () => {
+      if (!isBookingWorkspaceMutable) {
+        throw new Error(
+          bookingWorkspaceLockedMessage ?? 'Payment activity is unavailable for this event.',
+        );
+      }
       if (!paymentBooking) {
         throw new Error('Booking details are missing.');
       }
@@ -470,6 +492,12 @@ export function BookingsWorkspacePage() {
 
   const stripeCheckoutMutation = useMutation({
     mutationFn: async (booking: CustomerBooking) => {
+      if (!isBookingWorkspaceMutable) {
+        throw new Error(
+          bookingWorkspaceLockedMessage ?? 'Payment activity is unavailable for this event.',
+        );
+      }
+
       return createStripeCheckoutSession(booking.id);
     },
 
@@ -518,6 +546,10 @@ export function BookingsWorkspacePage() {
   };
 
   const openCancelDialog = (booking: CustomerBooking) => {
+    if (!isBookingWorkspaceMutable) {
+      return;
+    }
+
     cancelBookingMutation.reset();
     setCancellationReason('');
     setBookingToCancel(booking);
@@ -534,6 +566,10 @@ export function BookingsWorkspacePage() {
   };
 
   const openPaymentDialog = (booking: CustomerBooking) => {
+    if (!isBookingWorkspaceMutable) {
+      return;
+    }
+
     submitPaymentMutation.reset();
     setPaymentBooking(booking);
     setPaymentReferenceNumber('');
@@ -911,6 +947,24 @@ export function BookingsWorkspacePage() {
             </div>
           </section>
 
+          {bookingWorkspaceLockedMessage ? (
+            <div className="mt-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Booking activity is read-only
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {bookingWorkspaceLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
             <article className="glass-card p-6 sm:p-7">
               <div>
@@ -1143,7 +1197,13 @@ export function BookingsWorkspacePage() {
                             {isCustomerCancellable(booking.status) ? (
                               <button
                                 type="button"
-                                className="group/cancel-booking flex items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.34)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.13)]"
+                                className="group/cancel-booking flex items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.34)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.13)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                                disabled={!isBookingWorkspaceMutable}
+                                title={
+                                  !isBookingWorkspaceMutable
+                                    ? (bookingWorkspaceLockedMessage ?? undefined)
+                                    : undefined
+                                }
                                 onClick={() => {
                                   openCancelDialog(booking);
                                 }}
@@ -1433,6 +1493,8 @@ export function BookingsWorkspacePage() {
                   <BookingDetails
                     booking={selectedBookingQuery.data}
                     hasReview={reviewsByBookingId.has(selectedBookingQuery.data.id)}
+                    canMutateBooking={isBookingWorkspaceMutable}
+                    bookingLockedMessage={bookingWorkspaceLockedMessage}
                     onOpenReview={openReviewDialog}
                     payments={selectedBookingPaymentsQuery.data?.payments ?? []}
                     paymentsCount={selectedBookingPaymentsQuery.data?.count ?? 0}
@@ -1493,7 +1555,7 @@ export function BookingsWorkspacePage() {
         />
       ) : null}
 
-      {paymentBooking ? (
+      {paymentBooking && isBookingWorkspaceMutable ? (
         <div
           className="fixed inset-0 z-[60] overflow-y-auto bg-[rgba(31,27,29,0.58)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -1750,7 +1812,7 @@ export function BookingsWorkspacePage() {
         </div>
       ) : null}
 
-      {bookingToCancel ? (
+      {bookingToCancel && isBookingWorkspaceMutable ? (
         <div
           className="fixed inset-0 z-[60] overflow-y-auto bg-[rgba(31,27,29,0.58)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -1938,6 +2000,8 @@ export function BookingsWorkspacePage() {
 function BookingDetails({
   booking,
   hasReview,
+  canMutateBooking,
+  bookingLockedMessage,
   onOpenReview,
   payments,
   paymentsCount,
@@ -1952,6 +2016,8 @@ function BookingDetails({
 }: {
   booking: CustomerBooking;
   hasReview: boolean;
+  canMutateBooking: boolean;
+  bookingLockedMessage: string | null;
   onOpenReview: (booking: CustomerBooking) => void;
   payments: CustomerPayment[];
   paymentsCount: number;
@@ -1978,6 +2044,7 @@ function BookingDetails({
   const hasVerifiedPayment = payments.some((payment) => payment.status === 'VERIFIED');
 
   const canSubmitManualDeposit =
+    canMutateBooking &&
     booking.status === 'DEPOSIT_PENDING' &&
     Boolean(booking.acceptedQuotation.depositAmount) &&
     !hasPendingManualPayment &&
@@ -1985,6 +2052,7 @@ function BookingDetails({
     !pendingStripePayment;
 
   const canStartStripeCheckout =
+    canMutateBooking &&
     booking.status === 'DEPOSIT_PENDING' &&
     Boolean(booking.acceptedQuotation.depositAmount) &&
     !hasPendingManualPayment &&
@@ -2967,8 +3035,14 @@ function BookingDetails({
 
             <button
               type="button"
-              className="group/cancel-details flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.36)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_16px_34px_rgba(124,74,90,0.14)]"
+              className="group/cancel-details flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.36)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_16px_34px_rgba(124,74,90,0.14)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+              disabled={!canMutateBooking}
+              title={!canMutateBooking ? (bookingLockedMessage ?? undefined) : undefined}
               onClick={() => {
+                if (!canMutateBooking) {
+                  return;
+                }
+
                 onCancel(booking);
               }}
             >

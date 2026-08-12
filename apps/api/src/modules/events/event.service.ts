@@ -1,4 +1,4 @@
-import { EventStatus, Prisma } from '@prisma/client';
+import { BookingStatus, EventStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import type {
@@ -7,12 +7,25 @@ import type {
   UpdateCustomerEventInput,
   UpdateCustomerEventStatusInput,
 } from './event.schemas.js';
+import {
+  canDeleteEventAtStatus,
+  canMutateEventWorkspace,
+  canTransitionEventStatus,
+  getAllowedEventStatusTransitions,
+  getWorkspaceLockedMessage,
+} from './event.lifecycle.js';
 
 const eventSelect = {
   id: true,
   name: true,
   eventType: true,
   invitationTemplate: true,
+  invitationArtwork: true,
+  invitationFont: true,
+  invitationGradient: true,
+  invitationAccentColor: true,
+  invitationArtworkPosition: true,
+  invitationDesignConfirmedAt: true,
   eventDate: true,
   location: true,
   guestCount: true,
@@ -169,9 +182,6 @@ const getEventOrderBy = (
 
 export const createCustomerEvent = async (ownerId: string, input: CreateEventInput) => {
   const eventType = toEventType(input.eventType);
-  const invitationTemplate = input.invitationTemplate ?? null;
-
-  assertInvitationTemplateMatchesEventType(eventType, invitationTemplate);
 
   const event = await prisma.$transaction(async (transaction) => {
     const createdEvent = await transaction.event.create({
@@ -179,7 +189,6 @@ export const createCustomerEvent = async (ownerId: string, input: CreateEventInp
         ownerId,
         name: input.name,
         eventType,
-        invitationTemplate,
         eventDate: new Date(input.eventDate),
         location: input.location,
         guestCount: input.guestCount ?? null,
@@ -281,8 +290,29 @@ export const updateCustomerEvent = async (
 ) => {
   const event = await getOwnedEvent(ownerId, eventId);
 
-  if (event.status === EventStatus.COMPLETED || event.status === EventStatus.CANCELLED) {
-    throw new AppError(409, 'Completed or cancelled events cannot be edited', 'EVENT_NOT_EDITABLE');
+  if (!canMutateEventWorkspace(event.status, 'EVENT_DETAILS')) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(event.status, 'EVENT_DETAILS'),
+      'EVENT_NOT_EDITABLE',
+    );
+  }
+
+  const isInvitationDesignUpdate =
+    input.eventType !== undefined ||
+    input.invitationTemplate !== undefined ||
+    input.invitationArtwork !== undefined ||
+    input.invitationFont !== undefined ||
+    input.invitationGradient !== undefined ||
+    input.invitationAccentColor !== undefined ||
+    input.invitationArtworkPosition !== undefined;
+
+  if (event.invitationDesignConfirmedAt && isInvitationDesignUpdate) {
+    throw new AppError(
+      409,
+      'The invitation design for this event has already been confirmed and can no longer be changed',
+      'INVITATION_DESIGN_LOCKED',
+    );
   }
 
   const nextEventType =
@@ -308,6 +338,26 @@ export const updateCustomerEvent = async (
 
       ...(input.invitationTemplate !== undefined && {
         invitationTemplate: input.invitationTemplate,
+      }),
+
+      ...(input.invitationArtwork !== undefined && {
+        invitationArtwork: input.invitationArtwork,
+      }),
+
+      ...(input.invitationFont !== undefined && {
+        invitationFont: input.invitationFont,
+      }),
+
+      ...(input.invitationGradient !== undefined && {
+        invitationGradient: input.invitationGradient,
+      }),
+
+      ...(input.invitationAccentColor !== undefined && {
+        invitationAccentColor: input.invitationAccentColor,
+      }),
+
+      ...(input.invitationArtworkPosition !== undefined && {
+        invitationArtworkPosition: input.invitationArtworkPosition,
       }),
 
       ...(input.eventDate !== undefined && {
@@ -341,16 +391,44 @@ export const updateCustomerEvent = async (
   return formatEvent(updatedEvent);
 };
 
-const allowedEventStatusTransitions: Record<EventStatus, EventStatus[]> = {
-  [EventStatus.DRAFT]: [EventStatus.PLANNING, EventStatus.CANCELLED],
+export const confirmCustomerInvitationDesign = async (ownerId: string, eventId: string) => {
+  const event = await getOwnedEvent(ownerId, eventId);
 
-  [EventStatus.PLANNING]: [EventStatus.DRAFT, EventStatus.ACTIVE, EventStatus.CANCELLED],
+  if (event.status === EventStatus.COMPLETED || event.status === EventStatus.CANCELLED) {
+    throw new AppError(
+      409,
+      'Completed or cancelled events cannot confirm an invitation design',
+      'EVENT_NOT_EDITABLE',
+    );
+  }
 
-  [EventStatus.ACTIVE]: [EventStatus.COMPLETED, EventStatus.CANCELLED],
+  if (event.invitationDesignConfirmedAt) {
+    throw new AppError(
+      409,
+      'The invitation design for this event has already been confirmed',
+      'INVITATION_DESIGN_ALREADY_CONFIRMED',
+    );
+  }
 
-  [EventStatus.COMPLETED]: [],
+  if (!event.invitationTemplate) {
+    throw new AppError(
+      400,
+      'Choose and apply an invitation design before confirming it',
+      'INVITATION_DESIGN_REQUIRED',
+    );
+  }
 
-  [EventStatus.CANCELLED]: [],
+  const updatedEvent = await prisma.event.update({
+    where: {
+      id: eventId,
+    },
+    data: {
+      invitationDesignConfirmedAt: new Date(),
+    },
+    select: eventDetailsSelect,
+  });
+
+  return formatEvent(updatedEvent);
 };
 
 export const updateCustomerEventStatus = async (
@@ -364,14 +442,48 @@ export const updateCustomerEventStatus = async (
     throw new AppError(409, 'Event already has the requested status', 'EVENT_STATUS_UNCHANGED');
   }
 
-  const allowedStatuses = allowedEventStatusTransitions[event.status];
+  if (!canTransitionEventStatus(event.status, input.status)) {
+    const allowedStatuses = getAllowedEventStatusTransitions(event.status);
 
-  if (!allowedStatuses.includes(input.status)) {
+    const allowedStatusMessage =
+      allowedStatuses.length > 0
+        ? ` Allowed next ${allowedStatuses.length === 1 ? 'status is' : 'statuses are'}: ${allowedStatuses.join(
+            ', ',
+          )}.`
+        : ' This event is already in a terminal status and cannot transition further.';
+
     throw new AppError(
       409,
-      `Event status cannot change from ${event.status} to ${input.status}`,
+      `Event status cannot change from ${event.status} to ${input.status}.${allowedStatusMessage}`,
       'INVALID_EVENT_STATUS_TRANSITION',
     );
+  }
+
+  if (input.status === EventStatus.COMPLETED) {
+    const unfinishedBookingCount = await prisma.booking.count({
+      where: {
+        eventId,
+        status: {
+          in: [
+            BookingStatus.AWAITING_VENDOR_CONFIRMATION,
+            BookingStatus.CONFIRMED,
+            BookingStatus.DEPOSIT_PENDING,
+            BookingStatus.ACTIVE,
+            BookingStatus.DISPUTED,
+          ],
+        },
+      },
+    });
+
+    if (unfinishedBookingCount > 0) {
+      throw new AppError(
+        409,
+        `This event cannot be completed while ${unfinishedBookingCount} ${
+          unfinishedBookingCount === 1 ? 'booking still requires' : 'bookings still require'
+        } resolution or completion`,
+        'EVENT_HAS_UNFINISHED_BOOKINGS',
+      );
+    }
   }
 
   const updatedEvent = await prisma.$transaction(async (transaction) => {
@@ -455,7 +567,7 @@ export const deleteCustomerEvent = async (ownerId: string, eventId: string) => {
     );
   }
 
-  if (event.status !== EventStatus.DRAFT && event.status !== EventStatus.CANCELLED) {
+  if (!canDeleteEventAtStatus(event.status)) {
     throw new AppError(
       409,
       'Only draft or cancelled events can be deleted',

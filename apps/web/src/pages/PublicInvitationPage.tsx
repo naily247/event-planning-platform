@@ -26,6 +26,10 @@ import {
   type PublicRsvpStatus,
 } from '../features/invitations/invitation.api';
 import { InvitationHero } from '../features/events/InvitationHero';
+import {
+  resolveInvitationTemplate,
+  type InvitationFontOption,
+} from '../features/events/invitationTemplates';
 
 type ApiErrorResponse = {
   success?: false;
@@ -86,6 +90,25 @@ const getApiErrorMessage = (error: unknown) => {
     error.response?.data?.error?.message ??
     'Something went wrong. Please try again.'
   );
+};
+
+const getInvitationPageFontFamily = (font: string | null | undefined): string => {
+  const selectedFont = font as InvitationFontOption | null | undefined;
+
+  switch (selectedFont) {
+    case 'classic':
+      return '"Times New Roman", Times, serif';
+
+    case 'editorial':
+      return 'Georgia, "Times New Roman", serif';
+
+    case 'playful':
+      return '"Brush Script MT", "Segoe Script", "Apple Chancery", cursive';
+
+    case 'modern':
+    default:
+      return 'Aptos, Calibri, "Helvetica Neue", Arial, sans-serif';
+  }
 };
 
 const formatDateTime = (value: string) =>
@@ -235,9 +258,68 @@ export function PublicInvitationPage() {
   const invitation = invitationQuery.data;
   const hasResponded = invitation.invitation.hasResponded;
 
+  const selectedInvitationTemplate = resolveInvitationTemplate({
+    eventType: invitation.event.eventType,
+    invitationTemplate: invitation.event.invitationTemplate,
+  });
+
+  const invitationPageBackground =
+    invitation.event.invitationArtwork === 2
+      ? selectedInvitationTemplate?.backgrounds[0]
+      : selectedInvitationTemplate?.backgrounds[1];
+
+  const invitationPageFontFamily = getInvitationPageFontFamily(invitation.event.invitationFont);
+
   return (
-    <div className="app-shell min-h-screen overflow-hidden px-4 py-5 text-[var(--color-charcoal)] sm:px-6 sm:py-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <div
+      className="app-shell relative isolate min-h-screen overflow-hidden px-4 py-5 text-[var(--color-charcoal)] sm:px-6 sm:py-6 lg:px-8"
+      style={{
+        fontFamily: invitationPageFontFamily,
+      }}
+    >
+      {invitationPageBackground ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-[5vw] -top-16 -z-20 hidden h-[62rem] w-[76vw] min-w-[58rem] lg:block"
+          style={{
+            WebkitMaskImage:
+              'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.05) 8%, rgba(0,0,0,0.22) 18%, rgba(0,0,0,0.55) 31%, rgba(0,0,0,0.88) 44%, black 56%, black 100%)',
+            maskImage:
+              'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.05) 8%, rgba(0,0,0,0.22) 18%, rgba(0,0,0,0.55) 31%, rgba(0,0,0,0.88) 44%, black 56%, black 100%)',
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              WebkitMaskImage:
+                'linear-gradient(180deg, black 0%, black 48%, rgba(0,0,0,0.96) 57%, rgba(0,0,0,0.78) 67%, rgba(0,0,0,0.48) 77%, rgba(0,0,0,0.20) 87%, rgba(0,0,0,0.05) 94%, transparent 100%)',
+              maskImage:
+                'linear-gradient(180deg, black 0%, black 48%, rgba(0,0,0,0.96) 57%, rgba(0,0,0,0.78) 67%, rgba(0,0,0,0.48) 77%, rgba(0,0,0,0.20) 87%, rgba(0,0,0,0.05) 94%, transparent 100%)',
+            }}
+          >
+            <img
+              src={invitationPageBackground.imagePath}
+              alt=""
+              className="absolute inset-0 size-full object-cover"
+              style={{
+                objectPosition: '72% top',
+                opacity: 0.94,
+                filter: 'saturate(0.92) contrast(0.97)',
+              }}
+            />
+
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,239,233,0.96)_0%,rgba(246,239,233,0.78)_15%,rgba(246,239,233,0.42)_29%,rgba(246,239,233,0.16)_43%,rgba(246,239,233,0.04)_56%,transparent_70%)]" />
+
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,transparent_47%,rgba(239,228,219,0.08)_59%,rgba(239,228,219,0.24)_71%,rgba(239,228,219,0.48)_83%,rgba(239,228,219,0.74)_100%)]" />
+
+            <div className="absolute bottom-[4%] left-[8%] h-[40%] w-[96%] bg-[radial-gradient(ellipse_at_bottom,rgba(239,228,219,0.64)_0%,rgba(229,215,207,0.32)_38%,rgba(229,215,207,0.10)_61%,transparent_79%)] blur-3xl" />
+
+            <div className="absolute -right-24 -top-24 size-[32rem] rounded-full bg-[rgba(255,232,215,0.05)] blur-3xl" />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="relative mx-auto max-w-6xl">
         <header className="glass-card flex flex-col gap-5 rounded-[1.8rem] border border-white/55 bg-white/30 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-6">
           <div className="flex min-w-0 items-center gap-4">
             <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(145deg,rgba(93,58,85,0.16),rgba(255,255,255,0.36))] text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(93,58,85,0.08)]">
@@ -277,6 +359,8 @@ export function PublicInvitationPage() {
             eventName={invitation.event.name}
             eventType={invitation.event.eventType}
             invitationTemplate={invitation.event.invitationTemplate}
+            invitationArtwork={invitation.event.invitationArtwork}
+            invitationFont={invitation.event.invitationFont}
             guestFirstName={invitation.guest.firstName}
             expiresAt={invitation.invitation.expiresAt}
           />

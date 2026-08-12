@@ -8,6 +8,7 @@ import type {
   UpdateCustomerEventStatusInput,
 } from './event.schemas.js';
 import {
+  confirmCustomerInvitationDesign,
   createCustomerEvent,
   deleteCustomerEvent,
   getCustomerEventById,
@@ -65,6 +66,19 @@ export const updateCustomerEventHandler: RequestHandler = asyncHandler(async (re
     data: event,
   });
 });
+
+export const confirmCustomerInvitationDesignHandler: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const { eventId } = req.params as CustomerEventParams;
+
+    const event = await confirmCustomerInvitationDesign(req.auth!.userId, eventId);
+
+    res.status(200).json({
+      success: true,
+      data: event,
+    });
+  },
+);
 
 export const updateCustomerEventStatusHandler: RequestHandler = asyncHandler(async (req, res) => {
   const { eventId } = req.params as CustomerEventParams;

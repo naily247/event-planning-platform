@@ -50,6 +50,7 @@ import {
 } from '../features/eventDocuments/eventDocument.api';
 import { getPublicVendors, type PublicVendor } from '../features/vendors/vendor.api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -257,6 +258,18 @@ export function EventDocumentsWorkspacePage() {
     queryFn: () => getEventDocumentSummary(eventId!),
   });
 
+  const documentEventStatus = summaryQuery.data?.event.status;
+
+  const isDocumentsEditable =
+    documentEventStatus !== undefined
+      ? canManageWorkspace(documentEventStatus, 'DOCUMENTS')
+      : false;
+
+  const documentsLockedMessage =
+    documentEventStatus !== undefined && !isDocumentsEditable
+      ? getWorkspaceLockedMessage(documentEventStatus, 'DOCUMENTS')
+      : null;
+
   const documentsQuery = useQuery({
     queryKey: [
       'customer',
@@ -318,6 +331,12 @@ export function EventDocumentsWorkspacePage() {
 
   const createDocumentMutation = useMutation({
     mutationFn: async () => {
+      if (!isDocumentsEditable) {
+        throw new Error(
+          documentsLockedMessage ?? 'Document changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId) {
         throw new Error('Event ID is missing.');
       }
@@ -359,6 +378,12 @@ export function EventDocumentsWorkspacePage() {
 
   const updateDocumentMutation = useMutation({
     mutationFn: async () => {
+      if (!isDocumentsEditable) {
+        throw new Error(
+          documentsLockedMessage ?? 'Document changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !documentToEdit) {
         throw new Error('Document details are missing.');
       }
@@ -418,6 +443,12 @@ export function EventDocumentsWorkspacePage() {
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async () => {
+      if (!isDocumentsEditable) {
+        throw new Error(
+          documentsLockedMessage ?? 'Document changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !documentToDelete) {
         throw new Error('Document details are missing.');
       }
@@ -433,6 +464,12 @@ export function EventDocumentsWorkspacePage() {
 
   const addFilesMutation = useMutation({
     mutationFn: async () => {
+      if (!isDocumentsEditable) {
+        throw new Error(
+          documentsLockedMessage ?? 'Document changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !documentForNewFiles) {
         throw new Error('Document details are missing.');
       }
@@ -455,6 +492,12 @@ export function EventDocumentsWorkspacePage() {
 
   const replaceFileMutation = useMutation({
     mutationFn: async () => {
+      if (!isDocumentsEditable) {
+        throw new Error(
+          documentsLockedMessage ?? 'Document changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !fileToReplace) {
         throw new Error('File details are missing.');
       }
@@ -484,6 +527,12 @@ export function EventDocumentsWorkspacePage() {
 
   const deleteFileMutation = useMutation({
     mutationFn: async () => {
+      if (!isDocumentsEditable) {
+        throw new Error(
+          documentsLockedMessage ?? 'Document changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !fileToDelete) {
         throw new Error('File details are missing.');
       }
@@ -498,6 +547,10 @@ export function EventDocumentsWorkspacePage() {
   });
 
   const openCreateDialog = () => {
+    if (!isDocumentsEditable) {
+      return;
+    }
+
     createDocumentMutation.reset();
     resetForm();
     setIsCreateDialogOpen(true);
@@ -514,6 +567,10 @@ export function EventDocumentsWorkspacePage() {
   };
 
   const openEditDialog = (document: EventDocument) => {
+    if (!isDocumentsEditable) {
+      return;
+    }
+
     updateDocumentMutation.reset();
     setDocumentToEdit(document);
     setTitle(document.title);
@@ -533,6 +590,10 @@ export function EventDocumentsWorkspacePage() {
   };
 
   const openAddFilesDialog = (document: EventDocument) => {
+    if (!isDocumentsEditable) {
+      return;
+    }
+
     addFilesMutation.reset();
     setSelectedFiles([]);
     setDocumentForNewFiles(document);
@@ -549,6 +610,10 @@ export function EventDocumentsWorkspacePage() {
   };
 
   const openReplaceFileDialog = (document: EventDocument, file: EventDocumentFile) => {
+    if (!isDocumentsEditable) {
+      return;
+    }
+
     replaceFileMutation.reset();
     setSelectedReplacementFile(null);
     setFileToReplace({ document, file });
@@ -805,7 +870,11 @@ export function EventDocumentsWorkspacePage() {
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="group/hero-add-document btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      className="group/hero-add-document btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      disabled={!isDocumentsEditable}
+                      title={
+                        !isDocumentsEditable ? (documentsLockedMessage ?? undefined) : undefined
+                      }
                       onClick={openCreateDialog}
                     >
                       <Plus
@@ -927,6 +996,24 @@ export function EventDocumentsWorkspacePage() {
             </div>
           </section>
 
+          {documentsLockedMessage ? (
+            <div className="mt-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Document library is read-only
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {documentsLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
             <article className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.52),rgba(255,255,255,0.22))] p-6 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-7">
               <div
@@ -969,7 +1056,9 @@ export function EventDocumentsWorkspacePage() {
 
                   <button
                     type="button"
-                    className="group/library-add-document btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                    className="group/library-add-document btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    disabled={!isDocumentsEditable}
+                    title={!isDocumentsEditable ? (documentsLockedMessage ?? undefined) : undefined}
                     onClick={openCreateDialog}
                   >
                     <Plus
@@ -1174,8 +1263,14 @@ export function EventDocumentsWorkspacePage() {
                             <div className="flex shrink-0 items-center gap-2">
                               <button
                                 type="button"
-                                className="group/edit-document grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                                className="group/edit-document grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                 aria-label={`Edit ${document.title}`}
+                                disabled={!isDocumentsEditable}
+                                title={
+                                  !isDocumentsEditable
+                                    ? (documentsLockedMessage ?? undefined)
+                                    : undefined
+                                }
                                 onClick={() => {
                                   openEditDialog(document);
                                 }}
@@ -1188,9 +1283,19 @@ export function EventDocumentsWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="group/delete-document grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_12px_28px_rgba(124,74,90,0.10)]"
+                                className="group/delete-document grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_12px_28px_rgba(124,74,90,0.10)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                 aria-label={`Delete ${document.title}`}
+                                disabled={!isDocumentsEditable}
+                                title={
+                                  !isDocumentsEditable
+                                    ? (documentsLockedMessage ?? undefined)
+                                    : undefined
+                                }
                                 onClick={() => {
+                                  if (!isDocumentsEditable) {
+                                    return;
+                                  }
+
                                   deleteDocumentMutation.reset();
                                   setDocumentToDelete(document);
                                 }}
@@ -1338,8 +1443,14 @@ export function EventDocumentsWorkspacePage() {
 
                                     <button
                                       type="button"
-                                      className="group/replace-file grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-[rgba(93,58,85,0.13)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.07)]"
+                                      className="group/replace-file grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-[rgba(93,58,85,0.13)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.07)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                       aria-label={`Replace ${file.originalName}`}
+                                      disabled={!isDocumentsEditable}
+                                      title={
+                                        !isDocumentsEditable
+                                          ? (documentsLockedMessage ?? undefined)
+                                          : undefined
+                                      }
                                       onClick={() => {
                                         openReplaceFileDialog(document, file);
                                       }}
@@ -1352,10 +1463,21 @@ export function EventDocumentsWorkspacePage() {
 
                                     <button
                                       type="button"
-                                      className="group/delete-file grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.24)] hover:bg-[rgba(124,74,90,0.13)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.08)] disabled:cursor-not-allowed disabled:opacity-35"
+                                      className="group/delete-file grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.24)] hover:bg-[rgba(124,74,90,0.13)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                       aria-label={`Delete ${file.originalName}`}
-                                      disabled={document.files.length <= 1}
+                                      disabled={!isDocumentsEditable || document.files.length <= 1}
+                                      title={
+                                        !isDocumentsEditable
+                                          ? (documentsLockedMessage ?? undefined)
+                                          : document.files.length <= 1
+                                            ? 'At least one file must remain in a document group.'
+                                            : undefined
+                                      }
                                       onClick={() => {
+                                        if (!isDocumentsEditable) {
+                                          return;
+                                        }
+
                                         deleteFileMutation.reset();
                                         setFileToDelete({
                                           document,
@@ -1376,8 +1498,16 @@ export function EventDocumentsWorkspacePage() {
 
                           <button
                             type="button"
-                            className="group/add-document-file mt-5 flex w-full items-center justify-center gap-2 rounded-[1.35rem] border border-white/56 bg-white/28 px-5 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/48 hover:shadow-[0_16px_34px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
-                            disabled={document.files.length >= EVENT_DOCUMENT_MAX_FILES}
+                            className="group/add-document-file mt-5 flex w-full items-center justify-center gap-2 rounded-[1.35rem] border border-white/56 bg-white/28 px-5 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/48 hover:shadow-[0_16px_34px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                            disabled={
+                              !isDocumentsEditable ||
+                              document.files.length >= EVENT_DOCUMENT_MAX_FILES
+                            }
+                            title={
+                              !isDocumentsEditable
+                                ? (documentsLockedMessage ?? undefined)
+                                : undefined
+                            }
                             onClick={() => {
                               openAddFilesDialog(document);
                             }}
@@ -1387,9 +1517,11 @@ export function EventDocumentsWorkspacePage() {
                               className="size-4 transition duration-300 group-hover/add-document-file:rotate-[4deg] group-hover/add-document-file:scale-105"
                             />
 
-                            {document.files.length >= EVENT_DOCUMENT_MAX_FILES
-                              ? 'Maximum files added'
-                              : 'Add another file'}
+                            {!isDocumentsEditable
+                              ? 'Document library locked'
+                              : document.files.length >= EVENT_DOCUMENT_MAX_FILES
+                                ? 'Maximum files added'
+                                : 'Add another file'}
                           </button>
                         </div>
                       </article>
@@ -1435,7 +1567,11 @@ export function EventDocumentsWorkspacePage() {
                       ) : (
                         <button
                           type="button"
-                          className="group/first-document btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                          className="group/first-document btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                          disabled={!isDocumentsEditable}
+                          title={
+                            !isDocumentsEditable ? (documentsLockedMessage ?? undefined) : undefined
+                          }
                           onClick={openCreateDialog}
                         >
                           <Plus
@@ -1672,7 +1808,7 @@ export function EventDocumentsWorkspacePage() {
         </main>
       </div>
 
-      {isCreateDialogOpen ? (
+      {isCreateDialogOpen && isDocumentsEditable ? (
         <WorkspaceModal labelledBy="create-event-document-title" size="large">
           <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2129,7 +2265,7 @@ export function EventDocumentsWorkspacePage() {
         </WorkspaceModal>
       ) : null}
 
-      {documentToEdit ? (
+      {documentToEdit && isDocumentsEditable ? (
         <WorkspaceModal labelledBy="edit-event-document-title">
           <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2395,7 +2531,7 @@ export function EventDocumentsWorkspacePage() {
         </WorkspaceModal>
       ) : null}
 
-      {documentForNewFiles ? (
+      {documentForNewFiles && isDocumentsEditable ? (
         <WorkspaceModal labelledBy="add-document-files-title">
           <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2696,7 +2832,7 @@ export function EventDocumentsWorkspacePage() {
         </WorkspaceModal>
       ) : null}
 
-      {fileToReplace ? (
+      {fileToReplace && isDocumentsEditable ? (
         <WorkspaceModal labelledBy="replace-document-file-title">
           <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2971,7 +3107,7 @@ export function EventDocumentsWorkspacePage() {
         </WorkspaceModal>
       ) : null}
 
-      {documentToDelete ? (
+      {documentToDelete && isDocumentsEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -3107,7 +3243,7 @@ export function EventDocumentsWorkspacePage() {
         </div>
       ) : null}
 
-      {fileToDelete ? (
+      {fileToDelete && isDocumentsEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"

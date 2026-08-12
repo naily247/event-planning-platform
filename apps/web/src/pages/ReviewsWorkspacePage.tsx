@@ -30,6 +30,7 @@ import {
 } from '../features/reviews/review.api';
 import { api } from '../lib/api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -120,6 +121,16 @@ export function ReviewsWorkspacePage() {
     },
   });
 
+  const reviewEventStatus = eventQuery.data?.status;
+
+  const isReviewEditable =
+    reviewEventStatus !== undefined ? canManageWorkspace(reviewEventStatus, 'REVIEWS') : false;
+
+  const reviewLockedMessage =
+    reviewEventStatus !== undefined && !isReviewEditable
+      ? getWorkspaceLockedMessage(reviewEventStatus, 'REVIEWS')
+      : null;
+
   const reviewsQuery = useQuery({
     queryKey: [
       'customer',
@@ -200,6 +211,10 @@ export function ReviewsWorkspacePage() {
       reviewId: string;
       input: UpdateCustomerReviewInput;
     }) => {
+      if (!isReviewEditable) {
+        throw new Error(reviewLockedMessage ?? 'Review changes are unavailable for this event.');
+      }
+
       return updateCustomerReview(reviewId, input);
     },
 
@@ -214,6 +229,10 @@ export function ReviewsWorkspacePage() {
 
   const deleteReviewMutation = useMutation({
     mutationFn: async (reviewId: string) => {
+      if (!isReviewEditable) {
+        throw new Error(reviewLockedMessage ?? 'Review changes are unavailable for this event.');
+      }
+
       await deleteCustomerReview(reviewId);
 
       return reviewId;
@@ -235,6 +254,10 @@ export function ReviewsWorkspacePage() {
   };
 
   const openEditReview = (review: CustomerReview) => {
+    if (!isReviewEditable) {
+      return;
+    }
+
     updateReviewMutation.reset();
     setSelectedReview(null);
     setReviewToEdit(review);
@@ -250,6 +273,10 @@ export function ReviewsWorkspacePage() {
   };
 
   const openDeleteReview = (review: CustomerReview) => {
+    if (!isReviewEditable) {
+      return;
+    }
+
     deleteReviewMutation.reset();
     setReviewToDelete(review);
   };
@@ -264,7 +291,7 @@ export function ReviewsWorkspacePage() {
   };
 
   const handleUpdateReview = (input: ReviewFormInput | UpdateCustomerReviewInput) => {
-    if (!reviewToEdit) {
+    if (!isReviewEditable || !reviewToEdit) {
       return;
     }
 
@@ -567,6 +594,24 @@ export function ReviewsWorkspacePage() {
             </div>
           </section>
 
+          {reviewLockedMessage ? (
+            <div className="mt-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Review changes are unavailable
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {reviewLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
             <article className="glass-card p-6 sm:p-7">
               <div>
@@ -633,8 +678,8 @@ export function ReviewsWorkspacePage() {
                       key={review.id}
                       review={review}
                       onView={openReviewDetails}
-                      onEdit={openEditReview}
-                      onDelete={openDeleteReview}
+                      onEdit={isReviewEditable ? openEditReview : undefined}
+                      onDelete={isReviewEditable ? openDeleteReview : undefined}
                     />
                   ))}
                 </div>
@@ -784,7 +829,10 @@ export function ReviewsWorkspacePage() {
                 <div className="mt-4 space-y-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
                   <p>Hidden reviews remain visible to you inside this workspace.</p>
                   <p>The moderation reason and moderation date are shown when available.</p>
-                  <p>You can still edit or delete your own review after moderation.</p>
+                  <p>
+                    Moderated reviews remain manageable while review changes are available for the
+                    event.
+                  </p>
                 </div>
               </article>
 
@@ -812,11 +860,11 @@ export function ReviewsWorkspacePage() {
           onClose={() => {
             setSelectedReview(null);
           }}
-          onEdit={openEditReview}
+          onEdit={isReviewEditable ? openEditReview : undefined}
         />
       ) : null}
 
-      {reviewToEdit ? (
+      {reviewToEdit && isReviewEditable ? (
         <ReviewFormDialog
           mode="edit"
           review={reviewToEdit}
@@ -831,7 +879,7 @@ export function ReviewsWorkspacePage() {
         />
       ) : null}
 
-      {reviewToDelete ? (
+      {reviewToDelete && isReviewEditable ? (
         <div
           className="fixed inset-0 z-[70] grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.56)] px-4 py-8 backdrop-blur-md"
           role="dialog"

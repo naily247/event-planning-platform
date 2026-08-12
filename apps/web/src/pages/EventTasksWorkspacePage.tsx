@@ -53,6 +53,7 @@ import {
   validateEventTaskTitle,
 } from '../features/eventTasks/eventTask.ui';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -378,6 +379,10 @@ export function EventTasksWorkspacePage() {
   });
 
   const openCreateDialog = () => {
+    if (!isTaskWorkspaceEditable) {
+      return;
+    }
+
     createTaskMutation.reset();
     resetTaskForm();
     setIsCreateDialogOpen(true);
@@ -394,6 +399,10 @@ export function EventTasksWorkspacePage() {
   };
 
   const openEditDialog = (task: EventTask) => {
+    if (!isTaskWorkspaceEditable) {
+      return;
+    }
+
     updateTaskMutation.reset();
 
     setTaskToEdit(task);
@@ -411,6 +420,15 @@ export function EventTasksWorkspacePage() {
     updateTaskMutation.reset();
     setTaskToEdit(null);
     resetTaskForm();
+  };
+
+  const openDeleteDialog = (task: EventTask) => {
+    if (!isTaskWorkspaceEditable) {
+      return;
+    }
+
+    deleteTaskMutation.reset();
+    setTaskToDelete(task);
   };
 
   const closeDeleteDialog = () => {
@@ -549,6 +567,12 @@ export function EventTasksWorkspacePage() {
   const tasks = tasksQuery.data.tasks;
   const pagination = tasksQuery.data.pagination;
 
+  const isTaskWorkspaceEditable = canManageWorkspace(taskSummary.event.status, 'TASKS');
+
+  const taskWorkspaceLockedMessage = isTaskWorkspaceEditable
+    ? null
+    : getWorkspaceLockedMessage(taskSummary.event.status, 'TASKS');
+
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -580,6 +604,24 @@ export function EventTasksWorkspacePage() {
         </header>
 
         <main className="py-10">
+          {taskWorkspaceLockedMessage ? (
+            <div className="mb-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Tasks are read-only
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {taskWorkspaceLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           <section className="relative isolate min-h-[24.5rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-6 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-8 sm:py-7 lg:px-9 lg:py-8">
             <img
               src="/images/workspaces/shortcuts/tasks.png"
@@ -630,7 +672,8 @@ export function EventTasksWorkspacePage() {
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="group/hero-add-task btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      className="group/hero-add-task btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      disabled={!isTaskWorkspaceEditable}
                       onClick={openCreateDialog}
                     >
                       <Plus
@@ -813,7 +856,8 @@ export function EventTasksWorkspacePage() {
 
                   <button
                     type="button"
-                    className="group/checklist-add-task btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                    className="group/checklist-add-task btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    disabled={!isTaskWorkspaceEditable}
                     onClick={openCreateDialog}
                   >
                     <Plus
@@ -1105,8 +1149,9 @@ export function EventTasksWorkspacePage() {
                               <div className="flex shrink-0 items-center gap-2">
                                 <button
                                   type="button"
-                                  className="group/edit-task grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                                  className="group/edit-task grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                   aria-label={`Edit ${task.title}`}
+                                  disabled={!isTaskWorkspaceEditable}
                                   onClick={() => {
                                     openEditDialog(task);
                                   }}
@@ -1119,11 +1164,11 @@ export function EventTasksWorkspacePage() {
 
                                 <button
                                   type="button"
-                                  className="group/delete-task grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_12px_28px_rgba(124,74,90,0.10)]"
+                                  className="group/delete-task grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_12px_28px_rgba(124,74,90,0.10)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                   aria-label={`Delete ${task.title}`}
+                                  disabled={!isTaskWorkspaceEditable}
                                   onClick={() => {
-                                    deleteTaskMutation.reset();
-                                    setTaskToDelete(task);
+                                    openDeleteDialog(task);
                                   }}
                                 >
                                   <Trash2
@@ -1163,7 +1208,10 @@ export function EventTasksWorkspacePage() {
                                               ? 'border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.09)] text-[var(--color-muted-burgundy)] hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.15)]'
                                               : 'border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)]'
                                         }`}
-                                        disabled={updateTaskStatusMutation.isPending}
+                                        disabled={
+                                          updateTaskStatusMutation.isPending ||
+                                          !isTaskWorkspaceEditable
+                                        }
                                         onClick={() => {
                                           updateTaskStatusMutation.mutate({
                                             task,
@@ -1253,7 +1301,8 @@ export function EventTasksWorkspacePage() {
                       ) : (
                         <button
                           type="button"
-                          className="group/first-task btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                          className="group/first-task btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                          disabled={!isTaskWorkspaceEditable}
                           onClick={openCreateDialog}
                         >
                           <Plus
@@ -1434,7 +1483,7 @@ export function EventTasksWorkspacePage() {
         </main>
       </div>
 
-      {isCreateDialogOpen ? (
+      {isCreateDialogOpen && isTaskWorkspaceEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -1812,7 +1861,7 @@ export function EventTasksWorkspacePage() {
         </div>
       ) : null}
 
-      {taskToEdit ? (
+      {taskToEdit && isTaskWorkspaceEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2184,7 +2233,7 @@ export function EventTasksWorkspacePage() {
         </div>
       ) : null}
 
-      {taskToDelete ? (
+      {taskToDelete && isTaskWorkspaceEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"

@@ -1,6 +1,7 @@
 import { GuestStatus, Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
+import { canMutateEventWorkspace, getWorkspaceLockedMessage } from '../events/event.lifecycle.js';
 import type {
   CreateGuestInput,
   ListGuestsQuery,
@@ -26,12 +27,6 @@ const guestSelect = {
   createdAt: true,
   updatedAt: true,
 } as const;
-
-const respondedStatuses: GuestStatus[] = [
-  GuestStatus.CONFIRMED,
-  GuestStatus.DECLINED,
-  GuestStatus.MAYBE,
-];
 
 const normalizeOptionalText = (value: string | null | undefined) => {
   if (value === undefined) {
@@ -96,6 +91,20 @@ const getOwnedEvent = async (ownerId: string, eventId: string) => {
 
   if (!event) {
     throw new AppError(404, 'Event not found', 'EVENT_NOT_FOUND');
+  }
+
+  return event;
+};
+
+const assertGuestsAreEditable = async (ownerId: string, eventId: string) => {
+  const event = await getOwnedEvent(ownerId, eventId);
+
+  if (!canMutateEventWorkspace(event.status, 'GUESTS')) {
+    throw new AppError(
+      409,
+      getWorkspaceLockedMessage(event.status, 'GUESTS'),
+      'EVENT_GUESTS_LOCKED',
+    );
   }
 
   return event;
@@ -172,76 +181,28 @@ const handleGuestPrismaError = (error: unknown): never => {
 const getGuestOrderBy = (sort: ListGuestsQuery['sort']): Prisma.GuestOrderByWithRelationInput[] => {
   switch (sort) {
     case 'oldest':
-      return [
-        {
-          createdAt: 'asc',
-        },
-      ];
+      return [{ createdAt: 'asc' }];
 
     case 'name_asc':
-      return [
-        {
-          firstName: 'asc',
-        },
-        {
-          lastName: 'asc',
-        },
-        {
-          createdAt: 'asc',
-        },
-      ];
+      return [{ firstName: 'asc' }, { lastName: 'asc' }, { createdAt: 'asc' }];
 
     case 'name_desc':
-      return [
-        {
-          firstName: 'desc',
-        },
-        {
-          lastName: 'desc',
-        },
-        {
-          createdAt: 'desc',
-        },
-      ];
+      return [{ firstName: 'desc' }, { lastName: 'desc' }, { createdAt: 'desc' }];
 
     case 'party_size_highest':
-      return [
-        {
-          partySize: 'desc',
-        },
-        {
-          firstName: 'asc',
-        },
-        {
-          lastName: 'asc',
-        },
-      ];
+      return [{ partySize: 'desc' }, { firstName: 'asc' }, { lastName: 'asc' }];
 
     case 'party_size_lowest':
-      return [
-        {
-          partySize: 'asc',
-        },
-        {
-          firstName: 'asc',
-        },
-        {
-          lastName: 'asc',
-        },
-      ];
+      return [{ partySize: 'asc' }, { firstName: 'asc' }, { lastName: 'asc' }];
 
     case 'newest':
     default:
-      return [
-        {
-          createdAt: 'desc',
-        },
-      ];
+      return [{ createdAt: 'desc' }];
   }
 };
 
 export const createGuest = async (ownerId: string, eventId: string, input: CreateGuestInput) => {
-  await getOwnedEvent(ownerId, eventId);
+  await assertGuestsAreEditable(ownerId, eventId);
 
   const email = normalizeEmail(input.email);
   const status = input.status ?? GuestStatus.NOT_INVITED;
@@ -369,6 +330,8 @@ export const updateGuest = async (
   guestId: string,
   input: UpdateGuestInput,
 ) => {
+  await assertGuestsAreEditable(ownerId, eventId);
+
   await getOwnedGuest(ownerId, eventId, guestId);
 
   const email = normalizeEmail(input.email);
@@ -434,6 +397,8 @@ export const updateGuestRsvp = async (
   guestId: string,
   input: UpdateGuestRsvpInput,
 ) => {
+  await assertGuestsAreEditable(ownerId, eventId);
+
   const existingGuest = await getOwnedGuest(ownerId, eventId, guestId);
 
   if (existingGuest.status === input.status) {
@@ -458,6 +423,8 @@ export const updateGuestRsvp = async (
 };
 
 export const deleteGuest = async (ownerId: string, eventId: string, guestId: string) => {
+  await assertGuestsAreEditable(ownerId, eventId);
+
   await getOwnedGuest(ownerId, eventId, guestId);
 
   await prisma.guest.delete({

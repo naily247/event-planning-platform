@@ -22,6 +22,105 @@ export type InvitationTemplateDefinition = {
   backgrounds: readonly [InvitationTemplateBackground, InvitationTemplateBackground];
 };
 
+export const invitationFontOptions = [
+  {
+    id: 'editorial',
+    label: 'Georgia',
+    description: 'An elegant serif typeface with a refined editorial character.',
+  },
+  {
+    id: 'classic',
+    label: 'Times New Roman',
+    description: 'A timeless serif typeface suited to formal and traditional invitations.',
+  },
+  {
+    id: 'modern',
+    label: 'Aptos',
+    description: 'A clean contemporary sans-serif typeface with a polished modern feel.',
+  },
+  {
+    id: 'playful',
+    label: 'Cursive',
+    description: 'A flowing script-style typeface for expressive and celebratory invitations.',
+  },
+] as const;
+
+export type InvitationFontOption = (typeof invitationFontOptions)[number]['id'];
+
+export const invitationGradientOptions = [
+  {
+    id: 'balanced',
+    label: 'Balanced',
+    description: 'Keeps artwork visible while maintaining comfortable text readability.',
+  },
+  {
+    id: 'soft',
+    label: 'Soft fade',
+    description: 'Uses a lighter transition for a more open and airy composition.',
+  },
+  {
+    id: 'dramatic',
+    label: 'Dramatic',
+    description: 'Uses a stronger fade to create a cinematic text-and-artwork contrast.',
+  },
+] as const;
+
+export type InvitationGradientOption = (typeof invitationGradientOptions)[number]['id'];
+
+export const invitationAccentColorOptions = [
+  {
+    id: '#5D3A55',
+    label: 'Deep plum',
+  },
+  {
+    id: '#7C4A5A',
+    label: 'Rosewood',
+  },
+  {
+    id: '#596449',
+    label: 'Sage',
+  },
+  {
+    id: '#8F7664',
+    label: 'Warm taupe',
+  },
+  {
+    id: '#3B515B',
+    label: 'Slate',
+  },
+] as const;
+
+export type InvitationAccentColorOption = (typeof invitationAccentColorOptions)[number]['id'];
+
+export const invitationArtworkPositionOptions = [
+  {
+    id: 'left',
+    label: 'Left',
+    description: 'Keeps the main artwork focus toward the left side.',
+  },
+  {
+    id: 'center',
+    label: 'Centre',
+    description: 'Keeps the main artwork composition centred.',
+  },
+  {
+    id: 'right',
+    label: 'Right',
+    description: 'Keeps the main artwork focus toward the right side.',
+  },
+] as const;
+
+export type InvitationArtworkPositionOption =
+  (typeof invitationArtworkPositionOptions)[number]['id'];
+
+export const getDefaultInvitationCustomization = (template: InvitationTemplateDefinition) => ({
+  artwork: 1 as const,
+  font: template.fontStyle,
+  gradient: 'balanced' as InvitationGradientOption,
+  accentColor: null as InvitationAccentColorOption | null,
+  artworkPosition: 'center' as InvitationArtworkPositionOption,
+});
+
 const invitationImageBasePath = '/images/invitations/templates';
 
 export const invitationTemplates: readonly InvitationTemplateDefinition[] = [
@@ -923,9 +1022,7 @@ export const getInvitationTemplatesForEventType = (
     (option) => option.toLowerCase() === normalizedEventType,
   );
 
-  return matchedEventType
-    ? invitationTemplatesByEventType[matchedEventType]
-    : [];
+  return matchedEventType ? invitationTemplatesByEventType[matchedEventType] : [];
 };
 
 export const getInvitationTemplate = (templateId: EventInvitationTemplate | null | undefined) => {
@@ -940,10 +1037,7 @@ export const getDefaultInvitationTemplate = (eventType: EventTypeOption) => {
   const templates = getInvitationTemplatesForEventType(eventType);
 
   if (!templates?.length) {
-    console.error(
-      '[Invitation Templates] No templates registered for event type:',
-      eventType,
-    );
+    console.error('[Invitation Templates] No templates registered for event type:', eventType);
 
     return undefined;
   }

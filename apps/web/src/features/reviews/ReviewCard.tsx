@@ -16,8 +16,8 @@ import type { CustomerReview } from './review.api';
 type ReviewCardProps = {
   review: CustomerReview;
   onView: (review: CustomerReview) => void;
-  onEdit: (review: CustomerReview) => void;
-  onDelete: (review: CustomerReview) => void;
+  onEdit?: (review: CustomerReview) => void;
+  onDelete?: (review: CustomerReview) => void;
 };
 
 const formatDate = (value: string) =>
@@ -155,28 +155,30 @@ export function ReviewCard({ review, onView, onEdit, onDelete }: ReviewCardProps
             <Eye className="size-4" />
             View details
           </button>
-
-          <button
-            type="button"
-            className="btn-secondary justify-center text-sm font-bold"
-            onClick={() => {
-              onEdit(review);
-            }}
-          >
-            <Pencil className="size-4" />
-            Edit review
-          </button>
-
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
-            onClick={() => {
-              onDelete(review);
-            }}
-          >
-            <Trash2 className="size-4" />
-            Delete review
-          </button>
+          {onEdit ? (
+            <button
+              type="button"
+              className="btn-secondary justify-center text-sm font-bold"
+              onClick={() => {
+                onEdit?.(review);
+              }}
+            >
+              <Pencil className="size-4" />
+              Edit review
+            </button>
+          ) : null}
+          {onDelete ? (
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.16)]"
+              onClick={() => {
+                onDelete?.(review);
+              }}
+            >
+              <Trash2 className="size-4" />
+              Delete review
+            </button>
+          ) : null}
         </div>
       </div>
     </article>

@@ -36,6 +36,7 @@ import {
 } from '../features/moodBoards/moodBoard.api';
 import { getPublicVendors, type PublicVendor } from '../features/vendors/vendor.api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -148,6 +149,18 @@ export function MoodBoardWorkspacePage() {
     queryFn: () => getMoodBoardSummary(eventId!),
   });
 
+  const moodBoardEventStatus = summaryQuery.data?.event.status;
+
+  const isMoodBoardEditable =
+    moodBoardEventStatus !== undefined
+      ? canManageWorkspace(moodBoardEventStatus, 'MOOD_BOARD')
+      : false;
+
+  const moodBoardLockedMessage =
+    moodBoardEventStatus !== undefined && !isMoodBoardEditable
+      ? getWorkspaceLockedMessage(moodBoardEventStatus, 'MOOD_BOARD')
+      : null;
+
   const itemsQuery = useQuery({
     queryKey: [
       'customer',
@@ -209,6 +222,12 @@ export function MoodBoardWorkspacePage() {
 
   const createMoodBoardItemMutation = useMutation({
     mutationFn: async () => {
+      if (!isMoodBoardEditable) {
+        throw new Error(
+          moodBoardLockedMessage ?? 'Mood-board changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId) {
         throw new Error('Event ID is missing.');
       }
@@ -299,6 +318,12 @@ export function MoodBoardWorkspacePage() {
 
   const updateMoodBoardItemMutation = useMutation({
     mutationFn: async () => {
+      if (!isMoodBoardEditable) {
+        throw new Error(
+          moodBoardLockedMessage ?? 'Mood-board changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !itemToEdit) {
         throw new Error('Mood-board item details are missing.');
       }
@@ -403,6 +428,12 @@ export function MoodBoardWorkspacePage() {
 
   const deleteMoodBoardItemMutation = useMutation({
     mutationFn: async () => {
+      if (!isMoodBoardEditable) {
+        throw new Error(
+          moodBoardLockedMessage ?? 'Mood-board changes are unavailable for this event.',
+        );
+      }
+
       if (!eventId || !itemToDelete) {
         throw new Error('Mood-board item details are missing.');
       }
@@ -429,6 +460,10 @@ export function MoodBoardWorkspacePage() {
   });
 
   const openDeleteDialog = (item: MoodBoardItem) => {
+    if (!isMoodBoardEditable) {
+      return;
+    }
+
     deleteMoodBoardItemMutation.reset();
     setItemToDelete(item);
     setIsDeleteDialogOpen(true);
@@ -445,6 +480,10 @@ export function MoodBoardWorkspacePage() {
   };
 
   const openEditDialog = (item: MoodBoardItem) => {
+    if (!isMoodBoardEditable) {
+      return;
+    }
+
     updateMoodBoardItemMutation.reset();
 
     setItemToEdit(item);
@@ -469,6 +508,10 @@ export function MoodBoardWorkspacePage() {
   };
 
   const openCreateDialog = () => {
+    if (!isMoodBoardEditable) {
+      return;
+    }
+
     createMoodBoardItemMutation.reset();
     setCreationMode('upload');
     setSelectedImage(null);
@@ -583,6 +626,12 @@ export function MoodBoardWorkspacePage() {
 
   const moodBoardSummary = summaryQuery.data;
   const items = itemsQuery.data.items;
+
+  const eventStatus = moodBoardSummary.event.status;
+
+  const isReadOnly = eventStatus === 'COMPLETED' || eventStatus === 'CANCELLED';
+
+  const canEdit = eventStatus === 'DRAFT' || eventStatus === 'PLANNING' || eventStatus === 'ACTIVE';
   const pagination = itemsQuery.data.pagination;
 
   const previewItems = (previewItemsQuery.data?.items ?? [])
@@ -728,8 +777,12 @@ export function MoodBoardWorkspacePage() {
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="group/hero-add-inspiration btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
-                      onClick={openCreateDialog}
+                      disabled={!canEdit}
+                      className="group/hero-add-inspiration btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      onClick={() => {
+                        if (!canEdit) return;
+                        openCreateDialog();
+                      }}
                     >
                       <Plus
                         aria-hidden="true"
@@ -822,6 +875,24 @@ export function MoodBoardWorkspacePage() {
             </div>
           </section>
 
+          {moodBoardLockedMessage ? (
+            <div className="mt-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Mood board is read-only
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {moodBoardLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           <section className="relative mt-7 overflow-hidden rounded-[2.25rem] border border-white/64 bg-[linear-gradient(145deg,rgba(255,255,255,0.50),rgba(239,230,244,0.30))] p-5 shadow-[0_22px_64px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:p-7">
             <div
               aria-hidden="true"
@@ -866,6 +937,8 @@ export function MoodBoardWorkspacePage() {
                 <button
                   type="button"
                   className="group/preview-add-inspiration btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                  disabled={!isMoodBoardEditable}
+                  title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
                   onClick={openCreateDialog}
                 >
                   <Plus
@@ -955,6 +1028,10 @@ export function MoodBoardWorkspacePage() {
                       <button
                         type="button"
                         className="group/empty-preview-add btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                        disabled={!isMoodBoardEditable}
+                        title={
+                          !isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined
+                        }
                         onClick={openCreateDialog}
                       >
                         <Plus
@@ -1011,6 +1088,8 @@ export function MoodBoardWorkspacePage() {
                   <button
                     type="button"
                     className="group/add-board-inspiration btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                    disabled={!isMoodBoardEditable}
+                    title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
                     onClick={openCreateDialog}
                   >
                     <Plus
@@ -1181,9 +1260,9 @@ export function MoodBoardWorkspacePage() {
                   <div className="mt-8 grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {items.map((item) => (
                       <article
-  key={item.id}
-  className="group min-w-0 overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/34 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/85 hover:bg-white/48 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]"
->
+                        key={item.id}
+                        className="group min-w-0 overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/34 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/85 hover:bg-white/48 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]"
+                      >
                         <div
                           aria-hidden="true"
                           className="pointer-events-none absolute -right-14 -top-14 z-10 size-40 rounded-full bg-[rgba(183,167,200,0.18)] opacity-0 blur-3xl transition duration-500 group-hover/mood-item:scale-125 group-hover/mood-item:opacity-100"
@@ -1242,8 +1321,14 @@ export function MoodBoardWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="group/edit-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.08)]"
+                                className="group/edit-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                 aria-label={`Edit ${item.title}`}
+                                disabled={!isMoodBoardEditable}
+                                title={
+                                  !isMoodBoardEditable
+                                    ? (moodBoardLockedMessage ?? undefined)
+                                    : undefined
+                                }
                                 onClick={() => {
                                   openEditDialog(item);
                                 }}
@@ -1256,8 +1341,14 @@ export function MoodBoardWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="group/delete-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.10)]"
+                                className="group/delete-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.10)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                 aria-label={`Delete ${item.title}`}
+                                disabled={!isMoodBoardEditable}
+                                title={
+                                  !isMoodBoardEditable
+                                    ? (moodBoardLockedMessage ?? undefined)
+                                    : undefined
+                                }
                                 onClick={() => {
                                   openDeleteDialog(item);
                                 }}
@@ -1355,6 +1446,10 @@ export function MoodBoardWorkspacePage() {
                         <button
                           type="button"
                           className="group/first-inspiration btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                          disabled={!isMoodBoardEditable}
+                          title={
+                            !isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined
+                          }
                           onClick={openCreateDialog}
                         >
                           <Plus
@@ -1514,6 +1609,8 @@ export function MoodBoardWorkspacePage() {
                   <button
                     type="button"
                     className="group/add-another-idea btn-secondary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
+                    disabled={!isMoodBoardEditable}
+                    title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
                     onClick={openCreateDialog}
                   >
                     <Plus
@@ -1528,7 +1625,7 @@ export function MoodBoardWorkspacePage() {
           </section>
         </main>
       </div>
-      {isCreateDialogOpen ? (
+      {isCreateDialogOpen && isMoodBoardEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2293,7 +2390,7 @@ export function MoodBoardWorkspacePage() {
           </div>
         </div>
       ) : null}
-      {isEditDialogOpen && itemToEdit ? (
+      {isEditDialogOpen && isMoodBoardEditable && itemToEdit ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2756,7 +2853,7 @@ export function MoodBoardWorkspacePage() {
         </div>
       ) : null}
 
-      {isDeleteDialogOpen && itemToDelete ? (
+      {isDeleteDialogOpen && isMoodBoardEditable && itemToDelete ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.60)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"

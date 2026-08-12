@@ -35,6 +35,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -198,6 +199,16 @@ export function GuestWorkspacePage() {
     enabled: Boolean(eventId),
     queryFn: () => getGuestSummary(eventId!),
   });
+
+  const guestEventStatus = summaryQuery.data?.event.status;
+
+  const isGuestsEditable =
+    guestEventStatus !== undefined ? canManageWorkspace(guestEventStatus, 'GUESTS') : false;
+
+  const guestsLockedMessage =
+    guestEventStatus !== undefined && !isGuestsEditable
+      ? getWorkspaceLockedMessage(guestEventStatus, 'GUESTS')
+      : null;
 
   const guestsQuery = useQuery({
     queryKey: [
@@ -389,6 +400,9 @@ export function GuestWorkspacePage() {
     },
   });
   const openEditGuestForm = (guest: Guest) => {
+    if (!isGuestsEditable) {
+      return;
+    }
     createGuestMutation.reset();
     updateGuestMutation.reset();
     guestForm.clearErrors();
@@ -411,6 +425,9 @@ export function GuestWorkspacePage() {
   };
 
   const openDeleteGuestDialog = (guest: Guest) => {
+    if (!isGuestsEditable) {
+      return;
+    }
     deleteGuestMutation.reset();
     setGuestToDelete(guest);
     setIsDeleteDialogOpen(true);
@@ -427,6 +444,9 @@ export function GuestWorkspacePage() {
   };
 
   const openGuestForm = () => {
+    if (!isGuestsEditable) {
+      return;
+    }
     createGuestMutation.reset();
     updateGuestMutation.reset();
     guestForm.clearErrors();
@@ -461,6 +481,9 @@ export function GuestWorkspacePage() {
   };
 
   const submitGuest = guestForm.handleSubmit((values) => {
+    if (!isGuestsEditable) {
+      return;
+    }
     guestForm.clearErrors('root');
 
     if (guestToEdit) {
@@ -582,6 +605,7 @@ export function GuestWorkspacePage() {
   const guestSummary = summaryQuery.data;
   const guests = guestsQuery.data.guests;
   const pagination = guestsQuery.data.pagination;
+
   const isGuestMutationPending = createGuestMutation.isPending || updateGuestMutation.isPending;
 
   return (
@@ -612,6 +636,24 @@ export function GuestWorkspacePage() {
         </header>
 
         <main className="py-10">
+          {guestsLockedMessage ? (
+            <div className="mb-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Guest list is read-only
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {guestsLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
             <img
               src="/images/workspaces/shortcuts/guests.png"
@@ -662,7 +704,8 @@ export function GuestWorkspacePage() {
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="group/hero-add-guest btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      className="group/hero-add-guest btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      disabled={!isGuestsEditable}
                       onClick={openGuestForm}
                     >
                       <UserRoundPlus
@@ -805,7 +848,8 @@ export function GuestWorkspacePage() {
 
                   <button
                     type="button"
-                    className="btn-primary text-sm font-bold"
+                    className="btn-primary text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                    disabled={!isGuestsEditable}
                     onClick={openGuestForm}
                   >
                     <UserRoundPlus className="size-4" />
@@ -929,14 +973,19 @@ export function GuestWorkspacePage() {
 
                           <div className="flex flex-wrap items-center justify-end gap-3">
                             <select
-                              className="min-h-10 rounded-2xl border border-white/60 bg-white/38 px-4 text-xs font-black tracking-[0.04em] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] outline-none backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-white/54 hover:shadow-[0_14px_30px_rgba(31,27,29,0.08)] focus:border-[rgba(93,58,85,0.34)] focus:ring-2 focus:ring-[var(--color-deep-plum)]/15"
+                              className="min-h-10 rounded-2xl border border-white/60 bg-white/38 px-4 text-xs font-black tracking-[0.04em] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] outline-none backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-white/54 hover:shadow-[0_14px_30px_rgba(31,27,29,0.08)] focus:border-[rgba(93,58,85,0.34)] focus:ring-2 focus:ring-[var(--color-deep-plum)]/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                               aria-label={`Update RSVP status for ${formatGuestName(guest)}`}
                               value={guest.status}
                               disabled={
-                                updateGuestRsvpMutation.isPending &&
-                                updateGuestRsvpMutation.variables?.guestId === guest.id
+                                !isGuestsEditable ||
+                                (updateGuestRsvpMutation.isPending &&
+                                  updateGuestRsvpMutation.variables?.guestId === guest.id)
                               }
                               onChange={(event) => {
+                                if (!isGuestsEditable) {
+                                  return;
+                                }
+
                                 const status = event.target.value as GuestStatus;
 
                                 if (status === guest.status) {
@@ -965,8 +1014,9 @@ export function GuestWorkspacePage() {
 
                             <button
                               type="button"
-                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_30px_rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_30px_rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
                               aria-label={`Edit ${formatGuestName(guest)}`}
+                              disabled={!isGuestsEditable}
                               onClick={() => {
                                 openEditGuestForm(guest);
                               }}
@@ -979,8 +1029,9 @@ export function GuestWorkspacePage() {
 
                             <button
                               type="button"
-                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
                               aria-label={`Delete ${formatGuestName(guest)}`}
+                              disabled={!isGuestsEditable}
                               onClick={() => {
                                 openDeleteGuestDialog(guest);
                               }}
@@ -1103,7 +1154,8 @@ export function GuestWorkspacePage() {
                     ) : (
                       <button
                         type="button"
-                        className="group/first-guest btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                        className="group/first-guest btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                        disabled={!isGuestsEditable}
                         onClick={openGuestForm}
                       >
                         <UserRoundPlus
@@ -1304,7 +1356,7 @@ export function GuestWorkspacePage() {
           </section>
         </main>
       </div>
-      {isGuestFormOpen ? (
+      {isGuestFormOpen && isGuestsEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -1940,7 +1992,7 @@ export function GuestWorkspacePage() {
         </div>
       ) : null}
 
-      {isDeleteDialogOpen && guestToDelete ? (
+      {isDeleteDialogOpen && guestToDelete && isGuestsEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.64)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"

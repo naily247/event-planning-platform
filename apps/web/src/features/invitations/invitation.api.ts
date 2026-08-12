@@ -96,6 +96,8 @@ export type PublicInvitation = {
     name: string;
     eventType: EventTypeOption;
     invitationTemplate: EventInvitationTemplate | null;
+    invitationArtwork: number | null;
+    invitationFont: string | null;
     eventDate: string;
     location: string;
     theme: string | null;

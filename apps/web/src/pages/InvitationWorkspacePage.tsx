@@ -14,6 +14,7 @@ import {
   Send,
   Sparkles,
   X,
+  LockKeyhole,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -38,9 +39,17 @@ import {
   type EventInvitationTemplate,
 } from '../features/events/event.api';
 import {
+  getDefaultInvitationCustomization,
   getDefaultInvitationTemplate,
+  getInvitationTemplate,
   getInvitationTemplatesForEventType,
+  invitationFontOptions,
+  type InvitationFontOption,
 } from '../features/events/invitationTemplates';
+import {
+  canManageInvitationWorkflow,
+  getInvitationWorkflowLockedMessage,
+} from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -131,11 +140,31 @@ export function InvitationWorkspacePage() {
   const [selectedInvitationTemplate, setSelectedInvitationTemplate] =
     useState<EventInvitationTemplate | null>(null);
 
+  const [selectedInvitationArtwork, setSelectedInvitationArtwork] = useState<1 | 2>(1);
+
+  const [selectedInvitationFont, setSelectedInvitationFont] =
+    useState<InvitationFontOption>('modern');
+
   const eventQuery = useQuery({
     queryKey: ['customer', 'events', eventId],
     enabled: Boolean(eventId),
     queryFn: () => getCustomerEventById(eventId!),
   });
+
+  const invitationEventStatus = eventQuery.data?.status;
+  const invitationEventDate = eventQuery.data?.eventDate;
+
+  const isInvitationWorkflowEditable =
+    invitationEventStatus !== undefined && invitationEventDate !== undefined
+      ? canManageInvitationWorkflow(invitationEventStatus, invitationEventDate)
+      : false;
+
+  const invitationWorkflowLockedMessage =
+    invitationEventStatus !== undefined &&
+    invitationEventDate !== undefined &&
+    !isInvitationWorkflowEditable
+      ? getInvitationWorkflowLockedMessage(invitationEventStatus, invitationEventDate)
+      : null;
 
   useEffect(() => {
     const event = eventQuery.data;
@@ -146,8 +175,31 @@ export function InvitationWorkspacePage() {
 
     const defaultTemplate = getDefaultInvitationTemplate(event.eventType);
 
-    setSelectedInvitationTemplate(event.invitationTemplate ?? defaultTemplate?.id ?? null);
-  }, [eventQuery.data?.eventType, eventQuery.data?.id, eventQuery.data?.invitationTemplate]);
+    const templateId = event.invitationTemplate ?? defaultTemplate?.id ?? null;
+    const template = getInvitationTemplate(templateId);
+
+    setSelectedInvitationTemplate(templateId);
+
+    if (!template) {
+      return;
+    }
+
+    const defaults = getDefaultInvitationCustomization(template);
+
+    setSelectedInvitationArtwork(event.invitationArtwork === 2 ? 2 : defaults.artwork);
+
+    setSelectedInvitationFont(
+      invitationFontOptions.some((option) => option.id === event.invitationFont)
+        ? (event.invitationFont as InvitationFontOption)
+        : defaults.font,
+    );
+  }, [
+    eventQuery.data?.eventType,
+    eventQuery.data?.id,
+    eventQuery.data?.invitationTemplate,
+    eventQuery.data?.invitationArtwork,
+    eventQuery.data?.invitationFont,
+  ]);
 
   const updateInvitationDesignMutation = useMutation({
     mutationFn: async () => {
@@ -157,13 +209,36 @@ export function InvitationWorkspacePage() {
 
       return updateCustomerEvent(eventId, {
         invitationTemplate: selectedInvitationTemplate,
+        invitationArtwork: selectedInvitationArtwork,
+        invitationFont: selectedInvitationFont,
+
+        // These controls are no longer part of the product design.
+        invitationGradient: null,
+        invitationAccentColor: null,
+        invitationArtworkPosition: null,
       });
     },
 
     onSuccess: async (updatedEvent) => {
       const defaultTemplate = getDefaultInvitationTemplate(updatedEvent.eventType);
 
-      setSelectedInvitationTemplate(updatedEvent.invitationTemplate ?? defaultTemplate?.id ?? null);
+      const templateId = updatedEvent.invitationTemplate ?? defaultTemplate?.id ?? null;
+
+      const template = getInvitationTemplate(templateId);
+
+      setSelectedInvitationTemplate(templateId);
+
+      if (template) {
+        const defaults = getDefaultInvitationCustomization(template);
+
+        setSelectedInvitationArtwork(updatedEvent.invitationArtwork === 2 ? 2 : defaults.artwork);
+
+        setSelectedInvitationFont(
+          invitationFontOptions.some((option) => option.id === updatedEvent.invitationFont)
+            ? (updatedEvent.invitationFont as InvitationFontOption)
+            : defaults.font,
+        );
+      }
 
       queryClient.setQueryData(['customer', 'events', eventId], updatedEvent);
 
@@ -237,8 +312,17 @@ export function InvitationWorkspacePage() {
         queryClient.invalidateQueries({
           queryKey: ['customer', 'events', eventId, 'invitations'],
         }),
+
         queryClient.invalidateQueries({
           queryKey: ['customer', 'events', eventId, 'guests'],
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'events', eventId],
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: ['customer', 'events'],
         }),
       ]);
     },
@@ -295,6 +379,10 @@ export function InvitationWorkspacePage() {
   });
 
   const openRegenerateInvitationDialog = (invitation: Invitation) => {
+    if (!isInvitationWorkflowEditable) {
+      return;
+    }
+
     regenerateInvitationMutation.reset();
     setInvitationToRegenerate(invitation);
     setRegenerateExpiresInDays('14');
@@ -317,6 +405,10 @@ export function InvitationWorkspacePage() {
   };
 
   const openRevokeInvitationDialog = (invitation: Invitation) => {
+    if (!isInvitationWorkflowEditable) {
+      return;
+    }
+
     revokeInvitationMutation.reset();
     setInvitationToRevoke(invitation);
     setIsRevokeDialogOpen(true);
@@ -333,6 +425,10 @@ export function InvitationWorkspacePage() {
   };
 
   const openCreateInvitationDialog = () => {
+    if (!isInvitationWorkflowEditable) {
+      return;
+    }
+
     createInvitationMutation.reset();
     setSelectedGuestId('');
     setExpiresInDays('14');
@@ -462,6 +558,9 @@ export function InvitationWorkspacePage() {
   const event = eventQuery.data;
   const invitations = invitationsQuery.data.invitations;
   const pagination = invitationsQuery.data.pagination ?? emptyPagination;
+  const isInvitationDesignConfirmed = event.invitationDesignConfirmedAt !== null;
+
+  const isInvitationDesignLocked = isInvitationDesignConfirmed || !isInvitationWorkflowEditable;
 
   const invitationTemplates = getInvitationTemplatesForEventType(event.eventType);
   const defaultInvitationTemplate = getDefaultInvitationTemplate(event.eventType);
@@ -470,8 +569,27 @@ export function InvitationWorkspacePage() {
 
   const previewInvitationTemplate = selectedInvitationTemplate ?? savedInvitationTemplate;
 
+  const previewTemplateDefinition = getInvitationTemplate(previewInvitationTemplate);
+
+  const savedTemplateDefinition = getInvitationTemplate(savedInvitationTemplate);
+
+  const savedDefaults = savedTemplateDefinition
+    ? getDefaultInvitationCustomization(savedTemplateDefinition)
+    : null;
+
+  const savedInvitationArtwork = event.invitationArtwork === 2 ? 2 : (savedDefaults?.artwork ?? 1);
+
+  const savedInvitationFont = invitationFontOptions.some(
+    (option) => option.id === event.invitationFont,
+  )
+    ? (event.invitationFont as InvitationFontOption)
+    : (savedDefaults?.font ?? 'modern');
+
   const hasInvitationDesignChanges =
-    Boolean(previewInvitationTemplate) && previewInvitationTemplate !== savedInvitationTemplate;
+    Boolean(previewInvitationTemplate) &&
+    (previewInvitationTemplate !== savedInvitationTemplate ||
+      selectedInvitationArtwork !== savedInvitationArtwork ||
+      selectedInvitationFont !== savedInvitationFont);
 
   const activeInvitationsOnPage = invitations.filter((invitation) => invitation.isActive).length;
 
@@ -516,6 +634,23 @@ export function InvitationWorkspacePage() {
         </header>
 
         <main className="py-10">
+          {invitationWorkflowLockedMessage ? (
+            <div className="mb-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <LockKeyhole aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Invitation activity is closed
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {invitationWorkflowLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
           <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
             <img
               src="/images/workspaces/shortcuts/invitations.png"
@@ -564,7 +699,8 @@ export function InvitationWorkspacePage() {
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="group/hero-create-invitation btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      className="group/hero-create-invitation btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      disabled={!isInvitationWorkflowEditable}
                       onClick={openCreateInvitationDialog}
                     >
                       <Plus
@@ -725,10 +861,23 @@ export function InvitationWorkspacePage() {
 
               <span
                 className="status-chip w-fit"
-                data-tone={hasInvitationDesignChanges ? 'plum' : 'green'}
+                data-tone={
+                  isInvitationDesignLocked ? 'gray' : hasInvitationDesignChanges ? 'plum' : 'green'
+                }
               >
-                <Sparkles aria-hidden="true" className="size-3.5" />
-                {hasInvitationDesignChanges ? 'Unsaved preview' : 'Design saved'}
+                {isInvitationDesignConfirmed || !isInvitationWorkflowEditable ? (
+                  <LockKeyhole aria-hidden="true" className="size-3.5" />
+                ) : (
+                  <Sparkles aria-hidden="true" className="size-3.5" />
+                )}
+
+                {isInvitationDesignConfirmed
+                  ? 'Design locked'
+                  : !isInvitationWorkflowEditable
+                    ? 'Design read-only'
+                    : hasInvitationDesignChanges
+                      ? 'Unsaved preview'
+                      : 'Design saved'}
               </span>
             </div>
 
@@ -736,6 +885,8 @@ export function InvitationWorkspacePage() {
               eventName={event.name}
               eventType={event.eventType}
               invitationTemplate={previewInvitationTemplate}
+              invitationArtwork={selectedInvitationArtwork}
+              invitationFont={selectedInvitationFont}
               mode="preview"
             />
 
@@ -773,14 +924,24 @@ export function InvitationWorkspacePage() {
                       key={template.id}
                       type="button"
                       aria-pressed={isSelected}
-                      className={`group/template relative overflow-hidden rounded-[1.7rem] border text-left shadow-[0_16px_40px_rgba(31,27,29,0.06)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 ${
-                        isSelected
-                          ? 'border-[rgba(93,58,85,0.42)] bg-white/72 shadow-[0_22px_54px_rgba(93,58,85,0.14)] ring-2 ring-[rgba(93,58,85,0.12)]'
-                          : 'border-white/62 bg-white/38 hover:-translate-y-1 hover:border-white/88 hover:bg-white/58 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]'
+                      disabled={isInvitationDesignLocked}
+                      className={`group/template relative overflow-hidden rounded-[1.7rem] border text-left shadow-[0_16px_40px_rgba(31,27,29,0.06)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed ${
+                        isInvitationDesignLocked
+                          ? isSelected
+                            ? 'border-[rgba(93,58,85,0.30)] bg-white/66 ring-2 ring-[rgba(93,58,85,0.08)]'
+                            : 'border-white/52 bg-white/30 opacity-55'
+                          : isSelected
+                            ? 'border-[rgba(93,58,85,0.42)] bg-white/72 shadow-[0_22px_54px_rgba(93,58,85,0.14)] ring-2 ring-[rgba(93,58,85,0.12)]'
+                            : 'border-white/62 bg-white/38 hover:-translate-y-1 hover:border-white/88 hover:bg-white/58 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]'
                       }`}
                       onClick={() => {
                         updateInvitationDesignMutation.reset();
+
+                        const defaults = getDefaultInvitationCustomization(template);
+
                         setSelectedInvitationTemplate(template.id);
+                        setSelectedInvitationArtwork(defaults.artwork);
+                        setSelectedInvitationFont(defaults.font);
                       }}
                     >
                       <div className="relative aspect-[16/10] overflow-hidden">
@@ -853,6 +1014,152 @@ export function InvitationWorkspacePage() {
                 })}
               </div>
 
+              {previewTemplateDefinition ? (
+                <div className="mt-6 border-t border-[rgba(93,58,85,0.09)] pt-6">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Customise design
+                    </p>
+
+                    <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      Choose the artwork and typography.
+                    </h3>
+
+                    <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/54">
+                      Keep the curated invitation structure while choosing the main artwork and font
+                      that best suit this event.
+                    </p>
+
+                    {isInvitationDesignConfirmed ? (
+                      <div className="mt-5 flex items-start gap-3 rounded-[1.35rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] p-4">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                          <LockKeyhole aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-near-black)]">
+                            Invitation design locked
+                          </p>
+
+                          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
+                            The first guest invitation has already been created. This saved
+                            template, artwork and font now apply to every invitation for this event.
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+                    {!isInvitationDesignConfirmed && invitationWorkflowLockedMessage ? (
+                      <div className="mt-5 flex items-start gap-3 rounded-[1.35rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] p-4">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                          <LockKeyhole aria-hidden="true" className="size-4" />
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-near-black)]">
+                            Invitation design is read-only
+                          </p>
+
+                          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
+                            {invitationWorkflowLockedMessage}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-6 grid gap-5 lg:grid-cols-2">
+                    <section className="rounded-[1.6rem] border border-white/60 bg-white/34 p-5">
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        Main artwork
+                      </p>
+
+                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                        Choose which of the two curated images leads the invitation.
+                      </p>
+
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        {previewTemplateDefinition.backgrounds.map((artwork, index) => {
+                          const artworkNumber = (index + 1) as 1 | 2;
+                          const isSelected = selectedInvitationArtwork === artworkNumber;
+
+                          return (
+                            <button
+                              key={artwork.id}
+                              type="button"
+                              disabled={isInvitationDesignLocked}
+                              className={`overflow-hidden rounded-[1.25rem] border text-left transition disabled:cursor-not-allowed ${
+                                isSelected
+                                  ? 'border-[rgba(93,58,85,0.42)] bg-white/72 ring-2 ring-[rgba(93,58,85,0.12)]'
+                                  : isInvitationDesignLocked
+                                    ? 'border-white/52 bg-white/30 opacity-55'
+                                    : 'border-white/62 bg-white/38 hover:bg-white/58'
+                              }`}
+                              onClick={() => {
+                                updateInvitationDesignMutation.reset();
+                                setSelectedInvitationArtwork(artworkNumber);
+                              }}
+                            >
+                              <img
+                                src={artwork.imagePath}
+                                alt={artwork.alt}
+                                className="aspect-[16/10] w-full object-cover"
+                              />
+
+                              <div className="flex items-center justify-between gap-3 p-3">
+                                <span className="text-sm font-black text-[var(--color-near-black)]">
+                                  Artwork {artworkNumber}
+                                </span>
+
+                                {isSelected ? (
+                                  <Check className="size-4 text-[var(--color-deep-plum)]" />
+                                ) : null}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+
+                    <section className="rounded-[1.6rem] border border-white/60 bg-white/34 p-5">
+                      <p className="text-sm font-black text-[var(--color-near-black)]">Font</p>
+
+                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                        Choose the typeface used for the main invitation heading.
+                      </p>
+
+                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                        {invitationFontOptions.map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            disabled={isInvitationDesignLocked}
+                            className={`rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed ${
+                              selectedInvitationFont === option.id
+                                ? 'border-[rgba(93,58,85,0.36)] bg-[rgba(183,167,200,0.16)]'
+                                : isInvitationDesignLocked
+                                  ? 'border-white/52 bg-white/26 opacity-55'
+                                  : 'border-white/58 bg-white/30 hover:bg-white/52'
+                            }`}
+                            onClick={() => {
+                              updateInvitationDesignMutation.reset();
+                              setSelectedInvitationFont(option.id);
+                            }}
+                          >
+                            <p className="text-base font-black text-[var(--color-near-black)]">
+                              {option.label}
+                            </p>
+
+                            <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                              {option.description}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              ) : null}
+
               {updateInvitationDesignMutation.isError ? (
                 <div
                   role="alert"
@@ -903,13 +1210,21 @@ export function InvitationWorkspacePage() {
               <div className="mt-6 flex flex-col gap-4 border-t border-[rgba(93,58,85,0.09)] pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-black text-[var(--color-near-black)]">
-                    {hasInvitationDesignChanges
-                      ? 'Your preview has unsaved changes.'
-                      : 'This is the currently saved event design.'}
+                    {isInvitationDesignConfirmed
+                      ? 'This invitation design is permanently locked for this event.'
+                      : !isInvitationWorkflowEditable
+                        ? 'This invitation design is now read-only.'
+                        : hasInvitationDesignChanges
+                          ? 'Your preview has unsaved changes.'
+                          : 'This is the currently saved event design.'}
                   </p>
 
                   <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
-                    Design changes are stored at event level and apply to its guest invitations.
+                    {isInvitationDesignConfirmed
+                      ? 'Every current and future guest invitation for this event uses this saved design.'
+                      : !isInvitationWorkflowEditable
+                        ? invitationWorkflowLockedMessage
+                        : 'Design changes are stored at event level and apply to its guest invitations.'}
                   </p>
                 </div>
 
@@ -917,6 +1232,7 @@ export function InvitationWorkspacePage() {
                   type="button"
                   className="btn-primary min-w-40 justify-center text-sm font-bold"
                   disabled={
+                    isInvitationDesignLocked ||
                     !hasInvitationDesignChanges ||
                     !previewInvitationTemplate ||
                     updateInvitationDesignMutation.isPending
@@ -925,13 +1241,21 @@ export function InvitationWorkspacePage() {
                     updateInvitationDesignMutation.mutate();
                   }}
                 >
-                  {updateInvitationDesignMutation.isPending ? (
+                  {isInvitationDesignConfirmed || !isInvitationWorkflowEditable ? (
+                    <LockKeyhole aria-hidden="true" className="size-4" />
+                  ) : updateInvitationDesignMutation.isPending ? (
                     <LoaderCircle className="size-4 animate-spin" />
                   ) : (
                     <Sparkles aria-hidden="true" className="size-4" />
                   )}
 
-                  {updateInvitationDesignMutation.isPending ? 'Applying design...' : 'Apply design'}
+                  {isInvitationDesignConfirmed
+                    ? 'Design locked'
+                    : !isInvitationWorkflowEditable
+                      ? 'Design read-only'
+                      : updateInvitationDesignMutation.isPending
+                        ? 'Applying design...'
+                        : 'Apply design'}
                 </button>
               </div>
             </div>
@@ -952,7 +1276,8 @@ export function InvitationWorkspacePage() {
 
                 <button
                   type="button"
-                  className="btn-primary shrink-0 text-sm font-bold"
+                  className="btn-primary shrink-0 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                  disabled={!isInvitationWorkflowEditable}
                   onClick={openCreateInvitationDialog}
                 >
                   <Plus className="size-4" />
@@ -1093,8 +1418,9 @@ export function InvitationWorkspacePage() {
 
                             <button
                               type="button"
-                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_30px_rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_30px_rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
                               aria-label={`Regenerate invitation for ${invitation.guest.firstName} ${invitation.guest.lastName}`}
+                              disabled={!isInvitationWorkflowEditable}
                               onClick={() => {
                                 openRegenerateInvitationDialog(invitation);
                               }}
@@ -1109,7 +1435,7 @@ export function InvitationWorkspacePage() {
                               type="button"
                               className="grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-[0_10px_24px_rgba(31,27,29,0.04)]"
                               aria-label={`Revoke invitation for ${invitation.guest.firstName} ${invitation.guest.lastName}`}
-                              disabled={invitation.isRevoked}
+                              disabled={invitation.isRevoked || !isInvitationWorkflowEditable}
                               onClick={() => {
                                 openRevokeInvitationDialog(invitation);
                               }}
@@ -1209,7 +1535,8 @@ export function InvitationWorkspacePage() {
                     ) : (
                       <button
                         type="button"
-                        className="group/first-invitation btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                        className="group/first-invitation btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                        disabled={!isInvitationWorkflowEditable}
                         onClick={openCreateInvitationDialog}
                       >
                         <Plus
@@ -1340,7 +1667,7 @@ export function InvitationWorkspacePage() {
           </section>
         </main>
       </div>
-      {isCreateDialogOpen ? (
+      {isCreateDialogOpen && isInvitationWorkflowEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -1752,7 +2079,7 @@ export function InvitationWorkspacePage() {
         </div>
       ) : null}
 
-      {isRegenerateDialogOpen && invitationToRegenerate ? (
+      {isRegenerateDialogOpen && invitationToRegenerate && isInvitationWorkflowEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2124,7 +2451,7 @@ export function InvitationWorkspacePage() {
         </div>
       ) : null}
 
-      {isRevokeDialogOpen && invitationToRevoke ? (
+      {isRevokeDialogOpen && invitationToRevoke && isInvitationWorkflowEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.64)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"

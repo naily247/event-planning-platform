@@ -42,6 +42,7 @@ import { createCustomerBooking, type CustomerBooking } from '../features/booking
 
 import { api } from '../lib/api';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -501,6 +502,10 @@ export function QuotationRequestsWorkspacePage() {
   });
 
   const openCreateDialog = () => {
+    if (!isQuotationEditable) {
+      return;
+    }
+
     createRequestMutation.reset();
     setSelectedPackage(null);
     setPackageSearch('');
@@ -535,6 +540,10 @@ export function QuotationRequestsWorkspacePage() {
   };
 
   const openCreateBookingDialog = (quotation: CustomerQuotation) => {
+    if (!isBookingCreationAllowed) {
+      return;
+    }
+
     createBookingMutation.reset();
     setCreatedBooking(null);
     setQuotationToBook(quotation);
@@ -643,6 +652,18 @@ export function QuotationRequestsWorkspacePage() {
 
   const eventDetails = requests[0]?.event ?? null;
 
+  const isQuotationEditable =
+    eventDetails !== null ? canManageWorkspace(eventDetails.status, 'QUOTATIONS') : false;
+
+  const quotationLockedMessage =
+    eventDetails !== null ? getWorkspaceLockedMessage(eventDetails.status, 'QUOTATIONS') : '';
+
+  const isBookingCreationAllowed =
+    eventDetails !== null ? canManageWorkspace(eventDetails.status, 'BOOKINGS') : false;
+
+  const bookingLockedMessage =
+    eventDetails !== null ? getWorkspaceLockedMessage(eventDetails.status, 'BOOKINGS') : '';
+
   const awaitingVendorCount = requestCounts.SENT + requestCounts.VIEWED;
 
   const quotationProgress =
@@ -727,8 +748,16 @@ export function QuotationRequestsWorkspacePage() {
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="group/hero-request-quotation btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
-                      onClick={openCreateDialog}
+                      className="group/hero-request-quotation btn-primary ..."
+                      disabled={!isQuotationEditable}
+                      title={!isQuotationEditable ? quotationLockedMessage : undefined}
+                      onClick={() => {
+                        if (!isQuotationEditable) {
+                          return;
+                        }
+
+                        openCreateDialog();
+                      }}
                     >
                       <Plus
                         aria-hidden="true"
@@ -880,6 +909,14 @@ export function QuotationRequestsWorkspacePage() {
             </div>
           </section>
 
+          {!isQuotationEditable ? (
+            <div className="mt-6 rounded-[1.4rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-5 py-4">
+              <p className="text-sm font-bold text-[var(--color-muted-burgundy)]">
+                {quotationLockedMessage}
+              </p>
+            </div>
+          ) : null}
+
           <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
             <article className="glass-card p-6 sm:p-7">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -896,7 +933,15 @@ export function QuotationRequestsWorkspacePage() {
                 <button
                   type="button"
                   className="btn-primary shrink-0 text-sm font-bold"
-                  onClick={openCreateDialog}
+                  disabled={!isQuotationEditable}
+                  title={!isQuotationEditable ? quotationLockedMessage : undefined}
+                  onClick={() => {
+                    if (!isQuotationEditable) {
+                      return;
+                    }
+
+                    openCreateDialog();
+                  }}
                 >
                   <Plus className="size-4" />
                   Request quotation
@@ -1081,7 +1126,15 @@ export function QuotationRequestsWorkspacePage() {
                     <button
                       type="button"
                       className="btn-primary mt-5 text-sm font-bold"
-                      onClick={openCreateDialog}
+                      disabled={!isQuotationEditable}
+                      title={!isQuotationEditable ? quotationLockedMessage : undefined}
+                      onClick={() => {
+                        if (!isQuotationEditable) {
+                          return;
+                        }
+
+                        openCreateDialog();
+                      }}
                     >
                       <Plus className="size-4" />
                       Request quotation
@@ -1831,7 +1884,13 @@ export function QuotationRequestsWorkspacePage() {
                               <button
                                 type="button"
                                 className="group/accept-quotation btn-primary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
+                                disabled={!isQuotationEditable}
+                                title={!isQuotationEditable ? quotationLockedMessage : undefined}
                                 onClick={() => {
+                                  if (!isQuotationEditable) {
+                                    return;
+                                  }
+
                                   acceptQuotationMutation.reset();
                                   setQuotationToAccept(quotation);
                                 }}
@@ -1848,7 +1907,13 @@ export function QuotationRequestsWorkspacePage() {
                               <button
                                 type="button"
                                 className="group/create-booking btn-primary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
+                                disabled={!isBookingCreationAllowed}
+                                title={!isBookingCreationAllowed ? bookingLockedMessage : undefined}
                                 onClick={() => {
+                                  if (!isBookingCreationAllowed) {
+                                    return;
+                                  }
+
                                   openCreateBookingDialog(quotation);
                                 }}
                               >

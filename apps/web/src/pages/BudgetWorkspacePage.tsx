@@ -38,6 +38,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { canManageWorkspace, getWorkspaceLockedMessage } from '../features/events/eventLifecycle';
 
 type ApiErrorResponse = {
   success?: false;
@@ -226,6 +227,16 @@ export function BudgetWorkspacePage() {
     enabled: Boolean(eventId),
     queryFn: () => getBudgetSummary(eventId!),
   });
+
+  const eventStatus = summaryQuery.data?.event.status;
+
+  const isBudgetEditable =
+    eventStatus !== undefined ? canManageWorkspace(eventStatus, 'BUDGET') : false;
+
+  const budgetLockedMessage =
+    eventStatus !== undefined && !isBudgetEditable
+      ? getWorkspaceLockedMessage(eventStatus, 'BUDGET')
+      : null;
 
   const categoriesQuery = useQuery({
     queryKey: ['customer', 'events', eventId, 'budget', 'categories'],
@@ -476,6 +487,10 @@ export function BudgetWorkspacePage() {
   });
 
   const openDeleteExpenseDialog = (expense: Expense) => {
+    if (!isBudgetEditable) {
+      return;
+    }
+
     deleteExpenseMutation.reset();
     setExpenseToDelete(expense);
   };
@@ -490,6 +505,10 @@ export function BudgetWorkspacePage() {
   };
 
   const openEditExpenseForm = (expense: Expense) => {
+    if (!isBudgetEditable) {
+      return;
+    }
+
     createExpenseMutation.reset();
     updateExpenseMutation.reset();
     expenseForm.clearErrors();
@@ -509,9 +528,14 @@ export function BudgetWorkspacePage() {
   };
 
   const openExpenseForm = () => {
+    if (!isBudgetEditable) {
+      return;
+    }
+
     createExpenseMutation.reset();
     updateExpenseMutation.reset();
-    expenseForm.clearErrors();
+
+    setExpenseToEdit(null);
 
     expenseForm.reset({
       budgetCategoryId: '',
@@ -523,7 +547,6 @@ export function BudgetWorkspacePage() {
       notes: '',
     });
 
-    setExpenseToEdit(null);
     setIsExpenseFormOpen(true);
   };
 
@@ -578,6 +601,10 @@ export function BudgetWorkspacePage() {
   });
 
   const openDeleteCategoryDialog = (category: BudgetSummaryCategory) => {
+    if (!isBudgetEditable) {
+      return;
+    }
+
     deleteCategoryMutation.reset();
     setCategoryToDelete(category);
   };
@@ -592,26 +619,38 @@ export function BudgetWorkspacePage() {
   };
 
   const openEditCategoryForm = (category: BudgetSummaryCategory) => {
+    if (!isBudgetEditable) {
+      return;
+    }
+
     createCategoryMutation.reset();
     updateCategoryMutation.reset();
     categoryForm.clearErrors();
+
     categoryForm.reset({
       name: category.name,
       allocatedAmount: category.allocatedAmount,
     });
+
     setCategoryToEdit(category);
     setIsCategoryFormOpen(true);
   };
 
   const openCategoryForm = () => {
+    if (!isBudgetEditable) {
+      return;
+    }
+
     createCategoryMutation.reset();
     updateCategoryMutation.reset();
-    categoryForm.clearErrors();
+
+    setCategoryToEdit(null);
+
     categoryForm.reset({
       name: '',
       allocatedAmount: '',
     });
-    setCategoryToEdit(null);
+
     setIsCategoryFormOpen(true);
   };
 
@@ -727,6 +766,7 @@ export function BudgetWorkspacePage() {
   const summary = summaryQuery.data;
   const categories = categoriesQuery.data;
   const expenses = expensesQuery.data;
+
   const isExpenseMutationPending =
     createExpenseMutation.isPending || updateExpenseMutation.isPending;
 
@@ -763,6 +803,23 @@ export function BudgetWorkspacePage() {
         </header>
 
         <main className="py-10">
+          {budgetLockedMessage ? (
+            <div className="mb-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                <CircleAlert aria-hidden="true" className="size-5" />
+              </span>
+
+              <div>
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  Budget is read-only
+                </p>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                  {budgetLockedMessage}
+                </p>
+              </div>
+            </div>
+          ) : null}
           <section className="relative isolate min-h-[27rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-7 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-8 sm:py-8 lg:px-10 lg:py-9">
             <img
               src="/images/workspaces/shortcuts/budget.png"
@@ -811,7 +868,8 @@ export function BudgetWorkspacePage() {
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="group/hero-add-expense btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)]"
+                      className="group/hero-add-expense btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      disabled={!isBudgetEditable}
                       onClick={openExpenseForm}
                     >
                       <Plus
@@ -823,7 +881,8 @@ export function BudgetWorkspacePage() {
 
                     <button
                       type="button"
-                      className="btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/56 hover:shadow-[0_14px_32px_rgba(31,27,29,0.09)]"
+                      className="btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/56 hover:shadow-[0_14px_32px_rgba(31,27,29,0.09)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      disabled={!isBudgetEditable}
                       onClick={openCategoryForm}
                     >
                       <WalletCards aria-hidden="true" className="size-4" />
@@ -981,7 +1040,8 @@ export function BudgetWorkspacePage() {
 
                   <button
                     type="button"
-                    className="btn-primary text-sm font-bold"
+                    className="btn-primary text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                    disabled={!isBudgetEditable}
                     onClick={openCategoryForm}
                   >
                     <Plus className="size-4" />
@@ -1046,8 +1106,9 @@ export function BudgetWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.15)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                                className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.15)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
                                 aria-label={`Edit ${category.name}`}
+                                disabled={!isBudgetEditable}
                                 onClick={() => {
                                   openEditCategoryForm(category);
                                 }}
@@ -1060,8 +1121,9 @@ export function BudgetWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.15)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                                className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.15)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
                                 aria-label={`Delete ${category.name}`}
+                                disabled={!isBudgetEditable}
                                 onClick={() => {
                                   openDeleteCategoryDialog(category);
                                 }}
@@ -1187,7 +1249,8 @@ export function BudgetWorkspacePage() {
 
                     <button
                       type="button"
-                      className="group/first-budget-category btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                      className="group/first-budget-category btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      disabled={!isBudgetEditable}
                       onClick={openCategoryForm}
                     >
                       <Plus
@@ -1347,7 +1410,8 @@ export function BudgetWorkspacePage() {
 
                 <button
                   type="button"
-                  className="btn-primary text-sm font-bold"
+                  className="btn-primary text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                  disabled={!isBudgetEditable}
                   onClick={openExpenseForm}
                 >
                   <Plus className="size-4" />
@@ -1419,8 +1483,9 @@ export function BudgetWorkspacePage() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            className="flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3.5 py-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+                            className="flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3.5 py-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                             aria-label={`Edit ${expense.title}`}
+                            disabled={!isBudgetEditable}
                             onClick={() => {
                               openEditExpenseForm(expense);
                             }}
@@ -1434,8 +1499,9 @@ export function BudgetWorkspacePage() {
 
                           <button
                             type="button"
-                            className="grid size-10 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.06)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30"
+                            className="grid size-10 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.06)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
                             aria-label={`Delete ${expense.title}`}
+                            disabled={!isBudgetEditable}
                             onClick={() => {
                               openDeleteExpenseDialog(expense);
                             }}
@@ -1526,7 +1592,8 @@ export function BudgetWorkspacePage() {
 
                   <button
                     type="button"
-                    className="group/first-budget-expense btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                    className="group/first-budget-expense btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    disabled={!isBudgetEditable}
                     onClick={openExpenseForm}
                   >
                     <Plus
@@ -1541,7 +1608,7 @@ export function BudgetWorkspacePage() {
           </section>
         </main>
       </div>
-      {isCategoryFormOpen ? (
+      {isCategoryFormOpen && isBudgetEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -1897,7 +1964,7 @@ export function BudgetWorkspacePage() {
         </div>
       ) : null}
 
-      {isExpenseFormOpen ? (
+      {isExpenseFormOpen && isBudgetEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2414,7 +2481,7 @@ export function BudgetWorkspacePage() {
           </div>
         </div>
       ) : null}
-      {expenseToDelete ? (
+      {expenseToDelete && isBudgetEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.64)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"
@@ -2653,7 +2720,7 @@ export function BudgetWorkspacePage() {
           </div>
         </div>
       ) : null}
-      {categoryToDelete ? (
+      {categoryToDelete && isBudgetEditable ? (
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.64)] px-4 py-6 backdrop-blur-xl sm:py-8"
           role="dialog"

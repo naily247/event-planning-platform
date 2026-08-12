@@ -1,7 +1,12 @@
+import type { CSSProperties } from 'react';
 import { Clock3, Eye, Images, Sparkles } from 'lucide-react';
 import type { EventInvitationTemplate, EventTypeOption } from './event.api';
 import {
   resolveInvitationTemplate,
+  type InvitationAccentColorOption,
+  type InvitationArtworkPositionOption,
+  type InvitationFontOption,
+  type InvitationGradientOption,
   type InvitationTemplateDefinition,
 } from './invitationTemplates';
 
@@ -9,6 +14,11 @@ type InvitationHeroProps = {
   eventName: string;
   eventType: EventTypeOption | string;
   invitationTemplate?: EventInvitationTemplate | null;
+  invitationArtwork?: number | null;
+  invitationFont?: string | null;
+  invitationGradient?: string | null;
+  invitationAccentColor?: string | null;
+  invitationArtworkPosition?: string | null;
   guestFirstName?: string;
   expiresAt?: string;
   mode?: 'public' | 'preview';
@@ -36,22 +46,110 @@ const normalizeEventType = (eventType: string): EventTypeOption => {
   return eventTypeAliases[normalizedEventType] ?? 'Birthday';
 };
 
-const getFontClassName = (
-  fontStyle: InvitationTemplateDefinition['fontStyle'],
-) => {
+const invitationFontValues: readonly InvitationFontOption[] = [
+  'editorial',
+  'classic',
+  'modern',
+  'playful',
+];
+
+const invitationGradientValues: readonly InvitationGradientOption[] = [
+  'balanced',
+  'soft',
+  'dramatic',
+];
+
+const invitationArtworkPositionValues: readonly InvitationArtworkPositionOption[] = [
+  'left',
+  'center',
+  'right',
+];
+
+const isInvitationFontOption = (value: string | null | undefined): value is InvitationFontOption =>
+  Boolean(value && invitationFontValues.includes(value as InvitationFontOption));
+
+const isInvitationGradientOption = (
+  value: string | null | undefined,
+): value is InvitationGradientOption =>
+  Boolean(value && invitationGradientValues.includes(value as InvitationGradientOption));
+
+const isInvitationArtworkPositionOption = (
+  value: string | null | undefined,
+): value is InvitationArtworkPositionOption =>
+  Boolean(
+    value && invitationArtworkPositionValues.includes(value as InvitationArtworkPositionOption),
+  );
+
+const getFontStyle = (
+  fontStyle: InvitationTemplateDefinition['fontStyle'] | InvitationFontOption,
+): CSSProperties => {
   switch (fontStyle) {
     case 'classic':
-      return 'font-serif tracking-[-0.035em]';
+      return {
+        fontFamily: '"Times New Roman", Times, serif',
+        letterSpacing: '-0.035em',
+      };
 
     case 'editorial':
-      return 'font-serif tracking-[-0.045em]';
+      return {
+        fontFamily: 'Georgia, "Times New Roman", serif',
+        letterSpacing: '-0.04em',
+      };
 
     case 'playful':
-      return 'tracking-[-0.055em]';
+      return {
+        fontFamily: '"Brush Script MT", "Segoe Script", "Apple Chancery", cursive',
+        letterSpacing: '-0.02em',
+      };
 
     case 'modern':
     default:
-      return 'tracking-[-0.06em]';
+      return {
+        fontFamily: 'Aptos, Calibri, "Helvetica Neue", Arial, sans-serif',
+        letterSpacing: '-0.045em',
+      };
+  }
+};
+
+const getArtworkObjectPosition = (position: InvitationArtworkPositionOption) => {
+  switch (position) {
+    case 'left':
+      return 'left center';
+
+    case 'right':
+      return 'right center';
+
+    case 'center':
+    default:
+      return 'center center';
+  }
+};
+
+const getReadabilityOverlay = (hasLightText: boolean, gradient: InvitationGradientOption) => {
+  if (hasLightText) {
+    switch (gradient) {
+      case 'soft':
+        return 'linear-gradient(90deg, rgba(16,18,24,0.90) 0%, rgba(16,18,24,0.78) 25%, rgba(16,18,24,0.52) 43%, rgba(16,18,24,0.22) 61%, rgba(16,18,24,0.04) 78%, transparent 92%)';
+
+      case 'dramatic':
+        return 'linear-gradient(90deg, rgba(16,18,24,0.99) 0%, rgba(16,18,24,0.97) 25%, rgba(16,18,24,0.84) 43%, rgba(16,18,24,0.52) 61%, rgba(16,18,24,0.16) 78%, transparent 92%)';
+
+      case 'balanced':
+      default:
+        return 'linear-gradient(90deg, rgba(16,18,24,0.97) 0%, rgba(16,18,24,0.92) 25%, rgba(16,18,24,0.72) 43%, rgba(16,18,24,0.34) 61%, rgba(16,18,24,0.08) 78%, transparent 92%)';
+    }
+  }
+
+  switch (gradient) {
+    case 'soft':
+      return 'linear-gradient(90deg, rgba(255,252,248,0.92) 0%, rgba(255,252,248,0.82) 25%, rgba(255,252,248,0.58) 43%, rgba(255,252,248,0.26) 61%, rgba(255,252,248,0.05) 78%, transparent 92%)';
+
+    case 'dramatic':
+      return 'linear-gradient(90deg, rgba(255,252,248,0.99) 0%, rgba(255,252,248,0.98) 25%, rgba(255,252,248,0.88) 43%, rgba(255,252,248,0.58) 61%, rgba(255,252,248,0.18) 78%, transparent 92%)';
+
+    case 'balanced':
+    default:
+      return 'linear-gradient(90deg, rgba(255,252,248,0.98) 0%, rgba(255,252,248,0.94) 25%, rgba(255,252,248,0.78) 43%, rgba(255,252,248,0.42) 61%, rgba(255,252,248,0.10) 78%, transparent 92%)';
   }
 };
 
@@ -77,6 +175,11 @@ export function InvitationHero({
   eventName,
   eventType,
   invitationTemplate,
+  invitationArtwork,
+  invitationFont,
+  invitationGradient,
+  invitationAccentColor,
+  invitationArtworkPosition,
   guestFirstName,
   expiresAt,
   mode = 'public',
@@ -89,19 +192,34 @@ export function InvitationHero({
   });
 
   if (!template) {
-    throw new Error(
-      `No invitation template is configured for ${normalizedEventType}.`,
-    );
+    throw new Error(`No invitation template is configured for ${normalizedEventType}.`);
   }
 
   const isPreview = mode === 'preview';
   const hasLightText = usesLightText(template.textColor);
-  const primaryBackground = template.backgrounds[0];
-  const secondaryBackground = template.backgrounds[1];
 
-  const readabilityOverlay = hasLightText
-    ? 'linear-gradient(90deg, rgba(16,18,24,0.97) 0%, rgba(16,18,24,0.92) 25%, rgba(16,18,24,0.72) 43%, rgba(16,18,24,0.34) 61%, rgba(16,18,24,0.08) 78%, transparent 92%)'
-    : 'linear-gradient(90deg, rgba(255,252,248,0.98) 0%, rgba(255,252,248,0.94) 25%, rgba(255,252,248,0.78) 43%, rgba(255,252,248,0.42) 61%, rgba(255,252,248,0.10) 78%, transparent 92%)';
+  const selectedArtwork = invitationArtwork === 2 ? 2 : 1;
+
+  const primaryBackground =
+    selectedArtwork === 2 ? template.backgrounds[1] : template.backgrounds[0];
+
+  const secondaryBackground =
+    selectedArtwork === 2 ? template.backgrounds[0] : template.backgrounds[1];
+
+  const selectedFont = isInvitationFontOption(invitationFont) ? invitationFont : template.fontStyle;
+
+  const selectedGradient = isInvitationGradientOption(invitationGradient)
+    ? invitationGradient
+    : 'balanced';
+
+  const selectedArtworkPosition = isInvitationArtworkPositionOption(invitationArtworkPosition)
+    ? invitationArtworkPosition
+    : 'center';
+
+  const selectedAccent =
+    invitationAccentColor?.trim() || (template.accent as InvitationAccentColorOption | string);
+
+  const readabilityOverlay = getReadabilityOverlay(hasLightText, selectedGradient);
 
   const textSurfaceClassName = hasLightText
     ? 'border-white/18 bg-black/24'
@@ -114,11 +232,7 @@ export function InvitationHero({
   return (
     <section
       className="relative isolate overflow-hidden rounded-[2.3rem] border border-white/45 shadow-[0_28px_90px_rgba(31,27,29,0.16)]"
-      aria-label={
-        isPreview
-          ? `${eventName} invitation design preview`
-          : `${eventName} invitation`
-      }
+      aria-label={isPreview ? `${eventName} invitation design preview` : `${eventName} invitation`}
       style={{
         background: template.background,
       }}
@@ -127,7 +241,10 @@ export function InvitationHero({
         src={primaryBackground.imagePath}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-30 size-full object-cover object-center"
+        className="pointer-events-none absolute inset-0 -z-30 size-full object-cover"
+        style={{
+          objectPosition: getArtworkObjectPosition(selectedArtworkPosition),
+        }}
       />
 
       <div
@@ -147,7 +264,7 @@ export function InvitationHero({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 z-20 h-1.5"
         style={{
-          background: template.accent,
+          background: selectedAccent,
         }}
       />
 
@@ -183,18 +300,17 @@ export function InvitationHero({
           <p
             className="mt-7 text-xs font-black uppercase tracking-[0.22em]"
             style={{
-              color: template.mutedTextColor,
+              color: selectedAccent,
             }}
           >
             {normalizedEventType}
           </p>
 
           <h2
-            className={`mt-4 max-w-4xl text-balance text-[2.65rem] font-black leading-[0.96] sm:text-5xl lg:text-[3.55rem] ${getFontClassName(
-              template.fontStyle,
-            )}`}
+            className="mt-4 max-w-4xl text-balance text-[2.65rem] font-black leading-[0.96] sm:text-5xl lg:text-[3.55rem]"
             style={{
               color: template.textColor,
+              ...getFontStyle(selectedFont),
             }}
           >
             {isPreview
@@ -259,7 +375,7 @@ export function InvitationHero({
             <div
               className="grid size-11 place-items-center rounded-2xl border border-white/36 bg-white/16 shadow-[0_10px_26px_rgba(31,27,29,0.08)]"
               style={{
-                color: template.textColor,
+                color: selectedAccent,
               }}
             >
               {isPreview ? (

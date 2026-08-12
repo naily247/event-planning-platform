@@ -32,7 +32,9 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../lib/api';
+import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 import { PageBackButton } from '../components/navigation/PageBackButton';
+import { useCurrentUser } from '../features/auth/useCurrentUser';
 import { eventTypeOptions } from '../features/events/event.api';
 
 type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
@@ -716,6 +718,8 @@ export function EventWorkspacePage() {
     },
   });
 
+  const currentUserQuery = useCurrentUser();
+
   const eventQuery = useQuery({
     queryKey: ['customer', 'events', eventId],
     enabled: Boolean(eventId),
@@ -911,6 +915,7 @@ export function EventWorkspacePage() {
     );
   }
 
+  const currentUser = currentUserQuery.data;
   const event = eventQuery.data;
   const workspaceHeroTheme = getWorkspaceHeroTheme(event.eventType);
   const isEventEditable = event.status !== 'COMPLETED' && event.status !== 'CANCELLED';
@@ -933,36 +938,42 @@ export function EventWorkspacePage() {
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <PageBackButton fallback="/events" label="Events" className="shrink-0" />
+        <div className="space-y-4">
+          {currentUser ? (
+            <CustomerWorkspaceHeader user={currentUser} unreadNotificationCount={0} />
+          ) : null}
 
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Event workspace
-              </p>
+          <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <PageBackButton fallback="/events" label="Events" className="shrink-0" />
 
-              <p className="mt-1 font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                {event.name}
-              </p>
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  Event workspace
+                </p>
+
+                <p className="mt-1 font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                  {event.name}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            className="btn-secondary text-sm font-bold"
-            disabled={!isEventEditable}
-            title={
-              isEventEditable
-                ? 'Edit event details'
-                : 'Completed or cancelled events cannot be edited'
-            }
-            onClick={openEditForm}
-          >
-            <Pencil className="size-4" />
-            Edit event
-          </button>
-        </header>
+            <button
+              type="button"
+              className="btn-secondary text-sm font-bold"
+              disabled={!isEventEditable}
+              title={
+                isEventEditable
+                  ? 'Edit event details'
+                  : 'Completed or cancelled events cannot be edited'
+              }
+              onClick={openEditForm}
+            >
+              <Pencil className="size-4" />
+              Edit event
+            </button>
+          </header>
+        </div>
 
         <main className="py-10">
           <section

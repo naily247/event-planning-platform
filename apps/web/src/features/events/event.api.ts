@@ -70,7 +70,15 @@ export type CustomerEvent = {
   id: string;
   name: string;
   eventType: EventTypeOption;
+
   invitationTemplate: EventInvitationTemplate | null;
+  invitationArtwork: number | null;
+  invitationFont: string | null;
+  invitationGradient: string | null;
+  invitationAccentColor: string | null;
+  invitationArtworkPosition: string | null;
+  invitationDesignConfirmedAt: string | null;
+
   eventDate: string;
   location: string;
   guestCount: number | null;
@@ -107,7 +115,6 @@ export type ApiSuccessResponse<T> = {
 export type CreateEventPayload = {
   name: string;
   eventType: EventTypeOption;
-  invitationTemplate?: EventInvitationTemplate | null;
   eventDate: string;
   location: string;
   guestCount?: number;
@@ -116,7 +123,24 @@ export type CreateEventPayload = {
   requirements?: string;
 };
 
-export type UpdateEventPayload = Partial<CreateEventPayload>;
+export type UpdateEventPayload = {
+  name?: string;
+  eventType?: EventTypeOption;
+
+  invitationTemplate?: EventInvitationTemplate | null;
+  invitationArtwork?: number | null;
+  invitationFont?: string | null;
+  invitationGradient?: string | null;
+  invitationAccentColor?: string | null;
+  invitationArtworkPosition?: string | null;
+
+  eventDate?: string;
+  location?: string;
+  guestCount?: number | null;
+  plannedBudget?: number | null;
+  theme?: string | null;
+  requirements?: string | null;
+};
 
 export type GetCustomerEventsParams = {
   status?: EventStatus;
@@ -159,6 +183,14 @@ export const updateCustomerEvent = async (eventId: string, payload: UpdateEventP
   const response = await api.patch<ApiSuccessResponse<CustomerEvent>>(
     `/events/${eventId}`,
     payload,
+  );
+
+  return response.data.data;
+};
+
+export const confirmCustomerInvitationDesign = async (eventId: string) => {
+  const response = await api.patch<ApiSuccessResponse<CustomerEvent>>(
+    `/events/${eventId}/invitation-design/confirm`,
   );
 
   return response.data.data;

@@ -21,15 +21,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
+import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 import { PageBackButton } from '../components/navigation/PageBackButton';
-import { InvitationTemplateSelector } from '../features/events/InvitationTemplateSelector';
+import { useCurrentUser } from '../features/auth/useCurrentUser';
 import {
   createCustomerEvent,
-  eventInvitationTemplateOptions,
   eventTypeOptions,
   getCustomerEvents,
   type CreateEventPayload,
-  type EventInvitationTemplate,
   type EventStatus,
   type EventTypeOption,
 } from '../features/events/event.api';
@@ -152,97 +151,85 @@ const eventPreviewThemes: Record<EventTypeOption, EventPreviewTheme> = {
   },
 };
 
-const createEventFormSchema = z
-  .object({
-    name: z
-      .string()
-      .trim()
-      .min(3, 'Event name must be at least 3 characters.')
-      .max(120, 'Event name cannot exceed 120 characters.'),
+const createEventFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, 'Event name must be at least 3 characters.')
+    .max(120, 'Event name cannot exceed 120 characters.'),
 
-    eventType: z.enum(eventTypeOptions, {
-      message: 'Choose an event type.',
-    }),
+  eventType: z.enum(eventTypeOptions, {
+    message: 'Choose an event type.',
+  }),
 
-    invitationTemplate: z.union([z.literal(''), z.enum(eventInvitationTemplateOptions)]),
-
-    eventDate: z
-      .string()
-      .min(1, 'Choose the event date and time.')
-      .refine(
-        (value) => {
-          const date = new Date(value);
-
-          return Number.isFinite(date.getTime()) && date.getTime() > Date.now();
-        },
-        {
-          message: 'Event date must be in the future.',
-        },
-      ),
-
-    location: z
-      .string()
-      .trim()
-      .min(2, 'Location must be at least 2 characters.')
-      .max(200, 'Location cannot exceed 200 characters.'),
-
-    guestCount: z.string().refine(
+  eventDate: z
+    .string()
+    .min(1, 'Choose the event date and time.')
+    .refine(
       (value) => {
-        if (!value.trim()) {
-          return true;
-        }
+        const date = new Date(value);
 
-        const guestCount = Number(value);
-
-        return Number.isInteger(guestCount) && guestCount > 0 && guestCount <= 1_000_000;
+        return Number.isFinite(date.getTime()) && date.getTime() > Date.now();
       },
       {
-        message: 'Guest count must be a positive whole number.',
+        message: 'Event date must be in the future.',
       },
     ),
 
-    plannedBudget: z.string().refine(
-      (value) => {
-        if (!value.trim()) {
-          return true;
-        }
+  location: z
+    .string()
+    .trim()
+    .min(2, 'Location must be at least 2 characters.')
+    .max(200, 'Location cannot exceed 200 characters.'),
 
-        const budget = Number(value);
+  guestCount: z.string().refine(
+    (value) => {
+      if (!value.trim()) {
+        return true;
+      }
 
-        return Number.isFinite(budget) && budget > 0 && budget <= 9_999_999_999.99;
-      },
-      {
-        message: 'Planned budget must be greater than zero.',
-      },
-    ),
+      const guestCount = Number(value);
 
-    theme: z
-      .string()
-      .trim()
-      .refine(
-        (value) => value.length === 0 || value.length >= 2,
-        'Theme must be at least 2 characters.',
-      )
-      .refine((value) => value.length <= 200, 'Theme cannot exceed 200 characters.'),
+      return Number.isInteger(guestCount) && guestCount > 0 && guestCount <= 1_000_000;
+    },
+    {
+      message: 'Guest count must be a positive whole number.',
+    },
+  ),
 
-    requirements: z
-      .string()
-      .trim()
-      .refine(
-        (value) => value.length === 0 || value.length >= 10,
-        'Requirements must be at least 10 characters.',
-      )
-      .refine((value) => value.length <= 5000, 'Requirements cannot exceed 5000 characters.'),
-  })
-  .superRefine((values, ctx) => {
-    if (values.invitationTemplate === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['invitationTemplate'],
-        message: 'Choose an invitation design.',
-      });
-    }
-  });
+  plannedBudget: z.string().refine(
+    (value) => {
+      if (!value.trim()) {
+        return true;
+      }
+
+      const budget = Number(value);
+
+      return Number.isFinite(budget) && budget > 0 && budget <= 9_999_999_999.99;
+    },
+    {
+      message: 'Planned budget must be greater than zero.',
+    },
+  ),
+
+  theme: z
+    .string()
+    .trim()
+    .refine(
+      (value) => value.length === 0 || value.length >= 2,
+      'Theme must be at least 2 characters.',
+    )
+    .refine((value) => value.length <= 200, 'Theme cannot exceed 200 characters.'),
+
+  requirements: z
+    .string()
+    .trim()
+    .refine(
+      (value) => value.length === 0 || value.length >= 10,
+      'Requirements must be at least 10 characters.',
+    )
+    .refine((value) => value.length <= 5000, 'Requirements cannot exceed 5000 characters.'),
+});
 
 type CreateEventFormValues = z.infer<typeof createEventFormSchema>;
 
@@ -509,7 +496,6 @@ export function EventsPage() {
     defaultValues: {
       name: '',
       eventType: undefined,
-      invitationTemplate: '',
       eventDate: '',
       location: '',
       guestCount: '',
@@ -520,7 +506,6 @@ export function EventsPage() {
   });
 
   const previewEventType = form.watch('eventType');
-  const selectedInvitationTemplate = form.watch('invitationTemplate');
   const previewName = form.watch('name');
   const previewDate = form.watch('eventDate');
   const previewLocation = form.watch('location');
@@ -554,21 +539,7 @@ export function EventsPage() {
         }).format(Number(previewBudget))
       : 'Budget not set';
 
-  useEffect(() => {
-    if (!previewEventType) {
-      form.setValue('invitationTemplate', '', {
-        shouldValidate: false,
-        shouldDirty: false,
-      });
-
-      return;
-    }
-
-    form.setValue('invitationTemplate', '', {
-      shouldValidate: false,
-      shouldDirty: true,
-    });
-  }, [form, previewEventType]);
+  const currentUserQuery = useCurrentUser();
 
   const eventsQuery = useQuery({
     queryKey: ['customer', 'events'],
@@ -579,6 +550,8 @@ export function EventsPage() {
         sort: 'upcoming',
       }),
   });
+
+  const currentUser = currentUserQuery.data;
 
   const createEventMutation = useMutation({
     mutationFn: (payload: CreateEventPayload) => createCustomerEvent(payload),
@@ -665,7 +638,6 @@ export function EventsPage() {
     createEventMutation.mutate({
       name: values.name.trim(),
       eventType: values.eventType,
-      invitationTemplate: values.invitationTemplate as EventInvitationTemplate,
       eventDate: new Date(values.eventDate).toISOString(),
       location: values.location.trim(),
 
@@ -729,26 +701,36 @@ export function EventsPage() {
         </div>
       </div>
       <div className="relative z-10 mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <PageBackButton fallback="/dashboard" label="Dashboard" className="shrink-0" />
+        <div className="space-y-4">
+          {currentUser ? (
+            <CustomerWorkspaceHeader user={currentUser} unreadNotificationCount={0} />
+          ) : null}
 
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Customer workspace
-              </p>
+          <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <PageBackButton fallback="/dashboard" label="Dashboard" className="shrink-0" />
 
-              <h1 className="mt-1 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                Your events
-              </h1>
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  Customer workspace
+                </p>
+
+                <h1 className="mt-1 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                  Your events
+                </h1>
+              </div>
             </div>
-          </div>
 
-          <button type="button" className="btn-primary text-sm font-bold" onClick={openCreateForm}>
-            <Plus aria-hidden="true" className="size-4" />
-            Create event
-          </button>
-        </header>
+            <button
+              type="button"
+              className="btn-primary text-sm font-bold"
+              onClick={openCreateForm}
+            >
+              <Plus aria-hidden="true" className="size-4" />
+              Create event
+            </button>
+          </header>
+        </div>
 
         <main className="py-10">
           <section
@@ -1369,43 +1351,6 @@ export function EventsPage() {
                       </label>
                     </div>
                   </section>
-
-                  {previewEventType ? (
-                    <InvitationTemplateSelector
-                      eventType={previewEventType}
-                      value={
-                        selectedInvitationTemplate
-                          ? (selectedInvitationTemplate as EventInvitationTemplate)
-                          : null
-                      }
-                      disabled={createEventMutation.isPending}
-                      onChange={(template) => {
-                        form.setValue('invitationTemplate', template, {
-                          shouldDirty: true,
-                          shouldTouch: true,
-                          shouldValidate: true,
-                        });
-                      }}
-                    />
-                  ) : (
-                    <section className="border-t border-white/65 pt-7">
-                      <div className="rounded-[1.4rem] border border-dashed border-[rgba(93,58,85,0.20)] bg-white/26 p-5">
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Invitation design
-                        </p>
-
-                        <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/56">
-                          Choose an event type first to view its available invitation designs.
-                        </p>
-                      </div>
-                    </section>
-                  )}
-
-                  {form.formState.errors.invitationTemplate ? (
-                    <p className="-mt-4 text-sm font-bold text-[var(--color-muted-burgundy)]">
-                      {form.formState.errors.invitationTemplate.message}
-                    </p>
-                  ) : null}
 
                   <section className="border-t border-white/65 pt-7">
                     <div className="mb-5 flex items-center gap-3">

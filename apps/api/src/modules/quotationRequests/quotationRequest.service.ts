@@ -9,6 +9,10 @@ import {
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../utils/AppError.js';
 import { createNotification } from '../notifications/notification.service.js';
+import {
+  canManageQuotationWorkflow,
+  getWorkspaceLockedMessage,
+} from '../events/event.lifecycle.js';
 import type {
   CreateQuotationRequestInput,
   CreateVendorQuotationDraftInput,
@@ -172,6 +176,18 @@ const getVendorProfileId = async (vendorUserId: string) => {
   return vendor.id;
 };
 
+const assertQuotationWorkflowAvailable = (eventStatus: EventStatus) => {
+  if (canManageQuotationWorkflow(eventStatus)) {
+    return;
+  }
+
+  throw new AppError(
+    409,
+    getWorkspaceLockedMessage(eventStatus, 'QUOTATIONS'),
+    'EVENT_QUOTATIONS_LOCKED',
+  );
+};
+
 export const getCustomerQuotationRequests = async (
   customerId: string,
   query: GetCustomerQuotationRequestsQuery,
@@ -243,6 +259,8 @@ export const getCustomerQuotationRequestById = async (
     throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
   }
 
+  assertQuotationWorkflowAvailable(quotationRequest.event.status);
+
   return formatQuotationRequest(quotationRequest);
 };
 
@@ -300,6 +318,7 @@ export const acceptCustomerQuotation = async (
         select: {
           id: true,
           name: true,
+          status: true,
         },
       },
 
@@ -329,6 +348,8 @@ export const acceptCustomerQuotation = async (
   if (!quotationRequest) {
     throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
   }
+
+  assertQuotationWorkflowAvailable(quotationRequest.event.status);
 
   const quotation = quotationRequest.quotations[0];
 
@@ -531,12 +552,20 @@ export const markVendorQuotationRequestViewed = async (
     select: {
       id: true,
       status: true,
+
+      event: {
+        select: {
+          status: true,
+        },
+      },
     },
   });
 
   if (!quotationRequest) {
     throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
   }
+
+  assertQuotationWorkflowAvailable(quotationRequest.event.status);
 
   if (quotationRequest.status !== QuotationRequestStatus.SENT) {
     throw new AppError(
@@ -579,6 +608,7 @@ export const createVendorQuotationDraft = async (
       event: {
         select: {
           eventDate: true,
+          status: true,
         },
       },
 
@@ -594,6 +624,8 @@ export const createVendorQuotationDraft = async (
   if (!quotationRequest) {
     throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
   }
+
+  assertQuotationWorkflowAvailable(quotationRequest.event.status);
 
   if (
     quotationRequest.status !== QuotationRequestStatus.SENT &&
@@ -708,6 +740,7 @@ export const updateVendorQuotationDraft = async (
           event: {
             select: {
               eventDate: true,
+              status: true,
             },
           },
         },
@@ -718,6 +751,8 @@ export const updateVendorQuotationDraft = async (
   if (!quotation) {
     throw new AppError(404, 'Quotation draft not found', 'QUOTATION_DRAFT_NOT_FOUND');
   }
+
+  assertQuotationWorkflowAvailable(quotation.quotationRequest.event.status);
 
   if (quotation.status !== QuotationStatus.DRAFT) {
     throw new AppError(
@@ -828,6 +863,7 @@ export const sendVendorQuotationDraft = async (
         select: {
           id: true,
           name: true,
+          status: true,
 
           owner: {
             select: {
@@ -862,6 +898,8 @@ export const sendVendorQuotationDraft = async (
   if (!quotationRequest) {
     throw new AppError(404, 'Quotation request not found', 'QUOTATION_REQUEST_NOT_FOUND');
   }
+
+  assertQuotationWorkflowAvailable(quotationRequest.event.status);
 
   const quotation = quotationRequest.quotations[0];
 
@@ -965,13 +1003,7 @@ export const createCustomerQuotationRequest = async (
     throw new AppError(404, 'Event not found', 'EVENT_NOT_FOUND');
   }
 
-  if (event.status !== EventStatus.PLANNING && event.status !== EventStatus.ACTIVE) {
-    throw new AppError(
-      409,
-      'Quotation requests can only be created for planning or active events',
-      'EVENT_NOT_AVAILABLE_FOR_QUOTATION_REQUEST',
-    );
-  }
+  assertQuotationWorkflowAvailable(event.status);
 
   const servicePackage = await prisma.servicePackage.findFirst({
     where: {
