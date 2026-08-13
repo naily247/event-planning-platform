@@ -270,6 +270,8 @@ model User {
   passwordHash              String
   firstName                 String
   lastName                  String
+  profileImageUrl           String?
+  profileImagePublicId      String?
   role                      UserRole
   status                    AccountStatus            @default(ACTIVE)
   customer                  CustomerProfile?

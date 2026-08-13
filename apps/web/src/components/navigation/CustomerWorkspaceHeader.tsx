@@ -143,11 +143,13 @@ export function CustomerWorkspaceHeader({
               </div>
 
               <div className="mt-2 space-y-1">
-                <button
-                  type="button"
-                  className="flex w-full cursor-not-allowed items-center gap-3 rounded-xl px-3.5 py-3 text-left opacity-55"
-                  disabled
-                  title="Profile page will be added next"
+                <Link
+                  to="/customer/profile"
+                  role="menuitem"
+                  className="group/menu-item flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left transition-all duration-200 hover:bg-[rgba(93,58,85,0.08)]"
+                  onClick={() => {
+                    setIsAccountMenuOpen(false);
+                  }}
                 >
                   <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.09)] text-[var(--color-deep-plum)]">
                     <UserRound className="size-4" />
@@ -163,10 +165,8 @@ export function CustomerWorkspaceHeader({
                     </span>
                   </span>
 
-                  <span className="rounded-full bg-[rgba(93,58,85,0.08)] px-2 py-1 text-[0.58rem] font-black uppercase tracking-[0.12em] text-[var(--color-deep-plum)]">
-                    Next
-                  </span>
-                </button>
+                  <ArrowRight className="size-4 text-[var(--color-charcoal)]/35 transition-transform duration-200 group-hover/menu-item:translate-x-0.5 group-hover/menu-item:text-[var(--color-deep-plum)]" />
+                </Link>
 
                 <button
                   type="button"

@@ -13,6 +13,7 @@ import { AdminVendorApplicationsPage } from '../pages/AdminVendorApplicationsPag
 import { BookingsWorkspacePage } from '../pages/BookingsWorkspacePage';
 import { BudgetWorkspacePage } from '../pages/BudgetWorkspacePage';
 import { ComplaintsWorkspacePage } from '../pages/ComplaintsWorkspacePage';
+import { CustomerProfilePage } from '../pages/CustomerProfilePage';
 import { CustomerRegisterPage } from '../pages/CustomerRegisterPage';
 import { DashboardEntryPage } from '../pages/DashboardEntryPage';
 import { EventDocumentsWorkspacePage } from '../pages/EventDocumentsWorkspacePage';
@@ -295,6 +296,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={['VENDOR']}>
             <VendorSettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/customer/profile',
+        element: (
+          <ProtectedRoute allowedRoles={['CUSTOMER']}>
+            <CustomerProfilePage />
           </ProtectedRoute>
         ),
       },

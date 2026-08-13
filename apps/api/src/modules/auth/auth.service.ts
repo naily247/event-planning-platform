@@ -4,13 +4,17 @@ import { AccountStatus, UserRole } from '@prisma/client';
 import { prisma } from '../../config/prisma.js';
 import { env } from '../../config/env.js';
 import { AppError } from '../../utils/AppError.js';
+import { deleteCloudinaryAsset } from '../../services/cloudinary.service.js';
+import { uploadAsset } from '../uploads/upload.service.js';
 import type {
   LoginInput,
   RegisterCustomerInput,
   RegisterVendorInput,
+  UpdateCurrentUserInput,
 } from './auth.schemas.js';
 
 const PASSWORD_SALT_ROUNDS = 12;
+const PROFILE_IMAGE_FOLDER = 'event-platform/profile-images';
 
 const createAccessToken = (userId: string, role: UserRole) => {
   const options: SignOptions = {
@@ -58,6 +62,7 @@ const createAuthResponse = (user: {
   email: string;
   firstName: string;
   lastName: string;
+  profileImageUrl?: string | null;
   role: UserRole;
   status: AccountStatus;
 }) => ({
@@ -67,31 +72,23 @@ const createAuthResponse = (user: {
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
+    profileImageUrl: user.profileImageUrl ?? null,
     role: user.role,
     status: user.status,
   },
 });
 
-export const registerCustomer = async (
-  input: RegisterCustomerInput,
-) => {
+export const registerCustomer = async (input: RegisterCustomerInput) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: input.email },
     select: { id: true },
   });
 
   if (existingUser) {
-    throw new AppError(
-      409,
-      'An account with this email already exists',
-      'EMAIL_ALREADY_EXISTS',
-    );
+    throw new AppError(409, 'An account with this email already exists', 'EMAIL_ALREADY_EXISTS');
   }
 
-  const passwordHash = await bcrypt.hash(
-    input.password,
-    PASSWORD_SALT_ROUNDS,
-  );
+  const passwordHash = await bcrypt.hash(input.password, PASSWORD_SALT_ROUNDS);
 
   const user = await prisma.user.create({
     data: {
@@ -112,6 +109,7 @@ export const registerCustomer = async (
       email: true,
       firstName: true,
       lastName: true,
+      profileImageUrl: true,
       role: true,
       status: true,
     },
@@ -120,26 +118,17 @@ export const registerCustomer = async (
   return createAuthResponse(user);
 };
 
-export const registerVendor = async (
-  input: RegisterVendorInput,
-) => {
+export const registerVendor = async (input: RegisterVendorInput) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: input.email },
     select: { id: true },
   });
 
   if (existingUser) {
-    throw new AppError(
-      409,
-      'An account with this email already exists',
-      'EMAIL_ALREADY_EXISTS',
-    );
+    throw new AppError(409, 'An account with this email already exists', 'EMAIL_ALREADY_EXISTS');
   }
 
-  const passwordHash = await bcrypt.hash(
-    input.password,
-    PASSWORD_SALT_ROUNDS,
-  );
+  const passwordHash = await bcrypt.hash(input.password, PASSWORD_SALT_ROUNDS);
 
   const slug = await createUniqueVendorSlug(input.businessName);
 
@@ -163,6 +152,7 @@ export const registerVendor = async (
       email: true,
       firstName: true,
       lastName: true,
+      profileImageUrl: true,
       role: true,
       status: true,
     },
@@ -177,40 +167,21 @@ export const login = async (input: LoginInput) => {
   });
 
   if (!user) {
-    throw new AppError(
-      401,
-      'Invalid email or password',
-      'INVALID_CREDENTIALS',
-    );
+    throw new AppError(401, 'Invalid email or password', 'INVALID_CREDENTIALS');
   }
 
-  const passwordMatches = await bcrypt.compare(
-    input.password,
-    user.passwordHash,
-  );
+  const passwordMatches = await bcrypt.compare(input.password, user.passwordHash);
 
   if (!passwordMatches) {
-    throw new AppError(
-      401,
-      'Invalid email or password',
-      'INVALID_CREDENTIALS',
-    );
+    throw new AppError(401, 'Invalid email or password', 'INVALID_CREDENTIALS');
   }
 
   if (user.status === AccountStatus.SUSPENDED) {
-    throw new AppError(
-      403,
-      'This account has been suspended',
-      'ACCOUNT_SUSPENDED',
-    );
+    throw new AppError(403, 'This account has been suspended', 'ACCOUNT_SUSPENDED');
   }
 
   if (user.status === AccountStatus.DEACTIVATED) {
-    throw new AppError(
-      403,
-      'This account has been deactivated',
-      'ACCOUNT_DEACTIVATED',
-    );
+    throw new AppError(403, 'This account has been deactivated', 'ACCOUNT_DEACTIVATED');
   }
 
   return createAuthResponse(user);
@@ -224,6 +195,7 @@ export const getCurrentUser = async (userId: string) => {
       email: true,
       firstName: true,
       lastName: true,
+      profileImageUrl: true,
       role: true,
       status: true,
       customer: {
@@ -244,12 +216,148 @@ export const getCurrentUser = async (userId: string) => {
   });
 
   if (!user) {
-    throw new AppError(
-      404,
-      'User account not found',
-      'USER_NOT_FOUND',
-    );
+    throw new AppError(404, 'User account not found', 'USER_NOT_FOUND');
   }
 
   return user;
+};
+
+export const updateCurrentUser = async (userId: string, input: UpdateCurrentUserInput) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      role: true,
+      customer: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!existingUser) {
+    throw new AppError(404, 'User account not found', 'USER_NOT_FOUND');
+  }
+
+  if (input.phone !== undefined && existingUser.role !== UserRole.CUSTOMER) {
+    throw new AppError(
+      400,
+      'Phone updates through this profile are only available for customer accounts',
+      'CUSTOMER_PHONE_UPDATE_ONLY',
+    );
+  }
+
+  await prisma.$transaction(async (transaction) => {
+    await transaction.user.update({
+      where: { id: userId },
+      data: {
+        ...(input.firstName !== undefined ? { firstName: input.firstName } : {}),
+        ...(input.lastName !== undefined ? { lastName: input.lastName } : {}),
+      },
+    });
+
+    if (input.phone !== undefined) {
+      if (!existingUser.customer) {
+        throw new AppError(404, 'Customer profile not found', 'CUSTOMER_PROFILE_NOT_FOUND');
+      }
+
+      await transaction.customerProfile.update({
+        where: {
+          id: existingUser.customer.id,
+        },
+        data: {
+          phone: input.phone,
+        },
+      });
+    }
+  });
+
+  return getCurrentUser(userId);
+};
+
+export const updateCurrentUserProfileImage = async (
+  userId: string,
+  file: Express.Multer.File | undefined,
+) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      profileImagePublicId: true,
+    },
+  });
+
+  if (!existingUser) {
+    throw new AppError(404, 'User account not found', 'USER_NOT_FOUND');
+  }
+
+  const uploadedImage = await uploadAsset({
+    file,
+    folder: PROFILE_IMAGE_FOLDER,
+  });
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        profileImageUrl: uploadedImage.fileUrl,
+        profileImagePublicId: uploadedImage.filePublicId,
+      },
+    });
+  } catch (error) {
+    await deleteCloudinaryAsset(uploadedImage.filePublicId);
+    throw error;
+  }
+
+  if (
+    existingUser.profileImagePublicId &&
+    existingUser.profileImagePublicId !== uploadedImage.filePublicId
+  ) {
+    try {
+      await deleteCloudinaryAsset(existingUser.profileImagePublicId);
+    } catch (error) {
+      console.error('Previous profile image could not be deleted from Cloudinary:', error);
+    }
+  }
+
+  return getCurrentUser(userId);
+};
+
+export const removeCurrentUserProfileImage = async (userId: string) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      profileImagePublicId: true,
+    },
+  });
+
+  if (!existingUser) {
+    throw new AppError(404, 'User account not found', 'USER_NOT_FOUND');
+  }
+
+  if (!existingUser.profileImagePublicId) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        profileImageUrl: null,
+        profileImagePublicId: null,
+      },
+    });
+
+    return getCurrentUser(userId);
+  }
+
+  await deleteCloudinaryAsset(existingUser.profileImagePublicId);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      profileImageUrl: null,
+      profileImagePublicId: null,
+    },
+  });
+
+  return getCurrentUser(userId);
 };
