@@ -9,8 +9,22 @@ export type AuthUser = {
   email: string;
   firstName: string;
   lastName: string;
+  profileImageUrl: string | null;
   role: AuthUserRole;
   status: AuthAccountStatus;
+};
+
+export type CurrentUser = AuthUser & {
+  customer: {
+    id: string;
+    phone: string | null;
+  } | null;
+  vendor: {
+    id: string;
+    businessName: string;
+    slug: string;
+    verificationStatus: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
+  } | null;
 };
 
 export type AuthResponse = {
@@ -44,6 +58,15 @@ export type RegisterVendorInput = {
   password: string;
 };
 
+export type UpdateCurrentUserInput = {
+  firstName?: string;
+  lastName?: string;
+  phone?: {
+    country: string;
+    number: string;
+  } | null;
+};
+
 export async function login(input: LoginInput) {
   const response = await api.post<ApiSuccessResponse<AuthResponse>>('/auth/login', input);
 
@@ -66,7 +89,32 @@ export async function registerVendor(input: RegisterVendorInput) {
 }
 
 export async function getCurrentUser() {
-  const response = await api.get<ApiSuccessResponse<AuthUser>>('/auth/me');
+  const response = await api.get<ApiSuccessResponse<CurrentUser>>('/auth/me');
+
+  return response.data.data;
+}
+
+export async function updateCurrentUser(input: UpdateCurrentUserInput) {
+  const response = await api.patch<ApiSuccessResponse<CurrentUser>>('/auth/me', input);
+
+  return response.data.data;
+}
+
+export async function uploadCurrentUserProfileImage(file: File) {
+  const formData = new FormData();
+
+  formData.append('file', file);
+
+  const response = await api.post<ApiSuccessResponse<CurrentUser>>(
+    '/auth/me/profile-image',
+    formData,
+  );
+
+  return response.data.data;
+}
+
+export async function removeCurrentUserProfileImage() {
+  const response = await api.delete<ApiSuccessResponse<CurrentUser>>('/auth/me/profile-image');
 
   return response.data.data;
 }

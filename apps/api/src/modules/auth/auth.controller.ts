@@ -5,53 +5,76 @@ import {
   login,
   registerCustomer,
   registerVendor,
+  removeCurrentUserProfileImage,
+  updateCurrentUser,
+  updateCurrentUserProfileImage,
 } from './auth.service.js';
 import type {
   LoginInput,
   RegisterCustomerInput,
   RegisterVendorInput,
+  UpdateCurrentUserInput,
 } from './auth.schemas.js';
 
-export const registerCustomerHandler: RequestHandler = asyncHandler(
+export const registerCustomerHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const result = await registerCustomer(req.body as RegisterCustomerInput);
+
+  res.status(201).json({
+    success: true,
+    data: result,
+  });
+});
+
+export const registerVendorHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const result = await registerVendor(req.body as RegisterVendorInput);
+
+  res.status(201).json({
+    success: true,
+    data: result,
+  });
+});
+
+export const loginHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const result = await login(req.body as LoginInput);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
+export const getCurrentUserHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const user = await getCurrentUser(req.auth!.userId);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
+export const updateCurrentUserHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const user = await updateCurrentUser(req.auth!.userId, req.body as UpdateCurrentUserInput);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
+export const updateCurrentUserProfileImageHandler: RequestHandler = asyncHandler(
   async (req, res) => {
-    const result = await registerCustomer(
-      req.body as RegisterCustomerInput,
-    );
-
-    res.status(201).json({
-      success: true,
-      data: result,
-    });
-  },
-);
-
-export const registerVendorHandler: RequestHandler = asyncHandler(
-  async (req, res) => {
-    const result = await registerVendor(
-      req.body as RegisterVendorInput,
-    );
-
-    res.status(201).json({
-      success: true,
-      data: result,
-    });
-  },
-);
-
-export const loginHandler: RequestHandler = asyncHandler(
-  async (req, res) => {
-    const result = await login(req.body as LoginInput);
+    const user = await updateCurrentUserProfileImage(req.auth!.userId, req.file);
 
     res.status(200).json({
       success: true,
-      data: result,
+      data: user,
     });
   },
 );
 
-export const getCurrentUserHandler: RequestHandler = asyncHandler(
+export const removeCurrentUserProfileImageHandler: RequestHandler = asyncHandler(
   async (req, res) => {
-    const user = await getCurrentUser(req.auth!.userId);
+    const user = await removeCurrentUserProfileImage(req.auth!.userId);
 
     res.status(200).json({
       success: true,
