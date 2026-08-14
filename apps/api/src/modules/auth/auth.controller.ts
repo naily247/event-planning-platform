@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import {
+  changeCurrentUserPassword,
   getCurrentUser,
   login,
   registerCustomer,
@@ -10,6 +11,7 @@ import {
   updateCurrentUserProfileImage,
 } from './auth.service.js';
 import type {
+  ChangeCurrentUserPasswordInput,
   LoginInput,
   RegisterCustomerInput,
   RegisterVendorInput,
@@ -82,3 +84,14 @@ export const removeCurrentUserProfileImageHandler: RequestHandler = asyncHandler
     });
   },
 );
+export const changeCurrentUserPasswordHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const result = await changeCurrentUserPassword(
+    req.auth!.userId,
+    req.body as ChangeCurrentUserPasswordInput,
+  );
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});

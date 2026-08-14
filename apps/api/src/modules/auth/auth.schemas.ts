@@ -84,6 +84,13 @@ export const updateCurrentUserSchema = z.object({
     ),
 });
 
+export const changeCurrentUserPasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: passwordSchema,
+  }),
+});
+
 export type RegisterCustomerInput = z.infer<typeof registerCustomerSchema>['body'];
 
 export type RegisterVendorInput = z.infer<typeof registerVendorSchema>['body'];
@@ -91,3 +98,7 @@ export type RegisterVendorInput = z.infer<typeof registerVendorSchema>['body'];
 export type LoginInput = z.infer<typeof loginSchema>['body'];
 
 export type UpdateCurrentUserInput = z.infer<typeof updateCurrentUserSchema>['body'];
+
+export type ChangeCurrentUserPasswordInput = z.infer<
+  typeof changeCurrentUserPasswordSchema
+>['body'];

@@ -67,6 +67,15 @@ export type UpdateCurrentUserInput = {
   } | null;
 };
 
+export type ChangeCurrentUserPasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+};
+
+export type ChangeCurrentUserPasswordResponse = {
+  message: string;
+};
+
 export async function login(input: LoginInput) {
   const response = await api.post<ApiSuccessResponse<AuthResponse>>('/auth/login', input);
 
@@ -96,6 +105,15 @@ export async function getCurrentUser() {
 
 export async function updateCurrentUser(input: UpdateCurrentUserInput) {
   const response = await api.patch<ApiSuccessResponse<CurrentUser>>('/auth/me', input);
+
+  return response.data.data;
+}
+
+export async function changeCurrentUserPassword(input: ChangeCurrentUserPasswordInput) {
+  const response = await api.patch<ApiSuccessResponse<ChangeCurrentUserPasswordResponse>>(
+    '/auth/me/password',
+    input,
+  );
 
   return response.data.data;
 }

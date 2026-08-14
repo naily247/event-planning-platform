@@ -7,6 +7,7 @@ import { AppError } from '../../utils/AppError.js';
 import { deleteCloudinaryAsset } from '../../services/cloudinary.service.js';
 import { uploadAsset } from '../uploads/upload.service.js';
 import type {
+  ChangeCurrentUserPasswordInput,
   LoginInput,
   RegisterCustomerInput,
   RegisterVendorInput,
@@ -360,4 +361,57 @@ export const removeCurrentUserProfileImage = async (userId: string) => {
   });
 
   return getCurrentUser(userId);
+};
+
+export const changeCurrentUserPassword = async (
+  userId: string,
+  input: ChangeCurrentUserPasswordInput,
+) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      passwordHash: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(404, 'User account not found', 'USER_NOT_FOUND');
+  }
+
+  const currentPasswordMatches = await bcrypt.compare(input.currentPassword, user.passwordHash);
+
+  if (!currentPasswordMatches) {
+    throw new AppError(400, 'Current password is incorrect', 'CURRENT_PASSWORD_INCORRECT');
+  }
+
+  const newPasswordMatchesCurrentPassword = await bcrypt.compare(
+    input.newPassword,
+    user.passwordHash,
+  );
+
+  if (newPasswordMatchesCurrentPassword) {
+    throw new AppError(
+      400,
+      'New password must be different from your current password',
+      'NEW_PASSWORD_MUST_DIFFER',
+    );
+  }
+
+  const newPasswordHash = await bcrypt.hash(input.newPassword, PASSWORD_SALT_ROUNDS);
+
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      passwordHash: newPasswordHash,
+    },
+  });
+
+  return {
+    message: 'Password changed successfully',
+  };
 };

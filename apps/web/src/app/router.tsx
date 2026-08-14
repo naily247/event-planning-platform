@@ -13,6 +13,7 @@ import { AdminVendorApplicationsPage } from '../pages/AdminVendorApplicationsPag
 import { BookingsWorkspacePage } from '../pages/BookingsWorkspacePage';
 import { BudgetWorkspacePage } from '../pages/BudgetWorkspacePage';
 import { ComplaintsWorkspacePage } from '../pages/ComplaintsWorkspacePage';
+import { CustomerAccountSettingsPage } from '../pages/CustomerAccountSettingsPage';
 import { CustomerProfilePage } from '../pages/CustomerProfilePage';
 import { CustomerRegisterPage } from '../pages/CustomerRegisterPage';
 import { DashboardEntryPage } from '../pages/DashboardEntryPage';
@@ -304,6 +305,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={['CUSTOMER']}>
             <CustomerProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/customer/account-settings',
+        element: (
+          <ProtectedRoute allowedRoles={['CUSTOMER']}>
+            <CustomerAccountSettingsPage />
           </ProtectedRoute>
         ),
       },
