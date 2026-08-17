@@ -2,12 +2,14 @@ import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import {
+  getNotificationSummaryHandler,
   getNotificationsHandler,
   getUnreadNotificationCountHandler,
   markAllNotificationsAsReadHandler,
   markNotificationAsReadHandler,
 } from './notification.controller.js';
 import {
+  getNotificationSummarySchema,
   getNotificationsSchema,
   getUnreadNotificationCountSchema,
   markAllNotificationsAsReadSchema,
@@ -23,6 +25,13 @@ notificationRouter.get(
   requireAuth,
   validate(getUnreadNotificationCountSchema),
   getUnreadNotificationCountHandler,
+);
+
+notificationRouter.get(
+  '/summary',
+  requireAuth,
+  validate(getNotificationSummarySchema),
+  getNotificationSummaryHandler,
 );
 
 notificationRouter.patch(

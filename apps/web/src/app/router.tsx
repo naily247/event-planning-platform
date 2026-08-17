@@ -53,6 +53,10 @@ import { AboutPage } from '../pages/AboutPage';
 import { ContactPage } from '../pages/ContactPage';
 import { PrivacyPolicyPage } from '../pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from '../pages/TermsOfServicePage';
+import { CustomerLayout } from '../components/layout/CustomerLayout';
+import { VendorLayout } from '../components/layout/VendorLayout';
+import { DashboardPage } from '../pages/DashboardPage';
+import { NotificationsEntryPage } from '../pages/NotificationsEntryPage';
 
 export const router = createBrowserRouter([
   {
@@ -136,7 +140,7 @@ export const router = createBrowserRouter([
         path: '/notifications',
         element: (
           <ProtectedRoute>
-            <NotificationsPage />
+            <NotificationsEntryPage />
           </ProtectedRoute>
         ),
       },
@@ -197,220 +201,146 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/vendor/dashboard',
         element: (
           <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorDashboardPage />
+            <VendorLayout />
           </ProtectedRoute>
         ),
+        children: [
+          {
+            path: '/vendor/dashboard',
+            element: <VendorDashboardPage />,
+          },
+          {
+            path: '/vendor/notifications',
+            element: <NotificationsPage />,
+          },
+          {
+            path: '/vendor/profile',
+            element: <VendorProfilePage />,
+          },
+          {
+            path: '/vendor/portfolio',
+            element: <VendorPortfolioPage />,
+          },
+          {
+            path: '/vendor/packages',
+            element: <VendorPackagesPage />,
+          },
+          {
+            path: '/vendor/availability',
+            element: <VendorAvailabilityPage />,
+          },
+          {
+            path: '/vendor/quotation-requests',
+            element: <VendorQuotationRequestsPage />,
+          },
+          {
+            path: '/vendor/quotation-requests/:quotationRequestId',
+            element: <VendorQuotationRequestDetailPage />,
+          },
+          {
+            path: '/vendor/quotation-requests/:quotationRequestId/quotation',
+            element: <VendorQuotationEditorPage />,
+          },
+          {
+            path: '/vendor/bookings',
+            element: <VendorBookingsPage />,
+          },
+          {
+            path: '/vendor/bookings/:bookingId',
+            element: <VendorBookingDetailPage />,
+          },
+          {
+            path: '/vendor/reviews',
+            element: <VendorReviewsPage />,
+          },
+          {
+            path: '/vendor/complaints',
+            element: <VendorComplaintsPage />,
+          },
+          {
+            path: '/vendor/settings',
+            element: <VendorSettingsPage />,
+          },
+        ],
       },
       {
-        path: '/vendor/profile',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorProfilePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/portfolio',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorPortfolioPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/packages',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorPackagesPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/availability',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorAvailabilityPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/quotation-requests',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorQuotationRequestsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/quotation-requests/:quotationRequestId',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorQuotationRequestDetailPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/quotation-requests/:quotationRequestId/quotation',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorQuotationEditorPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/bookings',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorBookingsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/bookings/:bookingId',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorBookingDetailPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/reviews',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorReviewsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/complaints',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorComplaintsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/vendor/settings',
-        element: (
-          <ProtectedRoute allowedRoles={['VENDOR']}>
-            <VendorSettingsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/customer/profile',
         element: (
           <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <CustomerProfilePage />
+            <CustomerLayout />
           </ProtectedRoute>
         ),
-      },
-      {
-        path: '/customer/account-settings',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <CustomerAccountSettingsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <EventsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <EventWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/budget',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <BudgetWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/guests',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <GuestWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/invitations',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <InvitationWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/mood-board',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <MoodBoardWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/documents',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <EventDocumentsWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/tasks',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <EventTasksWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/quotations',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <QuotationRequestsWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/bookings',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <BookingsWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/reviews',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <ReviewsWorkspacePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/events/:eventId/complaints',
-        element: (
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
-            <ComplaintsWorkspacePage />
-          </ProtectedRoute>
-        ),
+        children: [
+          {
+            path: '/customer/dashboard',
+            element: <DashboardPage />,
+          },
+          {
+            path: '/customer/notifications',
+            element: <NotificationsPage />,
+          },
+          {
+            path: '/customer/profile',
+            element: <CustomerProfilePage />,
+          },
+          {
+            path: '/customer/account-settings',
+            element: <CustomerAccountSettingsPage />,
+          },
+          {
+            path: '/events',
+            element: <EventsPage />,
+          },
+          {
+            path: '/events/:eventId',
+            element: <EventWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/vendors/:vendorSlug',
+            element: <VendorDetailPage />,
+          },
+          {
+            path: '/events/:eventId/budget',
+            element: <BudgetWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/guests',
+            element: <GuestWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/invitations',
+            element: <InvitationWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/mood-board',
+            element: <MoodBoardWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/documents',
+            element: <EventDocumentsWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/tasks',
+            element: <EventTasksWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/quotations',
+            element: <QuotationRequestsWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/bookings',
+            element: <BookingsWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/reviews',
+            element: <ReviewsWorkspacePage />,
+          },
+          {
+            path: '/events/:eventId/complaints',
+            element: <ComplaintsWorkspacePage />,
+          },
+        ],
       },
     ],
   },

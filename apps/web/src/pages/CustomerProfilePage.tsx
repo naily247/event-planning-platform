@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 import {
   removeCurrentUserProfileImage,
   updateCurrentUser,
@@ -262,8 +261,6 @@ export function CustomerProfilePage() {
   return (
     <main className="page-shell min-h-screen">
       <div className="mx-auto max-w-7xl py-8">
-        <CustomerWorkspaceHeader user={user} unreadNotificationCount={0} />
-
         <div className="mt-5">
           <Link
             to="/dashboard"

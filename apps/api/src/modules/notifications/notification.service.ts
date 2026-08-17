@@ -115,6 +115,29 @@ export const getUnreadNotificationCount = async (recipientId: string) => {
   });
 };
 
+export const getNotificationSummary = async (recipientId: string) => {
+  const [totalCount, unreadCount] = await prisma.$transaction([
+    prisma.notification.count({
+      where: {
+        recipientId,
+      },
+    }),
+
+    prisma.notification.count({
+      where: {
+        recipientId,
+        isRead: false,
+      },
+    }),
+  ]);
+
+  return {
+    totalCount,
+    unreadCount,
+    readCount: Math.max(totalCount - unreadCount, 0),
+  };
+};
+
 export const markNotificationAsRead = async (recipientId: string, notificationId: string) => {
   const notification = await prisma.notification.findFirst({
     where: {

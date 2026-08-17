@@ -1,6 +1,8 @@
 import { ArrowRight, BadgeCheck, MapPin, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { getAccessTokenPayload } from '../../features/auth/auth.storage';
+
 type StickyVendorCtaProps = {
   vendorName: string;
   location: string;
@@ -16,6 +18,9 @@ export function StickyVendorCta({
   rating,
   reviewCount,
 }: StickyVendorCtaProps) {
+  const accessTokenPayload = getAccessTokenPayload();
+  const isCustomerSession = accessTokenPayload?.role === 'CUSTOMER';
+
   const reviewLabel = reviewCount === 1 ? '1 verified review' : `${reviewCount} verified reviews`;
 
   return (
@@ -36,7 +41,7 @@ export function StickyVendorCta({
         </div>
 
         <p className="mt-6 text-sm font-bold text-[var(--color-charcoal)]/58">
-          Request a quotation from
+          {isCustomerSession ? 'Plan with' : 'Request a quotation from'}
         </p>
 
         <h3 className="mt-2 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
@@ -53,7 +58,7 @@ export function StickyVendorCta({
             Starting price
           </p>
 
-          <p className="mt-2 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+          <p className="mt-2 whitespace-nowrap text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
             {startingPrice}
           </p>
 
@@ -62,13 +67,22 @@ export function StickyVendorCta({
           </p>
         </div>
 
-        <Link to="/login" className="btn-primary mt-5 w-full justify-center text-sm font-bold">
-          Request quotation
-          <ArrowRight className="size-4" />
-        </Link>
+        {isCustomerSession ? (
+          <Link to="/events" className="btn-primary mt-5 w-full justify-center text-sm font-bold">
+            Open my events
+            <ArrowRight className="size-4" />
+          </Link>
+        ) : (
+          <Link to="/login" className="btn-primary mt-5 w-full justify-center text-sm font-bold">
+            Request quotation
+            <ArrowRight className="size-4" />
+          </Link>
+        )}
 
         <p className="mt-4 text-center text-xs font-bold text-[var(--color-charcoal)]/52">
-          Sign in to send event requirements securely.
+          {isCustomerSession
+            ? 'Choose an event before sending your requirements.'
+            : 'Sign in to send event requirements securely.'}
         </p>
 
         <div className="mt-6 border-t border-[rgba(46,42,44,0.08)] pt-5">

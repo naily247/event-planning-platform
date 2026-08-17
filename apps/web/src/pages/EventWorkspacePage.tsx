@@ -32,7 +32,6 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../lib/api';
-import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 import { PageBackButton } from '../components/navigation/PageBackButton';
 import { useCurrentUser } from '../features/auth/useCurrentUser';
 import { eventTypeOptions } from '../features/events/event.api';
@@ -939,10 +938,6 @@ export function EventWorkspacePage() {
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="space-y-4">
-          {currentUser ? (
-            <CustomerWorkspaceHeader user={currentUser} unreadNotificationCount={0} />
-          ) : null}
-
           <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <PageBackButton fallback="/events" label="Events" className="shrink-0" />

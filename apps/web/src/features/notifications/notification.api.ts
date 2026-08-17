@@ -76,6 +76,12 @@ export type UnreadNotificationCount = {
   unreadCount: number;
 };
 
+export type NotificationSummary = {
+  totalCount: number;
+  unreadCount: number;
+  readCount: number;
+};
+
 export type MarkAllNotificationsAsReadResult = {
   updatedCount: number;
 };
@@ -116,6 +122,12 @@ export async function getUnreadNotificationCount() {
   const response = await api.get<ApiSuccessResponse<UnreadNotificationCount>>(
     '/notifications/unread-count',
   );
+
+  return response.data.data;
+}
+
+export async function getNotificationSummary() {
+  const response = await api.get<ApiSuccessResponse<NotificationSummary>>('/notifications/summary');
 
   return response.data.data;
 }

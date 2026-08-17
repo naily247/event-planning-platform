@@ -1,26 +1,61 @@
-import { ArrowUpRight, CalendarDays, Heart, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Bell,
+  CalendarDays,
+  LayoutDashboard,
+  Settings,
+  Sparkles,
+  Store,
+  UserRound,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const workspaceLinks = [
   {
     label: 'Dashboard',
     to: '/dashboard',
+    icon: LayoutDashboard,
   },
   {
     label: 'My events',
     to: '/events',
-  },
-  {
-    label: 'Browse vendors',
-    to: '/vendors',
+    icon: CalendarDays,
   },
   {
     label: 'Notifications',
     to: '/notifications',
+    icon: Bell,
   },
 ];
 
-const companyLinks = [
+const discoverLinks = [
+  {
+    label: 'Browse vendors',
+    to: '/vendors',
+    icon: Store,
+  },
+  {
+    label: 'Planning guide',
+    to: '/planning-guide',
+    icon: Sparkles,
+  },
+];
+
+const accountLinks = [
+  {
+    label: 'My profile',
+    to: '/customer/profile',
+    icon: UserRound,
+  },
+  {
+    label: 'Account settings',
+    to: '/customer/account-settings',
+    icon: Settings,
+  },
+];
+
+const eventureLinks = [
   {
     label: 'About Eventure',
     to: '/about',
@@ -30,120 +65,243 @@ const companyLinks = [
     to: '/contact',
   },
   {
-    label: 'Privacy',
+    label: 'Privacy & Terms',
     to: '/privacy',
   },
-  {
-    label: 'Terms',
-    to: '/terms',
-  },
+  
 ];
 
 export function CustomerWorkspaceFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-10 overflow-hidden rounded-[2.2rem] border border-white/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(239,228,219,0.3))] shadow-[0_24px_70px_rgba(31,27,29,0.07)] backdrop-blur-2xl">
+    <footer className="relative mt-16 w-full overflow-hidden bg-[var(--color-near-black)] text-white">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-24 -top-28 size-80 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+        className="pointer-events-none absolute -left-32 -top-40 size-[30rem] rounded-full bg-[rgba(93,58,85,0.34)] blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-32 -left-24 size-80 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+        className="pointer-events-none absolute bottom-[-17rem] left-[34%] size-[34rem] rounded-full bg-[rgba(183,167,200,0.08)] blur-3xl"
       />
 
-      <div className="relative grid gap-10 px-6 py-8 sm:px-8 sm:py-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr] lg:gap-14 lg:px-10">
-        <div className="max-w-md">
-          <Link to="/" className="group inline-flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-2xl border border-white/55 bg-white/40 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.08)] transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:rotate-2 group-hover:bg-white/60 group-hover:shadow-[0_18px_42px_rgba(31,27,29,0.13)]">
-              <CalendarDays className="size-5 transition-transform duration-500 group-hover:scale-110" />
-            </span>
+      <div className="relative mx-auto grid w-full lg:grid-cols-[minmax(0,1.4fr)_minmax(25rem,0.6fr)]">
+        <div className="px-6 py-14 sm:px-10 lg:px-[max(3rem,calc((100vw-1180px)/2))] lg:py-16 lg:pr-14">
+          <div className="grid gap-14 xl:grid-cols-[1.08fr_0.92fr] xl:gap-16">
+            <div className="max-w-lg">
+              <Link
+                to="/"
+                aria-label="Eventure home"
+                className="group inline-flex rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+              >
+                <img
+                  src="/images/branding/eventure-logo-navbar.png"
+                  alt="Eventure"
+                  className="h-[5rem] w-auto max-w-[18rem] object-contain brightness-[3.6] contrast-[1.15] saturate-[0.85] drop-shadow-[0_2px_10px_rgba(255,255,255,0.10)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:brightness-[4]"
+                />
+              </Link>
 
-            <span>
-              <span className="block text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                Eventure
-              </span>
+              <p className="mt-6 text-[0.68rem] font-black uppercase tracking-[0.24em] text-[var(--color-light-champagne)]/62">
+                Your planning space
+              </p>
 
-              <span className="mt-1 block text-[0.65rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                Customer workspace
-              </span>
-            </span>
-          </Link>
+              <h2 className="mt-4 max-w-md text-3xl font-black leading-[1.08] tracking-[-0.045em] text-white sm:text-4xl">
+                Keep every event detail connected.
+              </h2>
 
-          <h2 className="mt-6 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl">
-            Every detail, thoughtfully kept together.
-          </h2>
+              <p className="mt-5 max-w-md text-sm font-medium leading-7 text-white/60 sm:text-base">
+                Move between events, vendors, updates and planning tools without losing sight of
+                what matters next.
+              </p>
 
-          <p className="mt-3 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
-            Plan the work, coordinate the people, and keep every important commitment visible from
-            one beautifully organised workspace.
-          </p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/dashboard"
+                  className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full !bg-[#fffaf5] px-5 text-sm font-black !text-[#5d3a55] shadow-[0_16px_38px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:!bg-white hover:shadow-[0_20px_46px_rgba(0,0,0,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                >
+                  <LayoutDashboard className="size-4 !text-[#5d3a55]" />
+                  <span className="!text-[#5d3a55]">Go to dashboard</span>
 
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/32 px-3.5 py-2 text-[0.66rem] font-black uppercase tracking-[0.17em] text-[var(--color-deep-plum)]">
-            <Sparkles className="size-3.5" />
-            Built for calmer planning
+                  <ArrowRight className="size-4 !text-[#5d3a55] transition-transform duration-300 group-hover:translate-x-0.5" />
+                </Link>
+
+                <Link
+                  to="/events"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/22 bg-white/[0.07] px-5 text-sm font-black text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/32 hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                >
+                  <CalendarDays className="size-4" />
+                  My events
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-x-10 gap-y-10 sm:grid-cols-2">
+              <div>
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
+                  Workspace
+                </p>
+
+                <nav aria-label="Customer workspace footer navigation" className="mt-5 space-y-2">
+                  {workspaceLinks.map((link) => {
+                    const Icon = link.icon;
+
+                    return (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className="group flex w-fit items-center gap-2.5 py-1.5 text-sm font-bold text-white/62 transition-colors duration-300 hover:text-white"
+                      >
+                        <Icon className="size-3.5 text-white/40 transition-colors duration-300 group-hover:text-[var(--color-light-champagne)]" />
+
+                        <span className="transition-transform duration-300 group-hover:translate-x-0.5">
+                          {link.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div>
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
+                  Discover
+                </p>
+
+                <nav aria-label="Customer discovery navigation" className="mt-5 space-y-2">
+                  {discoverLinks.map((link) => {
+                    const Icon = link.icon;
+
+                    return (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className="group flex w-fit items-center gap-2.5 py-1.5 text-sm font-bold text-white/62 transition-colors duration-300 hover:text-white"
+                      >
+                        <Icon className="size-3.5 text-white/40 transition-colors duration-300 group-hover:text-[var(--color-light-champagne)]" />
+
+                        <span className="transition-transform duration-300 group-hover:translate-x-0.5">
+                          {link.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div>
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
+                  Account
+                </p>
+
+                <nav aria-label="Customer account navigation" className="mt-5 space-y-2">
+                  {accountLinks.map((link) => {
+                    const Icon = link.icon;
+
+                    return (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className="group flex w-fit items-center gap-2.5 py-1.5 text-sm font-bold text-white/62 transition-colors duration-300 hover:text-white"
+                      >
+                        <Icon className="size-3.5 text-white/40 transition-colors duration-300 group-hover:text-[var(--color-light-champagne)]" />
+
+                        <span className="transition-transform duration-300 group-hover:translate-x-0.5">
+                          {link.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div>
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
+                  Eventure
+                </p>
+
+                <nav aria-label="Eventure footer navigation" className="mt-5 space-y-2">
+                  {eventureLinks.map((link) => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      className="group flex w-fit items-center gap-2 py-1.5 text-sm font-bold text-white/62 transition-colors duration-300 hover:text-white"
+                    >
+                      <span className="transition-transform duration-300 group-hover:translate-x-0.5">
+                        {link.label}
+                      </span>
+
+                      <ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-            Workspace
-          </p>
+        <div className="relative min-h-[25rem] overflow-hidden lg:min-h-full">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-cover bg-center opacity-70"
+            style={{
+              backgroundImage: "url('/images/event-planning-workspace.png')",
+            }}
+          />
 
-          <nav aria-label="Customer workspace footer navigation" className="mt-5 space-y-2">
-            {workspaceLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="group flex w-fit items-center gap-2 py-1.5 text-sm font-bold text-[var(--color-charcoal)]/64 transition-colors duration-300 hover:text-[var(--color-deep-plum)]"
-              >
-                <span className="transition-transform duration-300 group-hover:translate-x-1">
-                  {link.label}
-                </span>
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(31,27,29,0.22)_0%,rgba(31,27,29,0.78)_100%)]"
+          />
 
-                <ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
-              </Link>
-            ))}
-          </nav>
-        </div>
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-near-black)_0%,rgba(31,27,29,0.88)_13%,rgba(31,27,29,0.36)_48%,transparent_86%)] lg:block"
+          />
 
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-            Eventure
-          </p>
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[rgba(93,58,85,0.12)] mix-blend-multiply"
+          />
 
-          <nav aria-label="Eventure footer navigation" className="mt-5 space-y-2">
-            {companyLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="group flex w-fit items-center gap-2 py-1.5 text-sm font-bold text-[var(--color-charcoal)]/64 transition-colors duration-300 hover:text-[var(--color-deep-plum)]"
-              >
-                <span className="transition-transform duration-300 group-hover:translate-x-1">
-                  {link.label}
-                </span>
+          <div
+            aria-hidden="true"
+            className="absolute right-[-8rem] top-[-7rem] size-[24rem] rounded-full border border-white/[0.04]"
+          />
 
-                <ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
-              </Link>
-            ))}
-          </nav>
+          <div
+            aria-hidden="true"
+            className="absolute right-[-3rem] top-[-2rem] size-[17rem] rounded-full border border-white/[0.035]"
+          />
+
+          <div className="absolute inset-x-7 bottom-10 sm:inset-x-10 lg:bottom-14 lg:left-14 lg:right-12">
+            <div className="max-w-md">
+              <div className="flex items-center gap-2 text-[var(--color-light-champagne)]">
+                <Sparkles className="size-4" />
+
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.22em]">
+                  Customer planning
+                </p>
+              </div>
+
+              <p className="mt-5 text-xl font-black leading-7 tracking-[-0.03em] text-white sm:text-2xl">
+                Your plans stay connected as the event evolves.
+              </p>
+
+              <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-white/62">
+                Return to your dashboard, continue an event or explore trusted vendors whenever you
+                need them.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="relative border-t border-white/50 px-6 py-5 sm:px-8 lg:px-10">
-        <div className="flex flex-col gap-3 text-xs font-bold text-[var(--color-charcoal)]/48 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative border-t border-white/[0.09]">
+        <div className="page-container flex flex-col gap-3 py-5 text-xs font-bold text-white/38 sm:flex-row sm:items-center sm:justify-between">
           <p>© {currentYear} Eventure. All rights reserved.</p>
 
-          <p className="flex items-center gap-1.5">
-            Made with
-            <Heart
-              aria-hidden="true"
-              className="size-3.5 fill-[rgba(142,92,103,0.18)] text-[var(--color-rosewood)]"
-            />
-            for celebrations worth remembering.
-          </p>
+          <p>Every detail, thoughtfully kept together.</p>
         </div>
       </div>
     </footer>

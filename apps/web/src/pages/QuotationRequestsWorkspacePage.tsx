@@ -1031,6 +1031,10 @@ export function QuotationRequestsWorkspacePage() {
 
                             <Link
                               to={`/vendors/${request.vendor.slug}`}
+                              state={{
+                                returnTo: `/events/${eventId}/quotations`,
+                                returnLabel: 'Back to quotations',
+                              }}
                               className="group/vendor-link mt-3 inline-flex items-center gap-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:translate-x-0.5 hover:text-[var(--color-rosewood)]"
                             >
                               <Store
@@ -1644,6 +1648,10 @@ export function QuotationRequestsWorkspacePage() {
 
                     <Link
                       to={`/vendors/${selectedRequest.vendor.slug}`}
+                      state={{
+                        returnTo: `/events/${eventId}/quotations`,
+                        returnLabel: 'Back to quotations',
+                      }}
                       className="group/comparison-vendor mt-3 inline-flex items-center gap-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:translate-x-0.5 hover:text-[var(--color-rosewood)]"
                     >
                       <Store

@@ -1385,7 +1385,11 @@ export function MoodBoardWorkspacePage() {
                           {item.vendor ? (
                             <Link
                               className="group/vendor-link mt-5 flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/30 px-4 py-3 text-sm font-black text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/74 hover:bg-white/46 hover:shadow-[0_12px_28px_rgba(31,27,29,0.07)]"
-                              to={`/vendors/${item.vendor.slug}`}
+                              to={`/events/${eventId}/vendors/${item.vendor.slug}`}
+                              state={{
+                                returnTo: `/events/${eventId}/mood-board`,
+                                returnLabel: 'Back to mood board',
+                              }}
                             >
                               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.22)] text-[#3b515b]">
                                 <Store aria-hidden="true" className="size-4" />
