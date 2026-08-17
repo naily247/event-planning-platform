@@ -16,7 +16,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import type {
@@ -30,6 +30,7 @@ import type {
 type ComplaintDetailsDialogProps = {
   complaint: ComplaintDetail;
   currentUserId: string;
+  replySuccessCount: number;
   isReplyPending: boolean;
   isClosePending: boolean;
   replyErrorMessage?: string | null;
@@ -218,6 +219,7 @@ const getActionIcon = (action: ComplaintAction['action']) => {
 export function ComplaintDetailsDialog({
   complaint,
   currentUserId,
+  replySuccessCount,
   isReplyPending,
   isClosePending,
   replyErrorMessage,
@@ -232,6 +234,70 @@ export function ComplaintDetailsDialog({
   const [isCloseFormOpen, setIsCloseFormOpen] = useState(false);
   const [closeReason, setCloseReason] = useState('');
   const [closeValidationError, setCloseValidationError] = useState<string | null>(null);
+
+  const [discardTarget, setDiscardTarget] = useState<'DETAILS' | 'CLOSE_FORM' | null>(null);
+
+  const previousReplySuccessCountRef = useRef(replySuccessCount);
+
+  const hasReplyDraft = replyBody.trim().length > 0;
+  const hasCloseReasonDraft = closeReason.trim().length > 0;
+
+  useEffect(() => {
+    if (replySuccessCount > previousReplySuccessCountRef.current) {
+      setReplyBody('');
+      setReplyValidationError(null);
+    }
+
+    previousReplySuccessCountRef.current = replySuccessCount;
+  }, [replySuccessCount]);
+
+  const requestCloseDetails = () => {
+    if (isReplyPending || isClosePending) {
+      return;
+    }
+
+    if (hasReplyDraft || hasCloseReasonDraft) {
+      setDiscardTarget('DETAILS');
+      return;
+    }
+
+    onClose();
+  };
+
+  const requestCloseFormDismiss = () => {
+    if (isClosePending) {
+      return;
+    }
+
+    if (hasCloseReasonDraft) {
+      setDiscardTarget('CLOSE_FORM');
+      return;
+    }
+
+    setCloseValidationError(null);
+    setCloseReason('');
+    setIsCloseFormOpen(false);
+  };
+
+  const discardChanges = () => {
+    if (discardTarget === 'DETAILS') {
+      setReplyBody('');
+      setReplyValidationError(null);
+      setCloseReason('');
+      setCloseValidationError(null);
+      setIsCloseFormOpen(false);
+      setDiscardTarget(null);
+      onClose();
+      return;
+    }
+
+    if (discardTarget === 'CLOSE_FORM') {
+      setCloseReason('');
+      setCloseValidationError(null);
+      setIsCloseFormOpen(false);
+      setDiscardTarget(null);
+    }
+  };
 
   const TypeIcon = getTypeIcon(complaint.type);
 
@@ -289,11 +355,7 @@ export function ComplaintDetailsDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="complaint-details-title"
-      onClick={() => {
-        if (!isReplyPending && !isClosePending) {
-          onClose();
-        }
-      }}
+      onClick={requestCloseDetails}
     >
       <div className="mx-auto flex min-h-full max-w-6xl items-start justify-center">
         <div
@@ -373,7 +435,7 @@ export function ComplaintDetailsDialog({
                 className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Close complaint details"
                 disabled={isReplyPending || isClosePending}
-                onClick={onClose}
+                onClick={requestCloseDetails}
               >
                 <X aria-hidden="true" className="size-5" />
               </button>
@@ -1244,11 +1306,7 @@ export function ComplaintDetailsDialog({
                               type="button"
                               className="btn-secondary justify-center text-sm font-bold"
                               disabled={isClosePending}
-                              onClick={() => {
-                                setCloseValidationError(null);
-                                setCloseReason('');
-                                setIsCloseFormOpen(false);
-                              }}
+                              onClick={requestCloseFormDismiss}
                             >
                               Keep complaint open
                             </button>
@@ -1288,7 +1346,7 @@ export function ComplaintDetailsDialog({
                 type="button"
                 className="btn-secondary justify-center text-sm font-bold"
                 disabled={isReplyPending || isClosePending}
-                onClick={onClose}
+                onClick={requestCloseDetails}
               >
                 Close details
               </button>
@@ -1296,6 +1354,78 @@ export function ComplaintDetailsDialog({
           </div>
         </div>
       </div>
+      {discardTarget ? (
+        <div
+          className="fixed inset-0 z-[110] grid place-items-center bg-[rgba(31,27,29,0.62)] px-4 py-8 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="discard-complaint-changes-title"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setDiscardTarget(null);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(245,237,248,0.90))] p-6 shadow-[0_34px_100px_rgba(31,27,29,0.30)] backdrop-blur-3xl sm:p-8">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+            />
+
+            <div className="relative">
+              <div className="flex items-start justify-between gap-5">
+                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
+                  <CircleAlert className="size-5" />
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Keep editing"
+                  className="grid size-10 place-items-center rounded-full border border-white/60 bg-white/38 text-[var(--color-charcoal)]/58 transition hover:bg-white/58 hover:text-[var(--color-deep-plum)]"
+                  onClick={() => setDiscardTarget(null)}
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              <p className="mt-6 text-xs font-black uppercase tracking-[0.2em] text-[var(--color-muted-burgundy)]">
+                Unsaved changes
+              </p>
+
+              <h2
+                id="discard-complaint-changes-title"
+                className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl"
+              >
+                Discard what you entered?
+              </h2>
+
+              <p className="mt-4 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
+                {discardTarget === 'CLOSE_FORM'
+                  ? 'You entered a reason for closing this complaint. Leaving the close form will remove that text.'
+                  : 'You have unsent complaint information. Closing these details now will remove what you entered.'}
+              </p>
+
+              <div className="mt-7 flex flex-col-reverse gap-3 border-t border-white/55 pt-6 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="btn-secondary justify-center text-sm font-black"
+                  onClick={() => setDiscardTarget(null)}
+                >
+                  Keep editing
+                </button>
+
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition hover:-translate-y-0.5 hover:brightness-95"
+                  onClick={discardChanges}
+                >
+                  Discard changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

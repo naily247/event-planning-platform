@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   AlertCircle,
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   MessageSquareText,
@@ -17,8 +16,6 @@ import {
   type VendorReview,
   type VendorReviewSort,
 } from '../features/vendors/vendor.api';
-import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
-import { Link } from 'react-router-dom';
 import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const PAGE_LIMIT = 8;
@@ -125,54 +122,60 @@ function MetricCard({
 
 function ReviewCard({ review }: { review: VendorReview }) {
   return (
-    <article className="glass-card group relative overflow-hidden p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(64,42,51,0.1)]">
-      <div className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl transition duration-300 group-hover:bg-[rgba(183,167,200,0.2)]" />
-
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-[1.85rem] border border-white/60 bg-white/44 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_62px_rgba(35,24,30,0.11)] sm:p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-3.5">
+          <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
             <UserRound className="size-5" />
           </div>
 
-          <div>
-            <p className="font-black tracking-[-0.02em] text-[var(--color-near-black)]">
+          <div className="min-w-0">
+            <p className="truncate font-black tracking-[-0.02em] text-[var(--color-near-black)]">
               {getCustomerName(review) || 'Verified customer'}
             </p>
 
             <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/42">
-              {formatDate(review.createdAt)}
+              Reviewed {formatDate(review.createdAt)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-full border border-white/65 bg-white/45 px-3.5 py-2 shadow-sm backdrop-blur-xl">
-          <RatingStars rating={review.overallRating} />
+        <div className="shrink-0 rounded-[1.1rem] border border-white/60 bg-white/34 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <RatingStars rating={review.overallRating} />
 
-          <span className="text-sm font-black text-[var(--color-near-black)]">
-            {review.overallRating}.0
-          </span>
+            <span className="text-sm font-black text-[var(--color-near-black)]">
+              {review.overallRating}.0
+            </span>
+          </div>
         </div>
       </div>
 
       {review.comment ? (
-        <div className="relative mt-5 rounded-[1.35rem] border border-white/65 bg-white/45 p-5 shadow-inner">
-          <MessageSquareText className="size-5 text-[var(--color-rosewood)]" />
+        <div className="mt-5 rounded-[1.35rem] border border-white/58 bg-white/28 p-5">
+          <div className="flex items-center gap-2">
+            <MessageSquareText className="size-4 text-[var(--color-rosewood)]" />
 
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[var(--color-charcoal)]/64">
+            <p className="text-[0.63rem] font-black uppercase tracking-[0.13em] text-[var(--color-rosewood)]">
+              Customer feedback
+            </p>
+          </div>
+
+          <p className="mt-3 whitespace-pre-wrap text-sm font-medium leading-7 text-[var(--color-charcoal)]/64">
             {review.comment}
           </p>
         </div>
       ) : (
-        <div className="relative mt-5 rounded-[1.35rem] border border-dashed border-white/80 bg-white/35 p-5">
-          <p className="text-sm leading-6 text-[var(--color-charcoal)]/54">
+        <div className="mt-5 rounded-[1.35rem] border border-dashed border-[rgba(93,58,85,0.14)] bg-white/20 p-5">
+          <p className="text-sm font-medium leading-6 text-[var(--color-charcoal)]/52">
             The customer submitted ratings without a written comment.
           </p>
         </div>
       )}
 
-      <div className="relative mt-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-white/65 bg-white/48 p-4 shadow-inner">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+      <div className="mt-4 grid grid-cols-3 gap-2.5">
+        <div className="rounded-[1.15rem] border border-white/58 bg-white/28 p-3.5">
+          <p className="text-[0.59rem] font-black uppercase tracking-[0.11em] text-[var(--color-charcoal)]/38">
             Overall
           </p>
 
@@ -181,44 +184,56 @@ function ReviewCard({ review }: { review: VendorReview }) {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/65 bg-white/48 p-4 shadow-inner">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+        <div className="rounded-[1.15rem] border border-white/58 bg-white/28 p-3.5">
+          <p className="text-[0.59rem] font-black uppercase tracking-[0.11em] text-[var(--color-charcoal)]/38">
             Service
           </p>
 
           <p className="mt-2 text-lg font-black text-[var(--color-near-black)]">
-            {review.serviceRating === null ? 'Not rated' : `${review.serviceRating}/5`}
+            {review.serviceRating === null ? '—' : `${review.serviceRating}/5`}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/65 bg-white/48 p-4 shadow-inner">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+        <div className="rounded-[1.15rem] border border-white/58 bg-white/28 p-3.5">
+          <p className="text-[0.59rem] font-black uppercase tracking-[0.11em] text-[var(--color-charcoal)]/38">
             Communication
           </p>
 
           <p className="mt-2 text-lg font-black text-[var(--color-near-black)]">
-            {review.communicationRating === null ? 'Not rated' : `${review.communicationRating}/5`}
+            {review.communicationRating === null ? '—' : `${review.communicationRating}/5`}
           </p>
         </div>
       </div>
 
-      {review.package && (
-        <div className="relative mt-5 flex items-center gap-3 rounded-2xl border border-white/65 bg-white/48 p-4 shadow-inner">
-          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(122,80,99,0.1)] text-[var(--color-rosewood)]">
+      {review.package ? (
+        <div className="mt-4 flex items-start gap-3 rounded-[1.2rem] border border-white/58 bg-white/28 p-4">
+          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[#405d69]">
             <Package className="size-4" />
           </div>
 
-          <div>
-            <p className="text-xs font-semibold text-[var(--color-charcoal)]/42">
-              Reviewed package
+          <div className="min-w-0">
+            <p className="text-[0.61rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
+              Reviewed service
             </p>
 
-            <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
+            <p className="mt-1 truncate text-sm font-black text-[var(--color-near-black)]">
               {review.package.title}
             </p>
           </div>
         </div>
-      )}
+      ) : null}
+
+      <div className="mt-auto pt-4">
+        <div className="flex items-center gap-2 border-t border-[rgba(93,58,85,0.08)] pt-4">
+          <span className="grid size-7 place-items-center rounded-full bg-emerald-50 text-emerald-700">
+            <Star className="size-3.5 fill-current" />
+          </span>
+
+          <p className="text-xs font-bold text-[var(--color-charcoal)]/46">
+            Verified feedback from a completed booking
+          </p>
+        </div>
+      </div>
     </article>
   );
 }
@@ -289,346 +304,471 @@ export function VendorReviewsPage() {
   }
 
   return (
-    <main className="workspace-shell">
+    <main className="workspace-shell relative">
       <div className="workspace-container w-full max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
+        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+          />
+
+          <div className="relative flex items-center gap-4">
             <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+
+            <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                 Vendor workspace
               </p>
 
-              <p className="mt-1 font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+              <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
                 Customer reviews
-              </p>
+              </h1>
             </div>
           </div>
         </header>
 
-        <div className="mt-5">
-          <VendorWorkspaceNav />
-        </div>
+        <div className="pb-10 pt-6">
+          <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
+            />
 
-        <section className="glass-card relative mt-10 overflow-hidden p-6 sm:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 left-1/3 size-56 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-36 left-[30%] size-72 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl"
+            />
 
-          <div className="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/42 px-4 py-2 text-sm font-black text-[var(--color-rosewood)] shadow-sm backdrop-blur-xl">
-                <Star className="size-4 fill-current" />
-                Reviews
-              </div>
-
-              <h1 className="mt-5 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl lg:text-5xl">
-                Customer feedback
-              </h1>
-
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
-                See how customers rate your completed work, monitor feedback trends, and understand
-                where your service creates the strongest impression.
-              </p>
-            </div>
-
-            <div className="relative min-w-[230px] overflow-hidden rounded-[1.6rem] border border-white/65 bg-white/42 p-5 shadow-[0_18px_46px_rgba(64,42,51,0.08)] backdrop-blur-xl">
-              <div className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-[rgba(183,167,200,0.18)] blur-2xl" />
-
-              <div className="relative flex items-center gap-4">
-                <div className="grid size-12 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-                  <MessageSquareText className="size-5" />
+            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-10 lg:p-10">
+              <div>
+                <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                  <Star className="size-4 fill-current" />
+                  Reputation
                 </div>
 
-                <div>
-                  <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                    {onboardingQuery.isLoading || reviewsQuery.isLoading ? '—' : totalReviews}
-                  </p>
+                <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+                  Understand the experience customers remember.
+                </h2>
 
-                  <p className="mt-1 text-xs font-bold leading-5 text-[var(--color-charcoal)]/52">
-                    Verified customer reviews
-                  </p>
+                <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
+                  Review verified feedback from completed bookings, track service quality, and see
+                  where your customer experience creates the strongest impression.
+                </p>
+
+                <div className="mt-7 flex flex-wrap gap-2.5">
+                  <span className="soft-chip text-xs font-black">
+                    <MessageSquareText className="size-4" />
+                    {onboardingQuery.isLoading || reviewsQuery.isLoading ? '—' : totalReviews}{' '}
+                    reviews
+                  </span>
+
+                  <span className="soft-chip text-xs font-black">
+                    <Star className="size-4 fill-current" />
+                    {formatAverage(summary?.averageOverallRating ?? null)} overall
+                  </span>
+
+                  <span className="soft-chip text-xs font-black">Verified customers</span>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {onboardingQuery.isError ? (
-          <section className="glass-card relative mt-6 overflow-hidden p-8 text-center sm:p-10">
-            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-red-100/70 blur-3xl" />
-
-            <div className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600">
-              <AlertCircle className="size-6" />
-            </div>
-
-            <h2 className="relative mt-5 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-              Vendor profile could not be loaded
-            </h2>
-
-            <p className="relative mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-charcoal)]/62">
-              {getErrorMessage(onboardingQuery.error)}
-            </p>
-
-            <button
-              type="button"
-              onClick={() => onboardingQuery.refetch()}
-              className="relative mt-6 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
-            >
-              Try again
-            </button>
-          </section>
-        ) : onboardingQuery.isLoading || reviewsQuery.isLoading ? (
-          <>
-            <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="glass-card h-36 animate-pulse" />
-              ))}
-            </section>
-
-            <section className="mt-6 grid gap-5 xl:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <ReviewSkeleton key={index} />
-              ))}
-            </section>
-          </>
-        ) : reviewsQuery.isError ? (
-          <section className="glass-card relative mt-6 overflow-hidden p-8 text-center sm:p-10">
-            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-red-100/70 blur-3xl" />
-
-            <div className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600">
-              <AlertCircle className="size-6" />
-            </div>
-
-            <h2 className="relative mt-5 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-              Reviews could not be loaded
-            </h2>
-
-            <p className="relative mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-charcoal)]/62">
-              {getErrorMessage(reviewsQuery.error)}
-            </p>
-
-            <button
-              type="button"
-              onClick={() => reviewsQuery.refetch()}
-              className="relative mt-6 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
-            >
-              Try again
-            </button>
-          </section>
-        ) : (
-          <>
-            <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <MetricCard
-                label="Overall rating"
-                value={formatAverage(summary?.averageOverallRating ?? null)}
-                description="Average verified customer score"
-              />
-
-              <MetricCard
-                label="Service rating"
-                value={formatAverage(summary?.averageServiceRating ?? null)}
-                description="Average quality-of-service score"
-              />
-
-              <MetricCard
-                label="Communication"
-                value={formatAverage(summary?.averageCommunicationRating ?? null)}
-                description="Average customer communication score"
-              />
-
-              <MetricCard
-                label="Verified reviews"
-                value={String(totalReviews)}
-                description="Reviews from completed bookings"
-              />
-            </section>
-
-            <section className="mt-6 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
-              <div className="glass-card relative overflow-hidden p-6 sm:p-7">
-                <div className="pointer-events-none absolute -left-16 -top-20 size-48 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
+              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
+                />
 
                 <div className="relative">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
-                    Rating breakdown
-                  </p>
+                  <div className="flex items-start justify-between gap-5">
+                    <div>
+                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Reputation summary
+                      </p>
 
-                  <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
-                    <p className="text-5xl font-black tracking-[-0.055em] text-[var(--color-near-black)]">
-                      {formatAverage(summary?.averageOverallRating ?? null)}
+                      <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                        Customer trust at a glance
+                      </h3>
+                    </div>
+
+                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                      <Star className="size-5 fill-current" />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex items-end gap-4">
+                    <p className="text-5xl font-black tracking-[-0.065em] text-[var(--color-near-black)]">
+                      {onboardingQuery.isLoading || reviewsQuery.isLoading
+                        ? '—'
+                        : formatAverage(summary?.averageOverallRating ?? null)}
                     </p>
 
-                    <div>
-                      {summary?.averageOverallRating ? (
-                        <RatingStars
-                          rating={Math.round(summary.averageOverallRating)}
-                          size="large"
-                        />
-                      ) : (
-                        <RatingStars rating={0} size="large" />
-                      )}
+                    <div className="pb-1">
+                      <RatingStars
+                        rating={
+                          summary?.averageOverallRating
+                            ? Math.round(summary.averageOverallRating)
+                            : 0
+                        }
+                        size="large"
+                      />
 
-                      <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/52">
-                        Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
+                      <p className="mt-2 text-xs font-bold text-[var(--color-charcoal)]/46">
+                        {totalReviews} verified {totalReviews === 1 ? 'review' : 'reviews'}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-7 space-y-4">
-                    {[5, 4, 3, 2, 1].map((rating) => {
-                      const count = summary?.ratingBreakdown[rating as 1 | 2 | 3 | 4 | 5] ?? 0;
-                      const widthPercentage = (count / maximumBreakdownValue) * 100;
+                  <div className="mt-6 grid grid-cols-3 gap-3">
+                    <div className="rounded-[1.2rem] border border-white/60 bg-white/34 p-4">
+                      <p className="text-[0.61rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
+                        Overall
+                      </p>
 
-                      return (
-                        <div
-                          key={rating}
-                          className="grid grid-cols-[52px_1fr_34px] items-center gap-3"
-                        >
-                          <div className="flex items-center gap-1 text-sm font-black text-[var(--color-near-black)]">
-                            {rating}
-                            <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                          </div>
+                      <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
+                        {formatAverage(summary?.averageOverallRating ?? null)}
+                      </p>
+                    </div>
 
-                          <div className="h-2.5 overflow-hidden rounded-full bg-white/55 shadow-inner">
-                            <div
-                              className="h-full rounded-full bg-[var(--color-deep-plum)] transition-all duration-500"
-                              style={{
-                                width: `${widthPercentage}%`,
-                              }}
-                            />
-                          </div>
+                    <div className="rounded-[1.2rem] border border-white/60 bg-white/34 p-4">
+                      <p className="text-[0.61rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
+                        Service
+                      </p>
 
-                          <p className="text-right text-sm font-semibold text-[var(--color-charcoal)]/52">
-                            {count}
-                          </p>
-                        </div>
-                      );
-                    })}
+                      <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
+                        {formatAverage(summary?.averageServiceRating ?? null)}
+                      </p>
+                    </div>
+
+                    <div className="rounded-[1.2rem] border border-white/60 bg-white/34 p-4">
+                      <p className="text-[0.61rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
+                        Communication
+                      </p>
+
+                      <p className="mt-2 text-xl font-black text-[var(--color-near-black)]">
+                        {formatAverage(summary?.averageCommunicationRating ?? null)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </article>
+            </div>
+          </section>
 
-              <div className="glass-card relative overflow-hidden p-6 sm:p-7">
-                <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-
-                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
-                      Review insights
-                    </p>
-
-                    <h2 className="mt-2 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                      Understanding your feedback
-                    </h2>
-                  </div>
-
-                  <select
-                    value={sort}
-                    onChange={(event) => handleSortChange(event.target.value as VendorReviewSort)}
-                    className="rounded-2xl border border-white/70 bg-white/65 px-4 py-3 text-sm font-black text-[var(--color-near-black)] outline-none shadow-sm transition duration-300 focus:border-[rgba(183,167,200,0.75)] focus:bg-white focus:ring-4 focus:ring-[rgba(183,167,200,0.18)]"
-                  >
-                    {vendorReviewSortOptions.map((sortOption) => (
-                      <option key={sortOption} value={sortOption}>
-                        {sortLabels[sortOption]}
-                      </option>
-                    ))}
-                  </select>
+          {onboardingQuery.isError ? (
+            <section className="mt-6 grid min-h-72 place-items-center rounded-[2rem] border border-red-200/70 bg-red-50/55 p-8 text-center shadow-[0_18px_48px_rgba(35,24,30,0.06)]">
+              <div className="max-w-lg">
+                <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-red-100 text-red-600">
+                  <AlertCircle className="size-6" />
                 </div>
 
-                <div className="relative mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[1.35rem] border border-white/65 bg-white/45 p-5 shadow-inner">
-                    <p className="text-sm font-black text-[var(--color-near-black)]">
-                      Verified feedback only
-                    </p>
+                <h2 className="mt-5 text-2xl font-black tracking-[-0.04em] text-red-900">
+                  Vendor profile could not be loaded
+                </h2>
 
-                    <p className="mt-2 text-sm leading-7 text-[var(--color-charcoal)]/60">
-                      Reviews shown here come from customers with completed bookings and exclude
-                      hidden moderation records.
-                    </p>
-                  </div>
+                <p className="mt-3 text-sm leading-7 text-red-700">
+                  {getErrorMessage(onboardingQuery.error)}
+                </p>
 
-                  <div className="rounded-[1.35rem] border border-white/65 bg-white/45 p-5 shadow-inner">
-                    <p className="text-sm font-black text-[var(--color-near-black)]">
-                      Read-only vendor view
-                    </p>
-
-                    <p className="mt-2 text-sm leading-7 text-[var(--color-charcoal)]/60">
-                      The current backend does not yet support vendor replies, editing, or removal
-                      of customer feedback.
-                    </p>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => onboardingQuery.refetch()}
+                  className="mt-6 rounded-full bg-red-700 px-5 py-3 text-sm font-black !text-white"
+                >
+                  Try again
+                </button>
               </div>
             </section>
+          ) : onboardingQuery.isLoading || reviewsQuery.isLoading ? (
+            <>
+              <section className="mt-6 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
+                <div className="h-80 animate-pulse rounded-[2rem] border border-white/58 bg-white/42" />
+                <div className="h-80 animate-pulse rounded-[2rem] border border-white/58 bg-white/42" />
+              </section>
 
-            <section className="mt-6">
-              {reviews.length === 0 ? (
-                <div className="glass-card relative overflow-hidden p-10 text-center sm:p-14">
-                  <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-                  <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
-
-                  <div className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_14px_34px_rgba(91,61,82,0.2)]">
-                    <Star className="size-6" />
-                  </div>
-
-                  <h2 className="relative mt-5 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                    No verified reviews yet
-                  </h2>
-
-                  <p className="relative mx-auto mt-3 max-w-lg text-sm leading-7 text-[var(--color-charcoal)]/60">
-                    Customer reviews will appear here after completed bookings are reviewed and
-                    remain publicly visible.
-                  </p>
+              <section className="mt-6 grid gap-5 xl:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <ReviewSkeleton key={index} />
+                ))}
+              </section>
+            </>
+          ) : reviewsQuery.isError ? (
+            <section className="mt-6 grid min-h-72 place-items-center rounded-[2rem] border border-red-200/70 bg-red-50/55 p-8 text-center shadow-[0_18px_48px_rgba(35,24,30,0.06)]">
+              <div className="max-w-lg">
+                <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-red-100 text-red-600">
+                  <AlertCircle className="size-6" />
                 </div>
-              ) : (
-                <>
-                  <div className="grid gap-5 xl:grid-cols-2">
-                    {reviews.map((review) => (
-                      <ReviewCard key={review.id} review={review} />
-                    ))}
+
+                <h2 className="mt-5 text-2xl font-black tracking-[-0.04em] text-red-900">
+                  Reviews could not be loaded
+                </h2>
+
+                <p className="mt-3 text-sm leading-7 text-red-700">
+                  {getErrorMessage(reviewsQuery.error)}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => reviewsQuery.refetch()}
+                  className="mt-6 rounded-full bg-red-700 px-5 py-3 text-sm font-black !text-white"
+                >
+                  Try again
+                </button>
+              </div>
+            </section>
+          ) : (
+            <>
+              <section className="mt-6 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
+                <article className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -left-16 -top-20 size-48 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl"
+                  />
+
+                  <div className="relative">
+                    <p className="section-eyebrow">Rating distribution</p>
+
+                    <h2 className="section-title">How customers rate you</h2>
+
+                    <p className="section-description">
+                      See how your verified overall ratings are distributed across the five-star
+                      scale.
+                    </p>
+
+                    <div className="mt-7 space-y-4">
+                      {[5, 4, 3, 2, 1].map((rating) => {
+                        const count = summary?.ratingBreakdown[rating as 1 | 2 | 3 | 4 | 5] ?? 0;
+
+                        const widthPercentage = (count / maximumBreakdownValue) * 100;
+
+                        return (
+                          <div
+                            key={rating}
+                            className="grid grid-cols-[46px_1fr_32px] items-center gap-3"
+                          >
+                            <div className="flex items-center gap-1 text-sm font-black text-[var(--color-near-black)]">
+                              {rating}
+
+                              <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                            </div>
+
+                            <div className="h-2.5 overflow-hidden rounded-full bg-[rgba(91,61,82,0.08)]">
+                              <div
+                                className="h-full rounded-full bg-[var(--color-deep-plum)] transition-all duration-500"
+                                style={{ width: `${widthPercentage}%` }}
+                              />
+                            </div>
+
+                            <p className="text-right text-sm font-black text-[var(--color-charcoal)]/48">
+                              {count}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
+                </article>
 
-                  {pagination && pagination.totalPages > 1 && (
-                    <div className="glass-card relative mt-8 flex flex-col items-center justify-between gap-4 overflow-hidden px-5 py-4 sm:flex-row">
-                      <div className="pointer-events-none absolute -right-12 -top-14 size-32 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
+                <article className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+                  />
 
-                      <div className="relative">
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Showing {reviews.length} of {pagination.total} reviews
-                        </p>
+                  <div className="relative">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="section-eyebrow">Review insights</p>
 
-                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
-                          Page {pagination.page} of {pagination.totalPages}
+                        <h2 className="section-title">What this feedback means</h2>
+
+                        <p className="section-description max-w-xl">
+                          Reviews are verified against completed bookings and remain read-only for
+                          vendors.
                         </p>
                       </div>
 
-                      <div className="relative flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={!pagination.hasPreviousPage}
-                          onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
-                          className="inline-flex items-center gap-2 rounded-2xl border border-white/70 bg-white/65 px-4 py-2.5 text-sm font-black text-[var(--color-near-black)] shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
-                        >
-                          <ChevronLeft className="size-4" />
-                          Previous
-                        </button>
+                      <select
+                        value={sort}
+                        onChange={(event) =>
+                          handleSortChange(event.target.value as VendorReviewSort)
+                        }
+                        className="w-fit rounded-full border border-white/60 bg-white/36 px-4 py-3 text-sm font-black text-[var(--color-charcoal)] outline-none transition focus:border-[rgba(91,61,82,0.28)] focus:bg-white/56 focus:ring-4 focus:ring-[rgba(183,167,200,0.16)]"
+                      >
+                        {vendorReviewSortOptions.map((sortOption) => (
+                          <option key={sortOption} value={sortOption}>
+                            {sortLabels[sortOption]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                        <button
-                          type="button"
-                          disabled={!pagination.hasNextPage}
-                          onClick={() => setPage((currentPage) => currentPage + 1)}
-                          className="inline-flex items-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-4 py-2.5 text-sm font-black text-white shadow-[0_12px_28px_rgba(91,61,82,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
-                        >
-                          Next
-                          <ChevronRight className="size-4" />
-                        </button>
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[1.3rem] border border-white/58 bg-white/30 p-5">
+                        <div className="grid size-9 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+                          <Star className="size-4 fill-current" />
+                        </div>
+
+                        <p className="mt-4 text-sm font-black text-[var(--color-near-black)]">
+                          Verified feedback
+                        </p>
+
+                        <p className="mt-2 text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
+                          Reviews come from customers connected to completed Eventure bookings.
+                        </p>
+                      </div>
+
+                      <div className="rounded-[1.3rem] border border-white/58 bg-white/30 p-5">
+                        <div className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                          <MessageSquareText className="size-4" />
+                        </div>
+
+                        <p className="mt-4 text-sm font-black text-[var(--color-near-black)]">
+                          Read-only workspace
+                        </p>
+
+                        <p className="mt-2 text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
+                          Vendor replies, edits and removals are not currently supported by this
+                          workflow.
+                        </p>
                       </div>
                     </div>
-                  )}
-                </>
-              )}
-            </section>
-          </>
-        )}
+
+                    <div className="mt-3 rounded-[1.3rem] border border-white/58 bg-white/30 p-5">
+                      <p className="text-[0.63rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
+                        Reputation snapshot
+                      </p>
+
+                      <div className="mt-4 grid grid-cols-3 gap-3">
+                        <div>
+                          <p className="text-2xl font-black text-[var(--color-near-black)]">
+                            {formatAverage(summary?.averageOverallRating ?? null)}
+                          </p>
+
+                          <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/44">
+                            Overall
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-2xl font-black text-[var(--color-near-black)]">
+                            {formatAverage(summary?.averageServiceRating ?? null)}
+                          </p>
+
+                          <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/44">
+                            Service
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-2xl font-black text-[var(--color-near-black)]">
+                            {formatAverage(summary?.averageCommunicationRating ?? null)}
+                          </p>
+
+                          <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/44">
+                            Communication
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </section>
+
+              <section className="mt-6">
+                <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="section-eyebrow">Customer feedback</p>
+
+                    <h2 className="section-title">Verified reviews</h2>
+
+                    <p className="section-description max-w-2xl">
+                      Read the ratings and written feedback customers left after completed bookings.
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <span className="soft-chip text-xs font-black">
+                      <MessageSquareText className="size-4" />
+                      {totalReviews} total
+                    </span>
+
+                    {pagination ? (
+                      <span className="soft-chip text-xs font-black">
+                        Page {pagination.page} of {pagination.totalPages}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+
+                {reviews.length === 0 ? (
+                  <div className="grid min-h-72 place-items-center rounded-[2rem] border border-white/60 bg-white/44 p-8 text-center shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl">
+                    <div className="max-w-lg">
+                      <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <Star className="size-6" />
+                      </div>
+
+                      <h2 className="mt-5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                        No verified reviews yet
+                      </h2>
+
+                      <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--color-charcoal)]/58">
+                        Customer feedback will appear here after completed bookings receive verified
+                        reviews.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid gap-5 xl:grid-cols-2">
+                      {reviews.map((review) => (
+                        <ReviewCard key={review.id} review={review} />
+                      ))}
+                    </div>
+
+                    {pagination && pagination.totalPages > 1 ? (
+                      <div className="mt-6 flex flex-col gap-4 rounded-[1.75rem] border border-white/58 bg-white/42 p-4 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                        <div>
+                          <p className="text-sm font-black text-[var(--color-near-black)]">
+                            Showing {reviews.length} of {pagination.total} reviews
+                          </p>
+
+                          <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/46">
+                            Page {pagination.page} of {pagination.totalPages}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={!pagination.hasPreviousPage}
+                            onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/60 bg-white/36 px-4 py-2.5 text-sm font-black text-[var(--color-charcoal)] transition hover:bg-white/56 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-35"
+                          >
+                            <ChevronLeft className="size-4" />
+                            Previous
+                          </button>
+
+                          <span className="grid min-w-10 place-items-center rounded-full bg-[var(--color-deep-plum)] px-3 py-2.5 text-sm font-black text-white">
+                            {pagination.page}
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={!pagination.hasNextPage}
+                            onClick={() => setPage((currentPage) => currentPage + 1)}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/60 bg-white/36 px-4 py-2.5 text-sm font-black text-[var(--color-charcoal)] transition hover:bg-white/56 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-35"
+                          >
+                            Next
+                            <ChevronRight className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </section>
+            </>
+          )}
+        </div>
       </div>
     </main>
   );

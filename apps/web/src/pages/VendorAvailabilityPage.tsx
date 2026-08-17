@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
-  ArrowLeft,
   Ban,
   BriefcaseBusiness,
   CalendarDays,
@@ -10,16 +9,13 @@ import {
   CircleAlert,
   Clock3,
   LoaderCircle,
-  MapPin,
   Plus,
   Trash2,
   X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
 import { z } from 'zod';
-import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
 import {
   createVendorAvailabilityBlock,
   deleteVendorAvailabilityBlock,
@@ -203,6 +199,7 @@ export function VendorAvailabilityPage() {
   const queryClient = useQueryClient();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [showCreateDiscardConfirmation, setShowCreateDiscardConfirmation] = useState(false);
   const [deletingBlock, setDeletingBlock] = useState<VendorAvailabilityBlock | null>(null);
 
   const availabilityRange = useMemo(() => getAvailabilityRange(), []);
@@ -240,6 +237,7 @@ export function VendorAvailabilityPage() {
         reason: '',
       });
 
+      setShowCreateDiscardConfirmation(false);
       setIsCreateDialogOpen(false);
     },
   });
@@ -301,12 +299,14 @@ export function VendorAvailabilityPage() {
   const openCreateDialog = () => {
     createMutation.reset();
     form.clearErrors();
+
     form.reset({
       startsAt: getDefaultStart(),
       endsAt: getDefaultEnd(),
       reason: '',
     });
 
+    setShowCreateDiscardConfirmation(false);
     setIsCreateDialogOpen(true);
   };
 
@@ -315,8 +315,38 @@ export function VendorAvailabilityPage() {
       return;
     }
 
+    if (form.formState.isDirty) {
+      setShowCreateDiscardConfirmation(true);
+      return;
+    }
+
     createMutation.reset();
     form.clearErrors();
+
+    form.reset({
+      startsAt: getDefaultStart(),
+      endsAt: getDefaultEnd(),
+      reason: '',
+    });
+
+    setIsCreateDialogOpen(false);
+  };
+
+  const discardCreateChanges = () => {
+    if (createMutation.isPending) {
+      return;
+    }
+
+    setShowCreateDiscardConfirmation(false);
+    createMutation.reset();
+    form.clearErrors();
+
+    form.reset({
+      startsAt: getDefaultStart(),
+      endsAt: getDefaultEnd(),
+      reason: '',
+    });
+
     setIsCreateDialogOpen(false);
   };
 
@@ -380,188 +410,236 @@ export function VendorAvailabilityPage() {
   const availability = availabilityQuery.data;
 
   return (
-    <div className="workspace-shell">
+    <div className="workspace-shell relative">
       <div className="workspace-container max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <PageBackButton fallback="/dashboard" label="Dashboard" className="shrink-0" />
+        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+          />
 
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Vendor workspace
-              </p>
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
 
-              <p className="mt-1 font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                Availability management
-              </p>
+              <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                  Vendor workspace
+                </p>
+
+                <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
+                  Availability management
+                </h1>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            className="btn-primary text-sm font-bold"
-            onClick={openCreateDialog}
-          >
-            <Plus className="size-4" />
-            Block unavailable time
-          </button>
+            <button
+              type="button"
+              className="btn-primary w-fit text-sm font-bold"
+              onClick={openCreateDialog}
+            >
+              <Plus className="size-4" />
+              Block unavailable time
+            </button>
+          </div>
         </header>
 
-        <div className="mt-5">
-          <VendorWorkspaceNav />
-        </div>
+        <main className="pb-10 pt-6">
+          <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
+            />
 
-        <main className="py-10">
-          <section className="grid gap-6 lg:grid-cols-[1fr_0.4fr] lg:items-end">
-            <div>
-              <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                <CalendarRange className="size-4" />
-                Availability
-              </div>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-36 left-[32%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
+            />
 
-              <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
-                Protect your schedule before the next booking arrives.
-              </h1>
-
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--color-charcoal)]/70">
-                Review committed bookings and block periods when your business is unavailable.
-                Eventure prevents overlapping bookings and conflicting schedule blocks.
-              </p>
-            </div>
-
-            <article className="glass-card overflow-hidden p-5 sm:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                    Schedule overview
-                  </p>
-
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                    Next 90 days
-                  </h2>
-                </div>
-
-                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                  <CalendarRange className="size-5" />
-                </div>
-              </div>
-
-              <p className="mt-3 text-sm leading-6 text-[var(--color-charcoal)]/60">
-                A quick view of confirmed commitments and time you have manually protected.
-              </p>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-[1.35rem] border border-white/50 bg-white/28 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.3)] text-[#334954]">
-                      <BriefcaseBusiness className="size-4" />
-                    </div>
-
-                    <span className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/40">
-                      Committed
-                    </span>
-                  </div>
-
-                  <p className="mt-4 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                    {availability.bookings.length}
-                  </p>
-
-                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/48">
-                    Scheduled bookings
-                  </p>
-                </div>
-
-                <div className="rounded-[1.35rem] border border-white/50 bg-white/28 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="grid size-9 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
-                      <Ban className="size-4" />
-                    </div>
-
-                    <span className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/40">
-                      Protected
-                    </span>
-                  </div>
-
-                  <p className="mt-4 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                    {availability.blocks.length}
-                  </p>
-
-                  <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/48">
-                    Blocked periods
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-start gap-3 border-t border-white/48 pt-5">
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.11)] text-[var(--color-deep-plum)]">
-                  <Clock3 className="size-3.5" />
-                </span>
-
-                <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                  Eventure checks these periods before allowing new bookings to proceed.
-                </p>
-              </div>
-            </article>
-          </section>
-
-          <section className="mt-8 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-            <article className="glass-card p-6 sm:p-7">
+            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10 lg:p-10">
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                  Schedule timeline
-                </p>
+                <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                  <CalendarRange className="size-4" />
+                  Service availability
+                </div>
 
-                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                  Upcoming bookings and unavailable periods
+                <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+                  Protect your schedule before the next booking arrives.
                 </h2>
 
-                <p className="mt-3 max-w-2xl leading-7 text-[var(--color-charcoal)]/64">
-                  Booking periods are created automatically. Manual blocks can be removed whenever
-                  your schedule changes.
+                <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
+                  Review committed bookings and block periods when your business is unavailable.
+                  Eventure uses both when checking whether new work can proceed.
+                </p>
+
+                <div className="mt-7 flex flex-wrap gap-2.5">
+                  <span className="soft-chip text-xs font-black">
+                    <BriefcaseBusiness className="size-4" />
+                    {availability.bookings.length} bookings
+                  </span>
+
+                  <span className="soft-chip text-xs font-black">
+                    <Ban className="size-4" />
+                    {availability.blocks.length} blocked
+                  </span>
+
+                  <span className="soft-chip text-xs font-black">
+                    <CalendarRange className="size-4" />
+                    Next 90 days
+                  </span>
+                </div>
+              </div>
+
+              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
+                />
+
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-5">
+                    <div>
+                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Schedule overview
+                      </p>
+
+                      <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                        Next 90 days
+                      </h3>
+                    </div>
+
+                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                      <CalendarRange className="size-5" />
+                    </div>
+                  </div>
+
+                  <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                    Confirmed commitments and manually protected time are both considered before new
+                    bookings can proceed.
+                  </p>
+
+                  <div className="mt-6 grid grid-cols-2 gap-3">
+                    <div className="rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#405d69]">
+                          <BriefcaseBusiness className="size-4" />
+                        </div>
+
+                        <span className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
+                          Committed
+                        </span>
+                      </div>
+
+                      <p className="mt-4 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                        {availability.bookings.length}
+                      </p>
+
+                      <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/46">
+                        Scheduled bookings
+                      </p>
+                    </div>
+
+                    <div className="rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="grid size-9 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
+                          <Ban className="size-4" />
+                        </div>
+
+                        <span className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
+                          Protected
+                        </span>
+                      </div>
+
+                      <p className="mt-4 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                        {availability.blocks.length}
+                      </p>
+
+                      <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/46">
+                        Blocked periods
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex items-start gap-3 rounded-[1.25rem] border border-white/58 bg-white/30 p-4">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
+                      <Clock3 className="size-4" />
+                    </span>
+
+                    <p className="text-xs font-bold leading-5 text-[var(--color-charcoal)]/55">
+                      Eventure checks these periods before allowing overlapping work to move
+                      forward.
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section className="mt-6">
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="section-eyebrow">Schedule timeline</p>
+
+                <h2 className="section-title">Upcoming commitments</h2>
+
+                <p className="section-description max-w-2xl">
+                  Bookings are protected automatically. Manual unavailable periods can be removed
+                  whenever your plans change.
                 </p>
               </div>
 
+              <button
+                type="button"
+                className="btn-secondary w-fit text-sm font-bold"
+                onClick={openCreateDialog}
+              >
+                <Plus className="size-4" />
+                Add unavailable period
+              </button>
+            </div>
+
+            <article className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
               {timelineItems.length > 0 ? (
-                <div className="mt-7 space-y-4">
+                <div className="space-y-4">
                   {timelineItems.map((item, index) => {
                     if (item.type === 'BOOKING') {
                       return (
                         <div
                           key={`booking-${item.id}`}
-                          className="group relative overflow-hidden rounded-[1.65rem] border border-[rgba(93,58,85,0.12)] bg-white/28 p-5 transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.2)] hover:bg-white/36 hover:shadow-[0_18px_45px_rgba(35,24,30,0.08)]"
+                          className="group relative overflow-hidden rounded-[1.55rem] border border-[rgba(93,58,85,0.11)] bg-white/30 p-5 transition duration-300 hover:-translate-y-0.5 hover:bg-white/40 hover:shadow-[0_14px_38px_rgba(35,24,30,0.07)]"
                         >
-                          <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[rgba(92,139,164,0.62)]" />
+                          <div className="absolute inset-y-0 left-0 w-1 bg-[rgba(92,139,164,0.62)]" />
 
-                          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                             <div className="flex min-w-0 items-start gap-4">
-                              <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.34)] text-[#334954] shadow-[0_10px_25px_rgba(51,73,84,0.08)]">
+                              <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.30)] text-[#405d69]">
                                 <BriefcaseBusiness className="size-5" />
                               </div>
 
                               <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[#526f7d]">
+                                  <p className="text-[0.67rem] font-black uppercase tracking-[0.17em] text-[#526f7d]">
                                     Scheduled booking
                                   </p>
 
                                   {index === 0 ? (
-                                    <span className="rounded-full bg-[rgba(175,201,216,0.28)] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[#405d69]">
+                                    <span className="rounded-full bg-[rgba(175,201,216,0.24)] px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-[0.11em] text-[#405d69]">
                                       Next
                                     </span>
                                   ) : null}
                                 </div>
 
-                                <p className="mt-3 text-base font-black leading-7 text-[var(--color-near-black)]">
+                                <p className="mt-2.5 text-base font-black leading-7 text-[var(--color-near-black)]">
                                   {formatDateTimeRange(item.startsAt, item.endsAt)}
                                 </p>
 
-                                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-                                  <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--color-charcoal)]/52">
+                                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+                                  <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--color-charcoal)]/50">
                                     <CalendarDays className="size-3.5 text-[#526f7d]" />
                                     Reserved through Eventure
                                   </span>
 
-                                  <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--color-charcoal)]/52">
+                                  <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--color-charcoal)]/50">
                                     <Clock3 className="size-3.5 text-[#526f7d]" />
                                     Protected automatically
                                   </span>
@@ -577,14 +655,12 @@ export function VendorAvailabilityPage() {
                             </span>
                           </div>
 
-                          <div className="mt-5 flex items-start gap-3 rounded-[1.2rem] border border-white/48 bg-white/24 px-4 py-3">
-                            <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(175,201,216,0.26)] text-[#405d69]">
-                              <CircleAlert className="size-3.5" />
-                            </span>
+                          <div className="mt-4 flex items-start gap-3 rounded-[1.15rem] border border-white/52 bg-white/24 px-4 py-3">
+                            <CircleAlert className="mt-0.5 size-4 shrink-0 text-[#526f7d]" />
 
-                            <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                              This period belongs to an existing booking and cannot be manually
-                              removed from availability.
+                            <p className="text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
+                              This period belongs to an existing booking and cannot be removed from
+                              availability manually.
                             </p>
                           </div>
                         </div>
@@ -594,39 +670,39 @@ export function VendorAvailabilityPage() {
                     return (
                       <div
                         key={`block-${item.id}`}
-                        className="group relative overflow-hidden rounded-[1.65rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.065)] p-5 transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.26)] hover:bg-[rgba(124,74,90,0.09)] hover:shadow-[0_18px_45px_rgba(35,24,30,0.08)]"
+                        className="group relative overflow-hidden rounded-[1.55rem] border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.055)] p-5 transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.08)] hover:shadow-[0_14px_38px_rgba(35,24,30,0.07)]"
                       >
-                        <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[rgba(142,92,103,0.7)]" />
+                        <div className="absolute inset-y-0 left-0 w-1 bg-[rgba(142,92,103,0.68)]" />
 
-                        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex min-w-0 items-start gap-4">
-                            <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(142,92,103,0.16)] text-[var(--color-rosewood)] shadow-[0_10px_25px_rgba(124,74,90,0.08)]">
+                            <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
                               <Ban className="size-5" />
                             </div>
 
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
-                                <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                                <p className="text-[0.67rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
                                   Unavailable period
                                 </p>
 
                                 {index === 0 ? (
-                                  <span className="rounded-full bg-[rgba(142,92,103,0.14)] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-rosewood)]">
+                                  <span className="rounded-full bg-[rgba(142,92,103,0.12)] px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-[0.11em] text-[var(--color-rosewood)]">
                                     Next
                                   </span>
                                 ) : null}
                               </div>
 
-                              <p className="mt-3 text-base font-black leading-7 text-[var(--color-near-black)]">
+                              <p className="mt-2.5 text-base font-black leading-7 text-[var(--color-near-black)]">
                                 {formatDateTimeRange(item.startsAt, item.endsAt)}
                               </p>
 
-                              <div className="mt-4 rounded-[1.15rem] border border-white/44 bg-white/22 px-4 py-3">
-                                <p className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                              <div className="mt-3 rounded-[1.1rem] border border-white/48 bg-white/24 px-4 py-3">
+                                <p className="text-[0.63rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
                                   Private reason
                                 </p>
 
-                                <p className="mt-1.5 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                                <p className="mt-1.5 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
                                   {item.block.reason ??
                                     'No reason was added for this blocked period.'}
                                 </p>
@@ -636,7 +712,7 @@ export function VendorAvailabilityPage() {
 
                           <button
                             type="button"
-                            className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.09)] px-3 py-2.5 text-xs font-black text-[var(--color-muted-burgundy)] transition duration-300 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.16)] sm:size-10 sm:px-0"
+                            className="flex shrink-0 items-center justify-center gap-2 rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-4 py-2.5 text-xs font-black text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.14)] sm:size-10 sm:px-0"
                             aria-label="Delete availability block"
                             onClick={() => {
                               deleteMutation.reset();
@@ -644,7 +720,6 @@ export function VendorAvailabilityPage() {
                             }}
                           >
                             <Trash2 className="size-4" />
-
                             <span className="sm:hidden">Remove block</span>
                           </button>
                         </div>
@@ -653,288 +728,393 @@ export function VendorAvailabilityPage() {
                   })}
                 </div>
               ) : (
-                <div className="mt-7 grid min-h-72 place-items-center rounded-[1.75rem] border border-dashed border-[rgba(93,58,85,0.20)] bg-white/18 p-10 text-center">
+                <div className="grid min-h-64 place-items-center rounded-[1.65rem] border border-dashed border-[rgba(93,58,85,0.18)] bg-white/18 p-8 text-center">
                   <div className="max-w-md">
-                    <CalendarDays className="mx-auto size-9 text-[var(--color-deep-plum)]" />
+                    <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <CalendarDays className="size-6" />
+                    </div>
 
-                    <h3 className="mt-4 text-2xl font-black text-[var(--color-near-black)]">
+                    <h3 className="mt-5 text-2xl font-black text-[var(--color-near-black)]">
                       Your schedule is clear
                     </h3>
 
-                    <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                    <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55">
                       There are no committed bookings or manually blocked periods within the next 90
                       days.
                     </p>
+
+                    <button
+                      type="button"
+                      className="btn-primary mt-6 text-sm font-bold"
+                      onClick={openCreateDialog}
+                    >
+                      <Plus className="size-4" />
+                      Add unavailable period
+                    </button>
                   </div>
                 </div>
               )}
             </article>
+          </section>
 
-            <aside className="rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)]">
-              <Clock3 className="size-6 text-[var(--color-powder-blue)]" />
+          <section className="mt-6 overflow-hidden rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-xl">
+                <p className="section-eyebrow">Availability rules</p>
 
-              <h2 className="mt-8 text-3xl font-black tracking-[-0.045em]">Schedule rules</h2>
+                <h2 className="section-title">Keep your calendar conflict-free.</h2>
 
-              <p className="mt-3 leading-7 text-white/68">
-                Eventure checks availability before a booking is created and again before the vendor
-                confirms it.
-              </p>
+                <p className="section-description">
+                  These rules protect committed work and prevent invalid availability changes.
+                </p>
+              </div>
 
-              <div className="mt-8 space-y-3">
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <p className="font-black">No overlapping blocks</p>
+              <div className="grid flex-1 gap-3 sm:grid-cols-3 lg:max-w-3xl">
+                <div className="rounded-[1.3rem] border border-white/55 bg-white/30 p-4">
+                  <Ban className="size-5 text-[var(--color-deep-plum)]" />
 
-                  <p className="mt-2 text-sm font-semibold leading-6 text-white/58">
-                    A new blocked period cannot overlap an existing manual block.
+                  <p className="mt-3 text-sm font-black text-[var(--color-near-black)]">
+                    No overlapping blocks
+                  </p>
+
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                    A manual blocked period cannot overlap another manual block.
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <p className="font-black">Bookings are protected</p>
+                <div className="rounded-[1.3rem] border border-white/55 bg-white/30 p-4">
+                  <BriefcaseBusiness className="size-5 text-[var(--color-deep-plum)]" />
 
-                  <p className="mt-2 text-sm font-semibold leading-6 text-white/58">
-                    You cannot block time already reserved by a committed booking.
+                  <p className="mt-3 text-sm font-black text-[var(--color-near-black)]">
+                    Bookings stay protected
+                  </p>
+
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                    Time already reserved by committed work cannot be manually blocked.
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <p className="font-black">Future periods only</p>
+                <div className="rounded-[1.3rem] border border-white/55 bg-white/30 p-4">
+                  <Clock3 className="size-5 text-[var(--color-deep-plum)]" />
 
-                  <p className="mt-2 text-sm font-semibold leading-6 text-white/58">
-                    Availability blocks must begin in the future and end after they start.
+                  <p className="mt-3 text-sm font-black text-[var(--color-near-black)]">
+                    Future periods only
+                  </p>
+
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                    Blocks must start in the future and end after their selected start time.
                   </p>
                 </div>
               </div>
-
-              <button
-                type="button"
-                className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-white/14 px-4 py-3 text-sm font-black backdrop-blur transition hover:bg-white/20"
-                onClick={openCreateDialog}
-              >
-                <Plus className="size-4" />
-                Add unavailable period
-              </button>
-            </aside>
+            </div>
           </section>
         </main>
       </div>
 
       {isCreateDialogOpen ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-[70] overflow-y-auto bg-[rgba(31,27,29,0.54)] px-4 py-6 backdrop-blur-md sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-availability-title"
-          onClick={closeCreateDialog}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeCreateDialog();
+            }
+          }}
         >
-          <div
-            className="mx-auto max-w-2xl"
-            onClick={(event) => {
-              event.stopPropagation();
-            }}
-          >
-            <div className="glass-card p-6 sm:p-8">
-              <div>
+          <div className="mx-auto flex min-h-full w-full max-w-3xl items-center justify-center">
+            <div
+              className="relative w-full overflow-hidden rounded-[2rem] border border-white/75 bg-[rgba(250,247,248,0.97)] shadow-[0_34px_100px_rgba(27,17,23,0.34)] backdrop-blur-2xl"
+              onMouseDown={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+              />
+
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-28 left-[18%] size-64 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl"
+              />
+
+              <div className="relative border-b border-[rgba(93,58,85,0.08)] px-5 py-5 sm:px-7 sm:py-6">
                 <div className="flex items-start justify-between gap-5">
-                  <div className="flex min-w-0 items-start gap-4">
-                    <div className="grid size-14 shrink-0 place-items-center rounded-[1.25rem] bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)] shadow-[0_12px_30px_rgba(124,74,90,0.09)]">
-                      <Ban className="size-6" />
+                  <div className="min-w-0">
+                    <div className="soft-chip w-fit text-[0.65rem] font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)]">
+                      <Ban className="size-3.5" />
+                      Availability control
                     </div>
 
-                    <div className="min-w-0">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                        Availability control
-                      </p>
+                    <h2
+                      id="create-availability-title"
+                      className="mt-4 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl"
+                    >
+                      Protect a period in your schedule
+                    </h2>
 
-                      <h2
-                        id="create-availability-title"
-                        className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
-                      >
-                        Protect a period in your schedule.
-                      </h2>
-
-                      <p className="mt-3 max-w-xl leading-7 text-[var(--color-charcoal)]/66">
-                        Prevent customers from requesting or confirming bookings while your business
-                        is unavailable.
-                      </p>
-                    </div>
+                    <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
+                      Prevent new work from being scheduled while your business is unavailable.
+                      Existing committed bookings remain protected automatically.
+                    </p>
                   </div>
 
                   <button
                     type="button"
-                    className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition duration-300 hover:bg-white/42 hover:text-[var(--color-near-black)]"
                     aria-label="Close availability block dialog"
                     disabled={createMutation.isPending}
                     onClick={closeCreateDialog}
+                    className="grid size-10 shrink-0 place-items-center rounded-full border border-white/65 bg-white/42 text-[var(--color-charcoal)]/62 shadow-sm transition hover:bg-white/72 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <X className="size-5" />
+                    <X className="size-4.5" />
                   </button>
-                </div>
-
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  <div className="flex items-start gap-3 rounded-[1.25rem] border border-white/50 bg-white/24 p-4">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.2)] text-[var(--color-deep-plum)]">
-                      <CalendarDays className="size-4" />
-                    </span>
-
-                    <div>
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
-                        Choose an exact period
-                      </p>
-
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
-                        Add the precise start and end date for your absence.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 rounded-[1.25rem] border border-white/50 bg-white/24 p-4">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#405d69]">
-                      <Clock3 className="size-4" />
-                    </span>
-
-                    <div>
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
-                        Existing bookings stay safe
-                      </p>
-
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
-                        Eventure prevents blocks from conflicting with committed work.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              <form className="mt-8 grid gap-5" onSubmit={onSubmit}>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <label className="block">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <span className="text-sm font-black text-[var(--color-charcoal)]/72">
-                        Starts
+              <form onSubmit={onSubmit} noValidate>
+                <div className="relative max-h-[calc(100vh-14rem)] overflow-y-auto px-5 py-6 sm:px-7">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="flex items-start gap-3 rounded-[1.25rem] border border-white/58 bg-white/30 p-4">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                        <CalendarDays className="size-4" />
                       </span>
 
-                      <CalendarDays className="size-4 text-[var(--color-deep-plum)]/70" />
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Exact schedule protection
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                          Choose the precise start and end of your unavailable period.
+                        </p>
+                      </div>
                     </div>
 
-                    <input
-                      className="form-field"
-                      type="datetime-local"
-                      min={getMinimumDateTime()}
-                      disabled={createMutation.isPending}
-                      {...form.register('startsAt')}
-                    />
-
-                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
-                      Select when this unavailable period begins.
-                    </p>
-
-                    {form.formState.errors.startsAt ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.startsAt.message}
-                      </span>
-                    ) : null}
-                  </label>
-
-                  <label className="block">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <span className="text-sm font-black text-[var(--color-charcoal)]/72">
-                        Ends
+                    <div className="flex items-start gap-3 rounded-[1.25rem] border border-white/58 bg-white/30 p-4">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#405d69]">
+                        <BriefcaseBusiness className="size-4" />
                       </span>
 
-                      <Clock3 className="size-4 text-[var(--color-deep-plum)]/70" />
+                      <div>
+                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                          Bookings remain protected
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                          Eventure rejects unavailable periods that conflict with committed work.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="my-6 h-px bg-[rgba(93,58,85,0.08)]" />
+
+                  <section className="rounded-[1.6rem] border border-white/62 bg-white/30 p-5 sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <CalendarRange className="size-5" />
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                          Unavailable period
+                        </h3>
+
+                        <p className="mt-1 text-sm font-medium leading-6 text-[var(--color-charcoal)]/54">
+                          Both values are required. The period must begin in the future and end
+                          after its selected start.
+                        </p>
+                      </div>
                     </div>
 
-                    <input
-                      className="form-field"
-                      type="datetime-local"
-                      min={getMinimumDateTime()}
-                      disabled={createMutation.isPending}
-                      {...form.register('endsAt')}
-                    />
+                    <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                      <label className="block">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                            Starts
+                          </span>
 
-                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
-                      The end must be later than the selected start time.
-                    </p>
+                          <CalendarDays className="size-4 text-[var(--color-deep-plum)]/68" />
+                        </div>
 
-                    {form.formState.errors.endsAt ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.endsAt.message}
-                      </span>
-                    ) : null}
-                  </label>
+                        <input
+                          className="form-field bg-white/44"
+                          type="datetime-local"
+                          min={getMinimumDateTime()}
+                          disabled={createMutation.isPending}
+                          {...form.register('startsAt')}
+                        />
+
+                        {form.formState.errors.startsAt ? (
+                          <span className="mt-2 flex items-start gap-2 text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                            <CircleAlert className="mt-0.5 size-4 shrink-0" />
+                            {form.formState.errors.startsAt.message}
+                          </span>
+                        ) : (
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                            Choose when your business becomes unavailable.
+                          </p>
+                        )}
+                      </label>
+
+                      <label className="block">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                            Ends
+                          </span>
+
+                          <Clock3 className="size-4 text-[var(--color-deep-plum)]/68" />
+                        </div>
+
+                        <input
+                          className="form-field bg-white/44"
+                          type="datetime-local"
+                          min={form.watch('startsAt') || getMinimumDateTime()}
+                          disabled={createMutation.isPending}
+                          {...form.register('endsAt')}
+                        />
+
+                        {form.formState.errors.endsAt ? (
+                          <span className="mt-2 flex items-start gap-2 text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                            <CircleAlert className="mt-0.5 size-4 shrink-0" />
+                            {form.formState.errors.endsAt.message}
+                          </span>
+                        ) : (
+                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                            This must be later than the selected start date and time.
+                          </p>
+                        )}
+                      </label>
+                    </div>
+                  </section>
+
+                  <section className="mt-5 rounded-[1.6rem] border border-white/62 bg-white/30 p-5 sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(214,190,177,0.20)] text-[var(--color-rosewood)]">
+                        <CircleAlert className="size-5" />
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                          Private reason
+                        </h3>
+
+                        <p className="mt-1 text-sm font-medium leading-6 text-[var(--color-charcoal)]/54">
+                          This is optional and is never shown to customers.
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="mt-5 block">
+                      <div className="mb-2 flex items-center justify-between gap-4">
+                        <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                          Reason
+                        </span>
+
+                        <span
+                          className={[
+                            'text-xs font-bold',
+                            (form.watch('reason') ?? '').length > 500
+                              ? 'text-[var(--color-muted-burgundy)]'
+                              : 'text-[var(--color-charcoal)]/42',
+                          ].join(' ')}
+                        >
+                          {(form.watch('reason') ?? '').length}/500
+                        </span>
+                      </div>
+
+                      <textarea
+                        className="form-field min-h-32 resize-y bg-white/44 leading-7"
+                        placeholder="Annual leave, equipment maintenance, family event, team training..."
+                        disabled={createMutation.isPending}
+                        {...form.register('reason')}
+                      />
+
+                      {form.formState.errors.reason ? (
+                        <span className="mt-2 flex items-start gap-2 text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
+                          <CircleAlert className="mt-0.5 size-4 shrink-0" />
+                          {form.formState.errors.reason.message}
+                        </span>
+                      ) : (
+                        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                          Leave this blank if no internal explanation is necessary.
+                        </p>
+                      )}
+                    </label>
+                  </section>
+
+                  {form.formState.isDirty ? (
+                    <div className="mt-5 flex items-start gap-3 rounded-[1.25rem] border border-amber-200/70 bg-amber-50/65 p-4">
+                      <CircleAlert className="mt-0.5 size-4 shrink-0 text-amber-700" />
+
+                      <div>
+                        <p className="text-sm font-black text-amber-900">
+                          You have unsaved schedule changes
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold leading-5 text-amber-700">
+                          Create this unavailable period before closing, or discard your changes if
+                          you no longer need it.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {createMutation.isError ? (
+                    <div
+                      role="alert"
+                      className="mt-5 flex items-start gap-3 rounded-[1.25rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                    >
+                      <CircleAlert className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]" />
+
+                      <p className="text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]">
+                        {getErrorMessage(
+                          createMutation.error,
+                          'We could not create this availability block.',
+                        )}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
 
-                <label className="block">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className="text-sm font-black text-[var(--color-charcoal)]/72">
-                      Reason
-                    </span>
+                <div className="relative border-t border-[rgba(93,58,85,0.08)] bg-white/40 px-5 py-4 backdrop-blur-xl sm:px-7">
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="hidden max-w-sm text-xs font-semibold leading-5 text-[var(--color-charcoal)]/42 sm:block">
+                      Once created, this period will immediately be considered during availability
+                      checks.
+                    </p>
 
-                    <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
-                      {(form.watch('reason') ?? '').length}/500
-                    </span>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                      <button
+                        type="button"
+                        className="btn-secondary justify-center text-sm font-black"
+                        disabled={createMutation.isPending}
+                        onClick={closeCreateDialog}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={createMutation.isPending}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--color-deep-plum)] px-5 text-sm font-black !text-white shadow-[0_14px_32px_rgba(91,61,82,0.20)] transition hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                      >
+                        {createMutation.isPending ? (
+                          <LoaderCircle className="size-4 animate-spin text-white" />
+                        ) : (
+                          <Plus className="size-4 text-white" />
+                        )}
+
+                        <span className="text-white">
+                          {createMutation.isPending
+                            ? 'Creating unavailable period...'
+                            : 'Create unavailable period'}
+                        </span>
+                      </button>
+                    </div>
                   </div>
-
-                  <textarea
-                    className="form-field min-h-36 resize-y"
-                    placeholder="Annual leave, equipment maintenance, family event, venue inspection, team training..."
-                    maxLength={500}
-                    disabled={createMutation.isPending}
-                    {...form.register('reason')}
-                  />
-
-                  <div className="mt-2 flex items-start gap-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                    <CircleAlert className="mt-0.5 size-3.5 shrink-0" />
-
-                    <span>
-                      This note is optional and remains private to your vendor workspace. Customers
-                      will never see it.
-                    </span>
-                  </div>
-
-                  {form.formState.errors.reason ? (
-                    <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                      {form.formState.errors.reason.message}
-                    </span>
-                  ) : null}
-                </label>
-
-                {createMutation.isError ? (
-                  <div
-                    role="alert"
-                    className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                  >
-                    {getErrorMessage(
-                      createMutation.error,
-                      'We could not create this availability block.',
-                    )}
-                  </div>
-                ) : null}
-
-                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    className="btn-secondary justify-center text-sm font-bold"
-                    disabled={createMutation.isPending}
-                    onClick={closeCreateDialog}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="btn-primary justify-center text-sm font-bold"
-                    disabled={createMutation.isPending}
-                  >
-                    {createMutation.isPending ? (
-                      <LoaderCircle className="size-4 animate-spin" />
-                    ) : (
-                      <Plus className="size-4" />
-                    )}
-
-                    {createMutation.isPending ? 'Creating block...' : 'Create unavailable period'}
-                  </button>
                 </div>
               </form>
             </div>
@@ -942,68 +1122,201 @@ export function VendorAvailabilityPage() {
         </div>
       ) : null}
 
+      {showCreateDiscardConfirmation && isCreateDialogOpen ? (
+        <div
+          className="fixed inset-0 z-[90] grid place-items-center bg-[rgba(31,27,29,0.60)] px-4 py-8 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="discard-availability-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !createMutation.isPending) {
+              setShowCreateDiscardConfirmation(false);
+            }
+          }}
+        >
+          <div
+            className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/75 bg-[rgba(250,247,248,0.98)] p-6 shadow-[0_34px_100px_rgba(27,17,23,0.38)] backdrop-blur-2xl sm:p-7"
+            onMouseDown={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-amber-100/55 blur-3xl"
+            />
+
+            <div className="relative grid size-12 place-items-center rounded-[1.1rem] bg-amber-50 text-amber-700">
+              <CircleAlert className="size-5" />
+            </div>
+
+            <p className="relative mt-5 text-[0.65rem] font-black uppercase tracking-[0.16em] text-amber-700">
+              Unsaved availability
+            </p>
+
+            <h2
+              id="discard-availability-title"
+              className="relative mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+            >
+              Discard this unavailable period?
+            </h2>
+
+            <p className="relative mt-3 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
+              You changed the schedule details but have not created the blocked period yet. Closing
+              now will restore the default values and remove everything you entered.
+            </p>
+
+            <div className="relative mt-5 rounded-[1.25rem] border border-amber-200/70 bg-amber-50/55 p-4">
+              <p className="text-xs font-semibold leading-5 text-amber-800">
+                No availability block has been saved yet.
+              </p>
+            </div>
+
+            <div className="relative mt-6 flex flex-col-reverse gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                className="btn-secondary justify-center text-sm font-black"
+                onClick={() => {
+                  setShowCreateDiscardConfirmation(false);
+                }}
+              >
+                Keep editing
+              </button>
+
+              <button
+                type="button"
+                onClick={discardCreateChanges}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black !text-white shadow-[0_14px_32px_rgba(91,61,82,0.18)] transition hover:-translate-y-0.5 hover:opacity-90"
+              >
+                <X className="size-4 text-white" />
+                <span className="text-white">Discard changes</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {deletingBlock ? (
         <div
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-[80] grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.58)] px-4 py-8 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-availability-title"
-          onClick={() => {
-            if (!deleteMutation.isPending) {
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !deleteMutation.isPending) {
               setDeletingBlock(null);
               deleteMutation.reset();
             }
           }}
         >
           <div
-            className="glass-card w-full max-w-lg p-6 sm:p-8"
-            onClick={(event) => {
+            className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/75 bg-[rgba(250,247,248,0.98)] p-6 shadow-[0_34px_100px_rgba(27,17,23,0.38)] backdrop-blur-2xl sm:p-7"
+            onMouseDown={(event) => {
               event.stopPropagation();
             }}
           >
-            <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-              <Trash2 className="size-7" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-red-100/65 blur-3xl"
+            />
+
+            <div className="relative flex items-start justify-between gap-5">
+              <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-red-50 text-red-700">
+                <Trash2 className="size-5" />
+              </div>
+
+              <button
+                type="button"
+                aria-label="Close remove availability dialog"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  setDeletingBlock(null);
+                  deleteMutation.reset();
+                }}
+                className="grid size-10 shrink-0 place-items-center rounded-full border border-white/65 bg-white/42 text-[var(--color-charcoal)]/62 shadow-sm transition hover:bg-white/72 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <X className="size-4.5" />
+              </button>
             </div>
+
+            <p className="relative mt-5 text-[0.65rem] font-black uppercase tracking-[0.16em] text-red-600">
+              Availability change
+            </p>
 
             <h2
               id="delete-availability-title"
-              className="mt-6 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]"
+              className="relative mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl"
             >
               Remove this blocked period?
             </h2>
 
-            <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
-              Your schedule will become available again during:
+            <p className="relative mt-3 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
+              Removing this protection makes the selected period available for future booking checks
+              again.
             </p>
 
-            <div className="mt-4 rounded-2xl bg-white/28 p-4">
-              <p className="font-black text-[var(--color-near-black)]">
-                {formatDateTimeRange(deletingBlock.startsAt, deletingBlock.endsAt)}
-              </p>
+            <div className="relative mt-5 rounded-[1.35rem] border border-white/65 bg-white/42 p-5 shadow-[0_10px_28px_rgba(35,24,30,0.04)]">
+              <div className="flex items-start gap-3">
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
+                  <Ban className="size-4.5" />
+                </div>
 
-              {deletingBlock.reason ? (
-                <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
-                  {deletingBlock.reason}
+                <div className="min-w-0">
+                  <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
+                    Blocked period
+                  </p>
+
+                  <p className="mt-2 text-base font-black leading-7 text-[var(--color-near-black)]">
+                    {formatDateTimeRange(deletingBlock.startsAt, deletingBlock.endsAt)}
+                  </p>
+
+                  {deletingBlock.reason ? (
+                    <div className="mt-3 rounded-[1rem] border border-white/55 bg-white/28 px-3.5 py-3">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
+                        Private reason
+                      </p>
+
+                      <p className="mt-1.5 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                        {deletingBlock.reason}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <div className="relative mt-5 flex items-start gap-3 rounded-[1.3rem] border border-red-200/80 bg-red-50/70 p-4">
+              <CircleAlert className="mt-0.5 size-4.5 shrink-0 text-red-700" />
+
+              <div>
+                <p className="text-sm font-black text-red-900">The time becomes available again</p>
+
+                <p className="mt-1 text-xs font-semibold leading-5 text-red-700">
+                  This removes only the manual availability block. It does not alter any existing
+                  bookings.
                 </p>
-              ) : null}
+              </div>
             </div>
 
             {deleteMutation.isError ? (
               <div
                 role="alert"
-                className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+                className="relative mt-4 flex items-start gap-3 rounded-[1.2rem] border border-red-200 bg-red-50 p-4"
               >
-                {getErrorMessage(
-                  deleteMutation.error,
-                  'We could not remove this availability block.',
-                )}
+                <CircleAlert className="mt-0.5 size-4 shrink-0 text-red-700" />
+
+                <p className="text-sm font-bold leading-6 text-red-800">
+                  {getErrorMessage(
+                    deleteMutation.error,
+                    'We could not remove this availability block.',
+                  )}
+                </p>
               </div>
             ) : null}
 
-            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <div className="relative mt-6 flex flex-col-reverse gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="btn-secondary justify-center text-sm font-bold"
+                className="btn-secondary justify-center text-sm font-black"
                 disabled={deleteMutation.isPending}
                 onClick={() => {
                   setDeletingBlock(null);
@@ -1015,19 +1328,21 @@ export function VendorAvailabilityPage() {
 
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={deleteMutation.isPending}
                 onClick={() => {
                   deleteMutation.mutate(deletingBlock.id);
                 }}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-red-700 px-5 py-3 text-sm font-black !text-white shadow-[0_14px_32px_rgba(185,28,28,0.16)] transition hover:-translate-y-0.5 hover:bg-red-800 hover:!text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 {deleteMutation.isPending ? (
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <LoaderCircle className="size-4 animate-spin text-white" />
                 ) : (
-                  <Trash2 className="size-4" />
+                  <Trash2 className="size-4 text-white" />
                 )}
 
-                {deleteMutation.isPending ? 'Removing block...' : 'Remove blocked period'}
+                <span className="text-white">
+                  {deleteMutation.isPending ? 'Removing block...' : 'Remove blocked period'}
+                </span>
               </button>
             </div>
           </div>

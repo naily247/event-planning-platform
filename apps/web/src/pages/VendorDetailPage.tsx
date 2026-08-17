@@ -11,7 +11,6 @@ import {
   CircleAlert,
   Clock,
   Flower2,
-  Heart,
   Image,
   LoaderCircle,
   MapPin,
@@ -23,9 +22,12 @@ import {
   WandSparkles,
 } from 'lucide-react';
 import { type ComponentType, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { PortfolioLightbox } from '../components/vendors/PortfolioLightbox';
 import { StickyVendorCta } from '../components/vendors/StickyVendorCta';
+import { getAccessTokenPayload } from '../features/auth/auth.storage';
+import { useQuery } from '@tanstack/react-query';
+import { getVendorOnboardingProfile } from '../features/vendors/vendor.api';
 import { api } from '../lib/api';
 
 type VendorCategory = {
@@ -87,6 +89,19 @@ type PublicVendorDetail = {
 type PublicVendorDetailResponse = {
   success: boolean;
   data: PublicVendorDetail;
+};
+
+type VendorMarketplaceState = {
+  source?: 'vendor-workspace';
+  returnTo?: string;
+  returnLabel?: string;
+};
+
+type VendorDetailLocationState = {
+  source?: 'vendor-marketplace' | 'vendor-profile';
+  returnTo?: string;
+  returnLabel?: string;
+  marketplaceState?: VendorMarketplaceState;
 };
 
 const categoryIconMap: Record<string, ComponentType<{ className?: string }>> = {
@@ -184,6 +199,52 @@ const getPortfolioCardClassName = (index: number) => {
 
 export function VendorDetailPage() {
   const { vendorSlug } = useParams<{ vendorSlug: string }>();
+  const location = useLocation();
+
+  const accessTokenPayload = getAccessTokenPayload();
+
+  const isCustomerSession = accessTokenPayload?.role === 'CUSTOMER';
+  const isVendorSession = accessTokenPayload?.role === 'VENDOR';
+
+  const locationState = location.state as VendorDetailLocationState | null;
+
+  const vendorOnboardingQuery = useQuery({
+    queryKey: ['vendors', 'me', 'onboarding'],
+    queryFn: getVendorOnboardingProfile,
+    enabled: isVendorSession,
+  });
+
+  const hasValidCustomerWorkspaceReturn =
+    isCustomerSession &&
+    typeof locationState?.returnTo === 'string' &&
+    /^\/events\/[^/]+\/(mood-board|bookings|quotations)$/.test(locationState.returnTo) &&
+    typeof locationState.returnLabel === 'string';
+
+  const hasValidVendorMarketplaceReturn =
+    isVendorSession &&
+    locationState?.source === 'vendor-marketplace' &&
+    locationState.returnTo === '/vendors' &&
+    typeof locationState.returnLabel === 'string';
+
+  const hasValidVendorProfileReturn =
+    isVendorSession &&
+    locationState?.source === 'vendor-profile' &&
+    locationState.returnTo === '/vendor/profile' &&
+    locationState.returnLabel === 'Back to business profile';
+
+  const hasValidVendorReturn = hasValidVendorMarketplaceReturn || hasValidVendorProfileReturn;
+
+  const vendorBackTo =
+    hasValidVendorReturn || hasValidCustomerWorkspaceReturn ? locationState.returnTo! : '/vendors';
+
+  const vendorBackLabel =
+    hasValidVendorReturn || hasValidCustomerWorkspaceReturn
+      ? locationState.returnLabel!
+      : 'Back to vendors';
+
+  const vendorBackState = hasValidVendorMarketplaceReturn
+    ? locationState.marketplaceState
+    : undefined;
 
   const [vendor, setVendor] = useState<PublicVendorDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -367,6 +428,12 @@ export function VendorDetailPage() {
   const startingPrice = getStartingPrice(vendor.packages);
   const ratingLabel = getRatingLabel(vendor.ratingSummary);
   const locationLabel = getLocationLabel(vendor);
+
+  const ownVendorSlug = vendorOnboardingQuery.data?.profile.slug ?? null;
+
+  const isOwnVendorProfile =
+    isVendorSession && ownVendorSlug !== null && ownVendorSlug === vendor.slug;
+
   const heroPortfolioItems = vendor.portfolioItems;
   const activeHeroPortfolioItem = heroPortfolioItems[heroPortfolioIndex] ?? null;
 
@@ -377,9 +444,13 @@ export function VendorDetailPage() {
         <div className="pointer-events-none absolute right-[8%] top-20 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl" />
 
         <div className="page-container">
-          <Link to="/vendors" className="btn-secondary mb-6 w-fit text-sm font-bold">
+          <Link
+            to={vendorBackTo}
+            state={vendorBackState}
+            className="btn-secondary mb-6 w-fit text-sm font-bold"
+          >
             <ArrowLeft className="size-4" />
-            Back to vendors
+            {vendorBackLabel}
           </Link>
 
           <div className="glass-card overflow-hidden p-4 sm:p-6 lg:p-7">
@@ -457,14 +528,6 @@ export function VendorDetailPage() {
                     ))}
                   </div>
                 ) : null}
-
-                <button
-                  type="button"
-                  className="absolute right-5 top-5 z-10 grid size-11 place-items-center rounded-full border border-white/50 bg-white/30 text-[var(--color-near-black)] backdrop-blur-xl transition hover:scale-105 hover:bg-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                  aria-label={`Save ${vendor.businessName}`}
-                >
-                  <Heart className="size-5" />
-                </button>
 
                 <div className="pointer-events-none absolute bottom-4 left-4 right-4 z-10 rounded-[1.7rem] border border-white/60 bg-white/40 p-5 shadow-[0_22px_58px_rgba(31,27,29,0.18)] backdrop-blur-2xl sm:bottom-6 sm:left-6 sm:right-6 sm:p-6">
                   <div className="flex items-start justify-between gap-4">
@@ -564,25 +627,25 @@ export function VendorDetailPage() {
                     <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
                       <div className="pointer-events-none absolute -right-8 -top-10 size-24 rounded-full bg-[rgba(183,167,200,0.18)] blur-2xl transition duration-500 group-hover:scale-125" />
 
-                      <div className="relative flex items-start justify-between gap-3">
-                        <div>
+                      <div className="relative">
+                        <div className="flex items-start justify-between gap-3">
                           <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
                             Starting price
                           </p>
 
-                          <p className="mt-3 break-words text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-2xl">
-                            {startingPrice}
-                          </p>
+                          <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
+                            <MessageSquareQuote className="size-4" />
+                          </div>
                         </div>
 
-                        <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
-                          <MessageSquareQuote className="size-4" />
-                        </div>
+                        <p className="mt-3 whitespace-nowrap text-[1.45rem] font-black leading-none tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[1.55rem]">
+                          {startingPrice}
+                        </p>
+
+                        <p className="mt-4 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                          Final pricing is confirmed through a structured quotation.
+                        </p>
                       </div>
-
-                      <p className="relative mt-3 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                        Final pricing is confirmed through a structured quotation.
-                      </p>
                     </div>
 
                     <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
@@ -638,32 +701,93 @@ export function VendorDetailPage() {
                     <div className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.15)] blur-3xl" />
 
                     <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Ready to plan with {vendor.businessName}?
-                        </p>
+                      {isVendorSession ? (
+                        <>
+                          <div>
+                            <p className="text-sm font-black text-[var(--color-near-black)]">
+                              {isOwnVendorProfile
+                                ? 'You are viewing your public vendor profile.'
+                                : `Browsing ${vendor.businessName} as a vendor`}
+                            </p>
 
-                        <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
-                          Sign in to send your event details and receive a structured quotation.
-                        </p>
-                      </div>
+                            <p className="mt-1 max-w-xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
+                              {isOwnVendorProfile
+                                ? 'This is how customers currently see your business, portfolio and published service information across Eventure.'
+                                : 'You are browsing the public marketplace with your vendor account. Customer quotation actions are not available from vendor accounts.'}
+                            </p>
+                          </div>
 
-                      <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-                        <Link
-                          to="/login"
-                          className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
-                        >
-                          Request quotation
-                          <ArrowRight className="size-4" />
-                        </Link>
+                          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+                            {isOwnVendorProfile ? (
+                              <>
+                                <Link
+                                  to="/vendor/profile"
+                                  className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
+                                >
+                                  Manage business profile
+                                  <ArrowRight className="size-4" />
+                                </Link>
 
-                        <Link
-                          to="/planning-guide"
-                          className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
-                        >
-                          View planning guide
-                        </Link>
-                      </div>
+                                <Link
+                                  to="/vendor/portfolio"
+                                  className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
+                                >
+                                  Manage portfolio
+                                </Link>
+                              </>
+                            ) : (
+                              <Link
+                                to="/vendors"
+                                state={vendorBackState}
+                                className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
+                              >
+                                Back to marketplace
+                              </Link>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div>
+                            <p className="text-sm font-black text-[var(--color-near-black)]">
+                              Ready to plan with {vendor.businessName}?
+                            </p>
+
+                            <p className="mt-1 max-w-xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
+                              {isCustomerSession
+                                ? 'Choose the event you are planning, then send your requirements through a structured quotation request.'
+                                : 'Sign in to send your event details and receive a structured quotation.'}
+                            </p>
+                          </div>
+
+                          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+                            {isCustomerSession ? (
+                              <Link
+                                to="/events"
+                                className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
+                              >
+                                Open my events
+                                <ArrowRight className="size-4" />
+                              </Link>
+                            ) : (
+                              <Link
+                                to="/login"
+                                className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
+                              >
+                                Request quotation
+                                <ArrowRight className="size-4" />
+                              </Link>
+                            )}
+
+                            <Link
+                              to="/planning-guide"
+                              className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
+                            >
+                              View planning guide
+                            </Link>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -845,26 +969,106 @@ export function VendorDetailPage() {
                   </p>
 
                   <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/60">
-                    This vendor has not published fixed packages yet, but you can still request a
-                    tailored quotation based on your event requirements.
+                    {isVendorSession
+                      ? isOwnVendorProfile
+                        ? 'You have not published fixed packages yet. Add packages to give customers clearer service and pricing options.'
+                        : 'This vendor has not published fixed packages yet.'
+                      : isCustomerSession
+                        ? 'This vendor has not published fixed packages yet. Choose one of your events and send your requirements through a tailored quotation request.'
+                        : 'This vendor has not published fixed packages yet, but you can still request a tailored quotation based on your event requirements.'}
                   </p>
 
-                  <Link to="/login" className="btn-primary mt-6 text-sm font-bold">
-                    Request quotation
-                    <ArrowRight className="size-4" />
-                  </Link>
+                  {isVendorSession ? (
+                    isOwnVendorProfile ? (
+                      <Link to="/vendor/packages" className="btn-primary mt-6 text-sm font-bold">
+                        Manage packages
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/vendors"
+                        state={vendorBackState}
+                        className="btn-secondary mt-6 text-sm font-bold"
+                      >
+                        Back to marketplace
+                      </Link>
+                    )
+                  ) : isCustomerSession ? (
+                    <Link to="/events" className="btn-primary mt-6 text-sm font-bold">
+                      Open my events
+                      <ArrowRight className="size-4" />
+                    </Link>
+                  ) : (
+                    <Link to="/login" className="btn-primary mt-6 text-sm font-bold">
+                      Request quotation
+                      <ArrowRight className="size-4" />
+                    </Link>
+                  )}
                 </div>
               </div>
             )}
           </div>
 
-          <StickyVendorCta
-            vendorName={vendor.businessName}
-            location={locationLabel}
-            startingPrice={startingPrice}
-            rating={vendor.ratingSummary.overallAverage}
-            reviewCount={vendor.ratingSummary.reviewCount}
-          />
+          {!isVendorSession ? (
+            <StickyVendorCta
+              vendorName={vendor.businessName}
+              location={locationLabel}
+              startingPrice={startingPrice}
+              rating={vendor.ratingSummary.overallAverage}
+              reviewCount={vendor.ratingSummary.reviewCount}
+            />
+          ) : (
+            <aside className="glass-card sticky top-6 overflow-hidden p-6">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                Vendor view
+              </p>
+
+              <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                {isOwnVendorProfile ? 'Your marketplace presence' : 'Browsing as a vendor'}
+              </h3>
+
+              <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                {isOwnVendorProfile
+                  ? 'Review how your portfolio, packages and business information currently appear to customers.'
+                  : 'Quotation requests are customer actions, so they are unavailable while you are signed in with a vendor account.'}
+              </p>
+
+              <div className="mt-5 grid gap-2">
+                {isOwnVendorProfile ? (
+                  <>
+                    <Link
+                      to="/vendor/profile"
+                      className="btn-primary justify-center text-sm font-bold"
+                    >
+                      Manage profile
+                    </Link>
+
+                    <Link
+                      to="/vendor/portfolio"
+                      className="btn-secondary justify-center text-sm font-bold"
+                    >
+                      Manage portfolio
+                    </Link>
+
+                    <Link
+                      to="/vendor/packages"
+                      className="btn-secondary justify-center text-sm font-bold"
+                    >
+                      Manage packages
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="/vendors"
+                    state={vendorBackState}
+                    className="btn-secondary justify-center text-sm font-bold"
+                  >
+                    Back to marketplace
+                  </Link>
+                )}
+              </div>
+            </aside>
+          )}
         </div>
       </section>
 

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle,
-  ArrowLeft,
   Ban,
   BriefcaseBusiness,
   CalendarDays,
@@ -20,7 +19,7 @@ import {
   UserRound,
   XCircle,
 } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   cancelVendorBooking,
   completeVendorBooking,
@@ -30,7 +29,6 @@ import {
   type BookingStatus,
   type VendorBooking,
 } from '../features/bookings/booking.api';
-import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
 import { PageBackButton } from '../components/navigation/PageBackButton';
 
 type ActionDialog = 'CONFIRM' | 'REJECT' | 'CANCEL' | 'COMPLETE' | null;
@@ -133,18 +131,17 @@ function DetailItem({
   value: string;
 }) {
   return (
-    <div className="group relative flex items-start gap-4 overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/48 p-4 shadow-inner transition duration-300 hover:bg-white/60">
-      <div className="pointer-events-none absolute -right-10 -top-10 size-24 rounded-full bg-[rgba(183,167,200,0.12)] blur-2xl transition duration-500 group-hover:scale-110" />
-      <div className="relative grid size-11 shrink-0 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-        <Icon className="size-5" />
+    <div className="flex items-start gap-3 rounded-[1.2rem] border border-white/58 bg-white/30 p-4">
+      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
+        <Icon className="size-4" />
       </div>
 
       <div className="min-w-0">
-        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
+        <p className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
           {label}
         </p>
 
-        <p className="mt-1.5 break-words text-sm font-semibold leading-6 text-[var(--color-near-black)]">
+        <p className="mt-1 break-words text-sm font-black leading-6 text-[var(--color-near-black)]">
           {value}
         </p>
       </div>
@@ -163,12 +160,12 @@ function TextSection({
 }) {
   return (
     <div>
-      <h3 className="text-sm font-black tracking-[-0.015em] text-[var(--color-near-black)]">
+      <h3 className="text-[0.66rem] font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
         {title}
       </h3>
 
-      <div className="mt-2 rounded-[1.35rem] border border-white/65 bg-white/48 p-4 shadow-inner">
-        <p className="whitespace-pre-wrap text-sm leading-7 text-[var(--color-charcoal)]/64">
+      <div className="mt-2 rounded-[1.25rem] border border-white/58 bg-white/30 p-4">
+        <p className="whitespace-pre-wrap text-sm font-medium leading-7 text-[var(--color-charcoal)]/64">
           {value || emptyText}
         </p>
       </div>
@@ -213,6 +210,7 @@ export function VendorBookingDetailPage() {
   const [formError, setFormError] = useState('');
   const [operationError, setOperationError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
 
   const bookingQuery = useQuery({
     queryKey: ['vendor-booking', bookingId],
@@ -237,6 +235,40 @@ export function VendorBookingDetailPage() {
     setConfirmNote('');
     setReason('');
     setFormError('');
+    setShowDiscardConfirmation(false);
+  }
+
+  function hasUnsavedDialogInput() {
+    if (actionDialog === 'CONFIRM') {
+      return confirmNote.trim().length > 0;
+    }
+
+    if (actionDialog === 'REJECT' || actionDialog === 'CANCEL') {
+      return reason.trim().length > 0;
+    }
+
+    return false;
+  }
+
+  function requestCloseDialog() {
+    if (isActionPending) {
+      return;
+    }
+
+    if (hasUnsavedDialogInput()) {
+      setShowDiscardConfirmation(true);
+      return;
+    }
+
+    resetDialog();
+  }
+
+  function discardDialogInput() {
+    if (isActionPending) {
+      return;
+    }
+
+    resetDialog();
   }
 
   const confirmMutation = useMutation({
@@ -251,8 +283,8 @@ export function VendorBookingDetailPage() {
       setOperationError('');
     },
     onError: (error) => {
-      setOperationError(getErrorMessage(error));
-      resetDialog();
+      setFormError(getErrorMessage(error));
+      setOperationError('');
       setSuccessMessage('');
     },
   });
@@ -269,8 +301,8 @@ export function VendorBookingDetailPage() {
       setOperationError('');
     },
     onError: (error) => {
-      setOperationError(getErrorMessage(error));
-      resetDialog();
+      setFormError(getErrorMessage(error));
+      setOperationError('');
       setSuccessMessage('');
     },
   });
@@ -287,8 +319,8 @@ export function VendorBookingDetailPage() {
       setOperationError('');
     },
     onError: (error) => {
-      setOperationError(getErrorMessage(error));
-      resetDialog();
+      setFormError(getErrorMessage(error));
+      setOperationError('');
       setSuccessMessage('');
     },
   });
@@ -302,8 +334,8 @@ export function VendorBookingDetailPage() {
       setOperationError('');
     },
     onError: (error) => {
-      setOperationError(getErrorMessage(error));
-      resetDialog();
+      setFormError(getErrorMessage(error));
+      setOperationError('');
       setSuccessMessage('');
     },
   });
@@ -321,6 +353,12 @@ export function VendorBookingDetailPage() {
     setFormError('');
     setOperationError('');
     setSuccessMessage('');
+    setShowDiscardConfirmation(false);
+
+    confirmMutation.reset();
+    rejectMutation.reset();
+    cancelMutation.reset();
+    completeMutation.reset();
   }
 
   function handleConfirmBooking() {
@@ -417,681 +455,1016 @@ export function VendorBookingDetailPage() {
   }, [booking]);
 
   return (
-    <main className="workspace-shell">
-      <div className="workspace-container w-full max-w-[1500px]">
-        <VendorWorkspaceNav />
+    <main className="workspace-shell relative">
+      <div className="workspace-container w-full max-w-7xl">
+        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+          />
 
-        <div className="mt-6">
-          <Link
-            to="/vendor/bookings"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-600 transition hover:text-rose-800"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to bookings
-          </Link>
-        </div>
+          <div className="relative flex min-w-0 items-center gap-4">
+            <PageBackButton fallback="/vendor/bookings" label="Bookings" className="shrink-0" />
 
-        {bookingQuery.isLoading ? (
-          <div className="mt-6">
-            <PageSkeleton />
-          </div>
-        ) : bookingQuery.isError || !booking ? (
-          <section className="glass-card relative mt-6 overflow-hidden p-8 text-center sm:p-10">
-            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-red-100/70 blur-3xl" />
-            <div className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600">
-              <AlertCircle className="size-6" />
+            <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                Vendor workspace
+              </p>
+
+              <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
+                Booking details
+              </h1>
             </div>
+          </div>
+        </header>
 
-            <h1 className="relative mt-5 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-              Booking could not be loaded
-            </h1>
-
-            <p className="relative mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-charcoal)]/62">
-              {getErrorMessage(bookingQuery.error)}
-            </p>
-
-            <button
-              type="button"
-              onClick={() => bookingQuery.refetch()}
-              className="relative mt-6 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
-            >
-              Try again
-            </button>
-          </section>
-        ) : (
-          <>
-            <section className="glass-card relative mt-6 overflow-hidden p-6 sm:p-8">
-              <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-28 left-1/3 size-56 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
-              <div className="relative flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <span
-                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
-                      bookingStatusStyles[booking.status]
-                    }`}
-                  >
-                    {bookingStatusLabels[booking.status]}
-                  </span>
-
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-rose-700/70">
-                    {booking.event.eventType}
-                  </p>
-
-                  <h1 className="mt-2 max-w-4xl text-4xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                    {booking.event.name}
-                  </h1>
-
-                  <p className="mt-4 text-base leading-7 text-[var(--color-charcoal)]/60">
-                    Booking created {formatDateTime(booking.createdAt)}
-                  </p>
+        <div className="pb-10 pt-6">
+          {bookingQuery.isLoading ? (
+            <PageSkeleton />
+          ) : bookingQuery.isError || !booking ? (
+            <section className="grid min-h-72 place-items-center rounded-[2rem] border border-red-200/70 bg-red-50/55 p-8 text-center shadow-[0_18px_48px_rgba(35,24,30,0.06)]">
+              <div className="max-w-lg">
+                <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-red-100 text-red-600">
+                  <AlertCircle className="size-6" />
                 </div>
 
-                <div className="relative min-w-[220px] overflow-hidden rounded-[1.6rem] border border-white/60 bg-white/38 p-5 shadow-[0_18px_48px_rgba(49,35,42,0.08)] backdrop-blur-xl">
-                  <div className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-[rgba(183,167,200,0.18)] blur-2xl" />
+                <h1 className="mt-5 text-2xl font-black tracking-[-0.04em] text-red-900">
+                  Booking could not be loaded
+                </h1>
 
-                  <div className="relative flex items-center gap-4">
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.22)]">
-                      <CircleDollarSign className="size-5" />
-                    </div>
+                <p className="mt-3 text-sm leading-7 text-red-700">
+                  {getErrorMessage(bookingQuery.error)}
+                </p>
 
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/46">
-                        Agreed cost
-                      </p>
-
-                      <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                        {formatMoney(booking.agreedCost)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => bookingQuery.refetch()}
+                  className="mt-6 rounded-full bg-red-700 px-5 py-3 text-sm font-black !text-white transition hover:bg-red-800"
+                >
+                  Try again
+                </button>
               </div>
             </section>
+          ) : (
+            <>
+              <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
+                />
 
-            {successMessage && (
-              <div className="glass-card mt-6 flex items-start gap-3 border-emerald-200/70 bg-emerald-50/75 p-5">
-                <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-700" />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-36 left-[28%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
+                />
 
-                <p className="text-sm font-semibold leading-6 text-emerald-800">{successMessage}</p>
-              </div>
-            )}
+                <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10 lg:p-10">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span
+                        className={`inline-flex rounded-full border px-3 py-1.5 text-[0.68rem] font-black ${
+                          bookingStatusStyles[booking.status]
+                        }`}
+                      >
+                        {bookingStatusLabels[booking.status]}
+                      </span>
 
-            {operationError && (
-              <div className="glass-card mt-6 flex items-start gap-3 border-red-200/70 bg-red-50/75 p-5">
-                <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-700" />
-
-                <p className="text-sm font-semibold leading-6 text-red-800">{operationError}</p>
-              </div>
-            )}
-
-            <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_0.75fr]">
-              <div className="space-y-6">
-                <section className="glass-card relative overflow-hidden p-6 sm:p-7">
-                  <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
-                  <div className="relative flex items-center gap-4">
-                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-                      <CalendarDays className="size-5" />
+                      <span className="soft-chip text-xs font-black uppercase tracking-[0.14em]">
+                        {booking.event.eventType}
+                      </span>
                     </div>
 
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                        Service schedule
-                      </p>
-
-                      <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                        Booking details
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    <DetailItem
-                      icon={CalendarDays}
-                      label="Service starts"
-                      value={formatDateTime(booking.serviceStart)}
-                    />
-
-                    <DetailItem
-                      icon={Clock3}
-                      label="Service ends"
-                      value={
-                        booking.serviceEnd
-                          ? formatDateTime(booking.serviceEnd)
-                          : 'No end time provided'
-                      }
-                    />
-
-                    <DetailItem
-                      icon={MapPin}
-                      label="Location"
-                      value={booking.event.location || 'Location not provided'}
-                    />
-
-                    <DetailItem
-                      icon={BriefcaseBusiness}
-                      label="Booking status"
-                      value={bookingStatusLabels[booking.status]}
-                    />
-                  </div>
-                </section>
-
-                <section className="glass-card relative overflow-hidden p-6 sm:p-7">
-                  <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
-                  <div className="relative flex items-center gap-4">
-                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-                      <Package className="size-5" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                        Accepted quotation
-                      </p>
-
-                      <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                        Package and service scope
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="relative mt-6 overflow-hidden rounded-[1.5rem] border border-white/65 bg-white/48 p-5 shadow-inner">
-                    <div className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-[rgba(183,167,200,0.12)] blur-2xl" />
-                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                          {booking.acceptedQuotation.quotationRequest.package?.title ||
-                            'Custom service'}
-                        </p>
-
-                        <p className="mt-1.5 text-sm font-black text-[var(--color-deep-plum)]">
-                          {booking.acceptedQuotation.quotationRequest.package?.category?.name ||
-                            'Event service'}
-                        </p>
-                      </div>
-
-                      <p className="text-xl font-black tracking-[-0.03em] text-[var(--color-deep-plum)]">
-                        {formatMoney(booking.acceptedQuotation.proposedPrice)}
-                      </p>
-                    </div>
-
-                    {booking.acceptedQuotation.quotationRequest.package?.description && (
-                      <p className="relative mt-4 whitespace-pre-wrap border-t border-white/60 pt-4 text-sm leading-7 text-[var(--color-charcoal)]/64">
-                        {booking.acceptedQuotation.quotationRequest.package.description}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-6 space-y-5">
-                    <TextSection
-                      title="Customer requirements"
-                      value={booking.acceptedQuotation.quotationRequest.requirements}
-                      emptyText="No additional customer requirements were provided."
-                    />
-
-                    <TextSection
-                      title="Inclusions"
-                      value={booking.acceptedQuotation.inclusions}
-                      emptyText="No inclusions were recorded."
-                    />
-
-                    <TextSection
-                      title="Exclusions"
-                      value={booking.acceptedQuotation.exclusions}
-                      emptyText="No exclusions were recorded."
-                    />
-
-                    <TextSection
-                      title="Terms"
-                      value={booking.acceptedQuotation.terms}
-                      emptyText="No additional terms were recorded."
-                    />
-                  </div>
-                </section>
-
-                <section className="glass-card relative overflow-hidden p-6 sm:p-7">
-                  <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
-                  <div className="relative flex items-center gap-4">
-                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-                      <FileCheck2 className="size-5" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                        Booking record
-                      </p>
-
-                      <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                        Status timeline
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="relative mt-6 space-y-4">
-                    <DetailItem
-                      icon={CalendarDays}
-                      label="Booking created"
-                      value={formatDateTime(booking.createdAt)}
-                    />
-
-                    {booking.vendorRespondedAt && (
-                      <DetailItem
-                        icon={FileCheck2}
-                        label="Vendor responded"
-                        value={formatDateTime(booking.vendorRespondedAt)}
-                      />
-                    )}
-
-                    {booking.vendorCancelledAt && (
-                      <DetailItem
-                        icon={Ban}
-                        label="Vendor cancelled"
-                        value={formatDateTime(booking.vendorCancelledAt)}
-                      />
-                    )}
-
-                    {booking.customerCancelledAt && (
-                      <DetailItem
-                        icon={Ban}
-                        label="Customer cancelled"
-                        value={formatDateTime(booking.customerCancelledAt)}
-                      />
-                    )}
-
-                    {booking.vendorCompletedAt && (
-                      <DetailItem
-                        icon={CheckCircle2}
-                        label="Service completed"
-                        value={formatDateTime(booking.vendorCompletedAt)}
-                      />
-                    )}
-
-                    <DetailItem
-                      icon={Clock3}
-                      label="Last updated"
-                      value={formatDateTime(booking.updatedAt)}
-                    />
-                  </div>
-
-                  {booking.vendorResponseNote && (
-                    <div className="mt-6">
-                      <TextSection
-                        title="Vendor response note"
-                        value={booking.vendorResponseNote}
-                        emptyText="No response note recorded."
-                      />
-                    </div>
-                  )}
-
-                  {booking.vendorCancellationReason && (
-                    <div className="mt-6">
-                      <TextSection
-                        title="Vendor cancellation reason"
-                        value={booking.vendorCancellationReason}
-                        emptyText="No cancellation reason recorded."
-                      />
-                    </div>
-                  )}
-
-                  {booking.customerCancellationReason && (
-                    <div className="mt-6">
-                      <TextSection
-                        title="Customer cancellation reason"
-                        value={booking.customerCancellationReason}
-                        emptyText="No cancellation reason recorded."
-                      />
-                    </div>
-                  )}
-                </section>
-              </div>
-
-              <aside className="space-y-6">
-                <section className="glass-card relative overflow-hidden p-6">
-                  <div className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-                  <div className="relative flex items-center gap-4">
-                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-                      <UserRound className="size-5" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                        Customer
-                      </p>
-
-                      <h2 className="mt-1 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                        {getCustomerName(booking)}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="relative mt-6 space-y-3">
-                    <DetailItem icon={Mail} label="Email" value={booking.event.owner.email} />
-
-                    <DetailItem
-                      icon={Phone}
-                      label="Phone"
-                      value={booking.event.owner.phone || 'Phone number not provided'}
-                    />
-                  </div>
-                </section>
-
-                <section className="glass-card relative overflow-hidden p-6">
-                  <div className="pointer-events-none absolute -left-14 -top-16 size-40 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
-                  <div className="relative flex items-center gap-4">
-                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-                      <CircleDollarSign className="size-5" />
-                    </div>
-
-                    <h2 className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                      Financial summary
-                    </h2>
-                  </div>
-
-                  <dl className="relative mt-5 space-y-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="text-sm font-semibold text-[var(--color-charcoal)]/52">
-                        Agreed cost
-                      </dt>
-
-                      <dd className="font-black text-[var(--color-near-black)]">
-                        {formatMoney(booking.agreedCost)}
-                      </dd>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="text-sm font-semibold text-[var(--color-charcoal)]/52">
-                        Deposit
-                      </dt>
-
-                      <dd className="font-black text-[var(--color-near-black)]">
-                        {depositAmount ? formatMoney(depositAmount) : 'Not required'}
-                      </dd>
-                    </div>
-
-                    <div className="border-t border-white/65 pt-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <dt className="text-sm font-black text-[var(--color-near-black)]">
-                          Remaining balance
-                        </dt>
-
-                        <dd className="text-lg font-black tracking-[-0.025em] text-[var(--color-deep-plum)]">
-                          {remainingBalance !== null
-                            ? formatMoney(remainingBalance.toString())
-                            : 'Not available'}
-                        </dd>
-                      </div>
-                    </div>
-                  </dl>
-                </section>
-
-                {(canConfirm || canReject || canCancel || canComplete) && (
-                  <section className="glass-card relative overflow-hidden p-6">
-                    <div className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-                    <p className="relative text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
-                      Booking actions
+                    <p className="mt-6 text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                      Customer booking
                     </p>
 
-                    {canConfirm && (
-                      <button
-                        type="button"
-                        onClick={() => openDialog('CONFIRM')}
-                        className="relative mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-deep-plum)] px-5 py-3.5 text-sm font-black text-white shadow-[0_16px_38px_rgba(91,61,82,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)]"
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                        Confirm booking
-                      </button>
-                    )}
-
-                    {canReject && (
-                      <button
-                        type="button"
-                        onClick={() => openDialog('REJECT')}
-                        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200/80 bg-white/70 px-5 py-3.5 text-sm font-black text-red-700 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-red-50"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Reject booking
-                      </button>
-                    )}
-
-                    {canComplete && (
-                      <button
-                        type="button"
-                        onClick={() => openDialog('COMPLETE')}
-                        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3.5 text-sm font-black text-white shadow-[0_16px_38px_rgba(4,120,87,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-800"
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                        Mark as completed
-                      </button>
-                    )}
-
-                    {canCancel && (
-                      <button
-                        type="button"
-                        onClick={() => openDialog('CANCEL')}
-                        className="relative mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200/80 bg-white/70 px-5 py-3.5 text-sm font-black text-red-700 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-red-50"
-                      >
-                        <Ban className="h-4 w-4" />
-                        Cancel booking
-                      </button>
-                    )}
-                  </section>
-                )}
-
-                <section className="glass-card relative overflow-hidden p-6">
-                  <div className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(214,190,177,0.14)] blur-3xl" />
-                  <div className="relative flex items-center gap-4">
-                    <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_12px_28px_rgba(91,61,82,0.2)]">
-                      <ShieldAlert className="size-5" />
-                    </div>
-
-                    <h2 className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                      Booking guidance
+                    <h2 className="mt-3 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+                      {booking.event.name}
                     </h2>
+
+                    <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
+                      Review the service schedule, accepted quotation, customer details and current
+                      booking status from one place.
+                    </p>
+
+                    <div className="mt-7 flex flex-wrap gap-2.5">
+                      <span className="soft-chip text-xs font-black">
+                        <CalendarDays className="size-4" />
+                        Starts {formatDateTime(booking.serviceStart)}
+                      </span>
+
+                      <span className="soft-chip text-xs font-black">
+                        <UserRound className="size-4" />
+                        {getCustomerName(booking)}
+                      </span>
+                    </div>
                   </div>
 
-                  <p className="relative mt-5 text-sm leading-7 text-[var(--color-charcoal)]/64">
-                    Confirm only when the date and service scope are feasible. Rejections and
-                    cancellations require a clear reason and are permanently recorded.
-                  </p>
-                </section>
+                  <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
+                    />
 
-                <section className="glass-card relative overflow-hidden p-6">
-                  <div className="pointer-events-none absolute -left-14 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
-                  <p className="relative text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
-                    Record information
-                  </p>
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-5">
+                        <div>
+                          <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Booking summary
+                          </p>
 
-                  <dl className="relative mt-5 space-y-4 text-sm">
-                    <div>
-                      <dt className="font-semibold text-[var(--color-charcoal)]/42">Booking ID</dt>
+                          <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                            Current commitment
+                          </h3>
+                        </div>
 
-                      <dd className="mt-1.5 break-all font-semibold leading-6 text-[var(--color-near-black)]">
-                        {booking.id}
-                      </dd>
+                        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                          <BriefcaseBusiness className="size-5" />
+                        </div>
+                      </div>
+
+                      <div className="mt-6 rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
+                        <p className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
+                          Agreed cost
+                        </p>
+
+                        <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                          {formatMoney(booking.agreedCost)}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
+                        <p className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
+                          Current status
+                        </p>
+
+                        <div className="mt-3 flex items-center justify-between gap-4">
+                          <span
+                            className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-black ${
+                              bookingStatusStyles[booking.status]
+                            }`}
+                          >
+                            {bookingStatusLabels[booking.status]}
+                          </span>
+
+                          <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
+                            Updated {formatDateTime(booking.updatedAt)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              {successMessage ? (
+                <div className="mt-5 flex items-start gap-3 rounded-[1.5rem] border border-emerald-200 bg-emerald-50/70 p-5">
+                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-700" />
+
+                  <p className="text-sm font-bold leading-6 text-emerald-800">{successMessage}</p>
+                </div>
+              ) : null}
+
+              {operationError ? (
+                <div className="mt-5 flex items-start gap-3 rounded-[1.5rem] border border-red-200 bg-red-50/70 p-5">
+                  <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-700" />
+
+                  <p className="text-sm font-bold leading-6 text-red-800">{operationError}</p>
+                </div>
+              ) : null}
+
+              <div className="mt-6 grid gap-6 xl:grid-cols-[1.38fr_0.72fr]">
+                <div className="space-y-6">
+                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <CalendarDays className="size-5" />
+                      </div>
+
+                      <div>
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Service schedule
+                        </p>
+
+                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                          Booking details
+                        </h2>
+
+                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
+                          Confirm the service timing, location and current booking state.
+                        </p>
+                      </div>
                     </div>
 
-                    <div>
-                      <dt className="font-semibold text-[var(--color-charcoal)]/42">Version</dt>
+                    <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:grid-cols-2">
+                      <DetailItem
+                        icon={CalendarDays}
+                        label="Service starts"
+                        value={formatDateTime(booking.serviceStart)}
+                      />
 
-                      <dd className="mt-1.5 font-semibold text-[var(--color-near-black)]">
-                        Version {booking.acceptedQuotation.version}
-                      </dd>
+                      <DetailItem
+                        icon={Clock3}
+                        label="Service ends"
+                        value={
+                          booking.serviceEnd
+                            ? formatDateTime(booking.serviceEnd)
+                            : 'No end time provided'
+                        }
+                      />
+
+                      <DetailItem
+                        icon={MapPin}
+                        label="Location"
+                        value={booking.event.location || 'Location not provided'}
+                      />
+
+                      <DetailItem
+                        icon={BriefcaseBusiness}
+                        label="Booking status"
+                        value={bookingStatusLabels[booking.status]}
+                      />
                     </div>
-                  </dl>
-                </section>
-              </aside>
-            </div>
-          </>
-        )}
-      </div>
+                  </section>
 
-      {actionDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && !isActionPending) {
-              resetDialog();
-            }
-          }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="booking-action-title"
-            className="glass-card relative w-full max-w-lg overflow-hidden p-6 shadow-[0_32px_90px_rgba(38,24,31,0.24)] sm:p-7"
-          >
-            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl" />
+                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <Package className="size-5" />
+                      </div>
 
-            <div
-              className={`relative grid size-12 place-items-center rounded-2xl shadow-[0_12px_28px_rgba(49,35,42,0.1)] ${
-                actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-red-50 text-red-700'
-              }`}
-            >
-              {actionDialog === 'CONFIRM' && <CheckCircle2 className="size-5" />}
+                      <div>
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Accepted quotation
+                        </p>
 
-              {actionDialog === 'REJECT' && <XCircle className="size-5" />}
+                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                          Package and service scope
+                        </h2>
 
-              {actionDialog === 'CANCEL' && <Ban className="size-5" />}
+                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
+                          Review the service package and the exact scope agreed with the customer.
+                        </p>
+                      </div>
+                    </div>
 
-              {actionDialog === 'COMPLETE' && <FileCheck2 className="size-5" />}
-            </div>
+                    <div className="mt-6 overflow-hidden rounded-[1.55rem] border border-white/58 bg-white/30 p-5 sm:p-6">
+                      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
+                            Selected service
+                          </p>
 
-            <h2
-              id="booking-action-title"
-              className="relative mt-5 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]"
-            >
-              {actionDialog === 'CONFIRM' && 'Confirm this booking?'}
+                          <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                            {booking.acceptedQuotation.quotationRequest.package?.title ||
+                              'Custom service'}
+                          </h3>
 
-              {actionDialog === 'REJECT' && 'Reject this booking?'}
+                          <span className="soft-chip mt-3 w-fit text-xs font-black">
+                            <Package className="size-3.5" />
+                            {booking.acceptedQuotation.quotationRequest.package?.category?.name ||
+                              'Event service'}
+                          </span>
+                        </div>
 
-              {actionDialog === 'CANCEL' && 'Cancel this booking?'}
+                        <div className="shrink-0 rounded-[1.25rem] border border-white/60 bg-white/38 px-5 py-4">
+                          <p className="text-[0.63rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
+                            Quoted price
+                          </p>
 
-              {actionDialog === 'COMPLETE' && 'Mark this booking as completed?'}
-            </h2>
+                          <p className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                            {formatMoney(booking.acceptedQuotation.proposedPrice)}
+                          </p>
+                        </div>
+                      </div>
 
-            <p className="relative mt-3 text-sm leading-7 text-[var(--color-charcoal)]/62">
-              {actionDialog === 'CONFIRM' &&
-                'Confirm that you can provide the agreed service on the scheduled date.'}
+                      {booking.acceptedQuotation.quotationRequest.package?.description ? (
+                        <p className="mt-5 whitespace-pre-wrap border-t border-[rgba(93,58,85,0.08)] pt-5 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
+                          {booking.acceptedQuotation.quotationRequest.package.description}
+                        </p>
+                      ) : null}
+                    </div>
 
-              {actionDialog === 'REJECT' &&
-                'The customer will be informed that this booking request was rejected.'}
+                    <div className="mt-6 grid gap-5">
+                      <TextSection
+                        title="Customer requirements"
+                        value={booking.acceptedQuotation.quotationRequest.requirements}
+                        emptyText="No additional customer requirements were provided."
+                      />
 
-              {actionDialog === 'CANCEL' &&
-                'Cancellation affects an accepted booking and the reason will remain in the booking record.'}
+                      <TextSection
+                        title="Inclusions"
+                        value={booking.acceptedQuotation.inclusions}
+                        emptyText="No inclusions were recorded."
+                      />
 
-              {actionDialog === 'COMPLETE' &&
-                'Only mark the booking complete after the agreed service has been delivered.'}
-            </p>
+                      <TextSection
+                        title="Exclusions"
+                        value={booking.acceptedQuotation.exclusions}
+                        emptyText="No exclusions were recorded."
+                      />
 
-            {actionDialog === 'CONFIRM' && (
-              <label className="mt-5 block">
-                <span className="text-sm font-black text-[var(--color-near-black)]">
-                  Confirmation note (optional)
-                </span>
+                      <TextSection
+                        title="Terms"
+                        value={booking.acceptedQuotation.terms}
+                        emptyText="No additional terms were recorded."
+                      />
+                    </div>
+                  </section>
 
-                <textarea
-                  rows={5}
-                  value={confirmNote}
-                  disabled={isActionPending}
-                  onChange={(event) => {
-                    setConfirmNote(event.target.value);
-                    setFormError('');
-                  }}
-                  placeholder="Add any useful confirmation details for the customer..."
-                  className="mt-2 w-full resize-y rounded-2xl border border-white/70 bg-white/65 px-4 py-3 text-sm leading-7 text-[var(--color-near-black)] outline-none transition duration-300 placeholder:text-[var(--color-charcoal)]/38 focus:border-[rgba(183,167,200,0.75)] focus:bg-white focus:ring-4 focus:ring-[rgba(183,167,200,0.18)] disabled:bg-white/40 disabled:text-[var(--color-charcoal)]/40"
-                />
+                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <FileCheck2 className="size-5" />
+                      </div>
 
-                <p className="mt-2 text-right text-xs font-semibold text-[var(--color-charcoal)]/40">
-                  {confirmNote.length}/2000
-                </p>
-              </label>
-            )}
+                      <div>
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Booking record
+                        </p>
 
-            {(actionDialog === 'REJECT' || actionDialog === 'CANCEL') && (
-              <label className="mt-5 block">
-                <span className="text-sm font-black text-[var(--color-near-black)]">
-                  {actionDialog === 'REJECT' ? 'Rejection reason' : 'Cancellation reason'}
-                </span>
+                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                          Status timeline
+                        </h2>
 
-                <textarea
-                  rows={6}
-                  value={reason}
-                  disabled={isActionPending}
-                  onChange={(event) => {
-                    setReason(event.target.value);
-                    setFormError('');
-                  }}
-                  placeholder={
-                    actionDialog === 'REJECT'
-                      ? 'Explain why this booking cannot be accepted...'
-                      : 'Explain why this booking must be cancelled...'
-                  }
-                  className="mt-2 w-full resize-y rounded-2xl border border-white/70 bg-white/65 px-4 py-3 text-sm leading-7 text-[var(--color-near-black)] outline-none transition duration-300 placeholder:text-[var(--color-charcoal)]/38 focus:border-[rgba(183,167,200,0.75)] focus:bg-white focus:ring-4 focus:ring-[rgba(183,167,200,0.18)] disabled:bg-white/40 disabled:text-[var(--color-charcoal)]/40"
-                />
+                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
+                          Important changes and actions recorded throughout this booking.
+                        </p>
+                      </div>
+                    </div>
 
-                <p className="mt-2 text-right text-xs font-semibold text-[var(--color-charcoal)]/40">
-                  {reason.length}/2000
-                </p>
-              </label>
-            )}
+                    <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:grid-cols-2">
+                      <DetailItem
+                        icon={CalendarDays}
+                        label="Booking created"
+                        value={formatDateTime(booking.createdAt)}
+                      />
 
-            {formError && (
-              <div className="mt-4 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 p-4">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-700" />
+                      {booking.vendorRespondedAt ? (
+                        <DetailItem
+                          icon={FileCheck2}
+                          label="Vendor responded"
+                          value={formatDateTime(booking.vendorRespondedAt)}
+                        />
+                      ) : null}
 
-                <p className="text-xs font-medium leading-5 text-red-700">{formError}</p>
+                      {booking.vendorCancelledAt ? (
+                        <DetailItem
+                          icon={Ban}
+                          label="Vendor cancelled"
+                          value={formatDateTime(booking.vendorCancelledAt)}
+                        />
+                      ) : null}
+
+                      {booking.customerCancelledAt ? (
+                        <DetailItem
+                          icon={Ban}
+                          label="Customer cancelled"
+                          value={formatDateTime(booking.customerCancelledAt)}
+                        />
+                      ) : null}
+
+                      {booking.vendorCompletedAt ? (
+                        <DetailItem
+                          icon={CheckCircle2}
+                          label="Service completed"
+                          value={formatDateTime(booking.vendorCompletedAt)}
+                        />
+                      ) : null}
+
+                      <DetailItem
+                        icon={Clock3}
+                        label="Last updated"
+                        value={formatDateTime(booking.updatedAt)}
+                      />
+                    </div>
+
+                    {booking.vendorResponseNote ? (
+                      <div className="mt-6 border-t border-[rgba(93,58,85,0.08)] pt-6">
+                        <TextSection
+                          title="Vendor response note"
+                          value={booking.vendorResponseNote}
+                          emptyText="No response note recorded."
+                        />
+                      </div>
+                    ) : null}
+
+                    {booking.vendorCancellationReason ? (
+                      <div className="mt-5">
+                        <TextSection
+                          title="Vendor cancellation reason"
+                          value={booking.vendorCancellationReason}
+                          emptyText="No cancellation reason recorded."
+                        />
+                      </div>
+                    ) : null}
+
+                    {booking.customerCancellationReason ? (
+                      <div className="mt-5">
+                        <TextSection
+                          title="Customer cancellation reason"
+                          value={booking.customerCancellationReason}
+                          emptyText="No cancellation reason recorded."
+                        />
+                      </div>
+                    ) : null}
+                  </section>
+                </div>
+
+                <aside className="space-y-6 xl:sticky xl:top-6 xl:self-start">
+                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <UserRound className="size-5" />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Customer
+                        </p>
+
+                        <h2 className="mt-2 break-words text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          {getCustomerName(booking)}
+                        </h2>
+
+                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/54">
+                          Primary customer for this booking.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-3">
+                      <DetailItem icon={Mail} label="Email" value={booking.event.owner.email} />
+
+                      <DetailItem
+                        icon={Phone}
+                        label="Phone"
+                        value={booking.event.owner.phone || 'Phone number not provided'}
+                      />
+                    </div>
+                  </section>
+
+                  <section className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(240,231,238,0.48))] p-5 shadow-[0_18px_48px_rgba(35,24,30,0.08)] backdrop-blur-xl sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <CircleDollarSign className="size-5" />
+                      </div>
+
+                      <div>
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Financial summary
+                        </p>
+
+                        <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          Booking value
+                        </h2>
+                      </div>
+                    </div>
+
+                    <dl className="mt-5 space-y-3">
+                      <div className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-white/58 bg-white/30 px-4 py-3.5">
+                        <dt className="text-sm font-semibold text-[var(--color-charcoal)]/58">
+                          Agreed cost
+                        </dt>
+
+                        <dd className="text-sm font-black text-[var(--color-near-black)]">
+                          {formatMoney(booking.agreedCost)}
+                        </dd>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-white/58 bg-white/30 px-4 py-3.5">
+                        <dt className="text-sm font-semibold text-[var(--color-charcoal)]/58">
+                          Deposit
+                        </dt>
+
+                        <dd className="text-sm font-black text-[var(--color-near-black)]">
+                          {depositAmount ? formatMoney(depositAmount) : 'Not required'}
+                        </dd>
+                      </div>
+
+                      <div className="rounded-[1.25rem] bg-[var(--color-deep-plum)] p-4 shadow-[0_14px_34px_rgba(91,61,82,0.20)]">
+                        <div className="flex items-center justify-between gap-4">
+                          <dt className="text-sm font-bold text-white/72">Remaining balance</dt>
+
+                          <dd className="text-lg font-black text-white">
+                            {remainingBalance !== null
+                              ? formatMoney(remainingBalance.toString())
+                              : 'Not available'}
+                          </dd>
+                        </div>
+                      </div>
+                    </dl>
+                  </section>
+
+                  {canConfirm || canReject || canCancel || canComplete ? (
+                    <section className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Booking actions
+                      </p>
+
+                      <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Manage this commitment
+                      </h2>
+
+                      <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/54">
+                        Only actions valid for the current booking status are available.
+                      </p>
+
+                      <div className="mt-5 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-5">
+                        {canConfirm ? (
+                          <button
+                            type="button"
+                            onClick={() => openDialog('CONFIRM')}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-deep-plum)] px-5 py-3.5 text-sm font-black !text-white shadow-[0_14px_32px_rgba(91,61,82,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white"
+                          >
+                            <CheckCircle2 className="size-4 text-white" />
+                            <span className="text-white">Confirm booking</span>
+                          </button>
+                        ) : null}
+
+                        {canReject ? (
+                          <button
+                            type="button"
+                            onClick={() => openDialog('REJECT')}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200/80 bg-red-50/60 px-5 py-3.5 text-sm font-black text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100"
+                          >
+                            <XCircle className="size-4" />
+                            Reject booking
+                          </button>
+                        ) : null}
+
+                        {canComplete ? (
+                          <button
+                            type="button"
+                            onClick={() => openDialog('COMPLETE')}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-3.5 text-sm font-black !text-white shadow-[0_14px_32px_rgba(4,120,87,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-800 hover:!text-white"
+                          >
+                            <CheckCircle2 className="size-4 text-white" />
+                            <span className="text-white">Mark as completed</span>
+                          </button>
+                        ) : null}
+
+                        {canCancel ? (
+                          <button
+                            type="button"
+                            onClick={() => openDialog('CANCEL')}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200/80 bg-red-50/60 px-5 py-3.5 text-sm font-black text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100"
+                          >
+                            <Ban className="size-4" />
+                            Cancel booking
+                          </button>
+                        ) : null}
+                      </div>
+                    </section>
+                  ) : null}
+
+                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(220,186,167,0.20)] text-[var(--color-rosewood)]">
+                        <ShieldAlert className="size-5" />
+                      </div>
+
+                      <div>
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Booking guidance
+                        </p>
+
+                        <h2 className="mt-2 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                          Protect customer commitments
+                        </h2>
+                      </div>
+                    </div>
+
+                    <p className="mt-5 text-sm font-medium leading-7 text-[var(--color-charcoal)]/60">
+                      Confirm only when the date and service scope are feasible. Rejections and
+                      cancellations require a clear reason and remain permanently recorded.
+                    </p>
+                  </section>
+
+                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
+                    <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Record information
+                    </p>
+
+                    <dl className="mt-5 grid gap-3">
+                      <div className="rounded-[1.15rem] border border-white/58 bg-white/30 p-4">
+                        <dt className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+                          Booking ID
+                        </dt>
+
+                        <dd className="mt-2 break-all text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62">
+                          {booking.id}
+                        </dd>
+                      </div>
+
+                      <div className="rounded-[1.15rem] border border-white/58 bg-white/30 p-4">
+                        <dt className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+                          Quotation version
+                        </dt>
+
+                        <dd className="mt-2 text-sm font-black text-[var(--color-near-black)]">
+                          Version {booking.acceptedQuotation.version}
+                        </dd>
+                      </div>
+                    </dl>
+                  </section>
+                </aside>
               </div>
-            )}
+            </>
+          )}
+        </div>
 
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                disabled={isActionPending}
-                onClick={resetDialog}
-                className="rounded-2xl border border-white/70 bg-white/72 px-5 py-3 text-sm font-black text-[var(--color-charcoal)] shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-              >
-                Go back
-              </button>
-
-              <button
-                type="button"
-                disabled={isActionPending}
-                onClick={() => {
-                  if (actionDialog === 'CONFIRM') {
-                    handleConfirmBooking();
-                    return;
-                  }
-
-                  if (actionDialog === 'REJECT' || actionDialog === 'CANCEL') {
-                    handleReasonAction();
-                    return;
-                  }
-
-                  if (actionDialog === 'COMPLETE') {
-                    completeMutation.mutate();
-                  }
+        {actionDialog && booking ? (
+          <div
+            className="fixed inset-0 z-[70] overflow-y-auto bg-[rgba(31,27,29,0.58)] px-4 py-6 backdrop-blur-md sm:py-8"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                requestCloseDialog();
+              }
+            }}
+          >
+            <div className="mx-auto flex min-h-full w-full max-w-lg items-center justify-center">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="booking-action-title"
+                className="relative w-full overflow-hidden rounded-[2rem] border border-white/75 bg-[rgba(250,247,248,0.98)] shadow-[0_34px_100px_rgba(27,17,23,0.38)] backdrop-blur-2xl"
+                onMouseDown={(event) => {
+                  event.stopPropagation();
                 }}
-                className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white shadow-[0_16px_38px_rgba(49,35,42,0.18)] transition duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${
-                  actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
-                    ? 'bg-emerald-700 hover:bg-emerald-800'
-                    : 'bg-red-700 hover:bg-red-800'
-                }`}
               >
-                {isActionPending && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                <div
+                  aria-hidden="true"
+                  className={[
+                    'pointer-events-none absolute -right-20 -top-24 size-56 rounded-full blur-3xl',
+                    actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
+                      ? 'bg-emerald-100/55'
+                      : 'bg-red-100/60',
+                  ].join(' ')}
+                />
 
-                {actionDialog === 'CONFIRM' && 'Confirm booking'}
+                <div className="relative border-b border-[rgba(93,58,85,0.08)] px-6 py-6 sm:px-7">
+                  <div className="flex items-start justify-between gap-5">
+                    <div
+                      className={[
+                        'grid size-12 shrink-0 place-items-center rounded-[1.1rem]',
+                        actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-red-50 text-red-700',
+                      ].join(' ')}
+                    >
+                      {actionDialog === 'CONFIRM' ? <CheckCircle2 className="size-5" /> : null}
 
-                {actionDialog === 'REJECT' && 'Reject booking'}
+                      {actionDialog === 'REJECT' ? <XCircle className="size-5" /> : null}
 
-                {actionDialog === 'CANCEL' && 'Cancel booking'}
+                      {actionDialog === 'CANCEL' ? <Ban className="size-5" /> : null}
 
-                {actionDialog === 'COMPLETE' && 'Mark completed'}
-              </button>
+                      {actionDialog === 'COMPLETE' ? <FileCheck2 className="size-5" /> : null}
+                    </div>
+
+                    <button
+                      type="button"
+                      aria-label="Close booking action"
+                      disabled={isActionPending}
+                      onClick={requestCloseDialog}
+                      className="grid size-10 shrink-0 place-items-center rounded-full border border-white/65 bg-white/42 text-[var(--color-charcoal)]/62 shadow-sm transition hover:bg-white/72 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <XCircle className="size-4.5" />
+                    </button>
+                  </div>
+
+                  <p
+                    className={[
+                      'mt-5 text-[0.65rem] font-black uppercase tracking-[0.16em]',
+                      actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
+                        ? 'text-emerald-700'
+                        : 'text-red-600',
+                    ].join(' ')}
+                  >
+                    {actionDialog === 'CONFIRM' ? 'Booking confirmation' : null}
+                    {actionDialog === 'REJECT' ? 'Booking rejection' : null}
+                    {actionDialog === 'CANCEL' ? 'Booking cancellation' : null}
+                    {actionDialog === 'COMPLETE' ? 'Service completion' : null}
+                  </p>
+
+                  <h2
+                    id="booking-action-title"
+                    className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+                  >
+                    {actionDialog === 'CONFIRM' ? 'Confirm this booking?' : null}
+                    {actionDialog === 'REJECT' ? 'Reject this booking?' : null}
+                    {actionDialog === 'CANCEL' ? 'Cancel this booking?' : null}
+                    {actionDialog === 'COMPLETE' ? 'Mark this booking as completed?' : null}
+                  </h2>
+
+                  <p className="mt-3 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
+                    {actionDialog === 'CONFIRM'
+                      ? 'Confirm that you can provide the accepted service on the agreed schedule.'
+                      : null}
+
+                    {actionDialog === 'REJECT'
+                      ? 'The customer will be informed that you cannot accept this booking request.'
+                      : null}
+
+                    {actionDialog === 'CANCEL'
+                      ? 'This affects an accepted customer commitment. Your reason will remain permanently in the booking record.'
+                      : null}
+
+                    {actionDialog === 'COMPLETE'
+                      ? 'Only complete the booking after the agreed service has actually been delivered.'
+                      : null}
+                  </p>
+                </div>
+
+                <div className="relative px-6 py-6 sm:px-7">
+                  <div className="rounded-[1.3rem] border border-white/62 bg-white/38 p-4">
+                    <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
+                      Booking
+                    </p>
+
+                    <p className="mt-2 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      {booking.event.name}
+                    </p>
+
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                      <span className="text-xs font-semibold text-[var(--color-charcoal)]/52">
+                        {getCustomerName(booking)}
+                      </span>
+
+                      <span className="text-xs font-semibold text-[var(--color-charcoal)]/52">
+                        {formatDateTime(booking.serviceStart)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {actionDialog === 'CONFIRM' ? (
+                    <label className="mt-5 block">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-black text-[var(--color-near-black)]">
+                          Confirmation note
+                          <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
+                            Optional
+                          </span>
+                        </span>
+
+                        <span
+                          className={[
+                            'text-xs font-bold',
+                            confirmNote.length > 2000
+                              ? 'text-red-700'
+                              : 'text-[var(--color-charcoal)]/40',
+                          ].join(' ')}
+                        >
+                          {confirmNote.length}/2000
+                        </span>
+                      </div>
+
+                      <textarea
+                        rows={5}
+                        value={confirmNote}
+                        disabled={isActionPending}
+                        onChange={(event) => {
+                          setConfirmNote(event.target.value);
+                          setFormError('');
+                        }}
+                        placeholder="Add useful confirmation details for the customer..."
+                        className="form-field mt-2 min-h-32 resize-y bg-white/55 leading-7"
+                      />
+
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                        Optional notes can include arrival instructions, preparation details, or
+                        another useful service reminder.
+                      </p>
+                    </label>
+                  ) : null}
+
+                  {actionDialog === 'REJECT' || actionDialog === 'CANCEL' ? (
+                    <label className="mt-5 block">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-black text-[var(--color-near-black)]">
+                          {actionDialog === 'REJECT' ? 'Rejection reason' : 'Cancellation reason'}
+                        </span>
+
+                        <span
+                          className={[
+                            'text-xs font-bold',
+                            reason.length > 2000
+                              ? 'text-red-700'
+                              : 'text-[var(--color-charcoal)]/40',
+                          ].join(' ')}
+                        >
+                          {reason.length}/2000
+                        </span>
+                      </div>
+
+                      <textarea
+                        rows={6}
+                        value={reason}
+                        disabled={isActionPending}
+                        onChange={(event) => {
+                          setReason(event.target.value);
+                          setFormError('');
+                        }}
+                        placeholder={
+                          actionDialog === 'REJECT'
+                            ? 'Explain clearly why this booking cannot be accepted...'
+                            : 'Explain clearly why this booking must be cancelled...'
+                        }
+                        className="form-field mt-2 min-h-36 resize-y bg-white/55 leading-7"
+                      />
+
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/46">
+                        Minimum 10 characters. This explanation becomes part of the booking record.
+                      </p>
+                    </label>
+                  ) : null}
+
+                  {actionDialog === 'COMPLETE' ? (
+                    <div className="mt-5 flex items-start gap-3 rounded-[1.25rem] border border-emerald-200/75 bg-emerald-50/65 p-4">
+                      <FileCheck2 className="mt-0.5 size-4 shrink-0 text-emerald-700" />
+
+                      <div>
+                        <p className="text-sm font-black text-emerald-900">
+                          Confirm service delivery
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold leading-5 text-emerald-700">
+                          Completing the booking records that your side of the agreed service has
+                          been delivered.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {actionDialog === 'CANCEL' ? (
+                    <div className="mt-5 flex items-start gap-3 rounded-[1.25rem] border border-red-200/80 bg-red-50/70 p-4">
+                      <ShieldAlert className="mt-0.5 size-4 shrink-0 text-red-700" />
+
+                      <div>
+                        <p className="text-sm font-black text-red-900">
+                          Existing customer commitment
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold leading-5 text-red-700">
+                          Cancellation can affect the customer's event planning and will remain
+                          visible in the booking history.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {formError ? (
+                    <div
+                      role="alert"
+                      className="mt-5 flex items-start gap-3 rounded-[1.2rem] border border-red-200 bg-red-50 p-4"
+                    >
+                      <AlertCircle className="mt-0.5 size-4 shrink-0 text-red-700" />
+
+                      <p className="text-xs font-bold leading-5 text-red-700">{formError}</p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="relative border-t border-[rgba(93,58,85,0.08)] bg-white/38 px-6 py-5 backdrop-blur-xl sm:px-7">
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      disabled={isActionPending}
+                      onClick={requestCloseDialog}
+                      className="btn-secondary justify-center text-sm font-black"
+                    >
+                      Go back
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isActionPending}
+                      onClick={() => {
+                        if (actionDialog === 'CONFIRM') {
+                          handleConfirmBooking();
+                          return;
+                        }
+
+                        if (actionDialog === 'REJECT' || actionDialog === 'CANCEL') {
+                          handleReasonAction();
+                          return;
+                        }
+
+                        if (actionDialog === 'COMPLETE') {
+                          completeMutation.mutate();
+                        }
+                      }}
+                      className={[
+                        'inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-black !text-white shadow-[0_14px_32px_rgba(49,35,42,0.18)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0',
+                        actionDialog === 'CONFIRM' || actionDialog === 'COMPLETE'
+                          ? 'bg-emerald-700 hover:bg-emerald-800'
+                          : 'bg-red-700 hover:bg-red-800',
+                      ].join(' ')}
+                    >
+                      {isActionPending ? (
+                        <LoaderCircle className="size-4 animate-spin text-white" />
+                      ) : actionDialog === 'CONFIRM' ? (
+                        <CheckCircle2 className="size-4 text-white" />
+                      ) : actionDialog === 'REJECT' ? (
+                        <XCircle className="size-4 text-white" />
+                      ) : actionDialog === 'CANCEL' ? (
+                        <Ban className="size-4 text-white" />
+                      ) : (
+                        <FileCheck2 className="size-4 text-white" />
+                      )}
+
+                      <span className="text-white">
+                        {isActionPending
+                          ? actionDialog === 'CONFIRM'
+                            ? 'Confirming booking...'
+                            : actionDialog === 'REJECT'
+                              ? 'Rejecting booking...'
+                              : actionDialog === 'CANCEL'
+                                ? 'Cancelling booking...'
+                                : 'Completing booking...'
+                          : actionDialog === 'CONFIRM'
+                            ? 'Confirm booking'
+                            : actionDialog === 'REJECT'
+                              ? 'Reject booking'
+                              : actionDialog === 'CANCEL'
+                                ? 'Cancel booking'
+                                : 'Mark completed'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        ) : null}
+
+        {showDiscardConfirmation && actionDialog && booking ? (
+          <div
+            className="fixed inset-0 z-[90] grid place-items-center bg-[rgba(31,27,29,0.62)] px-4 py-8 backdrop-blur-md"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="discard-booking-action-title"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !isActionPending) {
+                setShowDiscardConfirmation(false);
+              }
+            }}
+          >
+            <div
+              className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/75 bg-[rgba(250,247,248,0.98)] p-6 shadow-[0_34px_100px_rgba(27,17,23,0.40)] backdrop-blur-2xl sm:p-7"
+              onMouseDown={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-amber-100/55 blur-3xl"
+              />
+
+              <div className="relative grid size-12 place-items-center rounded-[1.1rem] bg-amber-50 text-amber-700">
+                <AlertCircle className="size-5" />
+              </div>
+
+              <p className="relative mt-5 text-[0.65rem] font-black uppercase tracking-[0.16em] text-amber-700">
+                Unsaved input
+              </p>
+
+              <h2
+                id="discard-booking-action-title"
+                className="relative mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+              >
+                Discard what you entered?
+              </h2>
+
+              <p className="relative mt-3 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
+                {actionDialog === 'CONFIRM'
+                  ? 'Your confirmation note has not been submitted. Closing this action will remove the note you entered.'
+                  : 'The reason you entered has not been submitted. Closing this action will remove it.'}
+              </p>
+
+              <div className="relative mt-6 flex flex-col-reverse gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirmation(false)}
+                  className="btn-secondary justify-center text-sm font-black"
+                >
+                  Keep editing
+                </button>
+
+                <button
+                  type="button"
+                  onClick={discardDialogInput}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black !text-white shadow-[0_14px_32px_rgba(91,61,82,0.18)] transition hover:-translate-y-0.5 hover:opacity-90"
+                >
+                  <XCircle className="size-4 text-white" />
+                  <span className="text-white">Discard input</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </main>
   );
 }
