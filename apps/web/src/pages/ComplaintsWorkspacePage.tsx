@@ -48,6 +48,8 @@ export function ComplaintsWorkspacePage() {
 
   const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
 
+  const [replySuccessCount, setReplySuccessCount] = useState(0);
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState<ComplaintStatus | 'ALL'>('ALL');
@@ -190,6 +192,7 @@ export function ComplaintsWorkspacePage() {
       }),
 
     onSuccess: (_, variables) => {
+      setReplySuccessCount((current) => current + 1);
       queryClient.invalidateQueries({
         queryKey: ['complaint', variables.complaintId],
       });
@@ -957,6 +960,7 @@ export function ComplaintsWorkspacePage() {
         <ComplaintDetailsDialog
           complaint={selectedComplaint}
           currentUserId={currentUserId}
+          replySuccessCount={replySuccessCount}
           isReplyPending={replyMutation.isPending}
           isClosePending={closeMutation.isPending}
           replyErrorMessage={

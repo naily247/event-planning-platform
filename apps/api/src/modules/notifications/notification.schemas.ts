@@ -21,15 +21,17 @@ export const getNotificationsSchema = z.object({
   }),
 });
 
+export const getUnreadNotificationCountSchema = z.object({});
+
+export const getNotificationSummarySchema = z.object({});
+
+export const markAllNotificationsAsReadSchema = z.object({});
+
 export const markNotificationAsReadSchema = z.object({
   params: z.object({
     notificationId: notificationIdSchema,
   }),
 });
-
-export const markAllNotificationsAsReadSchema = z.object({});
-
-export const getUnreadNotificationCountSchema = z.object({});
 
 export type GetNotificationsQuery = z.infer<typeof getNotificationsSchema>['query'];
 

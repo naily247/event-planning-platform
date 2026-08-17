@@ -1,4 +1,5 @@
-import { CircleAlert, LoaderCircle, Trash2, X } from 'lucide-react';
+import { CircleAlert, LoaderCircle, Package, Trash2, X } from 'lucide-react';
+
 import type { VendorServicePackage } from '../package.api';
 
 type DeletePackageDialogProps = {
@@ -22,55 +23,73 @@ export function DeletePackageDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[100] overflow-y-auto bg-[rgba(31,27,29,0.5)] px-4 py-8 backdrop-blur-md"
+      className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-[rgba(31,27,29,0.58)] px-4 py-8 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-package-title"
       aria-describedby="delete-package-description"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !isDeleting) {
+          onClose();
+        }
+      }}
     >
-      <div className="grid min-h-full place-items-center">
-        <button
-          type="button"
-          aria-label="Close delete package dialog"
-          onClick={onClose}
-          disabled={isDeleting}
-          className="absolute inset-0 cursor-default disabled:cursor-not-allowed"
+      <div
+        className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/75 bg-[rgba(250,247,248,0.98)] p-6 shadow-[0_34px_100px_rgba(27,17,23,0.38)] backdrop-blur-2xl sm:p-7"
+        onMouseDown={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-red-100/65 blur-3xl"
         />
 
-        <div className="glass-card relative z-10 w-full max-w-lg overflow-hidden p-6 shadow-[0_30px_90px_rgba(25,25,25,0.28)] sm:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-red-100/70 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-1/4 size-40 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-20 left-1/4 size-44 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl"
+        />
 
-          <div className="relative">
-            <div className="flex items-start justify-between gap-5">
-              <div className="grid size-14 shrink-0 place-items-center rounded-[1.2rem] bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_14px_34px_rgba(64,42,51,0.08)]">
-                <Trash2 className="size-6" />
-              </div>
+        <div className="relative flex items-start justify-between gap-5">
+          <div className="grid size-12 shrink-0 place-items-center rounded-[1.1rem] bg-red-50 text-red-700">
+            <Trash2 className="size-5" />
+          </div>
 
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isDeleting}
-                className="grid size-10 shrink-0 place-items-center rounded-full border border-white/60 bg-white/36 text-[var(--color-charcoal)]/58 transition hover:bg-white/52 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Close delete package dialog"
-              >
-                <X className="size-4" />
-              </button>
+          <button
+            type="button"
+            aria-label="Close delete package dialog"
+            disabled={isDeleting}
+            onClick={onClose}
+            className="grid size-10 shrink-0 place-items-center rounded-full border border-white/65 bg-white/42 text-[var(--color-charcoal)]/62 shadow-sm transition hover:bg-white/72 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <X className="size-4.5" />
+          </button>
+        </div>
+
+        <p className="relative mt-5 text-[0.65rem] font-black uppercase tracking-[0.16em] text-red-600">
+          Permanent action
+        </p>
+
+        <h2
+          id="delete-package-title"
+          className="relative mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl"
+        >
+          Delete this service package?
+        </h2>
+
+        <p className="relative mt-3 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
+          This will permanently remove the package from your vendor catalogue and customer-facing
+          profile.
+        </p>
+
+        <div className="relative mt-5 rounded-[1.35rem] border border-white/65 bg-white/42 p-5 shadow-[0_10px_28px_rgba(35,24,30,0.04)]">
+          <div className="flex items-start gap-3">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+              <Package className="size-4.5" />
             </div>
 
-            <p className="mt-6 text-xs font-black uppercase tracking-[0.2em] text-[var(--color-muted-burgundy)]">
-              Delete package
-            </p>
-
-            <h2
-              id="delete-package-title"
-              className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl"
-            >
-              Permanently remove this package?
-            </h2>
-
-            <div className="mt-5 rounded-[22px] border border-white/65 bg-white/34 p-5 backdrop-blur-xl">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+            <div className="min-w-0">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
                 Selected package
               </p>
 
@@ -81,46 +100,62 @@ export function DeletePackageDialog({
               <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
                 {servicePackage.category.name}
               </p>
-            </div>
 
-            <div
-              id="delete-package-description"
-              className="mt-5 flex items-start gap-3 rounded-[22px] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] p-4 text-sm leading-6 text-[var(--color-muted-burgundy)]"
-            >
-              <CircleAlert className="mt-0.5 size-5 shrink-0" />
-
-              <p>
-                This action permanently removes the package from your vendor profile. Customers will
-                no longer be able to view it, and the action cannot be undone.
-              </p>
-            </div>
-
-            <div className="mt-7 flex flex-col-reverse gap-3 border-t border-white/55 pt-6 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isDeleting}
-                className="btn-secondary justify-center text-sm font-bold"
-              >
-                Keep package
-              </button>
-
-              <button
-                type="button"
-                onClick={onConfirm}
-                disabled={isDeleting}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-muted-burgundy)] px-5 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(124,74,90,0.22)] transition duration-300 hover:-translate-y-0.5 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isDeleting ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  <Trash2 className="size-4" />
-                )}
-
-                {isDeleting ? 'Deleting package...' : 'Delete permanently'}
-              </button>
+              {servicePackage.basePrice ? (
+                <p className="mt-2 text-xs font-black text-[var(--color-rosewood)]">
+                  Starting price: LKR {Number(servicePackage.basePrice).toLocaleString('en-LK')}
+                </p>
+              ) : (
+                <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/42">
+                  Quotation-based pricing
+                </p>
+              )}
             </div>
           </div>
+        </div>
+
+        <div
+          id="delete-package-description"
+          className="relative mt-5 flex items-start gap-3 rounded-[1.3rem] border border-red-200/80 bg-red-50/70 p-4"
+        >
+          <CircleAlert className="mt-0.5 size-4.5 shrink-0 text-red-700" />
+
+          <div>
+            <p className="text-sm font-black text-red-900">This cannot be undone</p>
+
+            <p className="mt-1 text-xs font-semibold leading-5 text-red-700">
+              Customers will no longer be able to view or select this package after deletion. If you
+              only want to hide it temporarily, deactivate the package instead.
+            </p>
+          </div>
+        </div>
+
+        <div className="relative mt-6 flex flex-col-reverse gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isDeleting}
+            className="btn-secondary justify-center text-sm font-black"
+          >
+            Keep package
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isDeleting}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-red-700 px-5 py-3 text-sm font-black !text-white shadow-[0_14px_32px_rgba(185,28,28,0.16)] transition hover:-translate-y-0.5 hover:bg-red-800 hover:!text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            {isDeleting ? (
+              <LoaderCircle className="size-4 animate-spin text-white" />
+            ) : (
+              <Trash2 className="size-4 text-white" />
+            )}
+
+            <span className="text-white">
+              {isDeleting ? 'Deleting package...' : 'Delete permanently'}
+            </span>
+          </button>
         </div>
       </div>
     </div>

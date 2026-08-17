@@ -2,6 +2,7 @@ import type { RequestHandler } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import type { GetNotificationsQuery, NotificationParams } from './notification.schemas.js';
 import {
+  getNotificationSummary,
   getUnreadNotificationCount,
   getUserNotifications,
   markAllNotificationsAsRead,
@@ -31,6 +32,15 @@ export const getUnreadNotificationCountHandler: RequestHandler = asyncHandler(as
     data: {
       unreadCount,
     },
+  });
+});
+
+export const getNotificationSummaryHandler: RequestHandler = asyncHandler(async (req, res) => {
+  const summary = await getNotificationSummary(req.auth!.userId);
+
+  res.status(200).json({
+    success: true,
+    data: summary,
   });
 });
 

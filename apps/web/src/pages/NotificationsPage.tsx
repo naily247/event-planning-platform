@@ -24,7 +24,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import {
   getNotifications,
-  getUnreadNotificationCount,
+  getNotificationSummary,
   markAllNotificationsAsRead,
   markNotificationAsRead,
   notificationTypes,
@@ -253,20 +253,15 @@ export function NotificationsPage() {
       }),
   });
 
-  const unreadCountQuery = useQuery({
-    queryKey: ['notifications', 'unread-count'],
-    queryFn: getUnreadNotificationCount,
+  const notificationSummaryQuery = useQuery({
+    queryKey: ['notifications', 'summary'],
+    queryFn: getNotificationSummary,
   });
 
   const invalidateNotificationQueries = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: ['notifications'],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ['notifications', 'unread-count'],
-      }),
-    ]);
+    await queryClient.invalidateQueries({
+      queryKey: ['notifications'],
+    });
   };
 
   const markNotificationAsReadMutation = useMutation({
@@ -294,7 +289,7 @@ export function NotificationsPage() {
 
   const filtersAreActive = statusFilter !== 'all' || Boolean(typeFilter) || sort !== 'newest';
 
-  if (notificationsQuery.isLoading || unreadCountQuery.isLoading) {
+  if (notificationsQuery.isLoading || notificationSummaryQuery.isLoading) {
     return (
       <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
         <div className="glass-card grid min-h-80 w-full max-w-3xl place-items-center p-10 text-center">
@@ -316,11 +311,11 @@ export function NotificationsPage() {
 
   if (
     notificationsQuery.isError ||
-    unreadCountQuery.isError ||
+    notificationSummaryQuery.isError ||
     !notificationsQuery.data ||
-    !unreadCountQuery.data
+    !notificationSummaryQuery.data
   ) {
-    const firstError = notificationsQuery.error ?? unreadCountQuery.error;
+    const firstError = notificationsQuery.error ?? notificationSummaryQuery.error;
 
     return (
       <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
@@ -343,7 +338,10 @@ export function NotificationsPage() {
                 type="button"
                 className="btn-primary text-sm font-bold"
                 onClick={() => {
-                  void Promise.all([notificationsQuery.refetch(), unreadCountQuery.refetch()]);
+                  void Promise.all([
+                    notificationsQuery.refetch(),
+                    notificationSummaryQuery.refetch(),
+                  ]);
                 }}
               >
                 <RefreshCcw className="size-4" />
@@ -363,8 +361,10 @@ export function NotificationsPage() {
 
   const notifications = notificationsQuery.data.notifications;
   const pagination = notificationsQuery.data.pagination;
-  const unreadCount = unreadCountQuery.data.unreadCount;
-  const readCount = Math.max(pagination.total - unreadCount, 0);
+
+  const totalCount = notificationSummaryQuery.data.totalCount;
+  const unreadCount = notificationSummaryQuery.data.unreadCount;
+  const readCount = notificationSummaryQuery.data.readCount;
 
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
@@ -489,8 +489,8 @@ export function NotificationsPage() {
                       className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.24)] transition-[width] duration-700"
                       style={{
                         width: `${
-                          pagination.total > 0
-                            ? Math.min(Math.max((readCount / pagination.total) * 100, 0), 100)
+                          totalCount > 0
+                            ? Math.min(Math.max((readCount / totalCount) * 100, 0), 100)
                             : 100
                         }%`,
                       }}
@@ -503,7 +503,7 @@ export function NotificationsPage() {
                         Total
                       </p>
 
-                      <p className="mt-2 text-2xl font-black">{pagination.total}</p>
+                      <p className="mt-2 text-2xl font-black">{totalCount}</p>
                     </div>
 
                     <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(142,151,115,0.16)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(142,151,115,0.22)]">
@@ -544,7 +544,7 @@ export function NotificationsPage() {
             {[
               {
                 label: 'Total notifications',
-                value: pagination.total,
+                value: totalCount,
                 helper: 'All platform activity',
                 icon: Bell,
               },
@@ -979,205 +979,203 @@ export function NotificationsPage() {
 
             <aside className="space-y-5">
               <article className="group/notification-overview relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_32px_86px_rgba(93,58,85,0.34)]">
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-3xl transition duration-500 group-hover/notification-overview:scale-125"
-  />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-3xl transition duration-500 group-hover/notification-overview:scale-125"
+                />
 
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-  />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                />
 
-  <div className="relative">
-    <div className="flex items-start justify-between gap-4">
-      <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/12 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur-xl transition duration-300 group-hover/notification-overview:-translate-y-0.5 group-hover/notification-overview:scale-105">
-        <BellDot aria-hidden="true" className="size-6" />
-      </div>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/12 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur-xl transition duration-300 group-hover/notification-overview:-translate-y-0.5 group-hover/notification-overview:scale-105">
+                      <BellDot aria-hidden="true" className="size-6" />
+                    </div>
 
-      <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur-xl">
-        {unreadCount} unread
-      </span>
-    </div>
+                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur-xl">
+                      {unreadCount} unread
+                    </span>
+                  </div>
 
-    <p className="mt-7 text-xs font-black uppercase tracking-[0.20em] text-white/48">
-      Activity status
-    </p>
+                  <p className="mt-7 text-xs font-black uppercase tracking-[0.20em] text-white/48">
+                    Activity status
+                  </p>
 
-    <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
-      Notification overview
-    </h2>
+                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
+                    Notification overview
+                  </h2>
 
-    <p className="mt-3 leading-7 text-white/68">
-      Review account activity and clear updates after you have handled them.
-    </p>
+                  <p className="mt-3 leading-7 text-white/68">
+                    Review account activity and clear updates after you have handled them.
+                  </p>
 
-    <div className="mt-8 space-y-3">
-      {[
-        {
-          label: 'All notifications',
-          helper: 'Current activity view',
-          value: pagination.total,
-          icon: Bell,
-        },
-        {
-          label: 'Unread',
-          helper: 'Needs your attention',
-          value: unreadCount,
-          icon: BellDot,
-        },
-        {
-          label: 'Reviewed',
-          helper: 'Already acknowledged',
-          value: readCount,
-          icon: CheckCheck,
-        },
-      ].map(({ label, helper, value, icon: Icon }) => (
-        <div
-          key={label}
-          className="group/overview-row flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.15]"
-        >
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[var(--color-powder-blue)] transition duration-300 group-hover/overview-row:scale-105">
-              <Icon aria-hidden="true" className="size-4" />
-            </span>
+                  <div className="mt-8 space-y-3">
+                    {[
+                      {
+                        label: 'All notifications',
+                        helper: 'Complete account activity',
+                        value: totalCount,
+                        icon: Bell,
+                      },
+                      {
+                        label: 'Unread',
+                        helper: 'Needs your attention',
+                        value: unreadCount,
+                        icon: BellDot,
+                      },
+                      {
+                        label: 'Reviewed',
+                        helper: 'Already acknowledged',
+                        value: readCount,
+                        icon: CheckCheck,
+                      },
+                    ].map(({ label, helper, value, icon: Icon }) => (
+                      <div
+                        key={label}
+                        className="group/overview-row flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.15]"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[var(--color-powder-blue)] transition duration-300 group-hover/overview-row:scale-105">
+                            <Icon aria-hidden="true" className="size-4" />
+                          </span>
 
-            <div className="min-w-0">
-              <p className="text-sm font-black text-white/88">{label}</p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-black text-white/88">{label}</p>
 
-              <p className="mt-1 text-xs font-semibold text-white/48">
-                {helper}
-              </p>
-            </div>
-          </div>
+                            <p className="mt-1 text-xs font-semibold text-white/48">{helper}</p>
+                          </div>
+                        </div>
 
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/12 text-lg font-black shadow-[0_8px_20px_rgba(31,27,29,0.10)]">
-            {value}
-          </span>
-        </div>
-      ))}
-    </div>
+                        <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/12 text-lg font-black shadow-[0_8px_20px_rgba(31,27,29,0.10)]">
+                          {value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
 
-    {unreadCount > 0 ? (
-      <button
-        type="button"
-        className="group/sidebar-mark-all mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/16 bg-white/12 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18 hover:shadow-[0_16px_34px_rgba(31,27,29,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={markAllNotificationsAsReadMutation.isPending}
-        onClick={() => {
-          markAllNotificationsAsReadMutation.mutate();
-        }}
-      >
-        {markAllNotificationsAsReadMutation.isPending ? (
-          <LoaderCircle className="size-4 animate-spin" />
-        ) : (
-          <CheckCheck
-            aria-hidden="true"
-            className="size-4 transition duration-300 group-hover/sidebar-mark-all:scale-110"
-          />
-        )}
+                  {unreadCount > 0 ? (
+                    <button
+                      type="button"
+                      className="group/sidebar-mark-all mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/16 bg-white/12 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18 hover:shadow-[0_16px_34px_rgba(31,27,29,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={markAllNotificationsAsReadMutation.isPending}
+                      onClick={() => {
+                        markAllNotificationsAsReadMutation.mutate();
+                      }}
+                    >
+                      {markAllNotificationsAsReadMutation.isPending ? (
+                        <LoaderCircle className="size-4 animate-spin" />
+                      ) : (
+                        <CheckCheck
+                          aria-hidden="true"
+                          className="size-4 transition duration-300 group-hover/sidebar-mark-all:scale-110"
+                        />
+                      )}
 
-        {markAllNotificationsAsReadMutation.isPending
-          ? 'Marking all...'
-          : 'Mark all as read'}
-      </button>
-    ) : (
-      <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[rgba(142,151,115,0.20)] bg-[rgba(142,151,115,0.14)] px-4 py-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[#dfe9c9]">
-          <CheckCheck aria-hidden="true" className="size-4" />
-        </span>
+                      {markAllNotificationsAsReadMutation.isPending
+                        ? 'Marking all...'
+                        : 'Mark all as read'}
+                    </button>
+                  ) : (
+                    <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[rgba(142,151,115,0.20)] bg-[rgba(142,151,115,0.14)] px-4 py-4">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[#dfe9c9]">
+                        <CheckCheck aria-hidden="true" className="size-4" />
+                      </span>
 
-        <p className="text-sm font-bold text-white/76">
-          You have reviewed every current notification.
-        </p>
-      </div>
-    )}
-  </div>
-</article>
+                      <p className="text-sm font-bold text-white/76">
+                        You have reviewed every current notification.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </article>
 
               <article className="group/account-updates glass-card relative overflow-hidden p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)]">
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute -bottom-16 -right-12 size-44 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/account-updates:scale-125 group-hover/account-updates:bg-[rgba(175,201,216,0.30)]"
-  />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-16 -right-12 size-44 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/account-updates:scale-125 group-hover/account-updates:bg-[rgba(175,201,216,0.30)]"
+                />
 
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute -left-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
-  />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -left-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+                />
 
-  <div className="relative">
-    <div className="flex items-start justify-between gap-4">
-      <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/account-updates:-translate-y-0.5 group-hover/account-updates:scale-105">
-        <CircleUserRound aria-hidden="true" className="size-6" />
-      </div>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/account-updates:-translate-y-0.5 group-hover/account-updates:scale-105">
+                      <CircleUserRound aria-hidden="true" className="size-6" />
+                    </div>
 
-      <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/52 backdrop-blur-xl">
-        Account
-      </span>
-    </div>
+                    <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/52 backdrop-blur-xl">
+                      Account
+                    </span>
+                  </div>
 
-    <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-      Notification scope
-    </p>
+                  <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Notification scope
+                  </p>
 
-    <h2 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/account-updates:text-[var(--color-deep-plum)]">
-      Account-wide updates
-    </h2>
+                  <h2 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/account-updates:text-[var(--color-deep-plum)]">
+                    Account-wide updates
+                  </h2>
 
-    <p className="mt-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
-      Notifications are connected to your logged-in account rather than one event,
-      so booking, vendor, payment and complaint activity appears together.
-    </p>
+                  <p className="mt-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
+                    Notifications are connected to your logged-in account rather than one event, so
+                    booking, vendor, payment and complaint activity appears together.
+                  </p>
 
-    <div className="mt-6 space-y-3">
-      {[
-        {
-          label: 'Booking and quotation progress',
-          icon: PackageCheck,
-        },
-        {
-          label: 'Payment verification decisions',
-          icon: CircleDollarSign,
-        },
-        {
-          label: 'Complaint and account updates',
-          icon: FileWarning,
-        },
-      ].map(({ label, icon: Icon }) => (
-        <div
-          key={label}
-          className="group/account-update-row flex items-center gap-3 rounded-2xl border border-white/46 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:border-white/72 hover:bg-white/42"
-        >
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)] transition duration-300 group-hover/account-update-row:scale-105">
-            <Icon aria-hidden="true" className="size-4" />
-          </span>
+                  <div className="mt-6 space-y-3">
+                    {[
+                      {
+                        label: 'Booking and quotation progress',
+                        icon: PackageCheck,
+                      },
+                      {
+                        label: 'Payment verification decisions',
+                        icon: CircleDollarSign,
+                      },
+                      {
+                        label: 'Complaint and account updates',
+                        icon: FileWarning,
+                      },
+                    ].map(({ label, icon: Icon }) => (
+                      <div
+                        key={label}
+                        className="group/account-update-row flex items-center gap-3 rounded-2xl border border-white/46 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:border-white/72 hover:bg-white/42"
+                      >
+                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)] transition duration-300 group-hover/account-update-row:scale-105">
+                          <Icon aria-hidden="true" className="size-4" />
+                        </span>
 
-          <span className="text-sm font-bold leading-6 text-[var(--color-charcoal)]/68">
-            {label}
-          </span>
+                        <span className="text-sm font-bold leading-6 text-[var(--color-charcoal)]/68">
+                          {label}
+                        </span>
 
-          <Check
-            aria-hidden="true"
-            className="ml-auto size-4 shrink-0 text-[var(--color-rosewood)] transition duration-300 group-hover/account-update-row:scale-110"
-          />
-        </div>
-      ))}
-    </div>
+                        <Check
+                          aria-hidden="true"
+                          className="ml-auto size-4 shrink-0 text-[var(--color-rosewood)] transition duration-300 group-hover/account-update-row:scale-110"
+                        />
+                      </div>
+                    ))}
+                  </div>
 
-    <div className="mt-6 rounded-[1.35rem] border border-[rgba(175,201,216,0.22)] bg-[rgba(222,236,242,0.28)] p-4">
-      <div className="flex items-start gap-3">
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b]">
-          <Bell aria-hidden="true" className="size-4" />
-        </span>
+                  <div className="mt-6 rounded-[1.35rem] border border-[rgba(175,201,216,0.22)] bg-[rgba(222,236,242,0.28)] p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b]">
+                        <Bell aria-hidden="true" className="size-4" />
+                      </span>
 
-        <p className="text-xs font-semibold leading-6 text-[var(--color-charcoal)]/58">
-          Use the activity-type filter to focus on one workflow without losing the
-          complete account history.
-        </p>
-      </div>
-    </div>
-  </div>
-</article>
+                      <p className="text-xs font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                        Use the activity-type filter to focus on one workflow without losing the
+                        complete account history.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </article>
             </aside>
           </section>
         </main>

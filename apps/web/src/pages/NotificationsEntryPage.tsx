@@ -1,8 +1,9 @@
 import { Navigate } from 'react-router-dom';
 
 import { getAccessTokenPayload } from '../features/auth/auth.storage';
+import { NotificationsPage } from './NotificationsPage';
 
-export function DashboardEntryPage() {
+export function NotificationsEntryPage() {
   const accessTokenPayload = getAccessTokenPayload();
 
   if (!accessTokenPayload) {
@@ -11,13 +12,13 @@ export function DashboardEntryPage() {
 
   switch (accessTokenPayload.role) {
     case 'CUSTOMER':
-      return <Navigate to="/customer/dashboard" replace />;
+      return <Navigate to="/customer/notifications" replace />;
 
     case 'VENDOR':
-      return <Navigate to="/vendor/dashboard" replace />;
+      return <Navigate to="/vendor/notifications" replace />;
 
     case 'ADMIN':
-      return <Navigate to="/admin/dashboard" replace />;
+      return <NotificationsPage />;
 
     default:
       return <Navigate to="/login" replace />;

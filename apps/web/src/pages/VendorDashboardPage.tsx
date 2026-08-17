@@ -37,7 +37,6 @@ import { VendorOnboardingCard } from '../features/vendors/components/VendorOnboa
 import { VendorQuickActions } from '../features/vendors/components/VendorQuickActions';
 import { VendorQuotationCard } from '../features/vendors/components/VendorQuotationCard';
 import { VendorStatCard } from '../features/vendors/components/VendorStatCard';
-import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
 
 type ApiErrorResponse = {
   success?: false;
@@ -451,11 +450,23 @@ export function VendorDashboardPage() {
   const scheduledRangeCount = availability.blocks.length + availability.bookings.length;
   const featuredPortfolioItem =
     portfolio.find((item) => item.isFeatured && item.imageUrl) ??
-    portfolio.find((item) => item.imageUrl);
-  const businessCoverUrl = featuredPortfolioItem?.imageUrl ?? null;
+    portfolio.find((item) => item.imageUrl) ??
+    null;
+
+  const heroPortfolioItem =
+    portfolio.find(
+      (item) => item.imageUrl && featuredPortfolioItem && item.id !== featuredPortfolioItem.id,
+    ) ??
+    featuredPortfolioItem ??
+    null;
+
+  const businessBackgroundUrl = featuredPortfolioItem?.imageUrl ?? null;
+  const businessCoverUrl = heroPortfolioItem?.imageUrl ?? null;
+
   const businessInitials = getInitials(onboarding.profile.businessName);
   const businessSlug = createVendorSlug(onboarding.profile.businessName);
   const businessLogoUrl = vendorLogoMap[businessSlug] ?? null;
+
   const activePortfolioItem = portfolioSlides[activePortfolioSlide] ?? portfolioSlides[0] ?? null;
 
   const stats = [
@@ -499,7 +510,41 @@ export function VendorDashboardPage() {
   ];
 
   return (
-    <div className="workspace-shell relative overflow-hidden">
+    <div className="workspace-shell relative">
+      {businessBackgroundUrl ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-[20rem] right-0 z-0 hidden h-[68rem] w-[72vw] min-w-[60rem] overflow-hidden lg:block"
+          style={{
+            WebkitMaskImage:
+              'linear-gradient(180deg, black 0%, black 56%, rgba(0,0,0,0.96) 64%, rgba(0,0,0,0.78) 73%, rgba(0,0,0,0.48) 82%, rgba(0,0,0,0.20) 91%, transparent 100%)',
+            maskImage:
+              'linear-gradient(180deg, black 0%, black 56%, rgba(0,0,0,0.96) 64%, rgba(0,0,0,0.78) 73%, rgba(0,0,0,0.48) 82%, rgba(0,0,0,0.20) 91%, transparent 100%)',
+          }}
+        >
+          <img
+            src={businessBackgroundUrl}
+            alt=""
+            className="absolute inset-0 size-full object-cover"
+            style={{
+              objectPosition: '76% 28%',
+              opacity: 0.64,
+              filter: 'saturate(1.02) contrast(1.02)',
+              WebkitMaskImage:
+                'radial-gradient(ellipse 138% 126% at 96% 2%, black 0%, black 56%, rgba(0,0,0,0.88) 69%, rgba(0,0,0,0.58) 82%, rgba(0,0,0,0.22) 92%, transparent 100%)',
+              maskImage:
+                'radial-gradient(ellipse 138% 126% at 96% 2%, black 0%, black 56%, rgba(0,0,0,0.88) 69%, rgba(0,0,0,0.58) 82%, rgba(0,0,0,0.22) 92%, transparent 100%)',
+            }}
+          />
+
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,239,233,0.94)_0%,rgba(246,239,233,0.62)_18%,rgba(246,239,233,0.24)_38%,rgba(246,239,233,0.08)_55%,rgba(246,239,233,0.015)_74%,transparent_100%)]" />
+
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(246,239,233,0.02)_0%,rgba(246,239,233,0.015)_34%,rgba(190,163,162,0.06)_58%,rgba(224,209,201,0.16)_74%,rgba(239,228,219,0.34)_88%,rgba(239,228,219,0.52)_100%)]" />
+
+          <div className="absolute -bottom-[9%] left-[4%] h-[56%] w-[96%] bg-[radial-gradient(ellipse_at_bottom,rgba(224,209,201,0.38),rgba(190,163,162,0.08)_46%,transparent_84%)] blur-3xl" />
+        </div>
+      ) : null}
+
       <div
         aria-hidden="true"
         className="vendor-dashboard-blob-a pointer-events-none absolute -left-32 top-44 size-96 rounded-full bg-[var(--color-lilac)]/16 blur-3xl"
@@ -509,50 +554,7 @@ export function VendorDashboardPage() {
         className="vendor-dashboard-blob-b pointer-events-none absolute -right-36 top-[34rem] size-[28rem] rounded-full bg-[var(--color-powder-blue)]/17 blur-3xl"
       />
       <div ref={workspaceContentRef} className="workspace-container relative">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl">
-              <CalendarDays className="size-5 text-[var(--color-deep-plum)]" />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="text-base font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                Eventure
-              </span>
-              <span className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Vendor workspace
-              </span>
-            </span>
-          </Link>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/notifications"
-              className="soft-chip text-sm font-bold transition hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-            >
-              <Bell className="size-4" />
-              {unreadNotificationCount} unread
-            </Link>
-            <Link to="/vendor/quotation-requests" className="btn-secondary text-sm font-bold">
-              Quotation requests
-            </Link>
-            <Link to="/vendor/bookings" className="btn-primary text-sm font-bold">
-              <BriefcaseBusiness className="size-4" />
-              Bookings
-            </Link>
-            <button
-              type="button"
-              className="btn-secondary text-sm font-bold"
-              onClick={handleLogout}
-            >
-              <LogOut className="size-4" />
-              Log out
-            </button>
-          </div>
-        </header>
-
-        <div className="mt-5">
-          <VendorWorkspaceNav />
-        </div>
+        <div className="mt-5"></div>
 
         <main className="py-10">
           <section
@@ -1089,32 +1091,7 @@ export function VendorDashboardPage() {
           </section>
         </main>
 
-        <footer
-          data-vendor-reveal
-          className="vendor-dashboard-reveal mb-4 border-t border-[rgba(46,42,44,0.10)] py-7"
-        >
-          <div className="flex flex-col gap-4 text-sm font-semibold text-[var(--color-charcoal)]/58 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-black text-[var(--color-near-black)]">Eventure</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.18em]">Vendor workspace</p>
-            </div>
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
-              <Link to="/about" className="transition hover:text-[var(--color-deep-plum)]">
-                About
-              </Link>
-              <Link to="/planning-guide" className="transition hover:text-[var(--color-deep-plum)]">
-                Planning guide
-              </Link>
-              <Link
-                to="/vendor/complaints"
-                className="transition hover:text-[var(--color-deep-plum)]"
-              >
-                Support
-              </Link>
-              <span>© 2026 Eventure</span>
-            </div>
-          </div>
-        </footer>
+        <div data-vendor-reveal className="vendor-dashboard-reveal mb-4"></div>
 
         <style>{`
           .vendor-dashboard-reveal {

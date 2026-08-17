@@ -8,7 +8,6 @@ import {
   ChefHat,
   CircleAlert,
   Flower2,
-  Heart,
   LoaderCircle,
   MapPin,
   Music2,
@@ -27,7 +26,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   getPublicVendors,
   type PublicVendor,
@@ -357,7 +356,29 @@ const getCategoryLabel = (vendor: PublicVendor) => vendor.categories[0]?.name ??
 const getLocationLabel = (vendor: PublicVendor) =>
   vendor.baseLocation ?? vendor.serviceAreas[0] ?? 'Sri Lanka';
 
+type MarketplaceNavigationState = {
+  source?: 'vendor-workspace';
+  returnTo?: string;
+  returnLabel?: string;
+};
+
 export function VendorsPage() {
+  const location = useLocation();
+
+  const navigationState = location.state as MarketplaceNavigationState | null;
+
+  const isFromVendorWorkspace = navigationState?.source === 'vendor-workspace';
+
+  const marketplaceReturnTo =
+    isFromVendorWorkspace && navigationState?.returnTo
+      ? navigationState.returnTo
+      : '/vendor/dashboard';
+
+  const marketplaceReturnLabel =
+    isFromVendorWorkspace && navigationState?.returnLabel
+      ? navigationState.returnLabel
+      : 'Back to vendor dashboard';
+
   const [vendors, setVendors] = useState<PublicVendor[]>([]);
   const [pagination, setPagination] = useState<VendorPagination | null>(null);
 
@@ -466,7 +487,7 @@ export function VendorsPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-white/35 py-14 sm:py-16 lg:py-20">
+      <section className="relative overflow-hidden border-b border-white/35 pb-10 pt-14 sm:pb-12 sm:pt-16 lg:pb-14 lg:pt-20">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -left-28 top-6 size-96 rounded-full bg-[var(--color-lilac)]/24 blur-3xl"
@@ -483,6 +504,18 @@ export function VendorsPage() {
         />
 
         <div className="page-container relative">
+          {isFromVendorWorkspace ? (
+            <div className="mb-8">
+              <Link
+                to={marketplaceReturnTo}
+                className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/55 px-4 py-2.5 text-sm font-black text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.20)] hover:bg-white/75 hover:text-[var(--color-deep-plum)]"
+              >
+                <span aria-hidden="true">←</span>
+                {marketplaceReturnLabel}
+              </Link>
+            </div>
+          ) : null}
+
           <div className="grid gap-10 lg:grid-cols-[1fr_0.42fr] lg:items-end lg:gap-16">
             <div>
               <ScrollReveal delay={40} distance={18} duration={650}>
@@ -500,8 +533,8 @@ export function VendorsPage() {
 
               <ScrollReveal delay={190} distance={22} duration={700}>
                 <p className="mt-6 max-w-2xl text-pretty text-lg font-medium leading-8 text-[var(--color-charcoal)]/70">
-                  Browse verified service providers, compare styles, shortlist your favourites and
-                  prepare structured quotation requests for your event workspace.
+                  Browse verified service providers, compare styles and reviews, explore service
+                  options and discover the right vendors for every part of your event.
                 </p>
               </ScrollReveal>
             </div>
@@ -513,10 +546,25 @@ export function VendorsPage() {
                   className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[var(--color-lilac)]/18 blur-2xl"
                 />
 
+                <Camera
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-2 bottom-5 size-16 rotate-[9deg] text-[var(--color-deep-plum)]/[0.045]"
+                />
+
+                <Music2
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-14 top-20 size-10 rotate-[-8deg] text-[var(--color-deep-plum)]/[0.04]"
+                />
+
+                <Flower2
+                  aria-hidden="true"
+                  className="pointer-events-none absolute bottom-7 left-7 size-12 rotate-[11deg] text-[var(--color-rosewood)]/[0.04]"
+                />
+
                 <div className="relative">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                      Public marketplace
+                      Vendor marketplace
                     </p>
 
                     <span className="grid size-10 place-items-center rounded-2xl bg-[var(--color-deep-plum)]/8 text-[var(--color-deep-plum)]">
@@ -528,13 +576,13 @@ export function VendorsPage() {
                     {marketplaceCountLabel}
                   </p>
 
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
+                  <p className="mt-3 max-w-xs text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
                     Verified professionals across photography, catering, décor, venues and more.
                   </p>
 
                   <div className="mt-6 flex items-center gap-2 border-t border-[var(--color-charcoal)]/8 pt-5 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
                     <Sparkles className="size-4" />
-                    Curated for real events
+                    Trusted event professionals
                   </div>
                 </div>
               </aside>
@@ -658,6 +706,72 @@ export function VendorsPage() {
                     </button>
                   </div>
                 ) : null}
+
+                <div className="mt-5 grid gap-3 border-t border-[var(--color-charcoal)]/8 pt-5 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.16)] text-[#4f5a3f]">
+                      <BadgeCheck className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
+                        Verified vendors
+                      </p>
+
+                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+                        Marketplace approved
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(220,183,150,0.18)] text-[var(--color-rosewood)]">
+                      <Star className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
+                        Reviewed services
+                      </p>
+
+                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+                        Real customer feedback
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <Sparkles className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
+                        Structured quotations
+                      </p>
+
+                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+                        Compare with clarity
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[#3b515b]">
+                      <SlidersHorizontal className="size-4" />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
+                        10 service categories
+                      </p>
+
+                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+                        Built for full events
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </form>
           </ScrollReveal>
@@ -669,11 +783,11 @@ export function VendorsPage() {
           <ScrollReveal direction="right" distance={26}>
             <div>
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--color-rosewood)]">
-                Featured matches
+                Vendor marketplace
               </p>
 
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-                Curated vendors for premium events.
+              <h2 className="mt-3 max-w-xl text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
+                Find professionals that fit your event.
               </h2>
             </div>
           </ScrollReveal>
@@ -681,15 +795,16 @@ export function VendorsPage() {
           <ScrollReveal direction="left" distance={26} delay={80} className="lg:justify-self-end">
             <div className="max-w-xl lg:text-right">
               <p className="leading-7 text-[var(--color-charcoal)]/68">
-                Compare vendors by service style, location and verified reviews before sending a
-                structured quotation request from your event workspace.
+                Compare service style, location and verified feedback, then explore the vendors that
+                best match the experience you are planning.
               </p>
 
               {!isLoading && !errorMessage ? (
-                <p className="mt-3 text-sm font-black text-[var(--color-deep-plum)]">
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/28 px-3 py-1.5 text-sm font-black text-[var(--color-deep-plum)] backdrop-blur-xl">
+                  <BadgeCheck className="size-4" />
                   Showing {vendors.length} of {pagination?.total ?? vendors.length}{' '}
                   {(pagination?.total ?? vendors.length) === 1 ? 'vendor' : 'vendors'}
-                </p>
+                </div>
               ) : null}
             </div>
           </ScrollReveal>
@@ -789,105 +904,155 @@ export function VendorsPage() {
 
               return (
                 <ScrollReveal key={vendor.id} delay={(index % 4) * 70} distance={28} duration={700}>
-                  <article className="group h-full overflow-hidden rounded-[2rem] border border-white/60 bg-white/30 p-5 shadow-[0_22px_64px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:bg-white/38 hover:shadow-[0_30px_78px_rgba(31,27,29,0.13)]">
-                    <div className="grid h-full gap-5 sm:grid-cols-[12rem_1fr]">
+                  <article className="group relative h-full overflow-hidden rounded-[2rem] border border-white/62 bg-[linear-gradient(145deg,rgba(255,255,255,0.48),rgba(255,255,255,0.26))] p-4 shadow-[0_20px_58px_rgba(31,27,29,0.07)] backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1 hover:border-white/88 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(248,243,250,0.46))] hover:shadow-[0_30px_76px_rgba(31,27,29,0.12)] sm:p-5">
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.12)] opacity-0 blur-3xl transition duration-500 group-hover:scale-125 group-hover:opacity-100"
+                    />
+
+                    <div className="relative grid h-full gap-5 sm:grid-cols-[11.5rem_minmax(0,1fr)]">
                       <div
-                        className="relative min-h-56 overflow-hidden rounded-[1.5rem]"
+                        className="relative min-h-[15rem] overflow-hidden rounded-[1.6rem] border border-white/38 shadow-[0_18px_42px_rgba(31,27,29,0.13)] sm:min-h-full"
                         style={visualStyle}
                       >
-                        <VendorIcon
-                          className={`pointer-events-none absolute -bottom-5 -right-5 size-40 rotate-[-8deg] transition duration-700 group-hover:rotate-[-4deg] group-hover:scale-105 ${categoryVisual.watermarkClassName}`}
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.24)_0%,transparent_38%,rgba(31,27,29,0.08)_100%)]"
                         />
 
-                        <div className="pointer-events-none absolute -left-14 top-8 size-36 rounded-full border border-white/24 transition duration-700 group-hover:translate-x-2" />
-                        <div className="pointer-events-none absolute -left-8 top-14 size-24 rounded-full border border-white/18 transition duration-700 group-hover:translate-x-1" />
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -left-16 -top-16 size-44 rounded-full border border-white/20"
+                        />
 
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -left-8 -top-8 size-28 rounded-full border border-white/14"
+                        />
 
-                        <div className="absolute left-1/2 top-1/2 grid size-28 -translate-x-1/2 -translate-y-[58%] place-items-center overflow-hidden rounded-[1.7rem] border border-white/65 bg-white/72 p-3 shadow-[0_22px_48px_rgba(31,27,29,0.2)] backdrop-blur-xl transition duration-500 group-hover:-translate-y-[61%] group-hover:scale-[1.03] group-hover:bg-white/80">
-                          {vendorLogoUrl ? (
-                            <img
-                              src={vendorLogoUrl}
-                              alt={`${vendor.businessName} logo`}
-                              className="h-full w-full object-contain"
-                            />
-                          ) : (
-                            <VendorIcon className="size-10 text-[var(--color-deep-plum)]" />
-                          )}
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/75 to-transparent"
+                        />
+
+                        <VendorIcon
+                          aria-hidden="true"
+                          className={`pointer-events-none absolute -bottom-8 -right-8 size-40 rotate-[-10deg] opacity-55 transition-all duration-700 group-hover:rotate-[-5deg] group-hover:scale-[1.06] ${categoryVisual.watermarkClassName}`}
+                        />
+
+                        <div className="absolute left-4 top-4">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/42 bg-white/28 px-2.5 py-1.5 text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-near-black)]/72 shadow-[0_8px_20px_rgba(31,27,29,0.08)] backdrop-blur-xl">
+                            <BadgeCheck className="size-3" />
+                            Eventure
+                          </span>
                         </div>
 
-                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3">
-                          <span className="inline-flex max-w-[8.5rem] items-center rounded-full border border-white/45 bg-[rgba(255,255,255,0.42)] px-3 py-2 text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-near-black)] backdrop-blur-xl">
-                            <span className="truncate">{categoryLabel}</span>
-                          </span>
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[54%]">
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-[-0.8rem] rounded-[2.1rem] border border-white/18"
+                          />
 
-                          <span className="grid size-8 shrink-0 place-items-center rounded-full border border-white/45 bg-white/36 text-[var(--color-near-black)] backdrop-blur-xl">
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-[-1.45rem] rounded-[2.5rem] border border-white/10"
+                          />
+
+                          <div className="relative grid size-[7.35rem] place-items-center overflow-hidden rounded-[1.8rem] border border-white/72 bg-white/78 p-3.5 shadow-[0_22px_52px_rgba(31,27,29,0.20)] backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1 group-hover:scale-[1.045] group-hover:border-white/88 group-hover:bg-white/88 group-hover:shadow-[0_28px_62px_rgba(31,27,29,0.24)]">
+                            {vendorLogoUrl ? (
+                              <img
+                                src={vendorLogoUrl}
+                                alt={`${vendor.businessName} logo`}
+                                className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.025]"
+                              />
+                            ) : (
+                              <VendorIcon className="size-10 text-[var(--color-deep-plum)]" />
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="absolute bottom-4 left-4">
+                          <span className="grid size-9 place-items-center rounded-xl border border-white/52 bg-white/36 text-[var(--color-near-black)] shadow-[0_8px_20px_rgba(31,27,29,0.09)] backdrop-blur-xl transition duration-300 group-hover:-translate-y-0.5 group-hover:bg-white/50">
                             <VendorIcon className="size-4" />
                           </span>
                         </div>
-
-                        <button
-                          type="button"
-                          className="absolute right-4 top-4 grid size-10 place-items-center rounded-full border border-white/55 bg-white/42 text-[var(--color-near-black)] shadow-[0_10px_26px_rgba(31,27,29,0.12)] backdrop-blur-xl transition duration-300 hover:scale-105 hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          aria-label={`Save ${vendor.businessName}`}
-                        >
-                          <Heart className="size-5" />
-                        </button>
                       </div>
 
-                      <div className="flex flex-col py-1">
+                      <div className="flex min-w-0 flex-col py-1 sm:py-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="status-chip" data-tone="blue">
                             {categoryLabel}
                           </span>
 
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(142,151,115,0.18)] px-3 py-1 text-xs font-black text-[#3d452f]">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(142,151,115,0.16)] bg-[rgba(142,151,115,0.16)] px-3 py-1 text-xs font-black text-[#3d452f]">
                             <BadgeCheck className="size-3.5" />
                             Verified
                           </span>
                         </div>
 
-                        <h3 className="mt-5 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                        <h3 className="mt-5 text-[1.65rem] font-black leading-tight tracking-[-0.045em] text-[var(--color-near-black)] transition duration-300 group-hover:text-[var(--color-deep-plum)]">
                           {vendor.businessName}
                         </h3>
 
-                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold text-[var(--color-charcoal)]/62">
+                        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold text-[var(--color-charcoal)]/62">
                           <span className="inline-flex items-center gap-1.5">
-                            <MapPin className="size-4 text-[var(--color-rosewood)]" />
-                            {getLocationLabel(vendor)}
+                            <MapPin className="size-4 shrink-0 text-[var(--color-rosewood)]" />
+                            <span>{getLocationLabel(vendor)}</span>
                           </span>
 
                           <span className="inline-flex items-center gap-1.5">
                             <Star
                               className={
                                 vendor.averageRating === null
-                                  ? 'size-4 text-[var(--color-charcoal)]/35'
-                                  : 'size-4 fill-[var(--color-dusty-olive)] text-[var(--color-dusty-olive)]'
+                                  ? 'size-4 shrink-0 text-[var(--color-charcoal)]/35'
+                                  : 'size-4 shrink-0 fill-[var(--color-dusty-olive)] text-[var(--color-dusty-olive)]'
                               }
                             />
 
-                            {formatRating(vendor)}
+                            <span>{formatRating(vendor)}</span>
                           </span>
                         </div>
 
-                        <p className="mt-4 line-clamp-4 leading-7 text-[var(--color-charcoal)]/68">
+                        <p className="mt-5 line-clamp-3 text-[0.95rem] font-medium leading-7 text-[var(--color-charcoal)]/66">
                           {vendor.description ??
                             'Explore this verified Eventure vendor and request a tailored quotation for your event.'}
                         </p>
 
                         <div className="mt-auto pt-6">
-                          <div className="flex flex-col justify-between gap-3 border-t border-[var(--color-charcoal)]/8 pt-5 sm:flex-row sm:items-center">
-                            <p className="text-sm font-black text-[var(--color-rosewood)]">
-                              Tailored pricing available
-                            </p>
+                          <div className="rounded-[1.35rem] border border-white/52 bg-white/26 p-4 transition duration-300 group-hover:border-white/72 group-hover:bg-white/38">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div>
+                                <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                                  Pricing
+                                </p>
 
-                            <Link
-                              to={`/vendors/${vendor.slug}`}
-                              className="group/link btn-secondary text-sm font-bold"
-                            >
-                              View profile
-                              <ArrowRight className="size-4 transition duration-300 group-hover/link:translate-x-0.5" />
-                            </Link>
+                                <p className="mt-1 text-sm font-black text-[var(--color-rosewood)]">
+                                  Tailored quotation available
+                                </p>
+                              </div>
+
+                              <Link
+                                to={`/vendors/${vendor.slug}`}
+                                state={
+                                  isFromVendorWorkspace
+                                    ? {
+                                        source: 'vendor-marketplace',
+                                        returnTo: '/vendors',
+                                        returnLabel: 'Back to marketplace',
+                                        marketplaceState: {
+                                          source: 'vendor-workspace',
+                                          returnTo: marketplaceReturnTo,
+                                          returnLabel: marketplaceReturnLabel,
+                                        },
+                                      }
+                                    : undefined
+                                }
+                                className="group/link btn-secondary text-sm font-bold"
+                              >
+                                View profile
+                                <ArrowRight className="size-4 transition duration-300 group-hover/link:translate-x-1" />
+                              </Link>
+                            </div>
                           </div>
                         </div>
                       </div>

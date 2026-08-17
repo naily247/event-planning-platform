@@ -1,7 +1,17 @@
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ArrowRight, Bell, ChevronDown, LogOut, Plus, Settings, UserRound } from 'lucide-react';
+import {
+  ArrowRight,
+  Bell,
+  ChevronDown,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  UserRound,
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { clearAuthTokens } from '../../features/auth/auth.storage';
+import { getUnreadNotificationCount } from '../../features/notifications/notification.api';
 
 export type CustomerWorkspaceHeaderUser = {
   id: string;
@@ -15,15 +25,19 @@ export type CustomerWorkspaceHeaderUser = {
 
 type CustomerWorkspaceHeaderProps = {
   user: CustomerWorkspaceHeaderUser;
-  unreadNotificationCount?: number;
 };
 
-export function CustomerWorkspaceHeader({
-  user,
-  unreadNotificationCount = 0,
-}: CustomerWorkspaceHeaderProps) {
+export function CustomerWorkspaceHeader({ user }: CustomerWorkspaceHeaderProps) {
   const navigate = useNavigate();
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+
+  const unreadNotificationCountQuery = useQuery({
+    queryKey: ['notifications', 'unread-count'],
+    queryFn: getUnreadNotificationCount,
+    staleTime: 30_000,
+  });
+
+  const unreadNotificationCount = unreadNotificationCountQuery.data?.unreadCount ?? 0;
 
   const userInitials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
 
@@ -31,7 +45,7 @@ export function CustomerWorkspaceHeader({
     setIsAccountMenuOpen(false);
     clearAuthTokens();
 
-    navigate('/login', {
+    navigate('/', {
       replace: true,
     });
   };
@@ -48,22 +62,35 @@ export function CustomerWorkspaceHeader({
 
       <div className="flex flex-wrap items-center gap-3">
         <Link
-          to="/notifications"
-          className="soft-chip text-sm font-bold transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
-        >
-          <Bell className="size-4" />
-          {unreadNotificationCount}{' '}
-          {unreadNotificationCount === 1 ? 'unread update' : 'unread updates'}
-        </Link>
+  to="/notifications"
+  className="soft-chip text-sm font-bold transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.92)] hover:text-[#fffaf5]"
+>
+  <Bell className="size-4" />
+  {unreadNotificationCount}{' '}
+  {unreadNotificationCount === 1 ? 'unread update' : 'unread updates'}
+</Link>
 
-        <Link to="/vendors" className="btn-secondary text-sm font-bold">
-          Browse vendors
-        </Link>
+<Link
+  to="/dashboard"
+  className="btn-secondary text-sm font-bold"
+>
+  <LayoutDashboard className="size-4" />
+  Dashboard
+</Link>
 
-        <Link to="/events" className="btn-primary text-sm font-bold">
-          <Plus className="size-4" />
-          My events
-        </Link>
+<Link
+  to="/vendors"
+  className="btn-secondary text-sm font-bold"
+>
+  Browse vendors
+</Link>
+
+<Link
+  to="/events"
+  className="btn-primary text-sm font-bold"
+>
+  My events
+</Link>
 
         <div className="relative">
           <button

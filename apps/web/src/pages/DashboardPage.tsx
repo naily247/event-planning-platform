@@ -24,8 +24,6 @@ import { SectionHeader } from '../components/ui/SectionHeader';
 import { clearAuthTokens } from '../features/auth/auth.storage';
 import { HeroAtmosphere } from '../components/ui/HeroAtmosphere';
 import { api } from '../lib/api';
-import { CustomerWorkspaceFooter } from '../components/ui/CustomerWorkspaceFooter';
-import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 
 type EventStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
@@ -379,7 +377,6 @@ export function DashboardPage() {
     );
   }
 
-  const user = currentUserQuery.data;
   const dashboard = dashboardQuery.data;
   const highlightedEvent = dashboard.events.upcomingEvent;
 
@@ -501,14 +498,20 @@ export function DashboardPage() {
     firstIncompleteTimelineIndex === -1 ? timeline.length - 1 : firstIncompleteTimelineIndex;
 
   return (
-    <div className="app-shell relative min-h-screen overflow-hidden px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
+    <div className="relative min-h-full px-4 pb-6 pt-3 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <AmbientBackground variant="dashboard" />
 
       {highlightedEvent ? (
         <div
-          aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 z-0 hidden h-[42rem] w-[56vw] min-w-[46rem] overflow-hidden lg:block"
-        >
+  aria-hidden="true"
+  className="pointer-events-none absolute -top-[10.5rem] right-0 z-0 hidden h-[52.5rem] w-[56vw] min-w-[46rem] overflow-hidden lg:block"
+  style={{
+    WebkitMaskImage:
+      'linear-gradient(180deg, black 0%, black 60%, rgba(0,0,0,0.94) 68%, rgba(0,0,0,0.72) 76%, rgba(0,0,0,0.42) 84%, rgba(0,0,0,0.16) 91%, transparent 100%)',
+    maskImage:
+      'linear-gradient(180deg, black 0%, black 60%, rgba(0,0,0,0.94) 68%, rgba(0,0,0,0.72) 76%, rgba(0,0,0,0.42) 84%, rgba(0,0,0,0.16) 91%, transparent 100%)',
+  }}
+>
           <img
             src="/images/workspaces/dashboard-hero.png"
             alt=""
@@ -526,21 +529,16 @@ export function DashboardPage() {
 
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,239,233,0.94)_0%,rgba(246,239,233,0.58)_17%,rgba(246,239,233,0.18)_38%,transparent_64%)]" />
 
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(73,43,68,0.02)_0%,rgba(93,58,85,0.035)_38%,rgba(190,163,162,0.12)_58%,rgba(224,209,201,0.48)_76%,rgba(239,228,219,0.92)_91%,rgba(239,228,219,1)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(73,43,68,0.02)_0%,rgba(93,58,85,0.03)_38%,rgba(190,163,162,0.08)_60%,rgba(224,209,201,0.22)_78%,rgba(239,228,219,0.42)_100%)]" />
 
-          <div className="absolute bottom-0 left-[16%] h-[46%] w-[84%] bg-[radial-gradient(ellipse_at_bottom,rgba(224,209,201,0.72),rgba(190,163,162,0.18)_46%,transparent_76%)] blur-2xl" />
+          <div className="absolute -bottom-[8%] left-[10%] h-[54%] w-[92%] bg-[radial-gradient(ellipse_at_bottom,rgba(224,209,201,0.52),rgba(190,163,162,0.11)_44%,transparent_82%)] blur-3xl" />
 
           <div className="absolute -right-24 -top-24 size-[28rem] rounded-full bg-[rgba(255,210,190,0.1)] blur-3xl" />
         </div>
       ) : null}
 
       <div className="relative z-10 mx-auto max-w-7xl">
-        <CustomerWorkspaceHeader
-          user={user}
-          unreadNotificationCount={dashboard.notifications.unreadCount}
-        />
-
-        <main className="relative z-10 py-10">
+        <main className="relative z-10 pb-10 pt-3">
           <section className="group/hero relative isolate overflow-visible rounded-[2.35rem] border border-white/20 bg-[linear-gradient(128deg,rgba(73,43,68,0.99),rgba(112,61,78,0.97)_48%,rgba(98,77,110,0.95))] text-[#fffaf5] shadow-[0_30px_90px_rgba(93,58,85,0.28)] animate-[heroFloat_2s_ease-in-out_infinite] transition-[transform,box-shadow] duration-500 ease-out hover:!translate-y-[-0.55rem] hover:shadow-[0_38px_110px_rgba(93,58,85,0.36)]">
             <HeroAtmosphere
               imageSrc={highlightedEvent ? '/images/workspaces/dashboard-hero.png' : undefined}
@@ -563,7 +561,7 @@ export function DashboardPage() {
                   </div>
 
                   <p className="mt-8 text-sm font-bold text-white/58">
-                    {getGreeting()}, {user.firstName}.
+                    {getGreeting()}, {currentUserQuery.data.firstName}.
                   </p>
 
                   <h1 className="mt-3 max-w-4xl text-4xl font-black tracking-[-0.06em] sm:text-5xl lg:text-[3.7rem] lg:leading-[1.01]">
@@ -718,7 +716,7 @@ export function DashboardPage() {
                   </span>
 
                   <p className="mt-8 text-sm font-bold text-white/58">
-                    {getGreeting()}, {user.firstName}.
+                    {getGreeting()}, {currentUserQuery.data.firstName}.
                   </p>
 
                   <h1 className="mt-3 max-w-3xl text-4xl font-black tracking-[-0.06em] sm:text-5xl lg:text-[3.7rem] lg:leading-[1.01]">
@@ -1036,7 +1034,7 @@ export function DashboardPage() {
                   {highlightedEvent ? (
                     <>
                       <Link
-                        to={`/events/${highlightedEvent.id}/quotation-requests`}
+                        to={`/events/${highlightedEvent.id}/quotations`}
                         className="group flex w-full items-center gap-4 rounded-[1.35rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:translate-x-0.5 hover:border-white/24 hover:bg-white/18 hover:shadow-[0_16px_36px_rgba(31,27,29,0.18)]"
                       >
                         <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/12 text-[var(--color-powder-blue)] transition group-hover:bg-white/18">

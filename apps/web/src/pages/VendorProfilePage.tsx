@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
-  ArrowLeft,
   BadgeCheck,
   Building2,
   Check,
@@ -27,9 +26,9 @@ import { getServiceCategories } from '../features/categories/category.api';
 import { VendorProfileHealth } from '../features/vendors/components/VendorProfileHealth';
 import { VendorProfileSaveBar } from '../features/vendors/components/VendorProfileSaveBar';
 import { VendorPublicPreviewCard } from '../features/vendors/components/VendorPublicPreviewCard';
-import { VendorWorkspaceNav } from '../features/vendors/components/VendorWorkspaceNav';
 import {
   getVendorOnboardingProfile,
+  getVendorPortfolio,
   submitVendorOnboardingProfile,
   updateVendorCategories,
   updateVendorOnboardingProfile,
@@ -224,6 +223,11 @@ export function VendorProfilePage() {
     queryFn: getVendorOnboardingProfile,
   });
 
+  const portfolioQuery = useQuery({
+    queryKey: ['vendors', 'me', 'portfolio'],
+    queryFn: getVendorPortfolio,
+  });
+
   const categoriesQuery = useQuery({
     queryKey: ['service-categories'],
     queryFn: getServiceCategories,
@@ -331,8 +335,10 @@ export function VendorProfilePage() {
     saveMutation.reset();
   };
 
-  const isLoading = onboardingQuery.isLoading || categoriesQuery.isLoading;
-  const loadError = onboardingQuery.error ?? categoriesQuery.error;
+  const isLoading =
+    onboardingQuery.isLoading || categoriesQuery.isLoading || portfolioQuery.isLoading;
+
+  const loadError = onboardingQuery.error ?? categoriesQuery.error ?? portfolioQuery.error;
 
   if (isLoading) {
     return (
@@ -354,7 +360,7 @@ export function VendorProfilePage() {
     );
   }
 
-  if (loadError || !onboardingQuery.data || !categoriesQuery.data) {
+  if (loadError || !onboardingQuery.data || !categoriesQuery.data || !portfolioQuery.data) {
     return (
       <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
         <div className="state-surface w-full max-w-3xl">
@@ -378,7 +384,11 @@ export function VendorProfilePage() {
               type="button"
               className="btn-primary mt-6 text-sm font-bold"
               onClick={() => {
-                void Promise.all([onboardingQuery.refetch(), categoriesQuery.refetch()]);
+                void Promise.all([
+                  onboardingQuery.refetch(),
+                  categoriesQuery.refetch(),
+                  portfolioQuery.refetch(),
+                ]);
               }}
             >
               Try again
@@ -425,97 +435,165 @@ export function VendorProfilePage() {
   const primaryCategory = onboarding.profile.categories[0]?.name ?? 'Event services';
   const baseLocation = onboarding.profile.baseLocation ?? 'Location not added';
 
+  const portfolioItems = portfolioQuery.data;
+
+  const featuredPortfolioItem =
+    portfolioItems.find((item) => item.isFeatured) ??
+    [...portfolioItems].sort((a, b) => a.displayOrder - b.displayOrder)[0] ??
+    null;
+
   return (
-    <div className="workspace-shell">
+    <div className="workspace-shell relative">
       <div className="workspace-container max-w-7xl">
-        <header className="glass-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="w-fit" />
+        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+          />
 
-            <p className="mt-3 text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-              Vendor workspace
-            </p>
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
+
+              <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                  Vendor workspace
+                </p>
+
+                <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
+                  Business profile
+                </h1>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="hidden text-xs font-bold text-[var(--color-charcoal)]/46 sm:inline">
+                Customer-facing identity
+              </span>
+
+              <span className="status-chip w-fit" data-tone={statusContent.statusTone}>
+                {statusContent.label}
+              </span>
+            </div>
           </div>
-
-          <span className="status-chip w-fit" data-tone={statusContent.statusTone}>
-            {statusContent.label}
-          </span>
         </header>
 
-        <div className="mt-5">
-          <VendorWorkspaceNav />
-        </div>
+        <main className="pb-10 pt-6">
+          <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/62 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.67)_52%,rgba(229,221,237,0.58)_100%)] shadow-[0_24px_72px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-24 -top-28 size-80 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+            />
 
-        <main className="py-10">
-          <section className="relative overflow-hidden rounded-[2rem] border border-white/55 bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(239,229,232,0.58))] px-6 py-10 shadow-[0_28px_70px_rgba(74,52,62,0.12)] sm:px-10 lg:px-12 lg:py-14">
-            <div className="pointer-events-none absolute -right-16 -top-24 size-80 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-32 left-[38%] size-80 rounded-full bg-[rgba(142,92,103,0.13)] blur-3xl" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-36 left-[34%] size-80 rounded-full bg-[rgba(142,92,103,0.11)] blur-3xl"
+            />
 
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.42fr] lg:items-end">
-              <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] bg-[linear-gradient(135deg,transparent,rgba(255,255,255,0.26))] lg:block"
+            />
+
+            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-10 lg:p-10">
+              <div className="min-w-0">
+                <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
                   <Store className="size-4" />
                   Business profile
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.96] tracking-[-0.06em] text-[var(--color-near-black)] sm:text-6xl">
+                <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
                   Shape how customers experience your business.
-                </h1>
+                </h2>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--color-charcoal)]/70">
+                <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
                   Maintain the identity, story, contact details, locations, and services customers
                   use when deciding whether your business is right for their event.
                 </p>
+
+                <div className="mt-7 flex flex-wrap gap-2.5">
+                  <span className="soft-chip text-xs font-black">
+                    <Building2 className="size-4" />
+                    {businessName}
+                  </span>
+
+                  <span className="soft-chip text-xs font-black">
+                    <Store className="size-4" />
+                    {primaryCategory}
+                  </span>
+
+                  <span className="soft-chip text-xs font-black">
+                    <MapPin className="size-4" />
+                    {baseLocation}
+                  </span>
+                </div>
               </div>
 
-              <article className="rounded-[1.75rem] border border-white/70 bg-white/58 p-5 shadow-[0_22px_55px_rgba(67,45,56,0.11)] backdrop-blur-xl">
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`grid size-12 shrink-0 place-items-center rounded-2xl ${statusContent.tone}`}
-                  >
-                    <StatusIcon className="size-6" />
+              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                />
+
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={`grid size-12 shrink-0 place-items-center rounded-2xl ${statusContent.tone}`}
+                      >
+                        <StatusIcon className="size-6" />
+                      </div>
+
+                      <div>
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Profile status
+                        </p>
+
+                        <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          {statusContent.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <span className="status-chip shrink-0" data-tone={statusContent.statusTone}>
+                      {statusContent.label}
+                    </span>
                   </div>
 
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                      Profile status
-                    </p>
-
-                    <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                      {statusContent.title}
-                    </h2>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
-                  {statusContent.description}
-                </p>
-
-                <div className="mt-6 flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                      {onboarding.completion.percentage}%
-                    </p>
-
-                    <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/52">
-                      Profile completion
-                    </p>
-                  </div>
-
-                  <p className="text-sm font-black text-[var(--color-deep-plum)]">
-                    {onboarding.completion.percentage < 100
-                      ? `${100 - onboarding.completion.percentage}% remaining`
-                      : 'Ready for review'}
+                  <p className="mt-5 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                    {statusContent.description}
                   </p>
-                </div>
 
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.10)]">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] transition-[width] duration-700"
-                    style={{
-                      width: `${onboarding.completion.percentage}%`,
-                    }}
-                  />
+                  <div className="mt-7 rounded-[1.35rem] border border-white/64 bg-white/36 p-4">
+                    <div className="flex items-end justify-between gap-5">
+                      <div>
+                        <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44">
+                          Profile completion
+                        </p>
+
+                        <p className="mt-2 text-4xl font-black tracking-[-0.06em] text-[var(--color-near-black)]">
+                          {onboarding.completion.percentage}%
+                        </p>
+                      </div>
+
+                      <p className="pb-1 text-right text-xs font-black leading-5 text-[var(--color-deep-plum)]">
+                        {onboarding.completion.percentage < 100
+                          ? `${100 - onboarding.completion.percentage}% remaining`
+                          : onboarding.profile.verificationStatus === 'APPROVED'
+                            ? 'Profile complete'
+                            : 'Ready for review'}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),var(--color-valendor-lilac))] transition-[width] duration-700"
+                        style={{
+                          width: `${onboarding.completion.percentage}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </article>
             </div>
@@ -523,7 +601,7 @@ export function VendorProfilePage() {
 
           <section className="mt-6 overflow-hidden rounded-[2rem] border border-white/60 bg-white/58 shadow-[0_28px_68px_rgba(62,42,51,0.11)] backdrop-blur-xl">
             <div className="grid lg:grid-cols-[0.7fr_1.3fr]">
-              <div className="relative flex min-h-72 flex-col justify-between overflow-hidden bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-white sm:p-9">
+              <div className="relative flex min-h-[34rem] flex-col overflow-hidden bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-white sm:p-9">
                 <div className="pointer-events-none absolute -right-16 -top-12 size-56 rounded-full bg-white/10 blur-2xl" />
                 <div className="pointer-events-none absolute -bottom-20 -left-16 size-56 rounded-full bg-black/10 blur-3xl" />
 
@@ -532,27 +610,102 @@ export function VendorProfilePage() {
                     Business identity
                   </p>
 
-                  <div className="mt-7 grid size-24 place-items-center overflow-hidden rounded-full border border-white/25 bg-white p-1.5 shadow-[0_20px_44px_rgba(22,12,18,0.25)]">
-                    {businessLogoUrl ? (
-                      <img
-                        src={businessLogoUrl}
-                        alt={`${businessName} logo`}
-                        className="h-full w-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-full w-full place-items-center rounded-full bg-[linear-gradient(135deg,#8f6277,#58374f)] text-2xl font-black text-white">
-                        {businessInitials}
-                      </div>
-                    )}
+                  <div className="mt-7 flex items-center gap-4">
+                    <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-full border border-white/25 bg-white p-1.5 shadow-[0_20px_44px_rgba(22,12,18,0.25)]">
+                      {businessLogoUrl ? (
+                        <img
+                          src={businessLogoUrl}
+                          alt={`${businessName} logo`}
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="grid h-full w-full place-items-center rounded-full bg-[linear-gradient(135deg,#8f6277,#58374f)] text-xl font-black text-white">
+                          {businessInitials}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-lg font-black tracking-[-0.03em] text-white">
+                        {businessName}
+                      </p>
+
+                      <p className="mt-1 text-sm font-semibold text-white/60">{primaryCategory}</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="relative mt-10">
+                <div className="relative mt-8">
+                  {featuredPortfolioItem ? (
+                    <div className="group relative overflow-hidden rounded-[1.6rem] border border-white/18 bg-black/10 shadow-[0_22px_50px_rgba(20,10,16,0.28)]">
+                      <img
+                        src={featuredPortfolioItem.imageUrl}
+                        alt={
+                          featuredPortfolioItem.title
+                            ? featuredPortfolioItem.title
+                            : `${businessName} featured portfolio work`
+                        }
+                        className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.025]"
+                      />
+
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_42%,rgba(24,13,20,0.78)_100%)]" />
+
+                      <div className="absolute inset-x-0 bottom-0 p-5">
+                        <div className="flex flex-wrap items-end justify-between gap-3">
+                          <div>
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-white/60">
+                              {featuredPortfolioItem.isFeatured
+                                ? 'Featured work'
+                                : 'Portfolio work'}
+                            </p>
+
+                            <p className="mt-1 line-clamp-2 text-base font-black text-white">
+                              {featuredPortfolioItem.title ?? 'Selected portfolio work'}
+                            </p>
+                          </div>
+
+                          <Link
+                            to="/vendor/portfolio"
+                            className="inline-flex shrink-0 items-center rounded-full border border-white/20 bg-white/12 px-3 py-2 text-xs font-black text-white backdrop-blur-md transition hover:bg-white/18"
+                          >
+                            View portfolio
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid min-h-72 place-items-center rounded-[1.6rem] border border-dashed border-white/22 bg-white/[0.06] px-6 text-center">
+                      <div>
+                        <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-white/10">
+                          <Sparkles className="size-5 text-white/75" />
+                        </div>
+
+                        <p className="mt-4 text-sm font-black text-white">
+                          Your portfolio will appear here.
+                        </p>
+
+                        <p className="mx-auto mt-2 max-w-xs text-xs font-semibold leading-5 text-white/58">
+                          Add real work to your portfolio to strengthen your customer-facing
+                          business identity.
+                        </p>
+
+                        <Link
+                          to="/vendor/portfolio"
+                          className="mt-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black text-white transition hover:bg-white/16"
+                        >
+                          Manage portfolio
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative mt-8">
                   <p className="text-sm font-bold text-white/66">Customer-facing identity</p>
 
                   <p className="mt-2 max-w-sm text-sm leading-6 text-white/78">
-                    This information shapes how customers recognise and understand your business
-                    throughout Eventure.
+                    Your logo, business details and selected work help customers recognise and
+                    understand your business throughout Eventure.
                   </p>
                 </div>
               </div>
@@ -586,8 +739,11 @@ export function VendorProfilePage() {
                   {onboarding.profile.verificationStatus === 'APPROVED' ? (
                     <Link
                       to={`/vendors/${onboarding.profile.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      state={{
+                        source: 'vendor-profile',
+                        returnTo: '/vendor/profile',
+                        returnLabel: 'Back to business profile',
+                      }}
                       className="btn-secondary w-fit text-sm font-bold"
                     >
                       View public profile
@@ -1068,8 +1224,11 @@ export function VendorProfilePage() {
                   {onboarding.profile.verificationStatus === 'APPROVED' ? (
                     <Link
                       to={`/vendors/${onboarding.profile.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      state={{
+                        source: 'vendor-profile',
+                        returnTo: '/vendor/profile',
+                        returnLabel: 'Back to business profile',
+                      }}
                       className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/32 bg-white/10 px-5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-white/16"
                     >
                       View public profile

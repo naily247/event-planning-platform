@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, Menu, Sparkles, X } from 'lucide-react';
+import { CalendarDays, LoaderCircle, Menu, Sparkles, X } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+
+import { getAccessTokenPayload } from '../../features/auth/auth.storage';
+import { useCurrentUser } from '../../features/auth/useCurrentUser';
+import { CustomerWorkspaceHeader } from '../navigation/CustomerWorkspaceHeader';
+import { VendorWorkspaceHeader } from '../navigation/VendorWorkspaceHeader';
+import { CustomerWorkspaceFooter } from '../ui/CustomerWorkspaceFooter';
+import { VendorWorkspaceFooter } from '../ui/VendorWorkspaceFooter';
 import { Footer } from './Footer';
 
 const navLinks = [
@@ -33,6 +40,14 @@ export function PublicLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
+  const accessTokenPayload = getAccessTokenPayload();
+
+  const hasCustomerSession = accessTokenPayload?.role === 'CUSTOMER';
+  const hasVendorSession = accessTokenPayload?.role === 'VENDOR';
+  const hasAuthenticatedWorkspaceSession = hasCustomerSession || hasVendorSession;
+
+  const currentUserQuery = useCurrentUser(hasAuthenticatedWorkspaceSession);
+
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
@@ -54,6 +69,62 @@ export function PublicLayout() {
       window.removeEventListener('keydown', handleEscape);
     };
   }, [isMobileMenuOpen]);
+
+  if (hasAuthenticatedWorkspaceSession && currentUserQuery.isLoading) {
+    return (
+      <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
+        <div className="glass-card grid min-h-72 w-full max-w-3xl place-items-center p-10 text-center">
+          <div>
+            <LoaderCircle className="mx-auto size-9 animate-spin text-[var(--color-deep-plum)]" />
+
+            <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
+              Opening Eventure
+            </p>
+
+            <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+              Restoring your Eventure workspace.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasCustomerSession && currentUserQuery.data && currentUserQuery.data.role === 'CUSTOMER') {
+    return (
+      <div className="workspace-shell flex min-h-screen flex-col overflow-x-hidden text-[var(--color-charcoal)]">
+        <div className="relative z-40 px-4 pt-6 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <CustomerWorkspaceHeader user={currentUserQuery.data} />
+          </div>
+        </div>
+
+        <main className="relative flex-1">
+          <Outlet />
+        </main>
+
+        <CustomerWorkspaceFooter />
+      </div>
+    );
+  }
+
+  if (hasVendorSession && currentUserQuery.data && currentUserQuery.data.role === 'VENDOR') {
+    return (
+      <div className="workspace-shell flex min-h-screen flex-col overflow-x-hidden text-[var(--color-charcoal)]">
+        <div className="relative z-50 px-4 pt-6 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <VendorWorkspaceHeader />
+          </div>
+        </div>
+
+        <main className="relative flex-1">
+          <Outlet />
+        </main>
+
+        <VendorWorkspaceFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell flex min-h-screen flex-col text-[var(--color-charcoal)]">
@@ -165,6 +236,7 @@ export function PublicLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
+
       <Footer />
     </div>
   );

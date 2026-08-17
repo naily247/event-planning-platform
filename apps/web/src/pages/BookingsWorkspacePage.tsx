@@ -1086,6 +1086,10 @@ export function BookingsWorkspacePage() {
 
                             <Link
                               to={`/vendors/${booking.vendor.slug}`}
+                              state={{
+                                returnTo: `/events/${eventId}/bookings`,
+                                returnLabel: 'Back to bookings',
+                              }}
                               className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[rgba(93,58,85,0.07)] px-3 py-2 text-sm font-black text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.12)]"
                             >
                               <Store
@@ -1432,6 +1436,10 @@ export function BookingsWorkspacePage() {
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <Link
                         to={`/vendors/${selectedBookingQuery.data?.vendor.slug ?? ''}`}
+                        state={{
+                          returnTo: `/events/${eventId}/bookings`,
+                          returnLabel: 'Back to bookings',
+                        }}
                         className={`group/details-vendor inline-flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.10)] bg-[rgba(93,58,85,0.07)] px-3 py-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 ${
                           selectedBookingQuery.data
                             ? 'hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.20)] hover:bg-[rgba(93,58,85,0.13)] hover:text-[var(--color-rosewood)]'
@@ -2135,6 +2143,10 @@ function BookingDetails({
 
             <Link
               to={`/vendors/${booking.vendor.slug}`}
+              state={{
+                returnTo: `/events/${booking.event.id}/bookings`,
+                returnLabel: 'Back to bookings',
+              }}
               className="group/vendor-profile btn-secondary mt-5 w-fit text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
             >
               <Store

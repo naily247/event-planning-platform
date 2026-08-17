@@ -1,28 +1,33 @@
-import { CalendarDays, Mail } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, LogIn, Mail, Sparkles, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const footerLinkGroups = [
+const exploreLinks = [
   {
-    title: 'Product',
-    links: [
-      { to: '/vendors', label: 'Explore vendors' },
-      { to: '/planning-guide', label: 'Planning guide' },
-      { to: '/register', label: 'Start planning' },
-    ],
+    label: 'Browse vendors',
+    to: '/vendors',
   },
   {
-    title: 'Company',
-    links: [
-      { to: '/about', label: 'About Eventure' },
-      { to: '/contact', label: 'Contact' },
-    ],
+    label: 'Planning guide',
+    to: '/planning-guide',
   },
   {
-    title: 'Legal',
-    links: [
-      { to: '/privacy', label: 'Privacy policy' },
-      { to: '/terms', label: 'Terms of service' },
-    ],
+    label: 'About Eventure',
+    to: '/about',
+  },
+];
+
+const companyLinks = [
+  {
+    label: 'Contact',
+    to: '/contact',
+  },
+  {
+    label: 'Privacy',
+    to: '/privacy',
+  },
+  {
+    label: 'Terms',
+    to: '/terms',
   },
 ];
 
@@ -30,88 +35,135 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/35 bg-[var(--color-near-black)] text-white">
+    <footer className="relative overflow-hidden border-t border-white/10 bg-[var(--color-near-black)] text-white">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-24 top-0 size-72 rounded-full bg-[var(--color-deep-plum)]/35 blur-3xl"
+        className="pointer-events-none absolute -left-32 -top-32 size-[26rem] rounded-full bg-[rgba(93,58,85,0.34)] blur-3xl"
+      />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-[-12rem] left-[34%] size-[30rem] rounded-full bg-[rgba(183,167,200,0.10)] blur-3xl"
       />
 
       <div className="relative">
-        <div className="grid lg:grid-cols-[minmax(0,3fr)_minmax(360px,2fr)]">
-          <div className="relative z-10 px-6 py-14 sm:px-10 sm:py-16 lg:px-[max(3rem,calc((100vw-1180px)/2))] lg:py-20 lg:pr-12">
-            <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
-              <div className="max-w-md">
+        <div className="grid lg:grid-cols-[minmax(0,1.25fr)_minmax(24rem,0.75fr)]">
+          <div className="relative px-6 py-12 sm:px-10 sm:py-14 lg:px-[max(3rem,calc((100vw-1180px)/2))] lg:py-16 lg:pr-12">
+            <div className="grid gap-12 xl:grid-cols-[1.15fr_0.85fr] xl:gap-16">
+              <div className="max-w-xl">
                 <Link
                   to="/"
                   className="group inline-flex items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   aria-label="Eventure home"
                 >
-                  <span className="grid size-12 place-items-center rounded-2xl border border-white/15 bg-white/10 shadow-[0_18px_40px_rgba(0,0,0,0.24)] backdrop-blur-xl transition group-hover:-translate-y-0.5 group-hover:bg-white/15">
-                    <CalendarDays className="size-5 text-[var(--color-light-champagne)]" />
+                  <span className="grid size-12 place-items-center rounded-2xl border border-white/12 bg-white/[0.08] text-[var(--color-light-champagne)] shadow-[0_16px_38px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-0.5 group-hover:bg-white/[0.13]">
+                    <CalendarDays className="size-5" />
                   </span>
 
                   <span>
-                    <span className="block text-lg font-black tracking-[-0.03em]">Eventure</span>
+                    <span className="block text-lg font-black tracking-[-0.035em] text-white">
+                      Eventure
+                    </span>
 
-                    <span className="mt-1 block text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[var(--color-light-champagne)]/70">
+                    <span className="mt-1 block text-[0.65rem] font-black uppercase tracking-[0.22em] text-[var(--color-light-champagne)]/68">
                       Plan beautifully
                     </span>
                   </span>
                 </Link>
 
-                <h2 className="mt-7 text-3xl font-black leading-tight tracking-[-0.04em] text-white sm:text-4xl">
-                  Plan beautifully.
-                  <span className="block text-[var(--color-light-champagne)]">
-                    Celebrate confidently.
-                  </span>
-                </h2>
-
-                <p className="mt-5 max-w-sm text-sm font-medium leading-7 text-white/60 sm:text-base">
-                  Organise your event, discover trusted vendors and manage every important detail
-                  from one thoughtfully designed workspace.
+                <p className="mt-7 text-xs font-black uppercase tracking-[0.22em] text-[var(--color-light-champagne)]/56">
+                  Event planning, thoughtfully connected
                 </p>
 
-                <Link
-                  to="/contact"
-                  className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                >
-                  <Mail className="size-4" />
-                  Contact Eventure
-                </Link>
+                <h2 className="mt-3 max-w-lg text-3xl font-black leading-[1.05] tracking-[-0.045em] text-white sm:text-4xl">
+                  Build every part of your event in one place.
+                </h2>
+
+                <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-white/58 sm:text-base">
+                  Discover trusted vendors, organise the details that matter and turn scattered
+                  planning into one calm, connected experience.
+                </p>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <Link
+                    to="/register"
+                    className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fffaf5] hover:shadow-[0_18px_42px_rgba(0,0,0,0.24)]"
+                  >
+                    <UserPlus className="size-4" />
+                    Start planning
+                    <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </Link>
+
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/[0.08] px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.14]"
+                  >
+                    <LogIn className="size-4" />
+                    Log in
+                  </Link>
+                </div>
               </div>
 
-              <nav
-                aria-label="Footer navigation"
-                className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-1"
-              >
-                {footerLinkGroups.map((group) => (
-                  <div key={group.title}>
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
-                      {group.title}
-                    </h3>
+              <div className="grid gap-9 sm:grid-cols-2 xl:grid-cols-2">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
+                    Explore
+                  </p>
 
-                    <ul className="mt-5 space-y-3">
-                      {group.links.map((link) => (
-                        <li key={link.to}>
-                          <Link
-                            to={link.to}
-                            className="inline-flex rounded-md text-sm font-semibold text-white/60 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                          >
-                            {link.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </nav>
+                  <nav aria-label="Explore Eventure" className="mt-5 space-y-2">
+                    {exploreLinks.map((link) => (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className="group flex w-fit items-center gap-2 py-1.5 text-sm font-bold text-white/58 transition-colors duration-300 hover:text-white"
+                      >
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">
+                          {link.label}
+                        </span>
+
+                        <ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
+                    Eventure
+                  </p>
+
+                  <nav aria-label="Eventure company links" className="mt-5 space-y-2">
+                    {companyLinks.map((link) => (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className="group flex w-fit items-center gap-2 py-1.5 text-sm font-bold text-white/58 transition-colors duration-300 hover:text-white"
+                      >
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">
+                          {link.label}
+                        </span>
+
+                        <ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                      </Link>
+                    ))}
+                  </nav>
+
+                  <Link
+                    to="/contact"
+                    className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.07] px-4 py-2.5 text-xs font-black text-white/72 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.12] hover:text-white"
+                  >
+                    <Mail className="size-3.5" />
+                    Contact Eventure
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="relative min-h-[340px] overflow-hidden sm:min-h-[420px] lg:min-h-full">
+          <div className="relative min-h-[22rem] overflow-hidden border-t border-white/10 sm:min-h-[26rem] lg:min-h-full lg:border-l lg:border-t-0">
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-cover bg-center brightness-[0.9] saturate-[0.92]"
+              className="absolute inset-0 bg-cover bg-center"
               style={{
                 backgroundImage: "url('/images/event-planning-workspace.png')",
               }}
@@ -119,36 +171,52 @@ export function Footer() {
 
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-[linear-gradient(180deg,rgba(31,27,29,0.18)_0%,rgba(31,27,29,0.4)_100%)]"
+              className="absolute inset-0 bg-[linear-gradient(180deg,rgba(31,27,29,0.12)_0%,rgba(31,27,29,0.62)_100%)]"
             />
 
             <div
               aria-hidden="true"
-              className="absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-near-black)_0%,rgba(31,27,29,0.96)_7%,rgba(31,27,29,0.78)_20%,rgba(31,27,29,0.28)_48%,transparent_76%)] lg:block"
+              className="absolute inset-0 hidden bg-[linear-gradient(90deg,var(--color-near-black)_0%,rgba(31,27,29,0.84)_12%,rgba(31,27,29,0.30)_44%,transparent_78%)] lg:block"
             />
 
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-[var(--color-deep-plum)]/10 mix-blend-multiply"
+              className="absolute inset-0 bg-[rgba(93,58,85,0.08)] mix-blend-multiply"
             />
 
-            <div className="absolute inset-x-6 bottom-6 rounded-[1.5rem] border border-white/15 bg-[var(--color-near-black)]/45 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:inset-x-10 sm:bottom-10 sm:p-6 lg:inset-x-auto lg:bottom-10 lg:right-10 lg:max-w-xs">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
-                Thoughtful planning
-              </p>
+            <div
+              aria-hidden="true"
+              className="absolute -right-20 -top-20 size-64 rounded-full bg-white/8 blur-3xl"
+            />
 
-              <p className="mt-3 text-sm font-semibold leading-6 text-white/75">
-                Bring ideas, vendors, schedules and details together before the celebration begins.
-              </p>
+            <div className="absolute inset-x-5 bottom-5 sm:inset-x-8 sm:bottom-8 lg:left-8 lg:right-8">
+              <div className="max-w-sm rounded-[1.6rem] border border-white/14 bg-[rgba(31,27,29,0.48)] p-5 shadow-[0_22px_64px_rgba(0,0,0,0.28)] backdrop-blur-2xl sm:p-6">
+                <div className="flex items-center gap-2 text-[var(--color-light-champagne)]">
+                  <Sparkles className="size-4" />
+
+                  <p className="text-[0.66rem] font-black uppercase tracking-[0.2em]">
+                    One connected platform
+                  </p>
+                </div>
+
+                <p className="mt-4 text-lg font-black leading-6 tracking-[-0.025em] text-white">
+                  From the first idea to the final celebration.
+                </p>
+
+                <p className="mt-3 text-sm font-semibold leading-6 text-white/62">
+                  Keep inspiration, vendors and planning decisions together as your event takes
+                  shape.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="border-t border-white/10">
-          <div className="page-container flex flex-col gap-4 py-7 text-xs font-semibold text-white/45 sm:flex-row sm:items-center sm:justify-between">
+          <div className="page-container flex flex-col gap-3 py-5 text-xs font-bold text-white/38 sm:flex-row sm:items-center sm:justify-between">
             <p>© {currentYear} Eventure. All rights reserved.</p>
 
-            <p>Thoughtfully built for unforgettable events.</p>
+            <p>Plan beautifully. Celebrate confidently.</p>
           </div>
         </div>
       </div>

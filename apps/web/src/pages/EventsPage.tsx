@@ -21,7 +21,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
-import { CustomerWorkspaceHeader } from '../components/navigation/CustomerWorkspaceHeader';
 import { PageBackButton } from '../components/navigation/PageBackButton';
 import { useCurrentUser } from '../features/auth/useCurrentUser';
 import {
@@ -660,10 +659,10 @@ export function EventsPage() {
   });
 
   return (
-    <div className="app-shell relative min-h-screen overflow-hidden px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
+    <div className="app-shell relative min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-[8vw] -top-20 z-0 hidden h-[62rem] w-[72vw] min-w-[58rem] lg:block"
+        className="pointer-events-none absolute -right-[8vw] -top-[10.5rem] z-0 hidden h-[70rem] w-[72vw] min-w-[58rem] lg:block"
         style={{
           WebkitMaskImage:
             'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.08) 9%, rgba(0,0,0,0.30) 20%, rgba(0,0,0,0.68) 34%, black 50%, black 100%)',
@@ -702,10 +701,6 @@ export function EventsPage() {
       </div>
       <div className="relative z-10 mx-auto max-w-7xl">
         <div className="space-y-4">
-          {currentUser ? (
-            <CustomerWorkspaceHeader user={currentUser} unreadNotificationCount={0} />
-          ) : null}
-
           <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <PageBackButton fallback="/dashboard" label="Dashboard" className="shrink-0" />
