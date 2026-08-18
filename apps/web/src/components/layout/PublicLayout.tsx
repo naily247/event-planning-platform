@@ -11,10 +11,17 @@ import { VendorWorkspaceFooter } from '../ui/VendorWorkspaceFooter';
 import { Footer } from './Footer';
 
 const navLinks = [
-  { to: '/vendors', label: 'Vendors' },
+  {
+    to: '/vendors',
+    label: 'Vendors',
+  },
   {
     to: '/planning-guide',
     label: 'Planning Guide',
+  },
+  {
+    to: '/about',
+    label: 'About',
   },
 ];
 
@@ -132,24 +139,16 @@ export function PublicLayout() {
         <div className="page-container">
           <div className="flex min-h-[76px] items-center justify-between gap-3 py-3">
             <Link
-              to="/"
-              className="group flex shrink-0 items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
-              aria-label="Eventure home"
-            >
-              <span className="grid size-11 place-items-center rounded-2xl border border-white/45 bg-white/30 shadow-[0_12px_30px_rgba(31,27,29,0.10)] backdrop-blur-xl transition group-hover:-translate-y-0.5">
-                <CalendarDays className="size-5 text-[var(--color-deep-plum)]" />
-              </span>
-
-              <span className="hidden flex-col leading-none min-[390px]:flex">
-                <span className="text-base font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                  Eventure
-                </span>
-
-                <span className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                  Plan beautifully
-                </span>
-              </span>
-            </Link>
+  to="/"
+  className="group flex min-w-0 shrink-0 items-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
+  aria-label="Eventure home"
+>
+  <img
+    src="/images/branding/eventure-logo-navbar.png"
+    alt="Eventure"
+    className="h-[4.35rem] w-auto max-w-[12.5rem] object-contain brightness-[0.82] contrast-[1.28] saturate-[1.18] drop-shadow-[0_1px_1px_rgba(93,58,85,0.18)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:scale-[1.015] sm:h-[4.65rem] sm:max-w-[14rem]"
+  />
+</Link>
 
             <nav
               aria-label="Primary navigation"

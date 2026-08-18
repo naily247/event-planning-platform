@@ -20,30 +20,30 @@ const challenges = [
   {
     title: 'Scattered information',
     description:
-      'Budgets, guest lists, quotations, documents and inspiration often end up spread across spreadsheets, messages and folders.',
+      'Event requirements, quotations, booking details, payments, documents and planning decisions can easily become spread across messages, spreadsheets and separate tools.',
     icon: FileText,
   },
   {
-    title: 'Time-consuming coordination',
+    title: 'Disconnected coordination',
     description:
-      'Following up with multiple vendors, comparing proposals and tracking commitments can quickly become overwhelming.',
+      'Customers and vendors often rely on repeated messages and manual follow-ups just to understand what has been requested, proposed or confirmed.',
     icon: MessageSquareQuote,
   },
   {
     title: 'Limited visibility',
     description:
-      'Important deadlines, deposits and planning tasks are easier to miss when there is no single source of truth.',
+      'Important deadlines, deposits, commitments and service updates are easier to miss when both sides are working from different information.',
     icon: ClipboardCheck,
   },
 ];
 
 const platformCapabilities = [
   {
-    label: 'Event workspaces',
+    label: 'Customer workspaces',
     icon: LayoutDashboard,
   },
   {
-    label: 'Trusted vendors',
+    label: 'Vendor marketplace',
     icon: Store,
   },
   {
@@ -55,7 +55,7 @@ const platformCapabilities = [
     icon: CircleDollarSign,
   },
   {
-    label: 'Guest coordination',
+    label: 'Shared coordination',
     icon: UsersRound,
   },
   {
@@ -69,60 +69,63 @@ const audiences = [
     eyebrow: 'For customers',
     title: 'Plan with clarity',
     description:
-      'Create events, discover vendors, compare quotations, organise guests, track budgets and keep every important detail in one connected workspace.',
+      'Create events, discover suitable vendors, compare quotations and keep budgets, guests, bookings, documents and planning decisions connected.',
     icon: Sparkles,
     highlights: [
-      'Discover and compare trusted vendors',
-      'Manage bookings, payments and reviews',
-      'Organise budgets, guests, tasks and documents',
+      'Discover and compare suitable vendors',
+      'Manage quotations, bookings and payments',
+      'Organise guests, budgets, tasks and documents',
     ],
   },
   {
     eyebrow: 'For vendors',
-    title: 'Grow with confidence',
+    title: 'Work professionally',
     description:
-      'Build a professional presence, showcase services, manage availability and respond to serious customer enquiries through a structured workflow.',
+      'Present services, showcase previous work, respond to opportunities and manage availability, quotations and bookings through a structured vendor workspace.',
     icon: Building2,
     highlights: [
-      'Present services through a polished profile',
+      'Present services through a dedicated profile',
       'Manage availability and quotation requests',
-      'Track bookings, reviews and customer communication',
+      'Coordinate bookings and customer commitments',
     ],
   },
   {
-    eyebrow: 'For administrators',
-    title: 'Protect the marketplace',
+    eyebrow: 'Platform trust',
+    title: 'Keep the marketplace reliable',
     description:
-      'Review vendor applications, verify payments, moderate platform activity and support a reliable experience for every participant.',
+      'Administration and moderation support vendor verification, payment oversight, complaint handling and the quality of the marketplace customers and vendors rely on.',
     icon: ShieldCheck,
     highlights: [
       'Review and verify vendor applications',
-      'Oversee payments, complaints and moderation',
-      'Maintain platform trust and service quality',
+      'Oversee complaints and platform activity',
+      'Support marketplace trust and service quality',
     ],
   },
 ];
 
 const principles = [
   {
-    title: 'Thoughtful planning',
-    description: 'Every feature should reduce complexity and help people make better decisions.',
+    title: 'Clarity',
+    description:
+      'Important information should be easy to understand, easy to find and connected to the event or service it belongs to.',
     icon: CalendarCheck2,
   },
   {
     title: 'Transparency',
-    description: 'Clear quotations, visible commitments and organised records build confidence.',
+    description:
+      'Clear quotations, visible commitments and organised records help both customers and vendors make confident decisions.',
     icon: BadgeCheck,
   },
   {
-    title: 'Collaboration',
+    title: 'Coordination',
     description:
-      'Customers, vendors and administrators work better when information stays connected.',
+      'Different roles can work independently while the information connecting them remains visible and structured.',
     icon: Handshake,
   },
   {
-    title: 'Beautiful experiences',
-    description: 'Powerful software should also feel calm, elegant and enjoyable to use.',
+    title: 'Thoughtful experiences',
+    description:
+      'Powerful event software should still feel calm, approachable and enjoyable for everyone using it.',
     icon: Sparkles,
   },
 ];
@@ -141,7 +144,7 @@ export function AboutPage() {
           className="pointer-events-none absolute -right-24 bottom-0 size-96 rounded-full bg-[var(--color-lilac)]/18 blur-3xl"
         />
 
-        <div className="page-container relative py-16 sm:py-20 lg:py-24">
+        <div className="page-container relative py-12 sm:py-14 lg:py-16">
           <div className="grid min-h-[560px] items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
             <div className="relative z-10 max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/35 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)] shadow-[0_14px_40px_rgba(31,27,29,0.08)] backdrop-blur-xl">
@@ -150,32 +153,45 @@ export function AboutPage() {
               </div>
 
               <h1 className="mt-8 text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl lg:text-7xl">
-                Planning an event should feel exciting,
-                <span className="block text-[var(--color-deep-plum)]">not overwhelming.</span>
+                Events bring people together.
+                <span className="block text-[var(--color-deep-plum)]">Planning should too.</span>
               </h1>
 
               <p className="mt-8 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/70 sm:text-lg">
-                From finding trusted vendors to managing budgets, guests, documents and bookings,
-                every celebration involves hundreds of small decisions. Eventure brings those
-                decisions together into one thoughtfully designed workspace.
+                Eventure is a connected event planning and vendor coordination platform built for
+                the people creating events and the professionals bringing them to life.
+              </p>
+
+              <p className="mt-4 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/62">
+                From early requirements to quotations, bookings, payments and final coordination,
+                Eventure keeps both sides working from the same event context.
               </p>
 
               <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row">
                 <Link
-                  to="/register"
+                  to="/register/customer"
                   className="btn-primary group min-h-12 px-6 transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(93,58,85,0.22)]"
                 >
-                  Start planning
+                  Plan an event
                   <ArrowRight className="size-4 transition duration-300 group-hover:translate-x-1" />
                 </Link>
 
                 <Link
-                  to="/planning-guide"
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/55 bg-white/35 px-6 text-sm font-bold text-[var(--color-charcoal)] shadow-[0_12px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-1 hover:border-white/80 hover:bg-white/60 hover:text-[var(--color-deep-plum)] hover:shadow-[0_18px_42px_rgba(31,27,29,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
+                  to="/register/vendor"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/55 bg-white/35 px-6 text-sm font-bold text-[var(--color-charcoal)] shadow-[0_12px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-1 hover:border-white/80 hover:bg-white/60 hover:text-[var(--color-deep-plum)] hover:shadow-[0_18px_42px_rgba(31,27,29,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
                 >
-                  See how Eventure works
+                  Join as a vendor
+                  <ArrowRight className="size-4" />
                 </Link>
               </div>
+
+              <Link
+                to="/planning-guide"
+                className="group mt-5 inline-flex items-center gap-2 text-xs font-black text-[var(--color-charcoal)]/52 transition hover:text-[var(--color-deep-plum)]"
+              >
+                See how the Eventure workflow works
+                <ArrowRight className="size-3.5 transition duration-300 group-hover:translate-x-1" />
+              </Link>
             </div>
 
             <div aria-hidden="true" className="group relative hidden min-h-[500px] lg:block">
@@ -203,7 +219,7 @@ export function AboutPage() {
         />
       </section>
 
-      <section className="page-container py-16 sm:py-20 lg:py-24">
+      <section className="page-container py-12 sm:py-14 lg:py-16">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.35fr] lg:items-end lg:gap-20">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
@@ -211,14 +227,14 @@ export function AboutPage() {
             </p>
 
             <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-0.045em] text-[var(--color-near-black)] sm:text-5xl">
-              Event planning becomes complicated when everything lives in different places.
+              Event coordination becomes difficult when every side works separately.
             </h2>
           </div>
 
           <p className="max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/68 sm:text-lg">
-            Ideas may begin in one place, conversations continue somewhere else, and important
-            records are often stored across several tools. The result is unnecessary friction at a
-            time that should feel creative and rewarding.
+            Customers make requests, vendors prepare proposals, bookings create commitments and
+            payments introduce deadlines. When those decisions live across separate messages and
+            tools, the event becomes harder to coordinate than it needs to be.
           </p>
         </div>
 
@@ -267,7 +283,7 @@ export function AboutPage() {
           className="pointer-events-none absolute -right-20 bottom-0 size-80 rounded-full bg-[var(--color-powder-blue)]/15 blur-3xl"
         />
 
-        <div className="page-container relative py-16 sm:py-20 lg:py-24">
+        <div className="page-container relative py-14 sm:py-16 lg:py-18">
           <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-20">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-light-champagne)]">
@@ -275,20 +291,20 @@ export function AboutPage() {
               </p>
 
               <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-0.045em] sm:text-5xl lg:text-6xl">
-                One workspace.
+                Different workspaces.
                 <span className="block text-[var(--color-light-champagne)]">
-                  Every important detail.
+                  One connected process.
                 </span>
               </h2>
 
               <p className="mt-7 max-w-xl text-base font-medium leading-8 text-white/62 sm:text-lg">
-                Instead of switching between disconnected tools, Eventure provides one place to
-                organise an event from the first idea to the final celebration.
+                Eventure gives customers and vendors role-specific spaces to do their work without
+                disconnecting the information that moves between them.
               </p>
 
               <p className="mt-5 max-w-xl text-base font-medium leading-8 text-white/62 sm:text-lg">
-                Customers can discover vendors and coordinate plans, vendors can manage professional
-                workflows, and administrators can maintain a trusted marketplace around them.
+                Requirements become quotation requests, quotations become bookings and bookings
+                become shared commitments that remain visible as the event progresses.
               </p>
             </div>
 
@@ -297,11 +313,11 @@ export function AboutPage() {
                 <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-light-champagne)]">
-                      Event planning workspace
+                      Connected Eventure workflow
                     </p>
 
                     <p className="mt-2 text-sm font-semibold text-white/55">
-                      Everything connected in one experience
+                      Role-specific tools working from shared context
                     </p>
                   </div>
 
@@ -334,19 +350,19 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="page-container py-16 sm:py-20 lg:py-24">
+      <section className="page-container py-12 sm:py-14 lg:py-16">
         <div className="max-w-3xl">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
             Built for everyone involved
           </p>
 
           <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-0.045em] text-[var(--color-near-black)] sm:text-5xl">
-            A connected experience for every side of the event.
+            Purpose-built experiences around one event.
           </h2>
 
           <p className="mt-6 text-base font-medium leading-8 text-[var(--color-charcoal)]/68 sm:text-lg">
-            Eventure supports the complete relationship between customers, service providers and the
-            people responsible for maintaining platform quality.
+            Eventure supports the relationship between the people planning events, the professionals
+            delivering services and the platform systems that keep the marketplace trustworthy.
           </p>
         </div>
 
@@ -398,7 +414,7 @@ export function AboutPage() {
       </section>
 
       <section className="border-y border-white/35 bg-white/16">
-        <div className="page-container py-16 sm:py-20 lg:py-24">
+        <div className="page-container py-12 sm:py-14 lg:py-16">
           <div className="grid gap-12 lg:grid-cols-[0.85fr_1.45fr] lg:gap-20">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
@@ -410,7 +426,7 @@ export function AboutPage() {
               </h2>
 
               <p className="mt-6 text-base font-medium leading-8 text-[var(--color-charcoal)]/68">
-                These principles shape how Eventure approaches product design, workflows and trust
+                These principles shape how Eventure approaches workflows, collaboration and trust
                 across the platform.
               </p>
             </div>
@@ -445,7 +461,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="page-container py-16 sm:py-20 lg:py-24">
+      <section className="page-container py-10 sm:py-12 lg:py-14">
         <div className="relative overflow-hidden rounded-[2.5rem] border border-white/55 bg-[var(--color-deep-plum)] px-6 py-14 text-center text-white shadow-[0_32px_90px_rgba(93,58,85,0.24)] sm:px-10 sm:py-18 lg:px-16 lg:py-20">
           <div
             aria-hidden="true"
@@ -459,33 +475,41 @@ export function AboutPage() {
 
           <div className="relative mx-auto max-w-3xl">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-light-champagne)]">
-              Begin with clarity
+              Choose your place in the workflow
             </p>
 
             <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-0.045em] sm:text-5xl">
-              Every memorable celebration begins with thoughtful planning.
+              Plan the event. Deliver the service. Stay connected.
             </h2>
 
             <p className="mx-auto mt-6 max-w-2xl text-base font-medium leading-8 text-white/72 sm:text-lg">
-              Spend less time managing disconnected details and more time creating an event worth
-              remembering.
+              Start an event workspace, bring your services to Eventure or explore the marketplace
+              before creating an account.
             </p>
 
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <Link
-                to="/register"
-                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-black text-[#5D3A55] shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition duration-300 ease-out hover:-translate-y-1 hover:bg-[var(--color-light-champagne)] hover:shadow-[0_22px_48px_rgba(0,0,0,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                to="/register/customer"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-black shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition duration-300 ease-out hover:-translate-y-1 hover:bg-[var(--color-light-champagne)] hover:shadow-[0_22px_48px_rgba(0,0,0,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
-                <span className="text-[#5D3A55]">Start planning today</span>
+                <span className="!text-[#5D3A55]">Plan an event</span>
 
-                <ArrowRight className="size-4 text-[#5D3A55] transition duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="size-4 !text-[#5D3A55] transition duration-300 group-hover:translate-x-1" />
+              </Link>
+
+              <Link
+                to="/register/vendor"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 text-sm font-bold text-white transition duration-300 ease-out hover:-translate-y-1 hover:border-white/35 hover:bg-white/16 hover:shadow-[0_18px_40px_rgba(0,0,0,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
+                Join as a vendor
+                <ArrowRight className="size-4 transition duration-300 group-hover:translate-x-1" />
               </Link>
 
               <Link
                 to="/vendors"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 text-sm font-bold text-white transition duration-300 ease-out hover:-translate-y-1 hover:border-white/35 hover:bg-white/16 hover:shadow-[0_18px_40px_rgba(0,0,0,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="inline-flex min-h-12 items-center justify-center px-5 text-sm font-black text-white/68 transition hover:text-white"
               >
-                Explore vendors
+                Browse marketplace
               </Link>
             </div>
           </div>

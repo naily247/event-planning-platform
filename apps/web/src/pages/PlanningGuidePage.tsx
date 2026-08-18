@@ -19,26 +19,37 @@ const journeySteps = [
   {
     number: '01',
     eyebrow: 'Build the foundation',
-    title: 'Create your event workspace',
-    text: 'Start with the details that shape every later decision: event type, date, location, guest count, estimated budget and planning notes.',
+    title: 'Create the event workspace',
+    text: 'The journey begins with the event details that shape every later decision, including the event type, date, location, guest estimate, budget and planning requirements.',
     icon: CalendarDays,
-    highlights: ['Event overview', 'Budget starting point', 'Guest estimate', 'Planning notes'],
-    support: 'Everything begins inside one connected workspace.',
+    highlights: [
+      'Event overview',
+      'Budget starting point',
+      'Guest estimate',
+      'Planning requirements',
+    ],
+    support: 'Customers establish the plan while Eventure keeps its important details connected.',
   },
   {
     number: '02',
-    eyebrow: 'Explore your options',
+    eyebrow: 'Connect the right people',
     title: 'Discover suitable vendors',
-    text: 'Browse trusted service providers by category, location, style, pricing guidance and customer feedback before building your shortlist.',
+    text: 'Customers explore service providers by category, location, style, pricing guidance and feedback, while vendors present their services, portfolios and availability through dedicated profiles.',
     icon: Search,
-    highlights: ['Vendor categories', 'Search and filters', 'Portfolios', 'Customer reviews'],
-    support: 'Compare real profiles instead of relying on scattered recommendations.',
+    highlights: [
+      'Vendor categories',
+      'Search and filters',
+      'Service portfolios',
+      'Customer reviews',
+    ],
+    support:
+      'Customers discover suitable services while vendors gain visibility to relevant opportunities.',
   },
   {
     number: '03',
     eyebrow: 'Share clear requirements',
-    title: 'Request structured quotations',
-    text: 'Send vendors the information they need to prepare relevant offers, including event details, package preferences, deadlines and reference notes.',
+    title: 'Exchange structured requests',
+    text: 'Customers send clear event requirements and service preferences, giving vendors the information they need to understand the opportunity and prepare an appropriate response.',
     icon: FileCheck2,
     highlights: [
       'Event requirements',
@@ -46,63 +57,61 @@ const journeySteps = [
       'Response deadlines',
       'Reference details',
     ],
-    support: 'Clear requests lead to clearer proposals and fewer misunderstandings.',
+    support: 'Structured requests give both sides a clearer starting point for the conversation.',
   },
   {
     number: '04',
-    eyebrow: 'Make a confident choice',
-    title: 'Compare quotations clearly',
-    text: 'Review prices, deposits, inclusions, exclusions, availability and terms side by side before deciding which proposal fits your event best.',
+    eyebrow: 'Turn requirements into proposals',
+    title: 'Review and compare quotations',
+    text: 'Vendors prepare structured quotations with pricing, inclusions, deposits, availability and terms, while customers can review and compare each proposal with the important details kept visible.',
     icon: ClipboardCheck,
     highlights: ['Package pricing', 'Deposit terms', 'Service inclusions', 'Vendor availability'],
-    support: 'Compare the complete value of each proposal—not only the lowest price.',
+    support:
+      'Clear proposals help customers compare value while vendors communicate exactly what they can deliver.',
   },
   {
     number: '05',
     eyebrow: 'Turn decisions into commitments',
-    title: 'Confirm your bookings',
-    text: 'Accept the right quotation, move into booking confirmation and keep every important agreement connected to the correct vendor.',
+    title: 'Confirm bookings together',
+    text: 'Accepted quotations move into booking coordination, connecting the customer, vendor, agreed service details and payment progress through the same workflow.',
     icon: BadgeCheck,
     highlights: [
       'Accepted quotation',
       'Booking confirmation',
       'Payment details',
-      'Vendor communication',
+      'Shared coordination',
     ],
-    support: 'Your chosen vendors stay linked to the planning journey.',
+    support:
+      'Both sides can follow the commitment from quotation acceptance through service delivery.',
   },
   {
     number: '06',
-    eyebrow: 'Keep the plan moving',
-    title: 'Manage your event in one place',
-    text: 'Track tasks, guests, documents, payments, inspiration and vendor activity as the event moves from early planning toward completion.',
+    eyebrow: 'Keep everything moving',
+    title: 'Coordinate through one platform',
+    text: 'Customers continue managing event details while vendors manage their service commitments, with bookings, payments, documents and progress remaining connected as the event approaches.',
     icon: FolderKanban,
-    highlights: [
-      'Tasks and deadlines',
-      'Guests and invitations',
-      'Documents',
-      'Payments and balances',
-    ],
-    support: 'The workspace grows with your event instead of becoming another disconnected tool.',
+    highlights: ['Planning progress', 'Vendor commitments', 'Documents', 'Payments and balances'],
+    support:
+      'Different workspaces support each role while shared progress keeps the event connected.',
   },
 ];
 
 const planningTools = [
   {
-    title: 'Budget visibility',
-    text: 'See planned costs, committed amounts, payments and outstanding balances without rebuilding your numbers in separate sheets.',
+    title: 'Shared financial visibility',
+    text: 'Keep quotation values, deposits, payments and outstanding balances connected to the services and bookings they belong to.',
     icon: WalletCards,
     tone: 'bg-[rgba(142,151,115,0.24)] text-[#3d452f]',
   },
   {
-    title: 'Guest coordination',
-    text: 'Keep guest details, party sizes, invitation responses and attendance updates connected to the same event.',
+    title: 'Role-focused coordination',
+    text: 'Customers organise event details while vendors manage service commitments, with the information that connects both sides remaining visible.',
     icon: UsersRound,
     tone: 'bg-[rgba(175,201,216,0.34)] text-[#334954]',
   },
   {
-    title: 'Visual direction',
-    text: 'Collect inspiration, colour references, styling ideas and vendor visuals inside a dedicated event mood board.',
+    title: 'Connected event direction',
+    text: 'Event inspiration, service choices and vendor references can stay connected as ideas develop into confirmed decisions.',
     icon: Images,
     tone: 'bg-[rgba(183,167,200,0.27)] text-[var(--color-deep-plum)]',
   },
@@ -110,20 +119,20 @@ const planningTools = [
 
 const planningTips = [
   {
-    title: 'Define the essentials first',
-    text: 'A realistic date, guest estimate and budget range make vendor conversations far more useful.',
+    title: 'Start with clear information',
+    text: 'Accurate event requirements help customers communicate what they need and vendors understand what they are being asked to deliver.',
   },
   {
-    title: 'Compare the full proposal',
-    text: 'Look beyond the headline price and review deposits, inclusions, availability and service terms.',
+    title: 'Make proposals easy to understand',
+    text: 'Clear pricing, inclusions, availability and service terms make quotation decisions easier for everyone involved.',
   },
   {
     title: 'Keep decisions documented',
-    text: 'Store confirmed details and supporting files where the rest of your planning information already lives.',
+    text: 'Confirmed details, agreements and supporting information should remain connected to the event and service they belong to.',
   },
   {
-    title: 'Review progress regularly',
-    text: 'Small planning check-ins help you catch missed deadlines, unpaid balances and incomplete tasks early.',
+    title: 'Keep progress visible',
+    text: 'Regular updates help customers and vendors understand what has been confirmed, what is pending and what needs attention next.',
   },
 ];
 
@@ -246,16 +255,16 @@ export function PlanningGuidePage() {
             <div>
               <div className="planning-guide-fade-up soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
                 <Sparkles className="size-4" />
-                The Eventure planning journey
+                The Eventure coordination journey
               </div>
 
               <h1 className="planning-guide-fade-up planning-guide-delay-1 max-w-3xl text-balance text-5xl font-black leading-[0.96] tracking-[-0.06em] text-[var(--color-near-black)] sm:text-6xl lg:text-7xl">
-                Plan every milestone with confidence.
+                Keep every stage clear, connected and moving.
               </h1>
 
               <p className="planning-guide-fade-up planning-guide-delay-2 mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                Eventure guides you from your first event idea to confirmed vendors and organised
-                execution through one connected planning workflow.
+                Eventure connects customers and vendors from early event requirements through
+                quotations, bookings and final coordination in one structured workflow.
               </p>
 
               <div className="planning-guide-fade-up planning-guide-delay-3 mt-9 flex flex-wrap gap-3">
@@ -271,8 +280,8 @@ export function PlanningGuidePage() {
 
               <div className="planning-guide-fade-up planning-guide-delay-4 mt-10 grid max-w-xl gap-3 sm:grid-cols-3">
                 {[
-                  ['01', 'Create'],
-                  ['02', 'Compare'],
+                  ['01', 'Plan'],
+                  ['02', 'Connect'],
                   ['03', 'Coordinate'],
                 ].map(([number, label]) => (
                   <div
@@ -282,6 +291,7 @@ export function PlanningGuidePage() {
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
                       {number}
                     </p>
+
                     <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                       {label}
                     </p>
@@ -308,7 +318,7 @@ export function PlanningGuidePage() {
                       One connected workflow
                     </p>
                     <p className="mt-2 max-w-md text-xl font-black tracking-[-0.035em]">
-                      From early ideas to final coordination.
+                      From early requirements to final coordination.
                     </p>
                   </div>
                 </div>
@@ -321,16 +331,16 @@ export function PlanningGuidePage() {
       <section className="page-container py-10 sm:py-14 lg:py-16">
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-            Your planning roadmap
+            The shared Eventure roadmap
           </p>
 
           <h2 className="mt-4 text-balance text-4xl font-black leading-[1] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-            A clear next step at every stage.
+            A clear next step for both sides.
           </h2>
 
           <p className="mx-auto mt-5 max-w-3xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/68">
-            Eventure brings the important parts of planning together so you always know what has
-            been decided, what is still pending and what needs your attention next.
+            Eventure keeps customers and vendors aligned so both sides can see what has been
+            requested, proposed, confirmed, completed and what still needs attention next.
           </p>
         </div>
 
@@ -442,7 +452,7 @@ export function PlanningGuidePage() {
                     <div className="rounded-[1.65rem] border border-white/60 bg-white/34 p-5 shadow-[0_16px_42px_rgba(31,27,29,0.08)] backdrop-blur-xl sm:p-6">
                       <div className="flex items-center justify-between gap-4">
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/50">
-                          Eventure helps with
+                          Connected through Eventure
                         </p>
 
                         <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.25)] text-[var(--color-deep-plum)] transition duration-500 group-hover:scale-[1.04]">
@@ -470,7 +480,7 @@ export function PlanningGuidePage() {
         </div>
       </section>
 
-      <section className="page-container py-12 sm:py-16 lg:py-20">
+      <section className="page-container pb-12 pt-6 sm:pb-14 sm:pt-8 lg:pb-16 lg:pt-10">
         <div className="glass-card overflow-hidden p-3 sm:p-4">
           <div className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch">
             <div className="group relative min-h-[25rem] overflow-hidden rounded-[1.8rem] sm:min-h-[32rem]">
@@ -498,23 +508,24 @@ export function PlanningGuidePage() {
               </div>
 
               <p className="mt-8 text-sm font-black uppercase tracking-[0.22em] text-white/55">
-                Shape the event vision
+                Build a shared event direction
               </p>
 
               <h2 className="mt-4 text-4xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
-                Bring every idea into one visual story.
+                Turn event ideas into a direction everyone can understand.
               </h2>
 
               <p className="mt-5 leading-7 text-white/68">
-                Use your mood board to organise styling references, colours, venue ideas, decor,
-                stationery and vendor inspiration before committing to final decisions.
+                Customers can organise styling references and event inspiration while vendor ideas
+                and service references remain connected to the visual direction as decisions take
+                shape.
               </p>
 
               <div className="mt-8 grid gap-3">
                 {[
                   'Collect event inspiration',
-                  'Save colour and styling references',
-                  'Connect ideas to vendors',
+                  'Keep visual references organised',
+                  'Connect ideas with suitable vendors',
                 ].map((item) => (
                   <div
                     key={item}
@@ -530,28 +541,34 @@ export function PlanningGuidePage() {
         </div>
       </section>
 
-      <section className="page-container py-12 sm:py-16 lg:py-20">
+      <section className="page-container pb-12 pt-6 sm:pb-14 sm:pt-8 lg:pb-16 lg:pt-10">
         <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-14">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-              Compare before committing
+              Clear proposals, clearer decisions
             </p>
 
             <h2 className="mt-4 text-balance text-4xl font-black leading-[1] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-              Make vendor decisions with the full picture.
+              Make service decisions with the full picture.
             </h2>
 
             <p className="mt-5 text-lg leading-8 text-[var(--color-charcoal)]/68">
-              A good quotation is more than a price. Eventure helps you review what is included, how
-              much is due, when the vendor is available and what each package actually offers.
+              Vendors can present structured proposals with pricing, inclusions, availability and
+              terms, while customers can review the full offer before making a commitment
             </p>
 
             <div className="mt-8 grid gap-4">
               {[
-                ['Pricing', 'Review package totals, deposits and remaining balances.'],
-                ['Inclusions', 'Understand exactly what each vendor is promising to deliver.'],
-                ['Availability', 'Confirm that the service aligns with your event schedule.'],
-                ['Terms', 'Keep important conditions visible before accepting an offer.'],
+                [
+                  'Pricing',
+                  'Keep package totals, deposits and remaining balances clear to both sides.',
+                ],
+                ['Inclusions', 'Show exactly what the vendor is proposing to deliver.'],
+                ['Availability', 'Confirm that the proposed service fits the event schedule.'],
+                [
+                  'Terms',
+                  'Keep important conditions visible before either side confirms the commitment.',
+                ],
               ].map(([title, text]) => (
                 <div
                   key={title}
@@ -585,7 +602,7 @@ export function PlanningGuidePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.48)] via-transparent to-transparent" />
 
                 <div className="absolute bottom-5 left-5 rounded-full border border-white/35 bg-black/24 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur-xl sm:bottom-6 sm:left-6">
-                  Clearer comparisons
+                  Clearer proposals
                 </div>
               </div>
             </div>
@@ -593,14 +610,14 @@ export function PlanningGuidePage() {
         </div>
       </section>
 
-      <section className="page-container py-12 sm:py-16 lg:py-20">
+      <section className="page-container pb-12 pt-6 sm:pb-14 sm:pt-8 lg:pb-16 lg:pt-10">
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-            One workspace, multiple planning tools
+            One platform, role-focused tools
           </p>
 
           <h2 className="mt-4 text-balance text-4xl font-black leading-[1] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-            Keep the practical details connected.
+            Keep the important details connected.
           </h2>
         </div>
 
@@ -626,21 +643,21 @@ export function PlanningGuidePage() {
         </div>
       </section>
 
-      <section className="page-container py-12 sm:py-16 lg:py-20">
+      <section className="page-container pb-12 pt-6 sm:pb-14 sm:pt-8 lg:pb-16 lg:pt-10">
         <div className="glass-card p-6 sm:p-8 lg:p-10">
           <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Planning principles
+                Coordination principles
               </p>
 
               <h2 className="mt-4 text-4xl font-black leading-[1] tracking-[-0.055em] text-[var(--color-near-black)]">
-                Small habits make complex events easier.
+                Clear habits make complex coordination easier.
               </h2>
 
               <p className="mt-5 leading-7 text-[var(--color-charcoal)]/68">
-                The strongest plans are not built in one sitting. They become clearer through
-                consistent decisions, organised information and regular progress reviews.
+                Strong event coordination depends on clear information, documented decisions and
+                regular progress updates from everyone involved.
               </p>
             </div>
 
@@ -666,7 +683,7 @@ export function PlanningGuidePage() {
         </div>
       </section>
 
-      <section className="page-container pb-20 pt-12 sm:pb-24 sm:pt-16">
+      <section className="page-container pb-20 pt-6 sm:pb-24 sm:pt-8">
         <div className="relative overflow-hidden rounded-[2.2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] px-6 py-12 text-center text-white shadow-[0_28px_80px_rgba(93,58,85,0.27)] sm:px-10 sm:py-16">
           <div className="planning-guide-blob-one pointer-events-none absolute -left-20 top-0 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
           <div className="planning-guide-blob-two pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-[rgba(175,201,216,0.2)] blur-3xl" />
@@ -677,29 +694,37 @@ export function PlanningGuidePage() {
             </div>
 
             <h2 className="mt-7 text-balance text-4xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
-              Ready to start your planning journey?
+              Ready to join the Eventure workflow?
             </h2>
 
             <p className="mx-auto mt-5 max-w-2xl text-pretty leading-7 text-white/68">
-              Create your event workspace or begin by discovering vendors who match the experience
-              you are planning.
+              Start as a customer planning an event, join as a vendor offering services, or explore
+              the marketplace before creating an account.
             </p>
 
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link
-                to="/register"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-black text-[#5D3A55] shadow-[0_16px_38px_rgba(0,0,0,0.16)] transition duration-300 ease-out hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-[0_20px_46px_rgba(0,0,0,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#5D3A55]"
+                to="/register/customer"
+                className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/80 bg-white px-6 py-3 text-sm font-black shadow-[0_16px_38px_rgba(0,0,0,0.16)] transition duration-300 ease-out hover:-translate-y-1 hover:bg-[#fffaf5] hover:shadow-[0_20px_46px_rgba(0,0,0,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#5D3A55]"
               >
-                <span className="text-[#5D3A55]">Create an account</span>
+                <span className="!text-[#5D3A55]">Plan an event</span>
 
-                <ArrowRight className="size-4 text-[#5D3A55] transition duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="size-4 !text-[#5D3A55] transition duration-300 group-hover:translate-x-1" />
+              </Link>
+
+              <Link
+                to="/register/vendor"
+                className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/28 bg-white/10 px-6 py-3 text-sm font-black text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/16"
+              >
+                Join as a vendor
+                <ArrowRight className="size-4 transition duration-300 group-hover:translate-x-1" />
               </Link>
 
               <Link
                 to="/vendors"
-                className="inline-flex items-center justify-center rounded-full border border-white/28 bg-white/10 px-6 py-3 text-sm font-black text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/16"
+                className="inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-black text-white/62 transition hover:text-white"
               >
-                Browse vendors
+                Browse marketplace
               </Link>
             </div>
           </div>

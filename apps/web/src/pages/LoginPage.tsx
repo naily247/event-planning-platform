@@ -100,24 +100,38 @@ export function LoginPage() {
     : null;
 
   return (
-    <div className="glass-card p-6 sm:p-8">
+  <div className="relative overflow-hidden rounded-[2rem] border border-white/62 bg-white/34 p-6 shadow-[0_28px_90px_rgba(31,27,29,0.10)] backdrop-blur-2xl sm:p-8">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -right-20 -top-24 size-56 rounded-full bg-[var(--color-lilac)]/18 blur-3xl"
+    />
+
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -bottom-24 -left-20 size-52 rounded-full bg-[var(--color-powder-blue)]/14 blur-3xl"
+    />
+
+    <div className="relative">
       <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
         <Sparkles aria-hidden="true" className="size-4" />
         Welcome back
       </div>
 
-      <h1 className="text-4xl font-black leading-[1] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-        Log in to your event workspace.
+      <h1 className="max-w-md text-4xl font-black leading-[1.02] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+        Return to your
+        <span className="block text-[var(--color-deep-plum)]">
+          Eventure workspace.
+        </span>
       </h1>
 
-      <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
-        Continue planning your events, reviewing vendor responses and keeping your booking details
-        beautifully organised.
+      <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-[var(--color-charcoal)]/66 sm:text-base">
+        Continue planning, review vendor activity and keep every important event detail connected in
+        one place.
       </p>
 
-      <form className="mt-8 grid gap-4" onSubmit={onSubmit} noValidate>
+      <form className="mt-8 grid gap-5" onSubmit={onSubmit} noValidate>
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+          <span className="mb-2.5 block text-sm font-black text-[var(--color-charcoal)]/74">
             Email address
           </span>
 
@@ -128,7 +142,7 @@ export function LoginPage() {
             />
 
             <input
-              className="form-field !pl-12"
+              className="form-field !min-h-12 !pl-12"
               placeholder="you@example.com"
               type="email"
               autoComplete="email"
@@ -150,7 +164,7 @@ export function LoginPage() {
         </label>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+          <span className="mb-2.5 block text-sm font-black text-[var(--color-charcoal)]/74">
             Password
           </span>
 
@@ -161,7 +175,7 @@ export function LoginPage() {
             />
 
             <input
-              className="form-field !pl-12 !pr-12"
+              className="form-field !min-h-12 !pl-12 !pr-12"
               placeholder="Enter your password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
@@ -173,7 +187,7 @@ export function LoginPage() {
 
             <button
               type="button"
-              className="absolute right-4 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--color-charcoal)]/46 transition hover:bg-white/36 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
+              className="absolute right-3 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full text-[var(--color-charcoal)]/46 transition hover:bg-white/45 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 disabled:cursor-not-allowed disabled:opacity-45"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               aria-pressed={showPassword}
               disabled={loginMutation.isPending}
@@ -202,15 +216,19 @@ export function LoginPage() {
         {loginErrorMessage ? (
           <div
             role="alert"
-            className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+            className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.08)] px-4 py-3.5 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
           >
-            {loginErrorMessage}
+            <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-[rgba(124,74,90,0.10)]">
+              !
+            </span>
+
+            <span>{loginErrorMessage}</span>
           </div>
         ) : null}
 
         <button
           type="submit"
-          className="btn-primary mt-2 w-full justify-center font-bold"
+          className="btn-primary mt-1 min-h-12 w-full justify-center text-sm font-black"
           disabled={loginMutation.isPending}
         >
           {loginMutation.isPending ? (
@@ -227,15 +245,23 @@ export function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-7 text-center text-sm font-semibold text-[var(--color-charcoal)]/62">
-        New to Eventure?{' '}
+      <div className="mt-7 border-t border-[var(--color-charcoal)]/8 pt-6">
+        <p className="text-center text-sm font-semibold text-[var(--color-charcoal)]/60">
+          New to Eventure?
+        </p>
+
         <Link
           to="/register"
-          className="font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
+          className="group mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/60 bg-white/34 px-4 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.05)] transition duration-300 hover:-translate-y-0.5 hover:bg-white/54 hover:text-[var(--color-rosewood)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
         >
           Create an account
+          <ArrowRight
+            aria-hidden="true"
+            className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+          />
         </Link>
-      </p>
+      </div>
     </div>
-  );
+  </div>
+);
 }

@@ -100,12 +100,26 @@ export function CustomerRegisterPage() {
     : null;
 
   return (
-    <div className="glass-card p-6 sm:p-8">
+  <div className="relative overflow-hidden rounded-[2rem] border border-white/62 bg-white/34 p-6 shadow-[0_28px_90px_rgba(31,27,29,0.10)] backdrop-blur-2xl sm:p-8">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -right-20 -top-24 size-56 rounded-full bg-[var(--color-lilac)]/18 blur-3xl"
+    />
+
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -bottom-24 -left-20 size-52 rounded-full bg-[var(--color-powder-blue)]/14 blur-3xl"
+    />
+
+    <div className="relative">
       <Link
         to="/register"
-        className="mb-6 inline-flex items-center gap-2 rounded-lg text-sm font-bold text-[var(--color-charcoal)]/64 transition hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 focus-visible:ring-offset-2"
+        className="group mb-6 inline-flex items-center gap-2 rounded-full border border-white/58 bg-white/28 px-3.5 py-2 text-xs font-black text-[var(--color-charcoal)]/60 transition duration-300 hover:bg-white/48 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
       >
-        <ArrowLeft aria-hidden="true" className="size-4" />
+        <ArrowLeft
+          aria-hidden="true"
+          className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5"
+        />
         Choose account type
       </Link>
 
@@ -114,19 +128,20 @@ export function CustomerRegisterPage() {
         Customer workspace
       </div>
 
-      <h1 className="text-4xl font-black leading-[1] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-        Start planning your event beautifully.
+      <h1 className="max-w-md text-4xl font-black leading-[1.02] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+        Start planning with
+        <span className="block text-[var(--color-deep-plum)]">Eventure.</span>
       </h1>
 
-      <p className="mt-4 leading-7 text-[var(--color-charcoal)]/68">
-        Create a customer account to organise events, shortlist vendors, request quotations and
-        manage bookings from one calm workspace.
+      <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-[var(--color-charcoal)]/66 sm:text-base">
+        Create your customer account to organise events, discover vendors, request quotations and
+        manage your planning from one connected workspace.
       </p>
 
-      <form className="mt-8 grid gap-4" onSubmit={onSubmit} noValidate>
-        <div className="grid gap-4 sm:grid-cols-2">
+      <form className="mt-8 grid gap-5" onSubmit={onSubmit} noValidate>
+        <div className="grid gap-5 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+            <span className="mb-2.5 block text-sm font-black text-[var(--color-charcoal)]/74">
               First name
             </span>
 
@@ -137,7 +152,7 @@ export function CustomerRegisterPage() {
               />
 
               <input
-                className="form-field !pl-12"
+                className="form-field !min-h-12 !pl-12"
                 placeholder="First name"
                 type="text"
                 autoComplete="given-name"
@@ -159,7 +174,7 @@ export function CustomerRegisterPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+            <span className="mb-2.5 block text-sm font-black text-[var(--color-charcoal)]/74">
               Last name
             </span>
 
@@ -170,7 +185,7 @@ export function CustomerRegisterPage() {
               />
 
               <input
-                className="form-field !pl-12"
+                className="form-field !min-h-12 !pl-12"
                 placeholder="Last name"
                 type="text"
                 autoComplete="family-name"
@@ -193,7 +208,7 @@ export function CustomerRegisterPage() {
         </div>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+          <span className="mb-2.5 block text-sm font-black text-[var(--color-charcoal)]/74">
             Email address
           </span>
 
@@ -204,7 +219,7 @@ export function CustomerRegisterPage() {
             />
 
             <input
-              className="form-field !pl-12"
+              className="form-field !min-h-12 !pl-12"
               placeholder="you@example.com"
               type="email"
               autoComplete="email"
@@ -226,7 +241,7 @@ export function CustomerRegisterPage() {
         </label>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+          <span className="mb-2.5 block text-sm font-black text-[var(--color-charcoal)]/74">
             Phone number
           </span>
 
@@ -237,7 +252,7 @@ export function CustomerRegisterPage() {
             />
 
             <input
-              className="form-field !pl-12"
+              className="form-field !min-h-12 !pl-12"
               placeholder="+94 77 123 4567"
               type="tel"
               inputMode="tel"
@@ -260,7 +275,7 @@ export function CustomerRegisterPage() {
         </label>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+          <span className="mb-2.5 block text-sm font-black text-[var(--color-charcoal)]/74">
             Password
           </span>
 
@@ -271,7 +286,7 @@ export function CustomerRegisterPage() {
             />
 
             <input
-              className="form-field !pl-12 !pr-12"
+              className="form-field !min-h-12 !pl-12 !pr-12"
               placeholder="Create a strong password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
@@ -287,7 +302,7 @@ export function CustomerRegisterPage() {
 
             <button
               type="button"
-              className="absolute right-4 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--color-charcoal)]/46 transition hover:bg-white/36 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
+              className="absolute right-3 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full text-[var(--color-charcoal)]/46 transition hover:bg-white/45 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 disabled:cursor-not-allowed disabled:opacity-45"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               aria-pressed={showPassword}
               disabled={registerMutation.isPending}
@@ -303,12 +318,16 @@ export function CustomerRegisterPage() {
             </button>
           </span>
 
-          <span
-            id="customer-register-password-help"
-            className="mt-2 block text-sm font-semibold text-[var(--color-charcoal)]/54"
-          >
-            Use at least 8 characters.
-          </span>
+          <div className="mt-2 flex items-start gap-2">
+            <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--color-dusty-olive)]" />
+
+            <span
+              id="customer-register-password-help"
+              className="text-sm font-semibold text-[var(--color-charcoal)]/54"
+            >
+              Use at least 8 characters.
+            </span>
+          </div>
 
           {passwordError ? (
             <span
@@ -323,15 +342,19 @@ export function CustomerRegisterPage() {
         {registrationErrorMessage ? (
           <div
             role="alert"
-            className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+            className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.08)] px-4 py-3.5 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
           >
-            {registrationErrorMessage}
+            <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-[rgba(124,74,90,0.10)]">
+              !
+            </span>
+
+            <span>{registrationErrorMessage}</span>
           </div>
         ) : null}
 
         <button
           type="submit"
-          className="btn-primary mt-2 w-full justify-center font-bold"
+          className="btn-primary mt-1 min-h-12 w-full justify-center text-sm font-black"
           disabled={registerMutation.isPending}
         >
           {registerMutation.isPending ? (
@@ -348,15 +371,23 @@ export function CustomerRegisterPage() {
         </button>
       </form>
 
-      <p className="mt-7 text-center text-sm font-semibold text-[var(--color-charcoal)]/62">
-        Already have an account?{' '}
+      <div className="mt-7 border-t border-[var(--color-charcoal)]/8 pt-6">
+        <p className="text-center text-sm font-semibold text-[var(--color-charcoal)]/60">
+          Already have an Eventure account?
+        </p>
+
         <Link
           to="/login"
-          className="rounded-md font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45 focus-visible:ring-offset-2"
+          className="group mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/60 bg-white/34 px-4 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.05)] transition duration-300 hover:-translate-y-0.5 hover:bg-white/54 hover:text-[var(--color-rosewood)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40"
         >
           Log in
+          <ArrowRight
+            aria-hidden="true"
+            className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+          />
         </Link>
-      </p>
+      </div>
     </div>
-  );
+  </div>
+);
 }
