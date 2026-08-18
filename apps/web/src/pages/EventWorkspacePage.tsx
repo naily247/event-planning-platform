@@ -1978,252 +1978,308 @@ export function EventWorkspacePage() {
 
       {isEditFormOpen ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.42)] px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.48)] px-4 py-6 backdrop-blur-md sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-event-title"
+          onMouseDown={(mouseEvent) => {
+            if (mouseEvent.target === mouseEvent.currentTarget && !updateEventMutation.isPending) {
+              closeEditForm();
+            }
+          }}
         >
-          <div className="mx-auto max-w-3xl">
-            <div className="glass-card p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-5">
-                <div>
-                  <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                    <Pencil className="size-4" />
-                    Edit event
-                  </div>
+          <div className="mx-auto flex min-h-full w-full max-w-4xl items-center justify-center">
+            <div className="relative w-full overflow-hidden rounded-[2rem] border border-white/70 bg-[rgba(255,252,248,0.94)] shadow-[0_32px_90px_rgba(31,27,29,0.26)] backdrop-blur-2xl">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+              />
 
-                  <h2
-                    id="edit-event-title"
-                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
-                  >
-                    Refine your event details.
-                  </h2>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-28 -left-20 size-72 rounded-full bg-[rgba(220,177,194,0.12)] blur-3xl"
+              />
 
-                  <p className="mt-3 max-w-xl leading-7 text-[var(--color-charcoal)]/66">
-                    Update the essential information that guides the rest of this event workspace.
-                  </p>
-                </div>
+              <div className="relative border-b border-[rgba(93,58,85,0.10)] px-6 py-6 sm:px-8 sm:py-7">
+                <div className="flex items-start justify-between gap-5">
+                  <div className="min-w-0">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(93,58,85,0.12)] bg-[rgba(93,58,85,0.07)] px-3.5 py-2 text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)]">
+                      <Pencil className="size-3.5" />
+                      Edit event
+                    </div>
 
-                <button
-                  type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/55 bg-white/28 text-[var(--color-charcoal)] transition hover:text-[var(--color-deep-plum)]"
-                  aria-label="Close edit event form"
-                  disabled={updateEventMutation.isPending}
-                  onClick={closeEditForm}
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
-
-              <form className="mt-8 grid gap-5" onSubmit={onSubmit}>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Event name
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="text"
-                      disabled={updateEventMutation.isPending}
-                      {...form.register('name')}
-                    />
-
-                    {form.formState.errors.name ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.name.message}
-                      </span>
-                    ) : null}
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Event type
-                    </span>
-
-                    <select
-                      className="form-field"
-                      disabled={updateEventMutation.isPending}
-                      {...form.register('eventType')}
+                    <h2
+                      id="edit-event-title"
+                      className="mt-4 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[2.35rem]"
                     >
-                      {eventTypeOptions.map((eventTypeOption) => (
-                        <option key={eventTypeOption} value={eventTypeOption}>
-                          {eventTypeOption}
-                        </option>
-                      ))}
-                    </select>
+                      Refine your event details.
+                    </h2>
 
-                    {form.formState.errors.eventType ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.eventType.message}
-                      </span>
-                    ) : null}
-                  </label>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Date and time
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="datetime-local"
-                      min={getMinimumDateTime()}
-                      disabled={updateEventMutation.isPending}
-                      {...form.register('eventDate')}
-                    />
-
-                    {form.formState.errors.eventDate ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.eventDate.message}
-                      </span>
-                    ) : null}
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Location
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="text"
-                      disabled={updateEventMutation.isPending}
-                      {...form.register('location')}
-                    />
-
-                    {form.formState.errors.location ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.location.message}
-                      </span>
-                    ) : null}
-                  </label>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Estimated guests
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="number"
-                      min="1"
-                      step="1"
-                      disabled={updateEventMutation.isPending}
-                      {...form.register('guestCount')}
-                    />
-
-                    {form.formState.errors.guestCount ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.guestCount.message}
-                      </span>
-                    ) : null}
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                      Planned budget
-                    </span>
-
-                    <input
-                      className="form-field"
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      disabled={updateEventMutation.isPending}
-                      {...form.register('plannedBudget')}
-                    />
-
-                    {form.formState.errors.plannedBudget ? (
-                      <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                        {form.formState.errors.plannedBudget.message}
-                      </span>
-                    ) : null}
-                  </label>
-                </div>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Theme
-                  </span>
-
-                  <input
-                    className="form-field"
-                    type="text"
-                    disabled={updateEventMutation.isPending}
-                    {...form.register('theme')}
-                  />
-
-                  {form.formState.errors.theme ? (
-                    <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                      {form.formState.errors.theme.message}
-                    </span>
-                  ) : null}
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                    Planning requirements
-                  </span>
-
-                  <textarea
-                    className="form-field min-h-32 resize-y"
-                    disabled={updateEventMutation.isPending}
-                    {...form.register('requirements')}
-                  />
-
-                  {form.formState.errors.requirements ? (
-                    <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                      {form.formState.errors.requirements.message}
-                    </span>
-                  ) : null}
-                </label>
-
-                {form.formState.errors.root?.message ? (
-                  <div
-                    role="alert"
-                    className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                  >
-                    {form.formState.errors.root.message}
+                    <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58 sm:text-[0.95rem] sm:leading-7">
+                      Update the core information that shapes this event workspace, including its
+                      date, location, guest estimate, budget and planning direction.
+                    </p>
                   </div>
-                ) : null}
 
-                {updateEventMutation.isError ? (
-                  <div
-                    role="alert"
-                    className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                  >
-                    {getApiErrorMessage(updateEventMutation.error)}
-                  </div>
-                ) : null}
-
-                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                   <button
                     type="button"
-                    className="btn-secondary justify-center text-sm font-bold"
+                    className="grid size-10 shrink-0 place-items-center rounded-full border border-[rgba(93,58,85,0.10)] bg-white/72 text-[var(--color-charcoal)]/58 shadow-[0_8px_20px_rgba(31,27,29,0.06)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.18)] hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Close edit event form"
                     disabled={updateEventMutation.isPending}
                     onClick={closeEditForm}
                   >
-                    Cancel
+                    <X className="size-4.5" />
                   </button>
+                </div>
+              </div>
 
-                  <button
-                    type="submit"
-                    className="btn-primary justify-center text-sm font-bold"
-                    disabled={updateEventMutation.isPending}
-                  >
-                    {updateEventMutation.isPending ? (
-                      <LoaderCircle className="size-4 animate-spin" />
-                    ) : (
-                      <Save className="size-4" />
-                    )}
+              <form onSubmit={onSubmit}>
+                <div className="relative max-h-[68vh] overflow-y-auto px-6 py-6 sm:px-8 sm:py-7">
+                  <div className="space-y-7">
+                    <section>
+                      <div className="mb-4 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                            Event basics
+                          </p>
 
-                    {updateEventMutation.isPending ? 'Saving changes...' : 'Save changes'}
-                  </button>
+                          <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/46">
+                            Keep the main event information accurate.
+                          </p>
+                        </div>
+
+                        <span className="hidden rounded-full border border-white/76 bg-white/62 px-3 py-1.5 text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]/70 shadow-[0_6px_18px_rgba(31,27,29,0.05)] sm:inline-flex">
+                          Required details
+                        </span>
+                      </div>
+
+                      <div className="grid gap-4 rounded-[1.6rem] border border-white/74 bg-white/48 p-4 shadow-[0_14px_38px_rgba(31,27,29,0.06)] backdrop-blur-xl sm:grid-cols-2 sm:p-5">
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Event name
+                          </span>
+
+                          <input
+                            className="form-field"
+                            type="text"
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('name')}
+                          />
+
+                          {form.formState.errors.name ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.name.message}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Event type
+                          </span>
+
+                          <select
+                            className="form-field"
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('eventType')}
+                          >
+                            {eventTypeOptions.map((eventTypeOption) => (
+                              <option key={eventTypeOption} value={eventTypeOption}>
+                                {eventTypeOption}
+                              </option>
+                            ))}
+                          </select>
+
+                          {form.formState.errors.eventType ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.eventType.message}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Date and time
+                          </span>
+
+                          <input
+                            className="form-field"
+                            type="datetime-local"
+                            min={getMinimumDateTime()}
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('eventDate')}
+                          />
+
+                          {form.formState.errors.eventDate ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.eventDate.message}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Location
+                          </span>
+
+                          <input
+                            className="form-field"
+                            type="text"
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('location')}
+                          />
+
+                          {form.formState.errors.location ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.location.message}
+                            </span>
+                          ) : null}
+                        </label>
+                      </div>
+                    </section>
+
+                    <section>
+                      <div className="mb-4">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Planning details
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/46">
+                          Adjust the information used throughout the planning workspace.
+                        </p>
+                      </div>
+
+                      <div className="grid gap-4 rounded-[1.6rem] border border-white/74 bg-white/42 p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-xl sm:grid-cols-2 sm:p-5">
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Estimated guests
+                          </span>
+
+                          <input
+                            className="form-field"
+                            type="number"
+                            min="1"
+                            step="1"
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('guestCount')}
+                          />
+
+                          {form.formState.errors.guestCount ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.guestCount.message}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Planned budget
+                          </span>
+
+                          <input
+                            className="form-field"
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('plannedBudget')}
+                          />
+
+                          {form.formState.errors.plannedBudget ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.plannedBudget.message}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className="block sm:col-span-2">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Theme
+                          </span>
+
+                          <input
+                            className="form-field"
+                            type="text"
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('theme')}
+                          />
+
+                          {form.formState.errors.theme ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.theme.message}
+                            </span>
+                          ) : null}
+                        </label>
+
+                        <label className="block sm:col-span-2">
+                          <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/70">
+                            Planning requirements
+                          </span>
+
+                          <textarea
+                            className="form-field min-h-28 resize-y"
+                            disabled={updateEventMutation.isPending}
+                            {...form.register('requirements')}
+                          />
+
+                          {form.formState.errors.requirements ? (
+                            <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
+                              {form.formState.errors.requirements.message}
+                            </span>
+                          ) : null}
+                        </label>
+                      </div>
+                    </section>
+
+                    {form.formState.errors.root?.message ? (
+                      <div
+                        role="alert"
+                        className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.09)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+                      >
+                        {form.formState.errors.root.message}
+                      </div>
+                    ) : null}
+
+                    {updateEventMutation.isError ? (
+                      <div
+                        role="alert"
+                        className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.09)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+                      >
+                        {getApiErrorMessage(updateEventMutation.error)}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="relative flex flex-col-reverse gap-3 border-t border-[rgba(93,58,85,0.10)] bg-[rgba(255,250,246,0.82)] px-6 py-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                  <p className="hidden max-w-md text-xs font-semibold leading-5 text-[var(--color-charcoal)]/44 sm:block">
+                    Changes affect this event workspace and its connected planning details.
+                  </p>
+
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      className="btn-secondary justify-center text-sm font-bold"
+                      disabled={updateEventMutation.isPending}
+                      onClick={closeEditForm}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="btn-primary justify-center text-sm font-bold"
+                      disabled={updateEventMutation.isPending}
+                    >
+                      {updateEventMutation.isPending ? (
+                        <LoaderCircle className="size-4 animate-spin" />
+                      ) : (
+                        <Save className="size-4" />
+                      )}
+
+                      {updateEventMutation.isPending ? 'Saving changes...' : 'Save changes'}
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
