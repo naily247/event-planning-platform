@@ -71,7 +71,6 @@ function formatDateTime(value: string | null) {
     minute: '2-digit',
   }).format(new Date(value));
 }
-
 function ReadOnlyDetail({
   icon: Icon,
   label,
@@ -82,18 +81,18 @@ function ReadOnlyDetail({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-amber-100/90 bg-white/72 p-4 shadow-[0_10px_28px_rgba(245,158,11,0.05)]">
+    <div className="rounded-[1.1rem] border border-[rgba(91,61,82,0.08)] bg-white/68 px-3.5 py-3">
       <div className="flex items-start gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
           <Icon className="size-4" />
         </div>
 
         <div className="min-w-0">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+          <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/44">
             {label}
           </p>
 
-          <p className="mt-1 break-words text-sm font-bold leading-6 text-[var(--color-near-black)]">
+          <p className="mt-1 break-words text-xs font-bold leading-5 text-[var(--color-near-black)]">
             {value}
           </p>
         </div>
@@ -110,67 +109,67 @@ function VendorApplicationCard({
   onView: (applicationId: string) => void;
 }) {
   return (
-    <article className="rounded-[1.6rem] border border-amber-100/90 bg-gradient-to-br from-amber-50/85 via-white to-orange-50/45 p-5 shadow-[0_18px_45px_rgba(245,158,11,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-[0_22px_55px_rgba(245,158,11,0.11)]">
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-        <div className="flex min-w-0 items-start gap-4">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 shadow-[0_8px_20px_rgba(245,158,11,0.10)]">
-            <Store className="size-5" />
+    <article className="group rounded-[1.35rem] border border-[rgba(91,61,82,0.09)] bg-white/72 p-4 shadow-[0_14px_38px_rgba(64,42,51,0.06)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgba(91,61,82,0.16)] hover:shadow-[0_18px_44px_rgba(64,42,51,0.09)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+            <Store className="size-4" />
           </div>
 
           <div className="min-w-0">
-            <h3 className="text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+            <h3 className="truncate text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
               {application.businessName}
             </h3>
 
-            <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+            <p className="mt-0.5 text-xs font-semibold text-[var(--color-charcoal)]/56">
               {application.user.firstName} {application.user.lastName}
             </p>
 
-            <p className="mt-1 break-all text-xs font-semibold text-[var(--color-charcoal)]/46">
+            <p className="mt-0.5 truncate text-[0.68rem] font-semibold text-[var(--color-charcoal)]/44">
               {application.user.email}
             </p>
           </div>
         </div>
 
-        <span className="status-chip w-fit" data-tone="warning">
+        <span className="status-chip w-fit shrink-0" data-tone="warning">
           Pending review
         </span>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-white/48 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+      <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+        <div className="rounded-xl bg-[rgba(183,167,200,0.07)] px-3 py-2.5">
+          <p className="text-[0.58rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
             Location
           </p>
 
-          <p className="mt-2 text-sm font-bold text-[var(--color-near-black)]">
+          <p className="mt-1 text-xs font-bold text-[var(--color-near-black)]">
             {application.baseLocation ?? 'Not provided'}
           </p>
         </div>
 
-        <div className="rounded-2xl bg-white/48 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+        <div className="rounded-xl bg-[rgba(183,167,200,0.07)] px-3 py-2.5">
+          <p className="text-[0.58rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
             Submitted
           </p>
 
-          <p className="mt-2 text-sm font-bold text-[var(--color-near-black)]">
+          <p className="mt-1 text-xs font-bold text-[var(--color-near-black)]">
             {formatDate(application.submittedAt)}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-3 flex min-h-7 flex-wrap gap-1.5">
         {application.categories.length > 0 ? (
           application.categories.map((category) => (
             <span
               key={category.id}
-              className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800"
+              className="inline-flex items-center rounded-full border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.08)] px-2.5 py-1 text-[0.65rem] font-bold text-[var(--color-deep-plum)]"
             >
               {category.name}
             </span>
           ))
         ) : (
-          <span className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
+          <span className="inline-flex items-center rounded-full border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.08)] px-2.5 py-1 text-[0.65rem] font-bold text-[var(--color-deep-plum)]">
             No categories selected
           </span>
         )}
@@ -178,7 +177,7 @@ function VendorApplicationCard({
 
       <button
         type="button"
-        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-5 text-sm font-black text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
+        className="mt-3 inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-[rgba(91,61,82,0.12)] bg-[rgba(183,167,200,0.10)] px-4 text-xs font-black text-[var(--color-deep-plum)] transition hover:border-[rgba(91,61,82,0.20)] hover:bg-[rgba(183,167,200,0.17)]"
         onClick={() => onView(application.id)}
       >
         Review application
@@ -293,131 +292,151 @@ export function AdminVendorApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(254,215,170,0.22),transparent_32%),radial-gradient(circle_at_top_right,rgba(253,230,138,0.16),transparent_28%),linear-gradient(180deg,#fffdf8_0%,#fffaf5_48%,#fffdfb_100%)]">
-      <div className="workspace-container">
-        <AdminWorkspaceNav />
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#fbf9fa_0%,#f7f3f6_48%,#f5f3f8_100%)]">
+  <div className="pointer-events-none absolute -left-40 top-40 size-[30rem] rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+  <div className="pointer-events-none absolute -right-44 top-[34rem] size-[32rem] rounded-full bg-[rgba(214,190,177,0.10)] blur-3xl" />
 
-        <main className="py-8">
-          <section className="relative overflow-hidden rounded-[2rem] border border-amber-200/80 bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-50 p-6 shadow-[0_24px_70px_rgba(245,158,11,0.10)] sm:p-8">
-            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-amber-300/24 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-orange-300/18 blur-3xl" />
-            <div className="relative">
-              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-                <div>
-                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-amber-200/80 bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-amber-700 shadow-sm">
-                    <ShieldCheck className="size-4" />
-                    Vendor verification
-                  </div>
+  <div className="relative mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
+    <AdminWorkspaceNav />
 
-                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                    Review vendor applications with confidence.
-                  </h1>
+    <main className="py-4">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(91,61,82,0.10)] bg-[linear-gradient(135deg,#fbf8fa_0%,#f5eff5_54%,#f1edf5_100%)] px-6 py-5 shadow-[0_18px_50px_rgba(64,42,51,0.07)] sm:px-7 sm:py-6">
+        <div className="pointer-events-none absolute -right-16 -top-28 size-72 rounded-full border border-[rgba(91,61,82,0.07)]" />
+        <div className="pointer-events-none absolute -right-2 -top-10 size-48 rounded-full border border-[rgba(91,61,82,0.06)]" />
 
-                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                    Inspect business information, service categories, locations, contact details,
-                    and submission history before approving or rejecting marketplace access.
-                  </p>
-                </div>
+        <div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div>
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(91,61,82,0.10)] bg-white/60 px-3 py-1.5 text-[0.64rem] font-extrabold uppercase tracking-[0.17em] text-[var(--color-deep-plum)]">
+              <ShieldCheck className="size-3.5" />
+              Vendor verification
+            </div>
 
-                <div className="rounded-2xl border border-amber-200/70 bg-white/72 px-5 py-4 shadow-[0_12px_30px_rgba(245,158,11,0.09)] backdrop-blur">
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                    Pending applications
-                  </p>
+            <h1 className="mt-4 max-w-4xl text-balance text-[2.25rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.7rem]">
+              Review vendor applications with confidence.
+            </h1>
 
-                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                    {applicationsQuery.isLoading ? '—' : (applicationsQuery.data?.count ?? 0)}
-                  </p>
-                </div>
+            <p className="mt-3 max-w-2xl text-pretty text-sm font-medium leading-6 text-[var(--color-charcoal)]/68">
+              Inspect business information, service categories, locations, contact details,
+              and submission history before approving or rejecting marketplace access.
+            </p>
+          </div>
+
+          <div className="min-w-[190px] rounded-[1.15rem] border border-[rgba(91,61,82,0.09)] bg-white/62 px-4 py-3 backdrop-blur-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[0.6rem] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                  Pending applications
+                </p>
+
+                <p className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                  {applicationsQuery.isLoading ? '—' : (applicationsQuery.data?.count ?? 0)}
+                </p>
+              </div>
+
+              <div className="grid size-9 place-items-center rounded-xl bg-amber-50 text-amber-700">
+                <Clock3 className="size-4" />
               </div>
             </div>
-          </section>
+          </div>
+        </div>
+      </section>
 
-          {applicationsQuery.isLoading ? (
-            <section className="state-surface mt-6">
-              <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-amber-700" />
+      {applicationsQuery.isLoading ? (
+        <section className="state-surface mt-4">
+          <div>
+            <LoaderCircle className="mx-auto size-9 animate-spin text-[var(--color-deep-plum)]" />
 
-                <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
-                  Loading vendor applications
-                </p>
+            <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
+              Loading vendor applications
+            </p>
 
-                <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
-                  Preparing pending submissions and business details.
-                </p>
-              </div>
-            </section>
-          ) : applicationsQuery.isError ? (
-            <section className="state-surface mt-6">
-              <div className="max-w-lg">
-                <div className="icon-tile mx-auto">
-                  <AlertCircle className="size-6" />
-                </div>
+            <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
+              Preparing pending submissions and business details.
+            </p>
+          </div>
+        </section>
+      ) : applicationsQuery.isError ? (
+        <section className="state-surface mt-4">
+          <div className="max-w-lg">
+            <div className="icon-tile mx-auto">
+              <AlertCircle className="size-6" />
+            </div>
 
-                <h2 className="mt-5 text-2xl font-black text-[var(--color-near-black)]">
-                  Vendor applications could not be loaded
-                </h2>
+            <h2 className="mt-4 text-2xl font-black text-[var(--color-near-black)]">
+              Vendor applications could not be loaded
+            </h2>
 
-                <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-                  {getErrorMessage(
-                    applicationsQuery.error,
-                    'We could not load pending vendor applications.',
-                  )}
-                </p>
-
-                <button
-                  type="button"
-                  className="btn-primary mt-6 text-sm"
-                  onClick={() => applicationsQuery.refetch()}
-                >
-                  Try again
-                </button>
-              </div>
-            </section>
-          ) : (
-            <section className="mt-6 rounded-[2rem] border border-amber-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(245,158,11,0.08)] backdrop-blur sm:p-7">
-              <div>
-                <p className="section-eyebrow">Verification queue</p>
-
-                <h2 className="section-title">Pending vendor applications</h2>
-
-                <p className="section-description">
-                  Applications are ordered by submission time, with the oldest submissions appearing
-                  first.
-                </p>
-              </div>
-
-              {applications.length > 0 ? (
-                <div className="mt-7 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-                  {applications.map((application) => (
-                    <VendorApplicationCard
-                      key={application.id}
-                      application={application}
-                      onView={openApplication}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-surface mt-7">
-                  <BadgeCheck className="mx-auto size-9 text-amber-700/64" />
-
-                  <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
-                    The verification queue is clear
-                  </h3>
-
-                  <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                    New vendor submissions will appear here when profiles are sent for administrator
-                    review.
-                  </p>
-                </div>
+            <p className="mt-2 leading-7 text-[var(--color-charcoal)]/66">
+              {getErrorMessage(
+                applicationsQuery.error,
+                'We could not load pending vendor applications.',
               )}
-            </section>
-          )}
-        </main>
-      </div>
+            </p>
 
-      {selectedApplicationId ? (
+            <button
+              type="button"
+              className="btn-primary mt-5 text-sm"
+              onClick={() => applicationsQuery.refetch()}
+            >
+              Try again
+            </button>
+          </div>
+        </section>
+      ) : (
+        <section className="mt-4 rounded-[1.75rem] border border-[rgba(91,61,82,0.10)] bg-white/82 p-4 shadow-[0_18px_50px_rgba(64,42,51,0.07)] backdrop-blur-xl sm:p-5">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <p className="section-eyebrow">Verification queue</p>
+
+              <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                Pending vendor applications
+              </h2>
+
+              <p className="mt-1 text-xs font-medium leading-5 text-[var(--color-charcoal)]/58">
+                Applications are ordered by submission time, with the oldest submissions
+                appearing first.
+              </p>
+            </div>
+
+            {applications.length > 0 ? (
+              <span className="status-chip w-fit" data-tone="warning">
+                {applications.length} pending
+              </span>
+            ) : null}
+          </div>
+
+          {applications.length > 0 ? (
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {applications.map((application) => (
+                <VendorApplicationCard
+                  key={application.id}
+                  application={application}
+                  onView={openApplication}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-[1.2rem] border border-dashed border-[rgba(91,61,82,0.14)] bg-[rgba(183,167,200,0.06)] px-5 py-7 text-center">
+              <BadgeCheck className="mx-auto size-7 text-[var(--color-deep-plum)]/60" />
+
+              <h3 className="mt-3 text-base font-black text-[var(--color-near-black)]">
+                The verification queue is clear
+              </h3>
+
+              <p className="mx-auto mt-1 max-w-lg text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
+                New vendor submissions will appear here when profiles are sent for
+                administrator review.
+              </p>
+            </div>
+          )}
+        </section>
+      )}
+    </main>
+  </div>
+
+            {selectedApplicationId ? (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-5 backdrop-blur-md"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
@@ -429,39 +448,42 @@ export function AdminVendorApplicationsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-vendor-application-title"
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-amber-100 bg-[#fffdf8] p-6 shadow-[0_28px_90px_rgba(120,53,15,0.18)] sm:p-7"
+            className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-[1.75rem] border border-white/80 bg-[#fbf9fa] p-5 shadow-[0_28px_90px_rgba(64,42,51,0.18)] sm:p-6"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="section-eyebrow">Vendor application</p>
 
-                <h2 id="admin-vendor-application-title" className="section-title">
+                <h2
+                  id="admin-vendor-application-title"
+                  className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+                >
                   Application review
                 </h2>
               </div>
 
               <button
                 type="button"
-                className="grid size-10 place-items-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50"
+                className="grid size-9 place-items-center rounded-xl border border-[rgba(91,61,82,0.10)] bg-white/72 text-[var(--color-charcoal)]/64 transition hover:bg-[rgba(183,167,200,0.10)] hover:text-[var(--color-deep-plum)]"
                 onClick={closeApplication}
                 aria-label="Close vendor application"
               >
-                <X className="size-5" />
+                <X className="size-4" />
               </button>
             </div>
 
             {applicationDetailQuery.isLoading ? (
-              <div className="state-surface mt-6 min-h-72">
+              <div className="state-surface mt-4 min-h-56">
                 <div>
-                  <LoaderCircle className="mx-auto size-9 animate-spin text-amber-700" />
+                  <LoaderCircle className="mx-auto size-8 animate-spin text-[var(--color-deep-plum)]" />
 
-                  <p className="mt-4 font-black text-[var(--color-near-black)]">
+                  <p className="mt-3 font-black text-[var(--color-near-black)]">
                     Loading application details
                   </p>
                 </div>
               </div>
             ) : applicationDetailQuery.isError ? (
-              <div className="feedback-surface mt-6" data-tone="danger">
+              <div className="feedback-surface mt-4" data-tone="danger">
                 {getErrorMessage(
                   applicationDetailQuery.error,
                   'We could not load this vendor application.',
@@ -469,35 +491,39 @@ export function AdminVendorApplicationsPage() {
               </div>
             ) : selectedApplication ? (
               <>
-                <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
-                  <div className="flex items-start gap-4">
-                    <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 shadow-[0_10px_24px_rgba(245,158,11,0.10)]">
-                      <Building2 className="size-6" />
+                <div className="mt-4 flex flex-col justify-between gap-4 rounded-[1.25rem] border border-[rgba(91,61,82,0.09)] bg-white/72 px-4 py-3.5 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                      <Building2 className="size-5" />
                     </div>
 
-                    <div>
-                      <h3 className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                         {selectedApplication.businessName}
                       </h3>
 
-                      <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                      <p className="mt-0.5 text-xs font-semibold text-[var(--color-charcoal)]/54">
                         Submitted by {selectedApplication.user.firstName}{' '}
                         {selectedApplication.user.lastName}
                       </p>
                     </div>
                   </div>
 
-                  <span className="status-chip w-fit" data-tone="warning">
+                  <span className="status-chip w-fit shrink-0" data-tone="warning">
                     {selectedApplication.verificationStatus}
                   </span>
                 </div>
 
-                <section className="mt-6 rounded-[2rem] border border-amber-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(245,158,11,0.08)] backdrop-blur sm:p-7">
-                  <p className="section-eyebrow">Business information</p>
+                <section className="mt-3 rounded-[1.25rem] border border-[rgba(91,61,82,0.09)] bg-white/68 p-4">
+                  <div>
+                    <p className="section-eyebrow">Business information</p>
 
-                  <h3 className="section-title">Vendor details</h3>
+                    <h3 className="mt-1 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      Vendor details
+                    </h3>
+                  </div>
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                     <ReadOnlyDetail
                       icon={Building2}
                       label="Business name"
@@ -535,69 +561,90 @@ export function AdminVendorApplicationsPage() {
                     />
                   </div>
 
-                  <div className="mt-6 rounded-2xl border border-white/80 bg-white/60 p-5">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                  <div className="mt-3 rounded-[1rem] bg-[rgba(183,167,200,0.055)] px-3.5 py-3">
+                    <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/44">
                       Business description
                     </p>
 
-                    <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[var(--color-charcoal)]/68">
-                      {selectedApplication.description ?? 'No business description was provided.'}
+                    <p className="mt-1.5 whitespace-pre-wrap text-xs font-medium leading-5 text-[var(--color-charcoal)]/66">
+                      {selectedApplication.description ??
+                        'No business description was provided.'}
                     </p>
                   </div>
 
-                  <div className="mt-6">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                      Service areas
-                    </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[1rem] bg-[rgba(183,167,200,0.055)] px-3.5 py-3">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/44">
+                        Service areas
+                      </p>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {selectedApplication.serviceAreas.length > 0 ? (
-                        selectedApplication.serviceAreas.map((area) => (
-                          <span
-                            key={area}
-                            className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800"
-                          >
-                            {area}
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {selectedApplication.serviceAreas.length > 0 ? (
+                          selectedApplication.serviceAreas.map((area) => (
+                            <span
+                              key={area}
+                              className="inline-flex items-center rounded-full border border-[rgba(91,61,82,0.09)] bg-white/72 px-2.5 py-1 text-[0.65rem] font-bold text-[var(--color-deep-plum)]"
+                            >
+                              {area}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="inline-flex items-center rounded-full border border-[rgba(91,61,82,0.09)] bg-white/72 px-2.5 py-1 text-[0.65rem] font-bold text-[var(--color-deep-plum)]">
+                            No service areas provided
                           </span>
-                        ))
-                      ) : (
-                        <span className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
-                          No service areas provided
-                        </span>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-6">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                      Service categories
-                    </p>
+                    <div className="rounded-[1rem] bg-[rgba(183,167,200,0.055)] px-3.5 py-3">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/44">
+                        Service categories
+                      </p>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {selectedApplication.categories.length > 0 ? (
-                        selectedApplication.categories.map((category) => (
-                          <span
-                            key={category.id}
-                            className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800"
-                          >
-                            {category.name}
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {selectedApplication.categories.length > 0 ? (
+                          selectedApplication.categories.map((category) => (
+                            <span
+                              key={category.id}
+                              className="inline-flex items-center rounded-full border border-[rgba(91,61,82,0.09)] bg-white/72 px-2.5 py-1 text-[0.65rem] font-bold text-[var(--color-deep-plum)]"
+                            >
+                              {category.name}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="inline-flex items-center rounded-full border border-[rgba(91,61,82,0.09)] bg-white/72 px-2.5 py-1 text-[0.65rem] font-bold text-[var(--color-deep-plum)]">
+                            No categories selected
                           </span>
-                        ))
-                      ) : (
-                        <span className="inline-flex items-center rounded-full border border-amber-200/80 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
-                          No categories selected
-                        </span>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </section>
 
-                <section className="mt-6 rounded-[2rem] border border-amber-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(245,158,11,0.08)] backdrop-blur sm:p-7">
-                  <p className="section-eyebrow">Account owner</p>
+                <section className="mt-3 rounded-[1.25rem] border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.055)] p-4">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                    <div>
+                      <p className="section-eyebrow">Account owner</p>
 
-                  <h3 className="section-title">Vendor account</h3>
+                      <h3 className="mt-1 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        Vendor account
+                      </h3>
+                    </div>
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {selectedApplication.website ? (
+                      <Link
+                        to={selectedApplication.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex min-h-9 w-fit items-center justify-center gap-2 rounded-xl border border-[rgba(91,61,82,0.12)] bg-white/72 px-3.5 text-xs font-black text-[var(--color-deep-plum)] transition hover:bg-[rgba(183,167,200,0.10)]"
+                      >
+                        <ExternalLink className="size-3.5" />
+                        Open vendor website
+                      </Link>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
                     <ReadOnlyDetail
                       icon={UserRound}
                       label="Full name"
@@ -618,20 +665,8 @@ export function AdminVendorApplicationsPage() {
                   </div>
                 </section>
 
-                {selectedApplication.website ? (
-                  <Link
-                    to={selectedApplication.website}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn-secondary mt-6 w-fit text-sm"
-                  >
-                    <ExternalLink className="size-4" />
-                    Open vendor website
-                  </Link>
-                ) : null}
-
                 {approveMutation.isError || rejectMutation.isError ? (
-                  <div className="feedback-surface mt-6" data-tone="danger" role="alert">
+                  <div className="feedback-surface mt-3" data-tone="danger" role="alert">
                     {getErrorMessage(
                       approveMutation.error ?? rejectMutation.error,
                       'We could not complete this vendor application decision.',
@@ -639,22 +674,22 @@ export function AdminVendorApplicationsPage() {
                   </div>
                 ) : null}
 
-                <div className="mt-6 flex flex-col justify-between gap-4 border-t border-zinc-200 pt-6 sm:flex-row sm:items-center">
+                <div className="mt-3 flex flex-col justify-between gap-3 border-t border-[rgba(91,61,82,0.09)] pt-3 sm:flex-row sm:items-center">
                   <div>
-                    <p className="font-black text-[var(--color-near-black)]">
+                    <p className="text-sm font-black text-[var(--color-near-black)]">
                       Verification decision
                     </p>
 
-                    <p className="mt-1 max-w-xl text-sm leading-6 text-[var(--color-charcoal)]/56">
-                      Approving publishes the vendor to the marketplace. Rejecting returns the
-                      profile with actionable feedback.
+                    <p className="mt-0.5 max-w-xl text-xs font-medium leading-5 text-[var(--color-charcoal)]/56">
+                      Approving publishes the vendor to the marketplace. Rejecting returns
+                      the profile with actionable feedback.
                     </p>
                   </div>
 
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                  <div className="flex shrink-0 flex-col-reverse gap-2 sm:flex-row">
                     <button
                       type="button"
-                      className="btn-danger text-sm"
+                      className="btn-danger min-h-10 px-4 text-xs"
                       disabled={isDecisionPending}
                       onClick={() => {
                         rejectMutation.reset();
@@ -662,20 +697,20 @@ export function AdminVendorApplicationsPage() {
                         setShowRejectDialog(true);
                       }}
                     >
-                      <XCircle className="size-4" />
+                      <XCircle className="size-3.5" />
                       Reject application
                     </button>
 
                     <button
                       type="button"
-                      className="btn-primary text-sm"
+                      className="btn-primary min-h-10 px-4 text-xs"
                       disabled={isDecisionPending}
                       onClick={handleApprove}
                     >
                       {approveMutation.isPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
+                        <LoaderCircle className="size-3.5 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="size-4" />
+                        <CheckCircle2 className="size-3.5" />
                       )}
 
                       {approveMutation.isPending ? 'Approving...' : 'Approve application'}

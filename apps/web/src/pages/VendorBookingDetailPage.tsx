@@ -131,8 +131,8 @@ function DetailItem({
   value: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-[1.2rem] border border-white/58 bg-white/30 p-4">
-      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
+        <div className="flex items-start gap-2.5 rounded-[1rem] border border-white/58 bg-white/30 px-3.5 py-3">
+            <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
         <Icon className="size-4" />
       </div>
 
@@ -141,7 +141,7 @@ function DetailItem({
           {label}
         </p>
 
-        <p className="mt-1 break-words text-sm font-black leading-6 text-[var(--color-near-black)]">
+                <p className="mt-0.5 break-words text-sm font-black leading-5 text-[var(--color-near-black)]">
           {value}
         </p>
       </div>
@@ -454,31 +454,10 @@ export function VendorBookingDetailPage() {
     return agreedCost - deposit;
   }, [booking]);
 
-  return (
+    return (
     <main className="workspace-shell relative">
       <div className="workspace-container w-full max-w-7xl">
-        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
-          />
-
-          <div className="relative flex min-w-0 items-center gap-4">
-            <PageBackButton fallback="/vendor/bookings" label="Bookings" className="shrink-0" />
-
-            <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                Vendor workspace
-              </p>
-
-              <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
-                Booking details
-              </h1>
-            </div>
-          </div>
-        </header>
-
-        <div className="pb-10 pt-6">
+        <div className="pb-8 pt-4">
           {bookingQuery.isLoading ? (
             <PageSkeleton />
           ) : bookingQuery.isError || !booking ? (
@@ -507,156 +486,117 @@ export function VendorBookingDetailPage() {
             </section>
           ) : (
             <>
-              <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+              <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_58%,rgba(232,225,238,0.52)_100%)] shadow-[0_20px_56px_rgba(64,42,51,0.09)] backdrop-blur-2xl">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
+                  className="pointer-events-none absolute -right-24 -top-28 size-64 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
                 />
 
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-36 left-[28%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
-                />
+                <div className="relative p-5 sm:p-6 lg:p-7">
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <PageBackButton
+                          fallback="/vendor/bookings"
+                          label="Bookings"
+                          className="shrink-0"
+                        />
 
-                <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10 lg:p-10">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <span
-                        className={`inline-flex rounded-full border px-3 py-1.5 text-[0.68rem] font-black ${
-                          bookingStatusStyles[booking.status]
-                        }`}
-                      >
-                        {bookingStatusLabels[booking.status]}
-                      </span>
+                        <span
+                          className={`inline-flex rounded-full border px-3 py-1.5 text-[0.68rem] font-black ${
+                            bookingStatusStyles[booking.status]
+                          }`}
+                        >
+                          {bookingStatusLabels[booking.status]}
+                        </span>
 
-                      <span className="soft-chip text-xs font-black uppercase tracking-[0.14em]">
-                        {booking.event.eventType}
-                      </span>
+                        <span className="soft-chip text-[0.68rem] font-black uppercase tracking-[0.12em]">
+                          {booking.event.eventType}
+                        </span>
+                      </div>
+
+                      <p className="mt-5 text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Customer booking
+                      </p>
+
+                      <h1 className="mt-2 max-w-4xl text-balance text-3xl font-black leading-[1.04] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl">
+                        {booking.event.name}
+                      </h1>
+
+                      <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/60">
+                        Review the agreed service, customer details and booking progress.
+                      </p>
                     </div>
 
-                    <p className="mt-6 text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                      Customer booking
-                    </p>
+                    <div className="grid shrink-0 gap-2 sm:grid-cols-2 lg:min-w-[27rem]">
+                      <div className="rounded-[1.15rem] border border-white/65 bg-white/38 px-4 py-3 backdrop-blur-xl">
+                        <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+                          Service starts
+                        </p>
 
-                    <h2 className="mt-3 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-                      {booking.event.name}
-                    </h2>
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <CalendarDays className="size-3.5 shrink-0 text-[var(--color-rosewood)]" />
 
-                    <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
-                      Review the service schedule, accepted quotation, customer details and current
-                      booking status from one place.
-                    </p>
+                          <p className="text-xs font-black leading-5 text-[var(--color-near-black)]">
+                            {formatDateTime(booking.serviceStart)}
+                          </p>
+                        </div>
+                      </div>
 
-                    <div className="mt-7 flex flex-wrap gap-2.5">
-                      <span className="soft-chip text-xs font-black">
-                        <CalendarDays className="size-4" />
-                        Starts {formatDateTime(booking.serviceStart)}
-                      </span>
+                      <div className="rounded-[1.15rem] border border-white/65 bg-white/38 px-4 py-3 backdrop-blur-xl">
+                        <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+                          Customer
+                        </p>
 
-                      <span className="soft-chip text-xs font-black">
-                        <UserRound className="size-4" />
-                        {getCustomerName(booking)}
-                      </span>
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <UserRound className="size-3.5 shrink-0 text-[var(--color-rosewood)]" />
+
+                          <p className="truncate text-xs font-black text-[var(--color-near-black)]">
+                            {getCustomerName(booking)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
-                    />
-
-                    <div className="relative">
-                      <div className="flex items-start justify-between gap-5">
-                        <div>
-                          <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Booking summary
-                          </p>
-
-                          <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                            Current commitment
-                          </h3>
-                        </div>
-
-                        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
-                          <BriefcaseBusiness className="size-5" />
-                        </div>
-                      </div>
-
-                      <div className="mt-6 rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
-                        <p className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
-                          Agreed cost
-                        </p>
-
-                        <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                          {formatMoney(booking.agreedCost)}
-                        </p>
-                      </div>
-
-                      <div className="mt-3 rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
-                        <p className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
-                          Current status
-                        </p>
-
-                        <div className="mt-3 flex items-center justify-between gap-4">
-                          <span
-                            className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-black ${
-                              bookingStatusStyles[booking.status]
-                            }`}
-                          >
-                            {bookingStatusLabels[booking.status]}
-                          </span>
-
-                          <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
-                            Updated {formatDateTime(booking.updatedAt)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
                 </div>
               </section>
 
               {successMessage ? (
-                <div className="mt-5 flex items-start gap-3 rounded-[1.5rem] border border-emerald-200 bg-emerald-50/70 p-5">
-                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-700" />
+                <div className="mt-4 flex items-start gap-3 rounded-[1.3rem] border border-emerald-200 bg-emerald-50/70 px-4 py-3.5">
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-700" />
 
                   <p className="text-sm font-bold leading-6 text-emerald-800">{successMessage}</p>
                 </div>
               ) : null}
 
               {operationError ? (
-                <div className="mt-5 flex items-start gap-3 rounded-[1.5rem] border border-red-200 bg-red-50/70 p-5">
-                  <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-700" />
+                <div className="mt-4 flex items-start gap-3 rounded-[1.3rem] border border-red-200 bg-red-50/70 px-4 py-3.5">
+                  <AlertCircle className="mt-0.5 size-4 shrink-0 text-red-700" />
 
                   <p className="text-sm font-bold leading-6 text-red-800">{operationError}</p>
                 </div>
               ) : null}
 
-              <div className="mt-6 grid gap-6 xl:grid-cols-[1.38fr_0.72fr]">
-                <div className="space-y-6">
-                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <CalendarDays className="size-5" />
+              <div className="mt-5 grid gap-5 xl:grid-cols-[1.45fr_0.65fr]">
+                <div className="space-y-5">
+                  <section className="rounded-[1.7rem] border border-white/58 bg-white/42 p-5 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <CalendarDays className="size-4" />
                       </div>
 
                       <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                           Service schedule
                         </p>
 
-                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                        <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                           Booking details
                         </h2>
-
-                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
-                          Confirm the service timing, location and current booking state.
-                        </p>
                       </div>
                     </div>
 
-                    <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:grid-cols-2">
+                    <div className="mt-4 grid gap-2.5 border-t border-[rgba(93,58,85,0.08)] pt-4 sm:grid-cols-2">
                       <DetailItem
                         icon={CalendarDays}
                         label="Service starts"
@@ -687,71 +627,71 @@ export function VendorBookingDetailPage() {
                     </div>
                   </section>
 
-                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <Package className="size-5" />
+                  <section className="rounded-[1.7rem] border border-white/58 bg-white/42 p-5 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <Package className="size-4" />
                       </div>
 
                       <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                           Accepted quotation
                         </p>
 
-                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                        <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                           Package and service scope
                         </h2>
-
-                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
-                          Review the service package and the exact scope agreed with the customer.
-                        </p>
                       </div>
                     </div>
 
-                    <div className="mt-6 overflow-hidden rounded-[1.55rem] border border-white/58 bg-white/30 p-5 sm:p-6">
-                      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="mt-4 rounded-[1.35rem] border border-white/58 bg-white/30 p-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
-                          <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
+                          <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-rosewood)]">
                             Selected service
                           </p>
 
-                          <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                            {booking.acceptedQuotation.quotationRequest.package?.title ||
-                              'Custom service'}
-                          </h3>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                            <h3 className="text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                              {booking.acceptedQuotation.quotationRequest.package?.title ||
+                                'Custom service'}
+                            </h3>
 
-                          <span className="soft-chip mt-3 w-fit text-xs font-black">
-                            <Package className="size-3.5" />
-                            {booking.acceptedQuotation.quotationRequest.package?.category?.name ||
-                              'Event service'}
-                          </span>
+                            <span className="soft-chip text-[0.68rem] font-black">
+                              <Package className="size-3.5" />
+                              {booking.acceptedQuotation.quotationRequest.package?.category?.name ||
+                                'Event service'}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="shrink-0 rounded-[1.25rem] border border-white/60 bg-white/38 px-5 py-4">
-                          <p className="text-[0.63rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
+                        <div className="shrink-0 text-left sm:text-right">
+                          <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
                             Quoted price
                           </p>
 
-                          <p className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                          <p className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                             {formatMoney(booking.acceptedQuotation.proposedPrice)}
                           </p>
                         </div>
                       </div>
 
                       {booking.acceptedQuotation.quotationRequest.package?.description ? (
-                        <p className="mt-5 whitespace-pre-wrap border-t border-[rgba(93,58,85,0.08)] pt-5 text-sm font-medium leading-7 text-[var(--color-charcoal)]/62">
+                        <p className="mt-4 whitespace-pre-wrap border-t border-[rgba(93,58,85,0.08)] pt-4 text-sm font-medium leading-6 text-[var(--color-charcoal)]/62">
                           {booking.acceptedQuotation.quotationRequest.package.description}
                         </p>
                       ) : null}
                     </div>
 
-                    <div className="mt-6 grid gap-5">
+                    <div className="mt-4">
                       <TextSection
                         title="Customer requirements"
                         value={booking.acceptedQuotation.quotationRequest.requirements}
                         emptyText="No additional customer requirements were provided."
                       />
+                    </div>
 
+                    <div className="mt-4 grid gap-4 lg:grid-cols-2">
                       <TextSection
                         title="Inclusions"
                         value={booking.acceptedQuotation.inclusions}
@@ -763,7 +703,9 @@ export function VendorBookingDetailPage() {
                         value={booking.acceptedQuotation.exclusions}
                         emptyText="No exclusions were recorded."
                       />
+                    </div>
 
+                    <div className="mt-4">
                       <TextSection
                         title="Terms"
                         value={booking.acceptedQuotation.terms}
@@ -772,28 +714,26 @@ export function VendorBookingDetailPage() {
                     </div>
                   </section>
 
-                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <FileCheck2 className="size-5" />
-                      </div>
+                  <section className="rounded-[1.7rem] border border-white/58 bg-white/42 p-5 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                          <FileCheck2 className="size-4" />
+                        </div>
 
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Booking record
-                        </p>
+                        <div>
+                          <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+                            Booking record
+                          </p>
 
-                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                          Status timeline
-                        </h2>
-
-                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
-                          Important changes and actions recorded throughout this booking.
-                        </p>
+                          <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                            Status timeline
+                          </h2>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:grid-cols-2">
+                    <div className="mt-4 grid gap-2.5 border-t border-[rgba(93,58,85,0.08)] pt-4 sm:grid-cols-2">
                       <DetailItem
                         icon={CalendarDays}
                         label="Booking created"
@@ -840,7 +780,7 @@ export function VendorBookingDetailPage() {
                     </div>
 
                     {booking.vendorResponseNote ? (
-                      <div className="mt-6 border-t border-[rgba(93,58,85,0.08)] pt-6">
+                      <div className="mt-4 border-t border-[rgba(93,58,85,0.08)] pt-4">
                         <TextSection
                           title="Vendor response note"
                           value={booking.vendorResponseNote}
@@ -850,7 +790,7 @@ export function VendorBookingDetailPage() {
                     ) : null}
 
                     {booking.vendorCancellationReason ? (
-                      <div className="mt-5">
+                      <div className="mt-4">
                         <TextSection
                           title="Vendor cancellation reason"
                           value={booking.vendorCancellationReason}
@@ -860,7 +800,7 @@ export function VendorBookingDetailPage() {
                     ) : null}
 
                     {booking.customerCancellationReason ? (
-                      <div className="mt-5">
+                      <div className="mt-4">
                         <TextSection
                           title="Customer cancellation reason"
                           value={booking.customerCancellationReason}
@@ -871,29 +811,25 @@ export function VendorBookingDetailPage() {
                   </section>
                 </div>
 
-                <aside className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <UserRound className="size-5" />
+                <aside className="space-y-5 xl:sticky xl:top-5 xl:self-start">
+                  <section className="rounded-[1.7rem] border border-white/58 bg-white/42 p-5 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <UserRound className="size-4" />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                           Customer
                         </p>
 
-                        <h2 className="mt-2 break-words text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        <h2 className="mt-1 truncate text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                           {getCustomerName(booking)}
                         </h2>
-
-                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/54">
-                          Primary customer for this booking.
-                        </p>
                       </div>
                     </div>
 
-                    <div className="mt-5 grid gap-3">
+                    <div className="mt-4 grid gap-2.5">
                       <DetailItem icon={Mail} label="Email" value={booking.event.owner.email} />
 
                       <DetailItem
@@ -904,26 +840,26 @@ export function VendorBookingDetailPage() {
                     </div>
                   </section>
 
-                  <section className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(240,231,238,0.48))] p-5 shadow-[0_18px_48px_rgba(35,24,30,0.08)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <CircleDollarSign className="size-5" />
+                  <section className="relative overflow-hidden rounded-[1.7rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(240,231,238,0.48))] p-5 shadow-[0_16px_42px_rgba(35,24,30,0.07)] backdrop-blur-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <CircleDollarSign className="size-4" />
                       </div>
 
                       <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                           Financial summary
                         </p>
 
-                        <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                           Booking value
                         </h2>
                       </div>
                     </div>
 
-                    <dl className="mt-5 space-y-3">
-                      <div className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-white/58 bg-white/30 px-4 py-3.5">
-                        <dt className="text-sm font-semibold text-[var(--color-charcoal)]/58">
+                    <dl className="mt-4 space-y-2">
+                      <div className="flex items-center justify-between gap-4 rounded-[1rem] border border-white/58 bg-white/30 px-3.5 py-3">
+                        <dt className="text-xs font-semibold text-[var(--color-charcoal)]/58">
                           Agreed cost
                         </dt>
 
@@ -932,8 +868,8 @@ export function VendorBookingDetailPage() {
                         </dd>
                       </div>
 
-                      <div className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-white/58 bg-white/30 px-4 py-3.5">
-                        <dt className="text-sm font-semibold text-[var(--color-charcoal)]/58">
+                      <div className="flex items-center justify-between gap-4 rounded-[1rem] border border-white/58 bg-white/30 px-3.5 py-3">
+                        <dt className="text-xs font-semibold text-[var(--color-charcoal)]/58">
                           Deposit
                         </dt>
 
@@ -942,11 +878,11 @@ export function VendorBookingDetailPage() {
                         </dd>
                       </div>
 
-                      <div className="rounded-[1.25rem] bg-[var(--color-deep-plum)] p-4 shadow-[0_14px_34px_rgba(91,61,82,0.20)]">
+                      <div className="rounded-[1rem] bg-[var(--color-deep-plum)] px-3.5 py-3 shadow-[0_12px_28px_rgba(91,61,82,0.18)]">
                         <div className="flex items-center justify-between gap-4">
-                          <dt className="text-sm font-bold text-white/72">Remaining balance</dt>
+                          <dt className="text-xs font-bold text-white/72">Remaining balance</dt>
 
-                          <dd className="text-lg font-black text-white">
+                          <dd className="text-base font-black text-white">
                             {remainingBalance !== null
                               ? formatMoney(remainingBalance.toString())
                               : 'Not available'}
@@ -957,25 +893,25 @@ export function VendorBookingDetailPage() {
                   </section>
 
                   {canConfirm || canReject || canCancel || canComplete ? (
-                    <section className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    <section className="rounded-[1.7rem] border border-white/58 bg-white/42 p-5 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+                      <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                         Booking actions
                       </p>
 
-                      <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      <h2 className="mt-1.5 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                         Manage this commitment
                       </h2>
 
-                      <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/54">
-                        Only actions valid for the current booking status are available.
+                      <p className="mt-2 text-xs font-medium leading-5 text-[var(--color-charcoal)]/54">
+                        Only actions valid for the current status are available.
                       </p>
 
-                      <div className="mt-5 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-5">
+                      <div className="mt-4 grid gap-2.5 border-t border-[rgba(93,58,85,0.08)] pt-4">
                         {canConfirm ? (
                           <button
                             type="button"
                             onClick={() => openDialog('CONFIRM')}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-deep-plum)] px-5 py-3.5 text-sm font-black !text-white shadow-[0_14px_32px_rgba(91,61,82,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-deep-plum)] px-5 py-3 text-sm font-black !text-white shadow-[0_12px_28px_rgba(91,61,82,0.20)] transition hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white"
                           >
                             <CheckCircle2 className="size-4 text-white" />
                             <span className="text-white">Confirm booking</span>
@@ -986,7 +922,7 @@ export function VendorBookingDetailPage() {
                           <button
                             type="button"
                             onClick={() => openDialog('REJECT')}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200/80 bg-red-50/60 px-5 py-3.5 text-sm font-black text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200/80 bg-red-50/60 px-5 py-3 text-sm font-black text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100"
                           >
                             <XCircle className="size-4" />
                             Reject booking
@@ -997,7 +933,7 @@ export function VendorBookingDetailPage() {
                           <button
                             type="button"
                             onClick={() => openDialog('COMPLETE')}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-3.5 text-sm font-black !text-white shadow-[0_14px_32px_rgba(4,120,87,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-800 hover:!text-white"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-black !text-white shadow-[0_12px_28px_rgba(4,120,87,0.16)] transition hover:-translate-y-0.5 hover:bg-emerald-800 hover:!text-white"
                           >
                             <CheckCircle2 className="size-4 text-white" />
                             <span className="text-white">Mark as completed</span>
@@ -1008,7 +944,7 @@ export function VendorBookingDetailPage() {
                           <button
                             type="button"
                             onClick={() => openDialog('CANCEL')}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200/80 bg-red-50/60 px-5 py-3.5 text-sm font-black text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200/80 bg-red-50/60 px-5 py-3 text-sm font-black text-red-700 transition hover:-translate-y-0.5 hover:bg-red-100"
                           >
                             <Ban className="size-4" />
                             Cancel booking
@@ -1018,51 +954,51 @@ export function VendorBookingDetailPage() {
                     </section>
                   ) : null}
 
-                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(220,186,167,0.20)] text-[var(--color-rosewood)]">
-                        <ShieldAlert className="size-5" />
+                  <section className="rounded-[1.7rem] border border-white/58 bg-white/42 p-5 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+                    <div className="flex items-start gap-3">
+                      <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(220,186,167,0.20)] text-[var(--color-rosewood)]">
+                        <ShieldAlert className="size-4" />
                       </div>
 
                       <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                           Booking guidance
                         </p>
 
-                        <h2 className="mt-2 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                        <h2 className="mt-1 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                           Protect customer commitments
                         </h2>
+
+                        <p className="mt-2 text-xs font-medium leading-5 text-[var(--color-charcoal)]/60">
+                          Confirm only when the date and service scope are feasible. Rejections and
+                          cancellations require a clear reason and remain permanently recorded.
+                        </p>
                       </div>
                     </div>
-
-                    <p className="mt-5 text-sm font-medium leading-7 text-[var(--color-charcoal)]/60">
-                      Confirm only when the date and service scope are feasible. Rejections and
-                      cancellations require a clear reason and remain permanently recorded.
-                    </p>
                   </section>
 
-                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                  <section className="rounded-[1.7rem] border border-white/58 bg-white/42 p-5 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+                    <p className="text-[0.64rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                       Record information
                     </p>
 
-                    <dl className="mt-5 grid gap-3">
-                      <div className="rounded-[1.15rem] border border-white/58 bg-white/30 p-4">
-                        <dt className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+                    <dl className="mt-3 grid gap-2.5">
+                      <div className="rounded-[1rem] border border-white/58 bg-white/30 px-3.5 py-3">
+                        <dt className="text-[0.6rem] font-black uppercase tracking-[0.11em] text-[var(--color-charcoal)]/40">
                           Booking ID
                         </dt>
 
-                        <dd className="mt-2 break-all text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62">
+                        <dd className="mt-1 break-all text-[0.7rem] font-semibold leading-5 text-[var(--color-charcoal)]/62">
                           {booking.id}
                         </dd>
                       </div>
 
-                      <div className="rounded-[1.15rem] border border-white/58 bg-white/30 p-4">
-                        <dt className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+                      <div className="flex items-center justify-between gap-4 rounded-[1rem] border border-white/58 bg-white/30 px-3.5 py-3">
+                        <dt className="text-[0.6rem] font-black uppercase tracking-[0.11em] text-[var(--color-charcoal)]/40">
                           Quotation version
                         </dt>
 
-                        <dd className="mt-2 text-sm font-black text-[var(--color-near-black)]">
+                        <dd className="text-xs font-black text-[var(--color-near-black)]">
                           Version {booking.acceptedQuotation.version}
                         </dd>
                       </div>
@@ -1073,6 +1009,7 @@ export function VendorBookingDetailPage() {
             </>
           )}
         </div>
+
 
         {actionDialog && booking ? (
           <div

@@ -820,238 +820,236 @@ export function BudgetWorkspacePage() {
               </div>
             </div>
           ) : null}
-          <section className="relative isolate min-h-[27rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-7 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-8 sm:py-8 lg:px-10 lg:py-9">
+          <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/68 bg-[#fffaf6] px-5 py-5 shadow-[0_24px_68px_rgba(31,27,29,0.1)] sm:px-6 lg:min-h-[21.5rem] lg:px-7 lg:py-6">
             <img
               src="/images/workspaces/shortcuts/budget.png"
               alt=""
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[76%_center] opacity-100 saturate-[0.94] contrast-[0.99] transition duration-1000"
+              className="pointer-events-none absolute inset-0 -z-30 size-full scale-[1.01] object-cover object-[77%_center] opacity-100 saturate-[0.94] contrast-[0.99]"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.995)_0%,rgba(255,250,246,0.985)_20%,rgba(255,250,246,0.93)_34%,rgba(255,250,246,0.72)_47%,rgba(255,250,246,0.40)_58%,rgba(255,250,246,0.14)_69%,rgba(255,250,246,0.025)_79%,transparent_88%)]"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(255,250,246,0.998)_0%,rgba(255,250,246,0.99)_23%,rgba(255,250,246,0.94)_37%,rgba(255,250,246,0.77)_48%,rgba(255,250,246,0.43)_59%,rgba(255,250,246,0.13)_69%,rgba(255,250,246,0.02)_78%,transparent_87%)]"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[58%] bg-[linear-gradient(90deg,rgba(255,250,246,0.42),rgba(255,250,246,0.10),transparent)] backdrop-blur-[2.5px]"
+              className="pointer-events-none absolute inset-y-0 left-0 -z-20 w-[56%] bg-[linear-gradient(90deg,rgba(255,250,246,0.34),rgba(255,250,246,0.08),transparent)] backdrop-blur-[2px]"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,transparent_48%,rgba(255,250,246,0.09)_100%)]"
+              className="pointer-events-none absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,transparent_48%,rgba(255,250,246,0.08)_100%)]"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -left-24 -top-28 -z-10 size-[30rem] rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+              className="pointer-events-none absolute -left-28 -top-36 -z-10 size-[28rem] rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl"
             />
 
-            <div className="relative flex min-h-[21.5rem] flex-col justify-between gap-5">
-              <div className="max-w-[35rem]">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/44 px-4 py-2 text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl">
-                  <Sparkles aria-hidden="true" className="size-4" />
-                  Financial planning
+            <div className="relative lg:w-[53%] lg:max-w-[38rem]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/72 bg-white/48 px-3 py-1.5 text-[0.6rem] font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)] shadow-[0_8px_24px_rgba(31,27,29,0.06)] backdrop-blur-xl">
+                <Sparkles aria-hidden="true" className="size-3" />
+                Financial planning
+              </div>
+
+              <div className="mt-2.5 rounded-[1.25rem] border border-white/46 bg-white/[0.16] px-4 py-3.5 shadow-[0_12px_30px_rgba(31,27,29,0.045)] backdrop-blur-[3px] sm:px-5">
+                <h2 className="max-w-[31rem] text-balance text-[1.7rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[1.9rem] lg:text-[2rem]">
+                  Keep every event cost clear and under control.
+                </h2>
+
+                <p className="mt-2 max-w-[31rem] text-[0.78rem] font-semibold leading-[1.15rem] text-[var(--color-charcoal)]/68 sm:text-[0.8rem]">
+                  Track allocations, expenses, paid costs and vendor commitments from one organised
+                  financial workspace.
+                </p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    className="group/hero-add-expense btn-primary justify-center px-4 py-2 text-xs font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    disabled={!isBudgetEditable}
+                    onClick={openExpenseForm}
+                  >
+                    <Plus
+                      aria-hidden="true"
+                      className="size-3.5 transition duration-300 group-hover/hero-add-expense:rotate-90"
+                    />
+                    Add expense
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-secondary justify-center px-4 py-2 text-xs font-bold transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/56 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    disabled={!isBudgetEditable}
+                    onClick={openCategoryForm}
+                  >
+                    <WalletCards aria-hidden="true" className="size-3.5" />
+                    Add category
+                  </button>
+
+                  <span
+                    className="status-chip px-2.5 py-1 text-[0.62rem]"
+                    data-tone={summary.summary.isOverBudget ? 'rose' : 'green'}
+                  >
+                    {summary.summary.isOverBudget ? 'Needs attention' : 'On track'}
+                  </span>
                 </div>
 
-                <div className="mt-4 max-w-[33rem] rounded-[1.4rem] border border-white/44 bg-white/[0.15] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-[3px] sm:px-6">
-                  <h2 className="max-w-[31rem] text-balance text-[2.15rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.35rem] lg:text-[2.5rem]">
-                    Keep every event cost clear and under control.
-                  </h2>
+                <div className="mt-2.5 rounded-[0.95rem] border border-white/58 bg-white/36 px-3.5 py-2 backdrop-blur-xl">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-[0.54rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
+                      Budget committed
+                    </p>
 
-                  <p className="mt-3 max-w-[31rem] text-sm font-semibold leading-6 text-[var(--color-charcoal)]/70">
-                    Track allocations, expenses, paid costs and vendor commitments from one
-                    organised financial workspace.
-                  </p>
-
-                  <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <button
-                      type="button"
-                      className="group/hero-add-expense btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(93,58,85,0.24)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                      disabled={!isBudgetEditable}
-                      onClick={openExpenseForm}
-                    >
-                      <Plus
-                        aria-hidden="true"
-                        className="size-4 transition duration-300 group-hover/hero-add-expense:rotate-90"
-                      />
-                      Add expense
-                    </button>
-
-                    <button
-                      type="button"
-                      className="btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/56 hover:shadow-[0_14px_32px_rgba(31,27,29,0.09)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                      disabled={!isBudgetEditable}
-                      onClick={openCategoryForm}
-                    >
-                      <WalletCards aria-hidden="true" className="size-4" />
-                      Add category
-                    </button>
-
-                    <span
-                      className="status-chip"
-                      data-tone={summary.summary.isOverBudget ? 'rose' : 'green'}
-                    >
-                      {summary.summary.isOverBudget ? 'Needs attention' : 'On track'}
-                    </span>
+                    <p className="text-[0.68rem] font-black text-[var(--color-deep-plum)]">
+                      {Math.round(budgetUsagePercentage)}%
+                    </p>
                   </div>
 
-                  <div className="mt-4 max-w-[27rem] rounded-[1.15rem] border border-white/56 bg-white/34 px-4 py-3 backdrop-blur-xl">
-                    <div className="flex items-center justify-between gap-4">
-                      <p className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/48">
-                        Budget committed
-                      </p>
-
-                      <p className="text-xs font-black text-[var(--color-deep-plum)]">
-                        {Math.round(budgetUsagePercentage)}%
-                      </p>
-                    </div>
-
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
-                      <div
-                        className={
-                          summary.summary.isOverBudget
-                            ? 'h-full rounded-full bg-[linear-gradient(90deg,var(--color-muted-burgundy),#cf98a5)] transition-[width] duration-700'
-                            : 'h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700'
-                        }
-                        style={{
-                          width: `${budgetUsagePercentage}%`,
-                        }}
-                      />
-                    </div>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                    <div
+                      className={
+                        summary.summary.isOverBudget
+                          ? 'h-full rounded-full bg-[linear-gradient(90deg,var(--color-muted-burgundy),#cf98a5)] transition-[width] duration-700'
+                          : 'h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700'
+                      }
+                      style={{
+                        width: `${budgetUsagePercentage}%`,
+                      }}
+                    />
                   </div>
                 </div>
               </div>
 
-              <div className="grid max-w-[49rem] gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <article className="group/budget-metric rounded-[1.3rem] border border-white/68 bg-white/40 px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/56 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
-                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/budget-metric:scale-105">
-                    <WalletCards aria-hidden="true" className="size-4" />
-                  </span>
+              <div className="mt-2.5 grid grid-cols-2 gap-2">
+                <article className="group/budget-metric rounded-[1rem] border border-white/68 bg-white/44 px-3 py-2.5 shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/58">
+                  <div className="flex items-center gap-2">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                      <WalletCards aria-hidden="true" className="size-3" />
+                    </span>
 
-                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
-                    Planned
-                  </p>
+                    <div className="min-w-0">
+                      <p className="text-[0.52rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
+                        Planned
+                      </p>
 
-                  <p className="mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                    {formatCurrency(summary.summary.plannedBudget)}
-                  </p>
-
-                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
-                    Total event estimate
-                  </p>
+                      <p className="mt-0.5 truncate text-[0.86rem] font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-[0.92rem]">
+                        {formatCurrency(summary.summary.plannedBudget)}
+                      </p>
+                    </div>
+                  </div>
                 </article>
 
-                <article className="group/budget-metric rounded-[1.3rem] border border-white/68 bg-[rgba(240,247,250,0.46)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
-                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954] transition duration-300 group-hover/budget-metric:scale-105">
-                    <CreditCard aria-hidden="true" className="size-4" />
-                  </span>
+                <article className="group/budget-metric rounded-[1rem] border border-white/68 bg-[rgba(240,247,250,0.48)] px-3 py-2.5 shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/58">
+                  <div className="flex items-center gap-2">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.28)] text-[#334954]">
+                      <CreditCard aria-hidden="true" className="size-3" />
+                    </span>
 
-                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
-                    Committed
-                  </p>
+                    <div className="min-w-0">
+                      <p className="text-[0.52rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
+                        Committed
+                      </p>
 
-                  <p className="mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                    {formatCurrency(summary.summary.totalCommitted)}
-                  </p>
-
-                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
-                    Bookings and expenses
-                  </p>
+                      <p className="mt-0.5 truncate text-[0.86rem] font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-[0.92rem]">
+                        {formatCurrency(summary.summary.totalCommitted)}
+                      </p>
+                    </div>
+                  </div>
                 </article>
 
-                <article className="group/budget-metric rounded-[1.3rem] border border-white/68 bg-[rgba(244,246,236,0.48)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]">
-                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#3d452f] transition duration-300 group-hover/budget-metric:scale-105">
-                    <ReceiptText aria-hidden="true" className="size-4" />
-                  </span>
+                <article className="group/budget-metric rounded-[1rem] border border-white/68 bg-[rgba(244,246,236,0.5)] px-3 py-2.5 shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/58">
+                  <div className="flex items-center gap-2">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(142,151,115,0.20)] text-[#3d452f]">
+                      <ReceiptText aria-hidden="true" className="size-3" />
+                    </span>
 
-                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
-                    Paid
-                  </p>
+                    <div className="min-w-0">
+                      <p className="text-[0.52rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
+                        Paid
+                      </p>
 
-                  <p className="mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                    {formatCurrency(summary.summary.totalPaid)}
-                  </p>
-
-                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
-                    Verified paid costs
-                  </p>
+                      <p className="mt-0.5 truncate text-[0.86rem] font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-[0.92rem]">
+                        {formatCurrency(summary.summary.totalPaid)}
+                      </p>
+                    </div>
+                  </div>
                 </article>
 
                 <article
                   className={
                     summary.summary.isOverBudget
-                      ? 'group/budget-metric rounded-[1.3rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(249,235,240,0.52)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]'
-                      : 'group/budget-metric rounded-[1.3rem] border border-white/68 bg-[rgba(248,242,234,0.52)] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/58 hover:shadow-[0_20px_44px_rgba(31,27,29,0.12)]'
+                      ? 'group/budget-metric rounded-[1rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(249,235,240,0.54)] px-3 py-2.5 shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/58'
+                      : 'group/budget-metric rounded-[1rem] border border-white/68 bg-[rgba(248,242,234,0.54)] px-3 py-2.5 shadow-[0_10px_26px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/58'
                   }
                 >
-                  <span
-                    className={
-                      summary.summary.isOverBudget
-                        ? 'grid size-9 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] transition duration-300 group-hover/budget-metric:scale-105'
-                        : 'grid size-9 place-items-center rounded-xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)] transition duration-300 group-hover/budget-metric:scale-105'
-                    }
-                  >
-                    <PiggyBank aria-hidden="true" className="size-4" />
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={
+                        summary.summary.isOverBudget
+                          ? 'grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]'
+                          : 'grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)]'
+                      }
+                    >
+                      <PiggyBank aria-hidden="true" className="size-3" />
+                    </span>
 
-                  <p className="mt-3 text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/46">
-                    {summary.summary.isOverBudget ? 'Over budget' : 'Remaining'}
-                  </p>
+                    <div className="min-w-0">
+                      <p className="text-[0.52rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
+                        {summary.summary.isOverBudget ? 'Over budget' : 'Remaining'}
+                      </p>
 
-                  <p
-                    className={
-                      summary.summary.isOverBudget
-                        ? 'mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-muted-burgundy)]'
-                        : 'mt-1.5 truncate text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]'
-                    }
-                  >
-                    {summary.summary.isOverBudget
-                      ? formatCurrency(summary.summary.overBudgetAmount)
-                      : formatCurrency(summary.summary.remainingBudget)}
-                  </p>
-
-                  <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
-                    {summary.summary.isOverBudget ? 'Amount above plan' : 'Available budget'}
-                  </p>
+                      <p
+                        className={
+                          summary.summary.isOverBudget
+                            ? 'mt-0.5 truncate text-[0.86rem] font-black tracking-[-0.035em] text-[var(--color-muted-burgundy)] sm:text-[0.92rem]'
+                            : 'mt-0.5 truncate text-[0.86rem] font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-[0.92rem]'
+                        }
+                      >
+                        {summary.summary.isOverBudget
+                          ? formatCurrency(summary.summary.overBudgetAmount)
+                          : formatCurrency(summary.summary.remainingBudget)}
+                      </p>
+                    </div>
+                  </div>
                 </article>
               </div>
             </div>
           </section>
 
-          <section className="mt-7 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-            <article className="glass-card p-6 sm:p-7">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <section className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+            <article className="glass-card p-5 sm:p-6">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
-                  <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                     Category breakdown
                   </p>
 
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                  <h2 className="mt-1.5 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                     Allocations and spending by category.
                   </h2>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="soft-chip w-fit">
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <span className="soft-chip w-fit px-3 py-1.5 text-xs">
                     {summary.counts.budgetCategories} categories
                   </span>
 
                   <button
                     type="button"
-                    className="btn-primary text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                    className="btn-primary px-3.5 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45"
                     disabled={!isBudgetEditable}
                     onClick={openCategoryForm}
                   >
-                    <Plus className="size-4" />
+                    <Plus className="size-3.5" />
                     Add category
                   </button>
                 </div>
               </div>
 
               {summary.categoryBreakdown.length > 0 ? (
-                <div className="mt-8 space-y-4">
+                <div className="mt-5 space-y-3">
                   {summary.categoryBreakdown.map((category) => {
                     const allocatedAmount = Number(category.allocatedAmount);
                     const totalExpenses = Number(category.totalExpenses);
@@ -1064,39 +1062,34 @@ export function BudgetWorkspacePage() {
                     return (
                       <article
                         key={category.id}
-                        className="group/category relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/82 hover:bg-white/40 hover:shadow-[0_28px_66px_rgba(31,27,29,0.10)] sm:p-6"
+                        className="group/category relative overflow-hidden rounded-[1.35rem] border border-white/60 bg-white/28 p-4 shadow-[0_14px_34px_rgba(31,27,29,0.045)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-white/40 hover:shadow-[0_22px_50px_rgba(31,27,29,0.08)]"
                       >
                         <div
                           aria-hidden="true"
-                          className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/category:scale-125 group-hover/category:bg-[rgba(183,167,200,0.26)]"
+                          className="pointer-events-none absolute -right-12 -top-14 size-32 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl transition duration-500 group-hover/category:scale-125 group-hover/category:bg-[rgba(183,167,200,0.24)]"
                         />
 
                         <div className="relative">
-                          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="min-w-0">
-                              <div className="flex flex-wrap items-center gap-3">
-                                <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/category:-translate-y-0.5 group-hover/category:scale-105 group-hover/category:bg-[rgba(183,167,200,0.32)]">
-                                  <WalletCards
-                                    aria-hidden="true"
-                                    className="size-5 transition duration-300 group-hover/category:rotate-[5deg]"
-                                  />
-                                </div>
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)] transition duration-300 group-hover/category:-translate-y-0.5 group-hover/category:scale-105">
+                                <WalletCards aria-hidden="true" className="size-4" />
+                              </div>
 
-                                <div>
-                                  <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)] transition duration-300 group-hover/category:translate-x-0.5 group-hover/category:text-[var(--color-deep-plum)] sm:text-xl">
-                                    {category.name}
-                                  </p>
+                              <div className="min-w-0">
+                                <p className="truncate text-base font-black tracking-[-0.025em] text-[var(--color-near-black)] transition duration-300 group-hover/category:text-[var(--color-deep-plum)]">
+                                  {category.name}
+                                </p>
 
-                                  <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/52">
-                                    Category allocation
-                                  </p>
-                                </div>
+                                <p className="mt-0.5 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                                  Category allocation
+                                </p>
                               </div>
                             </div>
 
-                            <div className="flex shrink-0 flex-wrap items-center gap-2">
+                            <div className="flex shrink-0 flex-wrap items-center gap-1.5">
                               <span
-                                className="status-chip w-fit transition duration-300 group-hover/category:-translate-y-0.5 group-hover/category:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                                className="status-chip w-fit px-2.5 py-1 text-[0.68rem]"
                                 data-tone={category.isOverAllocated ? 'rose' : 'green'}
                               >
                                 {category.isOverAllocated
@@ -1106,55 +1099,49 @@ export function BudgetWorkspacePage() {
 
                               <button
                                 type="button"
-                                className="grid size-9 place-items-center rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.15)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
+                                className="grid size-8 place-items-center rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35"
                                 aria-label={`Edit ${category.name}`}
                                 disabled={!isBudgetEditable}
                                 onClick={() => {
                                   openEditCategoryForm(category);
                                 }}
                               >
-                                <Pencil
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/category:rotate-[3deg]"
-                                />
+                                <Pencil aria-hidden="true" className="size-3.5" />
                               </button>
 
                               <button
                                 type="button"
-                                className="grid size-9 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.15)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
+                                className="grid size-8 place-items-center rounded-full border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35"
                                 aria-label={`Delete ${category.name}`}
                                 disabled={!isBudgetEditable}
                                 onClick={() => {
                                   openDeleteCategoryDialog(category);
                                 }}
                               >
-                                <Trash2
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 hover:rotate-[4deg]"
-                                />
+                                <Trash2 aria-hidden="true" className="size-3.5" />
                               </button>
                             </div>
                           </div>
 
-                          <div className="mt-6 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                          <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
                             <div>
-                              <p className="text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/42">
+                              <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                                 Amount used
                               </p>
 
-                              <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <p className="text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl">
+                              <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                <p className="text-xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                                   {formatCurrency(category.totalExpenses)}
                                 </p>
 
-                                <p className="text-sm font-bold text-[var(--color-charcoal)]/46">
+                                <p className="text-xs font-bold text-[var(--color-charcoal)]/46">
                                   of {formatCurrency(category.allocatedAmount)}
                                 </p>
                               </div>
                             </div>
 
                             <p
-                              className={`text-sm font-black transition duration-300 group-hover/category:-translate-y-0.5 ${
+                              className={`text-xs font-black ${
                                 category.isOverAllocated
                                   ? 'text-[var(--color-muted-burgundy)]'
                                   : 'text-[var(--color-deep-plum)]'
@@ -1164,9 +1151,9 @@ export function BudgetWorkspacePage() {
                             </p>
                           </div>
 
-                          <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
+                          <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
                             <div
-                              className={`h-full rounded-full shadow-[0_0_12px_rgba(93,58,85,0.16)] transition-[width,filter] duration-700 group-hover/category:brightness-110 ${
+                              className={`h-full rounded-full transition-[width,filter] duration-700 group-hover/category:brightness-110 ${
                                 category.isOverAllocated
                                   ? 'bg-[linear-gradient(90deg,var(--color-muted-burgundy),#c28c98,#dfb1ba)]'
                                   : 'bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)]'
@@ -1177,34 +1164,34 @@ export function BudgetWorkspacePage() {
                             />
                           </div>
 
-                          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4 transition duration-300 group-hover/category:border-white/68 group-hover/category:bg-white/34">
-                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          <div className="mt-3 grid grid-cols-3 gap-2">
+                            <div className="rounded-xl border border-white/48 bg-white/24 px-3 py-2.5">
+                              <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                                 Planned
                               </p>
 
-                              <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                              <p className="mt-1 truncate text-sm font-black text-[var(--color-near-black)]">
                                 {formatCurrency(category.plannedExpenses)}
                               </p>
                             </div>
 
-                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4 transition duration-300 group-hover/category:border-white/68 group-hover/category:bg-white/34">
-                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            <div className="rounded-xl border border-white/48 bg-white/24 px-3 py-2.5">
+                              <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                                 Paid
                               </p>
 
-                              <p className="mt-2 text-base font-black text-[var(--color-near-black)]">
+                              <p className="mt-1 truncate text-sm font-black text-[var(--color-near-black)]">
                                 {formatCurrency(category.paidExpenses)}
                               </p>
                             </div>
 
-                            <div className="rounded-2xl border border-white/48 bg-white/24 p-4 transition duration-300 group-hover/category:border-white/68 group-hover/category:bg-white/34">
-                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                            <div className="rounded-xl border border-white/48 bg-white/24 px-3 py-2.5">
+                              <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                                 Balance
                               </p>
 
                               <p
-                                className={`mt-2 text-base font-black ${
+                                className={`mt-1 truncate text-sm font-black ${
                                   category.isOverAllocated
                                     ? 'text-[var(--color-muted-burgundy)]'
                                     : 'text-[var(--color-near-black)]'
@@ -1222,40 +1209,35 @@ export function BudgetWorkspacePage() {
                   })}
                 </div>
               ) : (
-                <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
+                <div className="relative mt-5 overflow-hidden rounded-[1.35rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.48),rgba(255,255,255,0.22))] px-5 py-6 text-center shadow-[0_12px_30px_rgba(31,27,29,0.035)] backdrop-blur-xl">
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
-                  />
-
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+                    className="pointer-events-none absolute -right-14 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl"
                   />
 
                   <div className="relative">
-                    <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
-                      <CircleDollarSign aria-hidden="true" className="size-8" />
+                    <div className="mx-auto grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
+                      <CircleDollarSign aria-hidden="true" className="size-5" />
                     </div>
 
-                    <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    <p className="mt-3 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                       No budget categories yet
                     </p>
 
-                    <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                    <p className="mx-auto mt-1.5 max-w-md text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
                       Create allocations for venue, catering, photography, decoration and other
-                      event costs so spending stays organised.
+                      event costs.
                     </p>
 
                     <button
                       type="button"
-                      className="group/first-budget-category btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                      className="group/first-budget-category btn-primary mt-4 justify-center px-3.5 py-2 text-xs font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(93,58,85,0.18)] disabled:cursor-not-allowed disabled:opacity-45"
                       disabled={!isBudgetEditable}
                       onClick={openCategoryForm}
                     >
                       <Plus
                         aria-hidden="true"
-                        className="size-4 transition duration-300 group-hover/first-budget-category:rotate-90"
+                        className="size-3.5 transition duration-300 group-hover/first-budget-category:rotate-90"
                       />
                       Add first category
                     </button>
@@ -1264,50 +1246,50 @@ export function BudgetWorkspacePage() {
               )}
             </article>
 
-            <aside className="relative self-start overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(244,238,246,0.82))] p-6 shadow-[0_24px_70px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-7 lg:sticky lg:top-6">
+            <aside className="relative self-start overflow-hidden rounded-[1.65rem] bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(244,238,246,0.82))] p-5 shadow-[0_20px_54px_rgba(31,27,29,0.07)] backdrop-blur-2xl lg:sticky lg:top-5">
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+                className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
               />
 
               <div className="relative">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                       Budget snapshot
                     </p>
 
-                    <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                    <h2 className="mt-1.5 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                       Financial health at a glance.
                     </h2>
                   </div>
 
-                  <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-                    <PiggyBank className="size-5" />
+                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
+                    <PiggyBank className="size-4" />
                   </div>
                 </div>
 
-                <div className="mt-8 rounded-[1.6rem] border border-white/60 bg-white/34 p-5 backdrop-blur-xl">
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/42">
+                <div className="mt-5 rounded-[1.3rem] border border-white/60 bg-white/34 p-4 backdrop-blur-xl">
+                  <div className="flex items-end justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                         Total allocated
                       </p>
 
-                      <p className="mt-3 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                      <p className="mt-1.5 truncate text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                         {formatCurrency(summary.summary.totalAllocated)}
                       </p>
                     </div>
 
                     <span
-                      className="status-chip shrink-0"
+                      className="status-chip shrink-0 px-2.5 py-1 text-[0.68rem]"
                       data-tone={summary.summary.isOverBudget ? 'rose' : 'green'}
                     >
                       {summary.summary.isOverBudget ? 'Needs attention' : 'Healthy'}
                     </span>
                   </div>
 
-                  <div className="mt-5 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
                     <div
                       className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy))]"
                       style={{
@@ -1316,75 +1298,75 @@ export function BudgetWorkspacePage() {
                     />
                   </div>
 
-                  <p className="mt-3 text-sm font-semibold text-[var(--color-charcoal)]/55">
+                  <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
                     {Math.round(budgetUsagePercentage)}% of the planned budget is currently
                     committed.
                   </p>
                 </div>
 
-                <div className="mt-5 divide-y divide-[rgba(93,58,85,0.10)] rounded-[1.6rem] border border-white/55 bg-white/24 px-5 backdrop-blur-xl">
-                  <div className="flex items-center justify-between gap-4 py-5">
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954]">
-                        <WalletCards className="size-4" />
+                <div className="mt-3 divide-y divide-[rgba(93,58,85,0.10)] rounded-[1.3rem] border border-white/55 bg-white/24 px-4 backdrop-blur-xl">
+                  <div className="flex items-center justify-between gap-3 py-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.28)] text-[#334954]">
+                        <WalletCards className="size-3.5" />
                       </span>
 
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-[var(--color-near-black)]">
                           Unallocated budget
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                        <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/46">
                           Still available to assign
                         </p>
                       </div>
                     </div>
 
-                    <p className="text-right text-sm font-black text-[var(--color-near-black)]">
+                    <p className="shrink-0 text-right text-xs font-black text-[var(--color-near-black)]">
                       {formatCurrency(summary.summary.unallocatedBudget)}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 py-5">
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]">
-                        <CreditCard className="size-4" />
+                  <div className="flex items-center justify-between gap-3 py-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)]">
+                        <CreditCard className="size-3.5" />
                       </span>
 
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-[var(--color-near-black)]">
                           Outstanding committed
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                        <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/46">
                           Confirmed but not yet paid
                         </p>
                       </div>
                     </div>
 
-                    <p className="text-right text-sm font-black text-[var(--color-near-black)]">
+                    <p className="shrink-0 text-right text-xs font-black text-[var(--color-near-black)]">
                       {formatCurrency(summary.summary.outstandingCommitted)}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 py-5">
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.22)] text-[#3d452f]">
-                        <ReceiptText className="size-4" />
+                  <div className="flex items-center justify-between gap-3 py-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(142,151,115,0.22)] text-[#3d452f]">
+                        <ReceiptText className="size-3.5" />
                       </span>
 
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-[var(--color-near-black)]">
                           Manual expenses
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                        <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/46">
                           Planned and paid records
                         </p>
                       </div>
                     </div>
 
-                    <p className="text-right text-sm font-black text-[var(--color-near-black)]">
+                    <p className="shrink-0 text-right text-xs font-black text-[var(--color-near-black)]">
                       {summary.counts.plannedExpenses + summary.counts.paidExpenses}
                     </p>
                   </div>
@@ -1393,70 +1375,67 @@ export function BudgetWorkspacePage() {
             </aside>
           </section>
 
-          <section className="glass-card mt-5 p-6 sm:p-7">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <section className="glass-card mt-4 p-5 sm:p-6">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                   Expenses
                 </p>
 
-                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                <h2 className="mt-1.5 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                   Planned and paid event costs.
                 </h2>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="soft-chip w-fit">{expenses.length} expenses</span>
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <span className="soft-chip w-fit px-3 py-1.5 text-xs">
+                  {expenses.length} expenses
+                </span>
 
                 <button
                   type="button"
-                  className="btn-primary text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                  className="btn-primary px-3.5 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45"
                   disabled={!isBudgetEditable}
                   onClick={openExpenseForm}
                 >
-                  <Plus className="size-4" />
+                  <Plus className="size-3.5" />
                   Add expense
                 </button>
               </div>
             </div>
 
             {expenses.length > 0 ? (
-              <div className="mt-8 grid gap-5 xl:grid-cols-2">
+              <div className="mt-5 grid gap-3 xl:grid-cols-2">
                 {expenses.map((expense) => (
                   <article
                     key={expense.id}
-                    className="group/expense relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-white/28 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/82 hover:bg-white/40 hover:shadow-[0_28px_68px_rgba(31,27,29,0.10)] sm:p-6"
+                    className="group/expense relative overflow-hidden rounded-[1.35rem] border border-white/60 bg-white/28 p-4 shadow-[0_14px_34px_rgba(31,27,29,0.045)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-white/40 hover:shadow-[0_22px_50px_rgba(31,27,29,0.08)]"
                   >
                     <div
                       aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl transition duration-500 group-hover/expense:scale-125 group-hover/expense:bg-[rgba(175,201,216,0.26)]"
+                      className="pointer-events-none absolute -right-14 -top-16 size-36 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl transition duration-500 group-hover/expense:scale-125 group-hover/expense:bg-[rgba(175,201,216,0.24)]"
                     />
 
                     <div className="relative">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-3">
-                            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/expense:-translate-y-0.5 group-hover/expense:scale-105 group-hover/expense:bg-[rgba(233,221,207,0.82)]">
-                              <ReceiptText
-                                aria-hidden="true"
-                                className="size-5 transition duration-300 group-hover/expense:rotate-[4deg]"
-                              />
-                            </span>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(233,221,207,0.68)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)] transition duration-300 group-hover/expense:-translate-y-0.5 group-hover/expense:scale-105">
+                            <ReceiptText aria-hidden="true" className="size-4" />
+                          </span>
 
-                            <div className="min-w-0">
-                              <p className="truncate text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)] transition duration-300 group-hover/expense:translate-x-0.5 group-hover/expense:text-[var(--color-deep-plum)] sm:text-xl">
-                                {expense.title}
-                              </p>
+                          <div className="min-w-0">
+                            <p className="truncate text-base font-black tracking-[-0.025em] text-[var(--color-near-black)] transition duration-300 group-hover/expense:text-[var(--color-deep-plum)]">
+                              {expense.title}
+                            </p>
 
-                              <p className="mt-1 truncate text-sm font-semibold text-[var(--color-charcoal)]/52">
-                                {expense.budgetCategory?.name ?? 'Uncategorised'}
-                              </p>
-                            </div>
+                            <p className="mt-0.5 truncate text-xs font-semibold text-[var(--color-charcoal)]/48">
+                              {expense.budgetCategory?.name ?? 'Uncategorised'}
+                            </p>
                           </div>
                         </div>
 
                         <span
-                          className="status-chip shrink-0 transition duration-300 group-hover/expense:-translate-y-0.5 group-hover/expense:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                          className="status-chip shrink-0 px-2.5 py-1 text-[0.68rem]"
                           data-tone={
                             expense.status === 'PAID'
                               ? 'green'
@@ -1469,80 +1448,73 @@ export function BudgetWorkspacePage() {
                         </span>
                       </div>
 
-                      <div className="mt-7 flex flex-col gap-4 border-b border-[rgba(93,58,85,0.10)] pb-6 sm:flex-row sm:items-end sm:justify-between">
+                      <div className="mt-4 flex flex-col gap-3 border-b border-[rgba(93,58,85,0.10)] pb-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                          <p className="text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/42">
+                          <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                             Expense amount
                           </p>
 
-                          <p className="mt-2 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/expense:translate-x-0.5 group-hover/expense:text-[var(--color-deep-plum)] sm:text-4xl">
+                          <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)] transition duration-300 group-hover/expense:text-[var(--color-deep-plum)]">
                             {formatCurrency(expense.amount)}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <button
                             type="button"
-                            className="flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3.5 py-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_10px_22px_rgba(93,58,85,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                            className="flex items-center gap-1.5 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3 py-1.5 text-xs font-black text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35"
                             aria-label={`Edit ${expense.title}`}
                             disabled={!isBudgetEditable}
                             onClick={() => {
                               openEditExpenseForm(expense);
                             }}
                           >
-                            <Pencil
-                              aria-hidden="true"
-                              className="size-4 transition duration-300 group-hover/expense:rotate-[3deg]"
-                            />
+                            <Pencil aria-hidden="true" className="size-3.5" />
                             Edit
                           </button>
 
                           <button
                             type="button"
-                            className="grid size-10 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.06)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
+                            className="grid size-8 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.06)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35"
                             aria-label={`Delete ${expense.title}`}
                             disabled={!isBudgetEditable}
                             onClick={() => {
                               openDeleteExpenseDialog(expense);
                             }}
                           >
-                            <Trash2
-                              aria-hidden="true"
-                              className="size-4 transition duration-300 hover:rotate-[4deg]"
-                            />
+                            <Trash2 aria-hidden="true" className="size-3.5" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                        <div className="group/expense-detail flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4 transition duration-300 group-hover/expense:border-white/68 group-hover/expense:bg-white/34">
-                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition duration-300 group-hover/expense-detail:-translate-y-0.5 group-hover/expense-detail:scale-105">
-                            {' '}
-                            <CircleDollarSign className="size-4" />
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <div className="flex min-w-0 items-start gap-2.5 rounded-xl border border-white/50 bg-white/24 p-3">
+                          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                            <CircleDollarSign className="size-3.5" />
                           </span>
 
-                          <div>
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          <div className="min-w-0">
+                            <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                               Expense date
                             </p>
 
-                            <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                            <p className="mt-1 text-xs font-black leading-5 text-[var(--color-near-black)]">
                               {formatDateTime(expense.expenseDate)}
                             </p>
                           </div>
                         </div>
 
-                        <div className="group/expense-detail flex items-start gap-3 rounded-2xl border border-white/50 bg-white/24 p-4 transition duration-300 group-hover/expense:border-white/68 group-hover/expense:bg-white/34">
-                          {' '}
-                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954]">
-                            <CreditCard className="size-4" />
+                        <div className="flex min-w-0 items-start gap-2.5 rounded-xl border border-white/50 bg-white/24 p-3">
+                          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.28)] text-[#334954]">
+                            <CreditCard className="size-3.5" />
                           </span>
-                          <div>
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+
+                          <div className="min-w-0">
+                            <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                               Due date
                             </p>
 
-                            <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
+                            <p className="mt-1 text-xs font-black leading-5 text-[var(--color-near-black)]">
                               {formatDateTime(expense.dueDate)}
                             </p>
                           </div>
@@ -1550,12 +1522,12 @@ export function BudgetWorkspacePage() {
                       </div>
 
                       {expense.notes ? (
-                        <div className="mt-5 rounded-2xl border border-white/48 bg-white/20 px-4 py-3.5 transition duration-300 group-hover/expense:border-white/66 group-hover/expense:bg-white/30">
-                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/38">
+                        <div className="mt-2 rounded-xl border border-white/48 bg-white/20 px-3 py-2.5">
+                          <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
                             Notes
                           </p>
 
-                          <p className="mt-2 line-clamp-3 text-sm font-medium leading-6 text-[var(--color-charcoal)]/64">
+                          <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-[var(--color-charcoal)]/62">
                             {expense.notes}
                           </p>
                         </div>
@@ -1565,40 +1537,40 @@ export function BudgetWorkspacePage() {
                 ))}
               </div>
             ) : (
-              <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
+              <div className="relative mt-5 overflow-hidden rounded-[1.35rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.48),rgba(255,255,255,0.22))] px-5 py-6 text-center shadow-[0_12px_30px_rgba(31,27,29,0.035)] backdrop-blur-xl">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                  className="pointer-events-none absolute -right-14 -top-14 size-36 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
                 />
 
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(255,228,210,0.16)] blur-3xl"
+                  className="pointer-events-none absolute -bottom-14 -left-12 size-32 rounded-full bg-[rgba(255,228,210,0.14)] blur-3xl"
                 />
 
                 <div className="relative">
-                  <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
-                    <ReceiptText aria-hidden="true" className="size-8" />
+                  <div className="mx-auto grid size-11 place-items-center rounded-2xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
+                    <ReceiptText aria-hidden="true" className="size-5" />
                   </div>
 
-                  <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                  <p className="mt-3 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                     No expenses recorded
                   </p>
 
-                  <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
-                    Add the first planned or paid cost to begin tracking commitments, deadlines and
-                    category totals.
+                  <p className="mx-auto mt-1.5 max-w-md text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
+                    Add the first planned or paid cost to track commitments, deadlines and category
+                    totals.
                   </p>
 
                   <button
                     type="button"
-                    className="group/first-budget-expense btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    className="group/first-budget-expense btn-primary mt-4 justify-center px-3.5 py-2 text-xs font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(93,58,85,0.18)] disabled:cursor-not-allowed disabled:opacity-45"
                     disabled={!isBudgetEditable}
                     onClick={openExpenseForm}
                   >
                     <Plus
                       aria-hidden="true"
-                      className="size-4 transition duration-300 group-hover/first-budget-expense:rotate-90"
+                      className="size-3.5 transition duration-300 group-hover/first-budget-expense:rotate-90"
                     />
                     Add first expense
                   </button>
@@ -1609,360 +1581,284 @@ export function BudgetWorkspacePage() {
         </main>
       </div>
       {isCategoryFormOpen && isBudgetEditable ? (
-        <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="create-budget-category-title"
-          onClick={() => {
-            if (!isCategoryMutationPending) {
-              closeCategoryForm();
-            }
-          }}
-        >
-          <div className="grid min-h-full place-items-center">
-            <div
-              className="relative w-full max-w-2xl overflow-hidden rounded-[2.25rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(240,231,246,0.86))] shadow-[0_42px_120px_rgba(31,27,29,0.28)] backdrop-blur-3xl"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-            >
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
-              />
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-4 backdrop-blur-sm sm:py-5"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) {
+        closeCategoryForm();
+      }
+    }}
+  >
+    <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/72 bg-[linear-gradient(145deg,rgba(255,252,250,0.98),rgba(245,239,247,0.97))] shadow-[0_32px_90px_rgba(31,27,29,0.28)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+      />
 
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute left-[12%] top-[-8rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
-              />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-24 -left-20 size-56 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+      />
 
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(255,228,210,0.14)] blur-3xl"
-              />
+      <div className="relative max-h-[calc(100vh-2.5rem)] overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+        <div className="flex items-start justify-between gap-5 border-b border-[rgba(93,58,85,0.10)] pb-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-deep-plum)] px-3 py-1.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-white">
+                <WalletCards aria-hidden="true" className="size-3" />
+                Budget allocation
+              </span>
 
-              <div className="relative max-h-[calc(100vh-3rem)] overflow-y-auto p-6 sm:p-8">
-                <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)]">
-                        {categoryToEdit ? (
-                          <Pencil aria-hidden="true" className="size-6" />
-                        ) : (
-                          <WalletCards aria-hidden="true" className="size-6" />
-                        )}
-                      </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(175,201,216,0.54)] px-3 py-1.5 text-[0.62rem] font-black uppercase tracking-[0.1em] text-[#334954]">
+                <CircleDollarSign aria-hidden="true" className="size-3" />
+                LKR amount
+              </span>
 
-                      <span className="rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
-                        {categoryToEdit ? 'Edit budget category' : 'New budget category'}
-                      </span>
-                    </div>
+              <span className="soft-chip px-3 py-1.5 text-[0.65rem]">
+                {categoryToEdit ? 'Editing category' : 'New category'}
+              </span>
+            </div>
 
-                    <h2
-                      id="create-budget-category-title"
-                      className="mt-6 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
-                    >
-                      {categoryToEdit ? 'Refine this allocation.' : 'Create a new allocation.'}
-                    </h2>
+            <h2 className="mt-3 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[1.8rem]">
+              {categoryToEdit
+                ? 'Update this allocation.'
+                : 'Create a new allocation.'}
+            </h2>
 
-                    <p className="mt-4 max-w-xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
-                      {categoryToEdit
-                        ? 'Update the category name or allocated amount while keeping its expense history intact.'
-                        : 'Create a clear spending area for venue, catering, photography, decoration or another event cost.'}
-                    </p>
+            <p className="mt-1.5 max-w-2xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62 sm:text-sm">
+              {categoryToEdit
+                ? 'Adjust the category name or planned spending limit while keeping its existing budget activity intact.'
+                : 'Create a clear spending area for venue, catering, photography, decoration or another event cost.'}
+            </p>
+          </div>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <span className="status-chip" data-tone="plum">
-                        <WalletCards aria-hidden="true" className="size-3.5" />
-                        Budget allocation
-                      </span>
+          <button
+            type="button"
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/68 bg-white/50 text-[var(--color-charcoal)] shadow-[0_8px_20px_rgba(31,27,29,0.06)] transition duration-300 hover:-translate-y-0.5 hover:bg-white/82 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30"
+            aria-label="Close category form"
+            onClick={closeCategoryForm}
+          >
+            <X aria-hidden="true" className="size-4" />
+          </button>
+        </div>
 
-                      <span className="status-chip" data-tone="blue">
-                        <CircleDollarSign aria-hidden="true" className="size-3.5" />
-                        LKR amount
-                      </span>
+        <form className="mt-4" onSubmit={submitCategory}>
+          <div className="grid gap-3 md:grid-cols-2">
+  {/* Category details */}
+  <section className="rounded-[1.35rem] border border-white/68 bg-white/42 p-4 shadow-[0_12px_30px_rgba(31,27,29,0.045)] backdrop-blur-xl">
+    <div className="flex items-center gap-3">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+        <WalletCards aria-hidden="true" className="size-4" />
+      </span>
 
-                      {categoryToEdit ? (
-                        <span className="status-chip" data-tone="gray">
-                          Existing category
-                        </span>
-                      ) : (
-                        <span className="status-chip" data-tone="green">
-                          New category
-                        </span>
-                      )}
-                    </div>
-                  </div>
+      <div>
+        <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+          Category details
+        </p>
 
-                  <button
-                    type="button"
-                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-label="Close category form"
-                    disabled={isCategoryMutationPending}
-                    onClick={closeCategoryForm}
-                  >
-                    <X aria-hidden="true" className="size-5" />
-                  </button>
+        <h3 className="mt-0.5 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+          Name this spending area
+        </h3>
+      </div>
+    </div>
+
+    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+      Use a short, recognisable label that stays easy to scan across the
+      budget.
+    </p>
+
+    <label
+      className="mt-3 block text-xs font-black text-[var(--color-charcoal)]"
+      htmlFor="budget-category-name"
+    >
+      Category name{' '}
+      <span className="text-[var(--color-rosewood)]">*</span>
+    </label>
+
+    <input
+      id="budget-category-name"
+      type="text"
+      className="form-field mt-1.5"
+      placeholder="Photography"
+      disabled={isCategoryMutationPending}
+      {...categoryForm.register('name')}
+    />
+
+    {categoryForm.formState.errors.name ? (
+      <p className="mt-1.5 text-xs font-bold text-[var(--color-muted-burgundy)]">
+        {categoryForm.formState.errors.name.message}
+      </p>
+    ) : (
+      <p className="mt-1.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/44">
+        Examples: venue, catering, photography, decoration or entertainment.
+      </p>
+    )}
+  </section>
+
+  {/* Allocation */}
+  <section className="rounded-[1.35rem] border border-white/68 bg-[linear-gradient(145deg,rgba(255,255,255,0.48),rgba(238,246,250,0.42))] p-4 shadow-[0_12px_30px_rgba(31,27,29,0.045)] backdrop-blur-xl">
+    <div className="flex items-center gap-3">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.28)] text-[#334954]">
+        <CircleDollarSign aria-hidden="true" className="size-4" />
+      </span>
+
+      <div>
+        <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+          Allocation
+        </p>
+
+        <h3 className="mt-0.5 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+          Set the planned spending limit
+        </h3>
+      </div>
+    </div>
+
+    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+      This amount contributes to the total allocated budget shown throughout
+      the workspace.
+    </p>
+
+    <label
+      className="mt-3 block text-xs font-black text-[var(--color-charcoal)]"
+      htmlFor="budget-category-amount"
+    >
+      Allocated amount{' '}
+      <span className="text-[var(--color-rosewood)]">*</span>
+    </label>
+
+    <div className="mt-1.5 flex min-h-12 overflow-hidden rounded-2xl border border-white/60 bg-white/34 shadow-[0_8px_22px_rgba(31,27,29,0.04)] transition duration-300 focus-within:border-[rgba(93,58,85,0.24)] focus-within:bg-white/52 focus-within:shadow-[0_12px_28px_rgba(31,27,29,0.07)]">
+      <span className="flex w-[4.5rem] shrink-0 items-center justify-center border-r border-[rgba(93,58,85,0.12)] bg-[rgba(175,201,216,0.18)] text-xs font-black uppercase tracking-[0.08em] text-[var(--color-deep-plum)]">
+        LKR
+      </span>
+
+      <input
+        id="budget-category-amount"
+        className="min-w-0 flex-1 appearance-none bg-transparent px-4 py-3 text-sm font-bold tabular-nums text-[var(--color-near-black)] outline-none placeholder:font-semibold placeholder:text-[var(--color-charcoal)]/38 disabled:cursor-not-allowed disabled:opacity-60"
+        type="number"
+        min="0.01"
+        step="0.01"
+        placeholder="250000"
+        disabled={isCategoryMutationPending}
+        {...categoryForm.register('allocatedAmount')}
+      />
+    </div>
+
+    {categoryForm.formState.errors.allocatedAmount ? (
+      <p className="mt-1.5 text-xs font-bold text-[var(--color-muted-burgundy)]">
+        {categoryForm.formState.errors.allocatedAmount.message}
+      </p>
+    ) : (
+      <p className="mt-1.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/44">
+        Enter the maximum amount you plan to reserve for this category.
+      </p>
+    )}
+  </section>
+</div>
+
+          {categoryToEdit ? (
+            <div className="mt-3 flex flex-col gap-2 rounded-[1.15rem] border border-[rgba(93,58,85,0.10)] bg-white/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                  <PiggyBank aria-hidden="true" className="size-3.5" />
+                </span>
+
+                <div>
+                  <p className="text-xs font-black text-[var(--color-near-black)]">
+                    Current category usage
+                  </p>
+
+                  <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/50">
+                    Existing expenses remain attached to this category.
+                  </p>
                 </div>
-
-                <form className="mt-7 grid gap-5" onSubmit={submitCategory}>
-                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl"
-                    />
-
-                    <div className="relative">
-                      <div className="flex items-start gap-4">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                          <WalletCards aria-hidden="true" className="size-5" />
-                        </span>
-
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Category details
-                          </p>
-
-                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            Name this spending area
-                          </h3>
-
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                            Use a short, recognisable label that stays easy to scan across the
-                            budget.
-                          </p>
-                        </div>
-                      </div>
-
-                      <label className="mt-6 block">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                          Category name
-                          <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
-                        </span>
-
-                        <input
-                          className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                          type="text"
-                          placeholder="Photography"
-                          disabled={isCategoryMutationPending}
-                          {...categoryForm.register('name')}
-                        />
-
-                        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                          Examples: venue, catering, photography, decoration or entertainment.
-                        </p>
-
-                        {categoryForm.formState.errors.name ? (
-                          <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                            <CircleAlert
-                              aria-hidden="true"
-                              className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                            />
-
-                            <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                              {categoryForm.formState.errors.name.message}
-                            </p>
-                          </div>
-                        ) : null}
-                      </label>
-                    </div>
-                  </section>
-
-                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(220,235,242,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                    />
-
-                    <div className="relative">
-                      <div className="flex items-start gap-4">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#334954]">
-                          <CircleDollarSign aria-hidden="true" className="size-5" />
-                        </span>
-
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Allocation
-                          </p>
-
-                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            Set the planned spending limit
-                          </h3>
-
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                            This amount contributes to the total allocated budget shown throughout
-                            the workspace.
-                          </p>
-                        </div>
-                      </div>
-
-                      <label className="mt-6 block">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                          Allocated amount
-                          <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
-                        </span>
-
-                        <div className="relative mt-2">
-                          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-black text-[var(--color-deep-plum)]">
-                            LKR
-                          </span>
-
-                          <input
-                            className="form-field min-h-12 pl-16 transition duration-300 focus:bg-white/52"
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            placeholder="350000"
-                            disabled={isCategoryMutationPending}
-                            {...categoryForm.register('allocatedAmount')}
-                          />
-                        </div>
-
-                        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                          Enter the maximum amount you plan to reserve for this category.
-                        </p>
-
-                        {categoryForm.formState.errors.allocatedAmount ? (
-                          <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                            <CircleAlert
-                              aria-hidden="true"
-                              className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                            />
-
-                            <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                              {categoryForm.formState.errors.allocatedAmount.message}
-                            </p>
-                          </div>
-                        ) : null}
-                      </label>
-
-                      {categoryToEdit ? (
-                        <div className="mt-5 rounded-[1.3rem] border border-white/60 bg-white/34 p-4">
-                          <div className="flex items-start gap-3">
-                            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                              <PiggyBank aria-hidden="true" className="size-4" />
-                            </span>
-
-                            <div>
-                              <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                                Current usage
-                              </p>
-
-                              <p className="mt-2 text-sm font-black text-[var(--color-near-black)]">
-                                {formatCurrency(categoryToEdit.totalExpenses)} used from{' '}
-                                {formatCurrency(categoryToEdit.allocatedAmount)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  </section>
-
-                  {categoryForm.formState.errors.root?.message ? (
-                    <div
-                      role="alert"
-                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                          <CircleAlert aria-hidden="true" className="size-4" />
-                        </span>
-
-                        <div>
-                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
-                            No category changes detected
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                            {categoryForm.formState.errors.root.message}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {createCategoryMutation.isError || updateCategoryMutation.isError ? (
-                    <div
-                      role="alert"
-                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                          <CircleAlert aria-hidden="true" className="size-4" />
-                        </span>
-
-                        <div>
-                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
-                            Budget category could not be saved
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                            {getApiErrorMessage(
-                              categoryToEdit
-                                ? updateCategoryMutation.error
-                                : createCategoryMutation.error,
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="flex flex-col gap-5 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-3">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <PiggyBank aria-hidden="true" className="size-4" />
-                      </span>
-
-                      <p className="max-w-sm text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
-                        {categoryToEdit
-                          ? 'Saving updates the budget totals while preserving the expenses assigned to this category.'
-                          : 'The new allocation will immediately appear in the category breakdown and budget totals.'}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col-reverse gap-3 sm:flex-row">
-                      <button
-                        type="button"
-                        className="btn-secondary justify-center text-sm font-bold"
-                        disabled={isCategoryMutationPending}
-                        onClick={closeCategoryForm}
-                      >
-                        Cancel
-                      </button>
-
-                      <button
-                        type="submit"
-                        className="group/save-budget-category btn-primary min-w-40 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                        disabled={isCategoryMutationPending}
-                      >
-                        {isCategoryMutationPending ? (
-                          <LoaderCircle className="size-4 animate-spin" />
-                        ) : (
-                          <Save
-                            aria-hidden="true"
-                            className="size-4 transition duration-300 group-hover/save-budget-category:scale-105"
-                          />
-                        )}
-
-                        {updateCategoryMutation.isPending
-                          ? 'Saving category...'
-                          : createCategoryMutation.isPending
-                            ? 'Creating category...'
-                            : categoryToEdit
-                              ? 'Save changes'
-                              : 'Create category'}
-                      </button>
-                    </div>
-                  </div>
-                </form>
               </div>
+
+              <p className="text-sm font-black text-[var(--color-deep-plum)]">
+                {formatCurrency(categoryToEdit.totalExpenses)}
+              </p>
+            </div>
+          ) : null}
+
+          {categoryForm.formState.errors.root?.message ? (
+            <div className="mt-3 flex items-start gap-2.5 rounded-[1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(249,235,240,0.62)] px-3.5 py-3 text-xs font-bold leading-5 text-[var(--color-muted-burgundy)]">
+              <CircleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0"
+              />
+
+              <p>{categoryForm.formState.errors.root.message}</p>
+            </div>
+          ) : null}
+
+          {createCategoryMutation.isError ||
+          updateCategoryMutation.isError ? (
+            <div className="mt-3 flex items-start gap-2.5 rounded-[1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(249,235,240,0.62)] px-3.5 py-3 text-xs font-bold leading-5 text-[var(--color-muted-burgundy)]">
+              <CircleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0"
+              />
+
+              <p>
+                {getApiErrorMessage(
+                  updateCategoryMutation.error ??
+                    createCategoryMutation.error,
+                )}
+              </p>
+            </div>
+          ) : null}
+
+          <div className="mt-4 flex flex-col gap-3 border-t border-[rgba(93,58,85,0.10)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
+                <PiggyBank aria-hidden="true" className="size-3.5" />
+              </span>
+
+              <p className="max-w-sm text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/52">
+                {categoryToEdit
+                  ? 'Saved changes will update the category breakdown and budget snapshot immediately.'
+                  : 'The new allocation will immediately appear in the category breakdown and budget snapshot.'}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 items-center justify-end gap-2">
+              <button
+                type="button"
+                className="btn-secondary justify-center px-4 py-2 text-xs font-bold"
+                disabled={isCategoryMutationPending}
+                onClick={closeCategoryForm}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="btn-primary min-w-[8.5rem] justify-center px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isCategoryMutationPending}
+              >
+                {isCategoryMutationPending ? (
+                  <>
+                    <LoaderCircle
+                      aria-hidden="true"
+                      className="size-3.5 animate-spin"
+                    />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save aria-hidden="true" className="size-3.5" />
+                    {categoryToEdit
+                      ? 'Save changes'
+                      : 'Create category'}
+                  </>
+                )}
+              </button>
             </div>
           </div>
-        </div>
-      ) : null}
+        </form>
+      </div>
+    </div>
+  </div>
+) : null}
 
       {isExpenseFormOpen && isBudgetEditable ? (
         <div

@@ -51,7 +51,7 @@ export function RegisterPage() {
         into the right registration flow.
       </p>
 
-      <div className="mt-8 grid gap-4">
+      <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {accountTypes.map(({ title, label, text, to, icon: Icon, badge }, index) => (
           <Link
             key={title}

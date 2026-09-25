@@ -609,8 +609,8 @@ export function InvitationWorkspacePage() {
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
+        <header className="glass-card flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3.5">
             <PageBackButton
               fallback={`/events/${eventId}`}
               label="Event workspace"
@@ -618,11 +618,11 @@ export function InvitationWorkspacePage() {
             />
 
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                 Invitation management
               </p>
 
-              <h1 className="mt-1 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+              <h1 className="mt-0.5 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                 {event.name}
               </h1>
             </div>
@@ -633,7 +633,7 @@ export function InvitationWorkspacePage() {
           </span>
         </header>
 
-        <main className="py-10">
+        <main className="py-6">
           {invitationWorkflowLockedMessage ? (
             <div className="mb-6 flex items-start gap-4 rounded-[1.5rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(255,255,255,0.58)] px-5 py-4 shadow-[0_14px_36px_rgba(31,27,29,0.05)] backdrop-blur-xl">
               <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
@@ -842,18 +842,18 @@ export function InvitationWorkspacePage() {
             </div>
           </section>
 
-          <section className="mt-7">
-            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <section className="mt-5">
+            <div className="mb-3.5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                   Guest-facing design
                 </p>
 
-                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                <h2 className="mt-1.5 text-[1.7rem] font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                   Choose how your invitation should feel.
                 </h2>
 
-                <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                <p className="mt-1.5 max-w-2xl text-[0.78rem] font-semibold leading-5 text-[var(--color-charcoal)]/56">
                   Preview one of the three curated designs created for this event type. Selecting a
                   design changes the preview only — nothing is saved until you apply it.
                 </p>
@@ -890,29 +890,29 @@ export function InvitationWorkspacePage() {
               mode="preview"
             />
 
-            <div className="mt-6 rounded-[2rem] border border-white/62 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(242,234,246,0.42))] p-5 shadow-[0_20px_55px_rgba(31,27,29,0.06)] backdrop-blur-2xl sm:p-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mt-4 rounded-[1.7rem] border border-white/62 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(242,234,246,0.42))] p-4 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                  <p className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
                     Available designs
                   </p>
 
-                  <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                  <h3 className="mt-1 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                     Three curated looks for {event.eventType}.
                   </h3>
 
-                  <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/54">
+                  <p className="mt-1 max-w-2xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
                     Each design contains two coordinated artworks while keeping one stable template
                     ID behind the scenes.
                   </p>
                 </div>
 
-                <span className="rounded-full border border-white/66 bg-white/42 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)] shadow-[0_8px_22px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                <span className="shrink-0 rounded-full border border-white/66 bg-white/42 px-3 py-1.5 text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)] shadow-[0_8px_22px_rgba(31,27,29,0.05)] backdrop-blur-xl">
                   {invitationTemplates.length} designs
                 </span>
               </div>
 
-              <div className="mt-6 grid gap-4 lg:grid-cols-3">
+              <div className="mt-4 grid gap-3 lg:grid-cols-3">
                 {invitationTemplates.map((template) => {
                   const isSelected = previewInvitationTemplate === template.id;
                   const isSaved = savedInvitationTemplate === template.id;
@@ -925,14 +925,14 @@ export function InvitationWorkspacePage() {
                       type="button"
                       aria-pressed={isSelected}
                       disabled={isInvitationDesignLocked}
-                      className={`group/template relative overflow-hidden rounded-[1.7rem] border text-left shadow-[0_16px_40px_rgba(31,27,29,0.06)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed ${
+                      className={`group/template relative overflow-hidden rounded-[1.35rem] border text-left shadow-[0_12px_30px_rgba(31,27,29,0.05)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed ${
                         isInvitationDesignLocked
                           ? isSelected
                             ? 'border-[rgba(93,58,85,0.30)] bg-white/66 ring-2 ring-[rgba(93,58,85,0.08)]'
                             : 'border-white/52 bg-white/30 opacity-55'
                           : isSelected
-                            ? 'border-[rgba(93,58,85,0.42)] bg-white/72 shadow-[0_22px_54px_rgba(93,58,85,0.14)] ring-2 ring-[rgba(93,58,85,0.12)]'
-                            : 'border-white/62 bg-white/38 hover:-translate-y-1 hover:border-white/88 hover:bg-white/58 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]'
+                            ? 'border-[rgba(93,58,85,0.42)] bg-white/72 shadow-[0_18px_42px_rgba(93,58,85,0.12)] ring-2 ring-[rgba(93,58,85,0.12)]'
+                            : 'border-white/62 bg-white/38 hover:-translate-y-0.5 hover:border-white/88 hover:bg-white/58'
                       }`}
                       onClick={() => {
                         updateInvitationDesignMutation.reset();
@@ -944,7 +944,7 @@ export function InvitationWorkspacePage() {
                         setSelectedInvitationFont(defaults.font);
                       }}
                     >
-                      <div className="relative aspect-[16/10] overflow-hidden">
+                      <div className="relative aspect-[16/7] overflow-hidden">
                         <img
                           src={primaryArtwork.imagePath}
                           alt={primaryArtwork.alt}
@@ -953,21 +953,21 @@ export function InvitationWorkspacePage() {
 
                         <div
                           aria-hidden="true"
-                          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_38%,rgba(20,18,21,0.68)_100%)]"
+                          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_28%,rgba(20,18,21,0.72)_100%)]"
                         />
 
-                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3">
                           <div className="min-w-0">
-                            <p className="truncate text-lg font-black tracking-[-0.03em] text-white">
+                            <p className="truncate text-base font-black tracking-[-0.03em] text-white">
                               {template.name}
                             </p>
 
-                            <p className="mt-1 truncate text-xs font-bold uppercase tracking-[0.12em] text-white/72">
+                            <p className="mt-0.5 truncate text-[0.6rem] font-bold uppercase tracking-[0.12em] text-white/72">
                               {template.previewLabel}
                             </p>
                           </div>
 
-                          <div className="relative size-14 shrink-0 overflow-hidden rounded-xl border border-white/42 bg-white/16 shadow-[0_8px_22px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+                          <div className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-white/42 bg-white/16 shadow-[0_6px_18px_rgba(0,0,0,0.18)] backdrop-blur-xl">
                             <img
                               src={companionArtwork.imagePath}
                               alt=""
@@ -978,36 +978,38 @@ export function InvitationWorkspacePage() {
                         </div>
                       </div>
 
-                      <div className="p-4">
+                      <div className="flex min-h-[5.4rem] flex-col justify-between p-3">
                         <div className="flex items-start justify-between gap-3">
-                          <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
+                          <p className="line-clamp-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/60">
                             {template.description}
                           </p>
 
                           <span
-                            className={`grid size-8 shrink-0 place-items-center rounded-full border transition duration-300 ${
+                            className={`grid size-7 shrink-0 place-items-center rounded-full border transition duration-300 ${
                               isSelected
                                 ? 'border-[rgba(93,58,85,0.24)] bg-[var(--color-deep-plum)] text-white'
                                 : 'border-white/66 bg-white/40 text-transparent'
                             }`}
                           >
-                            <Check aria-hidden="true" className="size-4" />
+                            <Check aria-hidden="true" className="size-3.5" />
                           </span>
                         </div>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {isSelected ? (
-                            <span className="status-chip" data-tone="plum">
-                              Selected
-                            </span>
-                          ) : null}
+                        {isSelected || isSaved ? (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {isSelected ? (
+                              <span className="status-chip" data-tone="plum">
+                                Selected
+                              </span>
+                            ) : null}
 
-                          {isSaved ? (
-                            <span className="status-chip" data-tone="green">
-                              Saved design
-                            </span>
-                          ) : null}
-                        </div>
+                            {isSaved ? (
+                              <span className="status-chip" data-tone="green">
+                                Saved design
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </div>
                     </button>
                   );
@@ -1015,51 +1017,54 @@ export function InvitationWorkspacePage() {
               </div>
 
               {previewTemplateDefinition ? (
-                <div className="mt-6 border-t border-[rgba(93,58,85,0.09)] pt-6">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                      Customise design
-                    </p>
+                <div className="mt-4 border-t border-[rgba(93,58,85,0.09)] pt-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <p className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Customise design
+                      </p>
 
-                    <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      Choose the artwork and typography.
-                    </h3>
+                      <h3 className="mt-1 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                        Choose the artwork and typography.
+                      </h3>
 
-                    <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/54">
-                      Keep the curated invitation structure while choosing the main artwork and font
-                      that best suit this event.
-                    </p>
+                      <p className="mt-1 max-w-2xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+                        Keep the curated invitation structure while choosing the main artwork and
+                        font that best suit this event.
+                      </p>
+                    </div>
 
                     {isInvitationDesignConfirmed ? (
-                      <div className="mt-5 flex items-start gap-3 rounded-[1.35rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] p-4">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
-                          <LockKeyhole aria-hidden="true" className="size-4" />
+                      <div className="flex max-w-xl items-center gap-2.5 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3 py-2.5">
+                        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                          <LockKeyhole aria-hidden="true" className="size-3.5" />
                         </span>
 
                         <div>
-                          <p className="text-sm font-black text-[var(--color-near-black)]">
+                          <p className="text-xs font-black text-[var(--color-near-black)]">
                             Invitation design locked
                           </p>
 
-                          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
+                          <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/56">
                             The first guest invitation has already been created. This saved
                             template, artwork and font now apply to every invitation for this event.
                           </p>
                         </div>
                       </div>
                     ) : null}
+
                     {!isInvitationDesignConfirmed && invitationWorkflowLockedMessage ? (
-                      <div className="mt-5 flex items-start gap-3 rounded-[1.35rem] border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] p-4">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
-                          <LockKeyhole aria-hidden="true" className="size-4" />
+                      <div className="flex max-w-xl items-center gap-2.5 rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.06)] px-3 py-2.5">
+                        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                          <LockKeyhole aria-hidden="true" className="size-3.5" />
                         </span>
 
                         <div>
-                          <p className="text-sm font-black text-[var(--color-near-black)]">
+                          <p className="text-xs font-black text-[var(--color-near-black)]">
                             Invitation design is read-only
                           </p>
 
-                          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
+                          <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/56">
                             {invitationWorkflowLockedMessage}
                           </p>
                         </div>
@@ -1067,17 +1072,21 @@ export function InvitationWorkspacePage() {
                     ) : null}
                   </div>
 
-                  <div className="mt-6 grid gap-5 lg:grid-cols-2">
-                    <section className="rounded-[1.6rem] border border-white/60 bg-white/34 p-5">
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
-                        Main artwork
-                      </p>
+                  <div className="mt-3 grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
+                    <section className="rounded-[1.3rem] border border-white/60 bg-white/34 p-3.5">
+                      <div className="flex items-end justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black text-[var(--color-near-black)]">
+                            Main artwork
+                          </p>
 
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
-                        Choose which of the two curated images leads the invitation.
-                      </p>
+                          <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
+                            Choose which of the two curated images leads the invitation.
+                          </p>
+                        </div>
+                      </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="mt-3 grid grid-cols-2 gap-2.5">
                         {previewTemplateDefinition.backgrounds.map((artwork, index) => {
                           const artworkNumber = (index + 1) as 1 | 2;
                           const isSelected = selectedInvitationArtwork === artworkNumber;
@@ -1087,7 +1096,7 @@ export function InvitationWorkspacePage() {
                               key={artwork.id}
                               type="button"
                               disabled={isInvitationDesignLocked}
-                              className={`overflow-hidden rounded-[1.25rem] border text-left transition disabled:cursor-not-allowed ${
+                              className={`overflow-hidden rounded-xl border text-left transition disabled:cursor-not-allowed ${
                                 isSelected
                                   ? 'border-[rgba(93,58,85,0.42)] bg-white/72 ring-2 ring-[rgba(93,58,85,0.12)]'
                                   : isInvitationDesignLocked
@@ -1102,16 +1111,16 @@ export function InvitationWorkspacePage() {
                               <img
                                 src={artwork.imagePath}
                                 alt={artwork.alt}
-                                className="aspect-[16/10] w-full object-cover"
+                                className="aspect-[16/6] w-full object-cover"
                               />
 
-                              <div className="flex items-center justify-between gap-3 p-3">
-                                <span className="text-sm font-black text-[var(--color-near-black)]">
+                              <div className="flex items-center justify-between gap-2 px-2.5 py-2">
+                                <span className="text-xs font-black text-[var(--color-near-black)]">
                                   Artwork {artworkNumber}
                                 </span>
 
                                 {isSelected ? (
-                                  <Check className="size-4 text-[var(--color-deep-plum)]" />
+                                  <Check className="size-3.5 text-[var(--color-deep-plum)]" />
                                 ) : null}
                               </div>
                             </button>
@@ -1120,20 +1129,20 @@ export function InvitationWorkspacePage() {
                       </div>
                     </section>
 
-                    <section className="rounded-[1.6rem] border border-white/60 bg-white/34 p-5">
-                      <p className="text-sm font-black text-[var(--color-near-black)]">Font</p>
+                    <section className="rounded-[1.3rem] border border-white/60 bg-white/34 p-3.5">
+                      <p className="text-xs font-black text-[var(--color-near-black)]">Font</p>
 
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                      <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
                         Choose the typeface used for the main invitation heading.
                       </p>
 
-                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <div className="mt-3 grid grid-cols-2 gap-2">
                         {invitationFontOptions.map((option) => (
                           <button
                             key={option.id}
                             type="button"
                             disabled={isInvitationDesignLocked}
-                            className={`rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed ${
+                            className={`rounded-xl border px-3 py-2.5 text-left transition disabled:cursor-not-allowed ${
                               selectedInvitationFont === option.id
                                 ? 'border-[rgba(93,58,85,0.36)] bg-[rgba(183,167,200,0.16)]'
                                 : isInvitationDesignLocked
@@ -1145,11 +1154,11 @@ export function InvitationWorkspacePage() {
                               setSelectedInvitationFont(option.id);
                             }}
                           >
-                            <p className="text-base font-black text-[var(--color-near-black)]">
+                            <p className="text-sm font-black text-[var(--color-near-black)]">
                               {option.label}
                             </p>
 
-                            <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                            <p className="mt-0.5 line-clamp-2 text-[0.66rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
                               {option.description}
                             </p>
                           </button>
@@ -1163,19 +1172,19 @@ export function InvitationWorkspacePage() {
               {updateInvitationDesignMutation.isError ? (
                 <div
                   role="alert"
-                  className="mt-5 rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                  className="mt-3 rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-3"
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                      <CircleAlert aria-hidden="true" className="size-4" />
+                  <div className="flex items-start gap-2.5">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                      <CircleAlert aria-hidden="true" className="size-3.5" />
                     </span>
 
                     <div>
-                      <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                      <p className="text-xs font-black text-[var(--color-muted-burgundy)]">
                         Invitation design could not be saved
                       </p>
 
-                      <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                      <p className="mt-0.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/66">
                         {updateInvitationDesignMutation.error instanceof Error &&
                         !axios.isAxiosError(updateInvitationDesignMutation.error)
                           ? updateInvitationDesignMutation.error.message
@@ -1187,18 +1196,18 @@ export function InvitationWorkspacePage() {
               ) : null}
 
               {updateInvitationDesignMutation.isSuccess && !hasInvitationDesignChanges ? (
-                <div className="mt-5 rounded-[1.35rem] border border-[rgba(142,151,115,0.24)] bg-[rgba(238,244,224,0.62)] p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#596449]">
-                      <Check aria-hidden="true" className="size-4" />
+                <div className="mt-3 rounded-xl border border-[rgba(142,151,115,0.24)] bg-[rgba(238,244,224,0.62)] p-3">
+                  <div className="flex items-start gap-2.5">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(142,151,115,0.20)] text-[#596449]">
+                      <Check aria-hidden="true" className="size-3.5" />
                     </span>
 
                     <div>
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
                         Invitation design saved
                       </p>
 
-                      <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                      <p className="mt-0.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
                         New and existing guest invitation links for this event will use this event
                         design.
                       </p>
@@ -1207,9 +1216,9 @@ export function InvitationWorkspacePage() {
                 </div>
               ) : null}
 
-              <div className="mt-6 flex flex-col gap-4 border-t border-[rgba(93,58,85,0.09)] pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-3 flex flex-col gap-3 border-t border-[rgba(93,58,85,0.09)] pt-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-black text-[var(--color-near-black)]">
+                  <p className="text-xs font-black text-[var(--color-near-black)]">
                     {isInvitationDesignConfirmed
                       ? 'This invitation design is permanently locked for this event.'
                       : !isInvitationWorkflowEditable
@@ -1219,7 +1228,7 @@ export function InvitationWorkspacePage() {
                           : 'This is the currently saved event design.'}
                   </p>
 
-                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                  <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
                     {isInvitationDesignConfirmed
                       ? 'Every current and future guest invitation for this event uses this saved design.'
                       : !isInvitationWorkflowEditable
@@ -1230,7 +1239,7 @@ export function InvitationWorkspacePage() {
 
                 <button
                   type="button"
-                  className="btn-primary min-w-40 justify-center text-sm font-bold"
+                  className="btn-primary min-w-36 shrink-0 justify-center px-4 py-2 text-xs font-bold"
                   disabled={
                     isInvitationDesignLocked ||
                     !hasInvitationDesignChanges ||
@@ -1242,11 +1251,11 @@ export function InvitationWorkspacePage() {
                   }}
                 >
                   {isInvitationDesignConfirmed || !isInvitationWorkflowEditable ? (
-                    <LockKeyhole aria-hidden="true" className="size-4" />
+                    <LockKeyhole aria-hidden="true" className="size-3.5" />
                   ) : updateInvitationDesignMutation.isPending ? (
-                    <LoaderCircle className="size-4 animate-spin" />
+                    <LoaderCircle className="size-3.5 animate-spin" />
                   ) : (
-                    <Sparkles aria-hidden="true" className="size-4" />
+                    <Sparkles aria-hidden="true" className="size-3.5" />
                   )}
 
                   {isInvitationDesignConfirmed
@@ -1261,15 +1270,15 @@ export function InvitationWorkspacePage() {
             </div>
           </section>
 
-          <section className="mt-7 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-            <article className="glass-card p-6 sm:p-7">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <section className="mt-5 grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+            <article className="glass-card p-5 sm:p-5">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
-                  <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                     Invitation list
                   </p>
 
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                  <h2 className="mt-1.5 text-[1.65rem] font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                     Invitations generated for your guests.
                   </h2>
                 </div>
@@ -1284,18 +1293,19 @@ export function InvitationWorkspacePage() {
                   Create invitation
                 </button>
               </div>
+
               <form
-                className="mt-6 grid gap-3 lg:grid-cols-[1fr_auto_auto]"
+                className="mt-4 grid gap-2.5 lg:grid-cols-[minmax(0,1fr)_9.5rem_10rem_auto]"
                 onSubmit={(event) => {
                   event.preventDefault();
                   submitInvitationSearch();
                 }}
               >
-                <div className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4 backdrop-blur-xl">
-                  <MailCheck className="size-5 shrink-0 text-[var(--color-charcoal)]/42" />
+                <div className="flex min-h-10 items-center gap-2.5 rounded-xl border border-white/55 bg-white/24 px-3.5 backdrop-blur-xl">
+                  <MailCheck className="size-4 shrink-0 text-[var(--color-charcoal)]/42" />
 
                   <input
-                    className="min-h-12 w-full bg-transparent text-sm font-semibold outline-none placeholder:text-[var(--color-charcoal)]/42"
+                    className="w-full bg-transparent text-sm font-semibold outline-none placeholder:text-[var(--color-charcoal)]/42"
                     type="search"
                     placeholder="Search by guest name or email"
                     value={searchInput}
@@ -1306,7 +1316,7 @@ export function InvitationWorkspacePage() {
                 </div>
 
                 <select
-                  className="form-field min-h-12 lg:w-48"
+                  className="form-field min-h-10 py-2 text-sm"
                   aria-label="Filter invitations by status"
                   value={statusFilter}
                   onChange={(event) => {
@@ -1323,7 +1333,7 @@ export function InvitationWorkspacePage() {
                 </select>
 
                 <select
-                  className="form-field min-h-12 lg:w-52"
+                  className="form-field min-h-10 py-2 text-sm"
                   aria-label="Sort invitations"
                   value={sort}
                   onChange={(event) => {
@@ -1338,65 +1348,68 @@ export function InvitationWorkspacePage() {
                   <option value="guest_name_desc">Guest name Z–A</option>
                 </select>
 
-                <div className="flex flex-wrap gap-3 lg:col-span-3">
-                  <button type="submit" className="btn-primary text-sm font-bold">
-                    Search
-                  </button>
+                <button
+                  type="submit"
+                  className="btn-primary min-h-10 justify-center px-4 py-2 text-sm font-bold"
+                >
+                  Search
+                </button>
 
-                  {searchQuery || statusFilter || sort !== 'newest' ? (
+                {searchQuery || statusFilter || sort !== 'newest' ? (
+                  <div className="lg:col-span-4">
                     <button
                       type="button"
-                      className="btn-secondary text-sm font-bold"
+                      className="btn-secondary px-4 py-2 text-xs font-bold"
                       onClick={clearInvitationFilters}
                     >
                       Clear filters
                     </button>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
               </form>
 
               {invitations.length > 0 ? (
-                <div className="mt-8 grid gap-4">
+                <div className="mt-4 grid gap-3">
                   {invitations.map((invitation) => (
                     <article
                       key={invitation.id}
-                      className="group/invitation relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-4 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.80),rgba(233,224,241,0.58))] hover:shadow-[0_28px_68px_rgba(31,27,29,0.11)] sm:p-5"
+                      className="group/invitation relative overflow-hidden rounded-[1.4rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-4 shadow-[0_14px_34px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.80),rgba(233,224,241,0.58))] hover:shadow-[0_20px_46px_rgba(31,27,29,0.10)]"
                     >
                       <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.16)] opacity-60 blur-3xl transition duration-500 group-hover/invitation:scale-125 group-hover/invitation:bg-[rgba(183,167,200,0.30)] group-hover/invitation:opacity-100"
+                        className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.16)] opacity-60 blur-3xl transition duration-500 group-hover/invitation:scale-125 group-hover/invitation:bg-[rgba(183,167,200,0.30)] group-hover/invitation:opacity-100"
                       />
 
                       <div className="relative">
-                        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-                          <div className="flex min-w-0 items-start gap-4">
-                            <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(93,58,85,0.08)] transition duration-300 group-hover/invitation:-translate-y-0.5 group-hover/invitation:scale-105 group-hover/invitation:bg-[rgba(183,167,200,0.34)] group-hover/invitation:shadow-[0_16px_34px_rgba(93,58,85,0.14)]">
+                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/55 bg-[rgba(183,167,200,0.22)] text-xs font-black text-[var(--color-deep-plum)] shadow-[0_10px_22px_rgba(93,58,85,0.08)] transition duration-300 group-hover/invitation:scale-105">
                               {invitation.guest.firstName.charAt(0)}
                               {invitation.guest.lastName.charAt(0)}
                             </span>
 
                             <div className="min-w-0">
-                              <p className="truncate text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/invitation:translate-x-0.5 group-hover/invitation:text-[var(--color-deep-plum)]">
+                              <p className="truncate text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/invitation:text-[var(--color-deep-plum)]">
                                 {invitation.guest.firstName} {invitation.guest.lastName}
                               </p>
 
-                              <div className="mt-2 flex flex-wrap items-center gap-2">
-                                <span className="max-w-full truncate text-sm font-semibold text-[var(--color-charcoal)]/58">
+                              <div className="mt-1 flex flex-wrap items-center gap-2">
+                                <span className="max-w-full truncate text-xs font-semibold text-[var(--color-charcoal)]/58">
                                   {invitation.guest.email ?? 'No email address provided'}
                                 </span>
 
                                 <span className="size-1 rounded-full bg-[var(--color-charcoal)]/24" />
 
-                                <span className="text-sm font-semibold text-[var(--color-charcoal)]/52">
+                                <span className="text-xs font-semibold text-[var(--color-charcoal)]/52">
                                   Party of {invitation.guest.partySize}
                                 </span>
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap items-center justify-end gap-3">
+                          <div className="flex flex-wrap items-center justify-end gap-2">
                             <span
-                              className="status-chip w-fit transition duration-300 group-hover/invitation:-translate-y-0.5 group-hover/invitation:scale-[1.02] group-hover/invitation:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                              className="status-chip w-fit"
                               data-tone={
                                 invitation.isRevoked
                                   ? 'rose'
@@ -1418,73 +1431,67 @@ export function InvitationWorkspacePage() {
 
                             <button
                               type="button"
-                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_30px_rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
+                              className="grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] disabled:cursor-not-allowed disabled:opacity-35"
                               aria-label={`Regenerate invitation for ${invitation.guest.firstName} ${invitation.guest.lastName}`}
                               disabled={!isInvitationWorkflowEditable}
                               onClick={() => {
                                 openRegenerateInvitationDialog(invitation);
                               }}
                             >
-                              <RefreshCcw
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/invitation:rotate-[10deg]"
-                              />
+                              <RefreshCcw aria-hidden="true" className="size-4" />
                             </button>
 
                             <button
                               type="button"
-                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-[0_10px_24px_rgba(31,27,29,0.04)]"
+                              className="grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] disabled:cursor-not-allowed disabled:opacity-45"
                               aria-label={`Revoke invitation for ${invitation.guest.firstName} ${invitation.guest.lastName}`}
                               disabled={invitation.isRevoked || !isInvitationWorkflowEditable}
                               onClick={() => {
                                 openRevokeInvitationDialog(invitation);
                               }}
                             >
-                              <Ban
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/invitation:rotate-[-4deg]"
-                              />
+                              <Ban aria-hidden="true" className="size-4" />
                             </button>
                           </div>
                         </div>
 
-                        <div className="mt-5 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-4 text-sm sm:grid-cols-2 xl:grid-cols-3">
-                          <div className="rounded-2xl border border-white/45 bg-white/22 p-4 transition duration-300 group-hover/invitation:border-white/72 group-hover/invitation:bg-white/38">
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                        <div className="mt-3 grid gap-2 border-t border-[rgba(93,58,85,0.08)] pt-3 text-xs sm:grid-cols-2 xl:grid-cols-4">
+                          <div className="rounded-xl border border-white/45 bg-white/22 px-3 py-2.5">
+                            <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                               Guest status
                             </p>
 
-                            <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
+                            <p className="mt-1 font-black text-[var(--color-near-black)]">
                               {invitation.guest.status.replaceAll('_', ' ')}
                             </p>
                           </div>
 
-                          <div className="rounded-2xl border border-white/45 bg-white/22 p-4 transition duration-300 group-hover/invitation:border-white/72 group-hover/invitation:bg-white/38">
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          <div className="rounded-xl border border-white/45 bg-white/22 px-3 py-2.5">
+                            <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                               Expires
                             </p>
 
-                            <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
+                            <p className="mt-1 font-black text-[var(--color-near-black)]">
                               {formatEventDate(invitation.expiresAt)}
                             </p>
                           </div>
 
-                          <div className="rounded-2xl border border-white/45 bg-white/22 p-4 transition duration-300 group-hover/invitation:border-white/72 group-hover/invitation:bg-white/38">
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          <div className="rounded-xl border border-white/45 bg-white/22 px-3 py-2.5">
+                            <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                               Created
                             </p>
 
-                            <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
+                            <p className="mt-1 font-black text-[var(--color-near-black)]">
                               {formatEventDate(invitation.createdAt)}
                             </p>
                           </div>
 
-                          <div className="rounded-2xl border border-white/45 bg-white/22 p-4 transition duration-300 group-hover/invitation:border-white/72 group-hover/invitation:bg-white/38 sm:col-span-2 xl:col-span-3">
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          <div className="rounded-xl border border-white/45 bg-white/22 px-3 py-2.5">
+                            <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
                               Last sent
                             </p>
 
-                            <p className="mt-2 font-black leading-6 text-[var(--color-near-black)]">
+                            <p className="mt-1 font-black text-[var(--color-near-black)]">
                               {invitation.lastSentAt
                                 ? formatEventDate(invitation.lastSentAt)
                                 : 'Not recorded'}
@@ -1496,29 +1503,29 @@ export function InvitationWorkspacePage() {
                   ))}
                 </div>
               ) : (
-                <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.50),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
+                <div className="relative mt-4 overflow-hidden rounded-[1.4rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.50),rgba(255,255,255,0.24))] px-5 py-6 text-center shadow-[0_12px_32px_rgba(31,27,29,0.04)] backdrop-blur-xl">
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                    className="pointer-events-none absolute -right-14 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
                   />
 
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+                    className="pointer-events-none absolute -bottom-16 -left-12 size-36 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
                   />
 
                   <div className="relative">
-                    <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
-                      <MailCheck aria-hidden="true" className="size-8" />
+                    <div className="mx-auto grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
+                      <MailCheck aria-hidden="true" className="size-5" />
                     </div>
 
-                    <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    <p className="mt-3 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                       {searchQuery || statusFilter
                         ? 'No invitations match these filters'
                         : 'No invitations created yet'}
                     </p>
 
-                    <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                    <p className="mx-auto mt-1.5 max-w-md text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
                       {searchQuery || statusFilter
                         ? 'Try changing the search term or invitation status filter.'
                         : 'Create the first secure invitation link for a guest and start tracking responses here.'}
@@ -1527,7 +1534,7 @@ export function InvitationWorkspacePage() {
                     {searchQuery || statusFilter ? (
                       <button
                         type="button"
-                        className="btn-secondary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
+                        className="btn-secondary mt-3 justify-center px-4 py-2 text-xs font-bold"
                         onClick={clearInvitationFilters}
                       >
                         Clear filters
@@ -1535,7 +1542,7 @@ export function InvitationWorkspacePage() {
                     ) : (
                       <button
                         type="button"
-                        className="group/first-invitation btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                        className="group/first-invitation btn-primary mt-3 justify-center px-4 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
                         disabled={!isInvitationWorkflowEditable}
                         onClick={openCreateInvitationDialog}
                       >
@@ -1549,35 +1556,31 @@ export function InvitationWorkspacePage() {
                   </div>
                 </div>
               )}
-              {pagination.totalPages > 1 ? (
-                <div className="relative mt-8 overflow-hidden rounded-[1.5rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(228,238,243,0.32))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-xl sm:p-5">
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                  />
 
-                  <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+              {pagination.totalPages > 1 ? (
+                <div className="relative mt-4 overflow-hidden rounded-[1.3rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(228,238,243,0.32))] px-4 py-3 shadow-[0_12px_30px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                  <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)]">
                         <MailCheck aria-hidden="true" className="size-4" />
                       </span>
 
                       <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
+                        <p className="text-xs font-black text-[var(--color-near-black)]">
                           Page {pagination.page} of {pagination.totalPages}
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/50">
+                        <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/50">
                           {pagination.total} {pagination.total === 1 ? 'invitation' : 'invitations'}{' '}
                           in total
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <button
                         type="button"
-                        className="btn-secondary min-w-28 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                        className="btn-secondary min-w-24 justify-center px-3 py-2 text-xs font-bold"
                         disabled={!pagination.hasPreviousPage || invitationsQuery.isFetching}
                         onClick={() => {
                           setPage((currentPage) => Math.max(currentPage - 1, 1));
@@ -1588,7 +1591,7 @@ export function InvitationWorkspacePage() {
 
                       <button
                         type="button"
-                        className="btn-secondary min-w-28 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                        className="btn-secondary min-w-24 justify-center px-3 py-2 text-xs font-bold"
                         disabled={!pagination.hasNextPage || invitationsQuery.isFetching}
                         onClick={() => {
                           setPage((currentPage) => currentPage + 1);
@@ -1602,61 +1605,61 @@ export function InvitationWorkspacePage() {
               ) : null}
             </article>
 
-            <aside className="self-start space-y-5">
-              <article className="group/context relative overflow-hidden rounded-[2rem] border border-white/68 bg-[linear-gradient(145deg,rgba(255,255,255,0.76),rgba(242,234,246,0.82))] p-6 shadow-[0_24px_70px_rgba(31,27,29,0.08)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_30px_78px_rgba(31,27,29,0.11)] sm:p-7">
+            <aside className="self-start">
+              <article className="group/context relative overflow-hidden rounded-[1.65rem] border border-white/68 bg-[linear-gradient(145deg,rgba(255,255,255,0.76),rgba(242,234,246,0.82))] p-5 shadow-[0_18px_50px_rgba(31,27,29,0.07)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_24px_58px_rgba(31,27,29,0.10)]">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl transition duration-500 group-hover/context:scale-125 group-hover/context:bg-[rgba(183,167,200,0.34)]"
+                  className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl transition duration-500 group-hover/context:scale-125"
                 />
 
                 <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                      <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                         Event context
                       </p>
 
-                      <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                      <h2 className="mt-1.5 text-[1.65rem] font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                         Invitation essentials.
                       </h2>
 
-                      <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                      <p className="mt-1.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
                         Keep the event details visible while managing guest access.
                       </p>
                     </div>
 
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(31,27,29,0.08)] transition duration-300 group-hover/context:-translate-y-0.5 group-hover/context:scale-105">
-                      <Send aria-hidden="true" className="size-5" />
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_22px_rgba(31,27,29,0.07)]">
+                      <Send aria-hidden="true" className="size-4" />
                     </span>
                   </div>
 
-                  <div className="mt-7 grid gap-3">
-                    <div className="rounded-[1.4rem] border border-white/60 bg-white/34 p-5 backdrop-blur-xl transition duration-300 group-hover/context:bg-white/46">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                  <div className="mt-4 grid gap-2">
+                    <div className="rounded-[1.1rem] border border-white/60 bg-white/34 px-4 py-3 backdrop-blur-xl transition duration-300 group-hover/context:bg-white/46">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                         Event date
                       </p>
 
-                      <p className="mt-2 text-xl font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      <p className="mt-1 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                         {formatEventDate(event.eventDate)}
                       </p>
                     </div>
 
-                    <div className="rounded-[1.4rem] border border-white/60 bg-white/34 p-5 backdrop-blur-xl transition duration-300 group-hover/context:bg-white/46">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                    <div className="rounded-[1.1rem] border border-white/60 bg-white/34 px-4 py-3 backdrop-blur-xl transition duration-300 group-hover/context:bg-white/46">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                         Location
                       </p>
 
-                      <p className="mt-2 text-xl font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      <p className="mt-1 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                         {event.location}
                       </p>
                     </div>
 
-                    <div className="rounded-[1.4rem] border border-white/60 bg-white/34 p-5 backdrop-blur-xl transition duration-300 group-hover/context:bg-white/46">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                    <div className="rounded-[1.1rem] border border-white/60 bg-white/34 px-4 py-3 backdrop-blur-xl transition duration-300 group-hover/context:bg-white/46">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                         Guest target
                       </p>
 
-                      <p className="mt-2 text-xl font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                      <p className="mt-1 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                         {event.guestCount ?? 'Not set'}
                       </p>
                     </div>

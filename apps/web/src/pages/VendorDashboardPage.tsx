@@ -553,10 +553,13 @@ export function VendorDashboardPage() {
         aria-hidden="true"
         className="vendor-dashboard-blob-b pointer-events-none absolute -right-36 top-[34rem] size-[28rem] rounded-full bg-[var(--color-powder-blue)]/17 blur-3xl"
       />
-      <div ref={workspaceContentRef} className="workspace-container relative">
-        <div className="mt-5"></div>
+      <div
+        ref={workspaceContentRef}
+        className="workspace-container relative !max-w-[1480px] xl:px-5 2xl:px-4"
+      >
+        <div className="mt-3"></div>
 
-        <main className="py-10">
+        <main className="py-6">
           <section
             data-vendor-reveal
             className="vendor-dashboard-reveal relative overflow-hidden rounded-[2.2rem] border border-white/80 bg-white/70 shadow-[0_28px_90px_rgba(64,42,51,0.10)] backdrop-blur-3xl"
@@ -580,27 +583,28 @@ export function VendorDashboardPage() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_22%,rgba(175,201,216,0.36),transparent_30%),radial-gradient(circle_at_90%_82%,rgba(183,167,200,0.38),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(244,237,239,0.86))]" />
             )}
 
-            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-end lg:p-10">
+            <div className="relative grid gap-6 p-5 sm:p-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-end lg:p-7">
               <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
+                <div className="soft-chip mb-4 w-fit text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
                   <LayoutDashboard className="size-4" />
                   Vendor workspace
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
+                <h1 className="max-w-4xl text-balance text-[2.7rem] font-black leading-[0.96] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-[3.15rem] lg:text-[3.45rem]">
                   {getGreeting()}, {user.firstName}. Keep your business moving beautifully.
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
+                <p className="mt-4 max-w-2xl text-pretty text-[0.95rem] font-medium leading-7 text-[var(--color-charcoal)]/68">
                   Review incoming opportunities, respond to customers, manage confirmed work, and
                   keep your vendor profile ready for the next event.
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-wrap gap-3">
                   <Link to="/vendor/quotation-requests" className="btn-primary text-sm font-bold">
                     Review opportunities
                     <ArrowRight className="size-4" />
                   </Link>
+
                   <Link to="/vendor/portfolio" className="btn-secondary text-sm font-bold">
                     <Images className="size-4" />
                     Manage portfolio
@@ -608,9 +612,9 @@ export function VendorDashboardPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_50px_rgba(31,27,29,0.10)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(31,27,29,0.14)]">
-                <div className="flex items-start gap-4">
-                  <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full border border-white/80 bg-white p-1 shadow-[0_14px_34px_rgba(57,37,45,0.18)]">
+              <div className="rounded-[1.55rem] border border-white/70 bg-white/52 p-4 shadow-[0_18px_50px_rgba(31,27,29,0.10)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(31,27,29,0.14)]">
+                <div className="flex items-center gap-3">
+                  <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full border border-white/80 bg-white p-1 shadow-[0_14px_34px_rgba(57,37,45,0.18)]">
                     {businessLogoUrl ? (
                       <img
                         src={businessLogoUrl}
@@ -618,37 +622,42 @@ export function VendorDashboardPage() {
                         className="h-full w-full rounded-full object-cover"
                       />
                     ) : (
-                      <div className="grid h-full w-full place-items-center rounded-full bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-lg font-black text-white">
+                      <div className="grid h-full w-full place-items-center rounded-full bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-base font-black text-white">
                         {businessInitials}
                       </div>
                     )}
                   </div>
+
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    <p className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
                       Business profile
                     </p>
-                    <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+
+                    <h2 className="mt-1 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                       {onboarding.profile.businessName}
                     </h2>
-                    <p className="mt-2 text-sm font-semibold text-[var(--color-charcoal)]/58">
+
+                    <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/58">
                       {onboarding.profile.baseLocation ?? 'Location not added'}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   {onboarding.profile.categories.length > 0 ? (
                     onboarding.profile.categories.slice(0, 3).map((category) => (
-                      <span key={category.id} className="soft-chip text-xs font-bold">
+                      <span key={category.id} className="soft-chip text-[0.68rem] font-bold">
                         {category.name}
                       </span>
                     ))
                   ) : (
-                    <span className="soft-chip text-xs font-bold">Add service categories</span>
+                    <span className="soft-chip text-[0.68rem] font-bold">
+                      Add service categories
+                    </span>
                   )}
                 </div>
 
-                <div className="mt-6 flex items-center justify-between gap-4">
+                <div className="mt-4 flex items-center justify-between gap-4">
                   <span
                     className="status-chip"
                     data-tone={
@@ -663,9 +672,10 @@ export function VendorDashboardPage() {
                   >
                     {onboarding.profile.verificationStatus.replaceAll('_', ' ')}
                   </span>
+
                   <Link
                     to="/vendor/profile"
-                    className="text-sm font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)]"
+                    className="text-xs font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)]"
                   >
                     Manage profile
                   </Link>
@@ -676,7 +686,7 @@ export function VendorDashboardPage() {
 
           <section
             data-vendor-reveal
-            className="vendor-dashboard-reveal mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            className="vendor-dashboard-reveal mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
           >
             {stats.map((stat, index) => (
               <div
@@ -691,9 +701,9 @@ export function VendorDashboardPage() {
 
           <section
             data-vendor-reveal
-            className="vendor-dashboard-reveal mt-5 grid gap-5 lg:grid-cols-[1.18fr_0.82fr]"
+            className="vendor-dashboard-reveal mt-4 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]"
           >
-            <div className="vendor-card-trace rounded-[2rem]">
+            <div className="vendor-card-trace overflow-hidden rounded-[1.75rem]">
               <VendorOnboardingCard onboarding={onboarding} />
             </div>
 
@@ -830,26 +840,34 @@ export function VendorDashboardPage() {
             </article>
           </section>
 
-          <section
+                    <section
             data-vendor-reveal
-            className="vendor-dashboard-reveal mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]"
+            className="vendor-dashboard-reveal mt-4 grid items-start gap-4 lg:grid-cols-[1.42fr_0.58fr]"
           >
-            <article className="vendor-card-trace workspace-panel relative overflow-hidden">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <article className="vendor-card-trace workspace-panel relative overflow-hidden !p-5">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                   <p className="section-eyebrow">Incoming opportunities</p>
-                  <h2 className="section-title">Recent quotation requests</h2>
-                  <p className="section-description">
+
+                  <h2 className="mt-1.5 text-[1.7rem] font-black leading-tight tracking-[-0.045em] text-[var(--color-near-black)]">
+                    Recent quotation requests
+                  </h2>
+
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
                     Review customer requirements and respond before their requested deadlines.
                   </p>
                 </div>
-                <Link to="/vendor/quotation-requests" className="btn-secondary text-sm font-bold">
+
+                <Link
+                  to="/vendor/quotation-requests"
+                  className="btn-secondary shrink-0 px-4 py-2 text-xs font-bold"
+                >
                   View all requests
                 </Link>
               </div>
 
               {quotationRequests.length > 0 ? (
-                <div className="mt-7 grid gap-4">
+                <div className="mt-4 grid gap-3">
                   {quotationRequests.map((quotationRequest) => (
                     <VendorQuotationCard
                       key={quotationRequest.id}
@@ -858,24 +876,24 @@ export function VendorDashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="group relative mt-7 overflow-hidden rounded-[1.8rem] border border-dashed border-[rgba(142,92,103,0.24)] bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(248,238,241,0.48))] p-6 sm:p-7">
+                <div className="group relative mt-4 overflow-hidden rounded-[1.4rem] border border-dashed border-[rgba(142,92,103,0.24)] bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(248,238,241,0.48))] p-4">
                   <div
                     aria-hidden="true"
-                    className="vendor-dashboard-orbit pointer-events-none absolute -right-12 -top-12 size-40 rounded-full border border-[rgba(142,92,103,0.14)]"
+                    className="vendor-dashboard-orbit pointer-events-none absolute -right-12 -top-12 size-36 rounded-full border border-[rgba(142,92,103,0.14)]"
                   />
 
-                  <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="vendor-dashboard-float-icon grid size-14 shrink-0 place-items-center rounded-2xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
-                        <FileText className="size-7" />
+                  <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="vendor-dashboard-float-icon grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
+                        <FileText className="size-4" />
                       </div>
 
                       <div>
-                        <h3 className="text-xl font-black text-[var(--color-near-black)]">
+                        <h3 className="text-sm font-black text-[var(--color-near-black)]">
                           No quotation requests yet
                         </h3>
 
-                        <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                        <p className="mt-1 max-w-xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
                           Keep your packages clear and complete so customers can send structured
                           requests directly to your business.
                         </p>
@@ -884,7 +902,7 @@ export function VendorDashboardPage() {
 
                     <Link
                       to="/vendor/packages"
-                      className="btn-secondary shrink-0 text-sm font-bold"
+                      className="btn-secondary shrink-0 px-4 py-2 text-xs font-bold"
                     >
                       Review service packages
                     </Link>
@@ -898,47 +916,55 @@ export function VendorDashboardPage() {
 
           <section
             data-vendor-reveal
-            className="vendor-card-trace vendor-dashboard-reveal mt-5 workspace-panel relative overflow-hidden"
+            className="vendor-card-trace vendor-dashboard-reveal mt-4 workspace-panel relative overflow-hidden !p-5"
           >
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
               <div>
                 <p className="section-eyebrow">Upcoming work</p>
-                <h2 className="section-title">Recent and scheduled bookings</h2>
-                <p className="section-description">
+
+                <h2 className="mt-1.5 text-[1.7rem] font-black leading-tight tracking-[-0.045em] text-[var(--color-near-black)]">
+                  Recent and scheduled bookings
+                </h2>
+
+                <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
                   Stay ahead of confirmation requests, deposits, service dates, and active customer
                   commitments.
                 </p>
               </div>
-              <Link to="/vendor/bookings" className="btn-secondary text-sm font-bold">
+
+              <Link
+                to="/vendor/bookings"
+                className="btn-secondary shrink-0 px-4 py-2 text-xs font-bold"
+              >
                 View all bookings
               </Link>
             </div>
 
             {recentBookings.length > 0 ? (
-              <div className="mt-7 grid gap-4 lg:grid-cols-2">
+              <div className="mt-4 grid gap-3 lg:grid-cols-2">
                 {recentBookings.map((booking) => (
                   <VendorBookingCard key={booking.id} booking={booking} />
                 ))}
               </div>
             ) : (
-              <div className="group relative mt-7 overflow-hidden rounded-[1.8rem] border border-dashed border-[rgba(142,151,115,0.28)] bg-[linear-gradient(135deg,rgba(255,255,255,0.74),rgba(241,243,234,0.54))] p-6 sm:p-7">
+              <div className="group relative mt-4 overflow-hidden rounded-[1.4rem] border border-dashed border-[rgba(142,151,115,0.28)] bg-[linear-gradient(135deg,rgba(255,255,255,0.74),rgba(241,243,234,0.54))] p-4">
                 <div
                   aria-hidden="true"
                   className="vendor-dashboard-orbit pointer-events-none absolute -bottom-16 -left-10 size-44 rounded-full border border-[rgba(142,151,115,0.16)]"
                 />
 
-                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="vendor-dashboard-float-icon grid size-14 shrink-0 place-items-center rounded-2xl bg-[rgba(142,151,115,0.2)] text-[#596043]">
-                      <BriefcaseBusiness className="size-7" />
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="vendor-dashboard-float-icon grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.2)] text-[#596043]">
+                      <BriefcaseBusiness className="size-4" />
                     </div>
 
                     <div>
-                      <h3 className="text-xl font-black text-[var(--color-near-black)]">
+                      <h3 className="text-sm font-black text-[var(--color-near-black)]">
                         No bookings yet
                       </h3>
 
-                      <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                      <p className="mt-1 max-w-xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
                         Accepted quotations will appear here as booking requests ready for your
                         confirmation.
                       </p>
@@ -947,7 +973,7 @@ export function VendorDashboardPage() {
 
                   <Link
                     to="/vendor/quotation-requests"
-                    className="btn-secondary shrink-0 text-sm font-bold"
+                    className="btn-secondary shrink-0 px-4 py-2 text-xs font-bold"
                   >
                     View quotation requests
                   </Link>
@@ -958,132 +984,172 @@ export function VendorDashboardPage() {
 
           <section
             data-vendor-reveal
-            className="vendor-dashboard-reveal mt-5 grid gap-5 lg:grid-cols-2"
+            className="vendor-dashboard-reveal mt-4 grid items-start gap-4 lg:grid-cols-2"
           >
-            <article className="vendor-card-trace workspace-panel relative overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(47,31,38,0.10)]">
+            <article className="vendor-card-trace workspace-panel relative overflow-hidden !p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_55px_rgba(47,31,38,0.09)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="section-eyebrow">Availability</p>
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+
+                  <h2 className="mt-1.5 text-[1.7rem] font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                     Next 30 days
                   </h2>
                 </div>
-                <CalendarDays className="size-6 text-[var(--color-deep-plum)]" />
+
+                <div className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
+                  <CalendarDays className="size-4" />
+                </div>
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl bg-white/38 p-4">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/56">
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-white/38 px-3.5 py-3">
+                  <p className="text-xs font-bold text-[var(--color-charcoal)]/52">
                     Scheduled bookings
                   </p>
-                  <p className="section-title">{availability.bookings.length}</p>
+
+                  <p className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {availability.bookings.length}
+                  </p>
                 </div>
-                <div className="rounded-2xl bg-white/38 p-4">
-                  <p className="text-sm font-bold text-[var(--color-charcoal)]/56">
+
+                <div className="rounded-xl bg-white/38 px-3.5 py-3">
+                  <p className="text-xs font-bold text-[var(--color-charcoal)]/52">
                     Blocked periods
                   </p>
-                  <p className="section-title">{availability.blocks.length}</p>
+
+                  <p className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {availability.blocks.length}
+                  </p>
                 </div>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-white/65 bg-white/30 p-4">
-                <p className="text-sm font-black text-[var(--color-near-black)]">
-                  Keep your calendar accurate
-                </p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                  Block unavailable dates early so customers can make better booking decisions.
-                </p>
-              </div>
+              <div className="mt-3 flex flex-col gap-3 rounded-xl border border-white/65 bg-white/30 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-black text-[var(--color-near-black)]">
+                    Keep your calendar accurate
+                  </p>
 
-              <Link to="/vendor/availability" className="btn-secondary mt-6 text-sm font-bold">
-                Manage availability
-              </Link>
+                  <p className="mt-1 max-w-md text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
+                    Block unavailable dates early so customers can make better booking decisions.
+                  </p>
+                </div>
+
+                <Link
+                  to="/vendor/availability"
+                  className="btn-secondary shrink-0 px-3 py-2 text-xs font-bold"
+                >
+                  Manage availability
+                </Link>
+              </div>
             </article>
 
-            <article className="vendor-card-trace workspace-panel relative overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(47,31,38,0.10)]">
+            <article className="vendor-card-trace workspace-panel relative overflow-hidden !p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_55px_rgba(47,31,38,0.09)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="section-eyebrow">Notifications</p>
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+
+                  <h2 className="mt-1.5 text-[1.7rem] font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                     Latest business updates
                   </h2>
                 </div>
-                <Bell className="size-6 text-[var(--color-deep-plum)]" />
+
+                <div className="relative grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
+                  <Bell className="size-4" />
+
+                  {unreadNotificationCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full bg-[var(--color-muted-burgundy)] px-1 text-[0.55rem] font-black leading-4 text-white">
+                      {unreadNotificationCount}
+                    </span>
+                  ) : null}
+                </div>
               </div>
 
               {notifications.length > 0 ? (
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 space-y-2">
                   {notifications.slice(0, 4).map((notification) => (
                     <div
                       key={notification.id}
-                      className="rounded-2xl border border-white/55 bg-white/34 px-4 py-3 transition hover:bg-white/52"
+                      className="rounded-xl border border-white/55 bg-white/34 px-3.5 py-2.5 transition hover:bg-white/52"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-black text-[var(--color-near-black)]">
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-black text-[var(--color-near-black)]">
                             {notification.title}
                           </p>
-                          <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
+
+                          <p className="mt-0.5 line-clamp-1 text-[0.68rem] font-semibold leading-5 text-[var(--color-charcoal)]/56">
                             {notification.message}
                           </p>
                         </div>
+
                         {!notification.isRead ? (
-                          <span className="mt-1 size-2 shrink-0 rounded-full bg-[var(--color-muted-burgundy)]" />
+                          <span className="mt-1.5 size-2 shrink-0 rounded-full bg-[var(--color-muted-burgundy)]" />
                         ) : null}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="empty-surface mt-6">
-                  <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                    <Bell className="size-6" />
+                <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-[rgba(93,58,85,0.16)] bg-white/24 px-3.5 py-3">
+                  <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                    <Bell className="size-4" />
                   </div>
-                  <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/58">
+
+                  <p className="text-xs font-semibold text-[var(--color-charcoal)]/58">
                     You do not have any notifications yet.
                   </p>
                 </div>
               )}
 
-              <Link to="/notifications" className="btn-secondary mt-6 text-sm font-bold">
-                View notifications
-              </Link>
+              <div className="mt-3 flex justify-end">
+                <Link
+                  to="/notifications"
+                  className="btn-secondary px-3 py-2 text-xs font-bold"
+                >
+                  View notifications
+                </Link>
+              </div>
             </article>
           </section>
 
           <section
             data-vendor-reveal
-            className="vendor-dashboard-reveal mt-5 rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-white shadow-[0_24px_70px_rgba(93,58,85,0.24)] sm:p-8"
+            className="vendor-dashboard-reveal mt-4 rounded-[1.6rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] px-5 py-4 text-white shadow-[0_18px_50px_rgba(93,58,85,0.20)] sm:px-6"
           >
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-2 text-[var(--color-powder-blue)]">
-                  <Sparkles className="size-5" />
-                  <span className="text-xs font-black uppercase tracking-[0.22em]">
+                  <Sparkles className="size-4" />
+
+                  <span className="text-[0.65rem] font-black uppercase tracking-[0.2em]">
                     Business insight
                   </span>
                 </div>
-                <h2 className="mt-4 text-3xl font-black tracking-[-0.045em]">
+
+                <h2 className="mt-2 text-2xl font-black leading-tight tracking-[-0.04em]">
                   A complete profile and a strong portfolio help customers decide with confidence.
                 </h2>
-                <p className="mt-3 max-w-2xl leading-7 text-white/70">
+
+                <p className="mt-1.5 max-w-2xl text-xs font-semibold leading-5 text-white/68">
                   Keep your service details, availability, and real work updated so every customer
                   sees an accurate picture of your business.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
+
+              <div className="flex shrink-0 flex-wrap gap-2">
                 <Link
                   to="/vendor/profile"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-black !text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(0,0,0,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-light-champagne)] hover:shadow-[0_20px_44px_rgba(0,0,0,0.24)]"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-white px-4 text-xs font-black !text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(0,0,0,0.16)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-light-champagne)]"
                 >
-                  <Store className="size-4 text-[var(--color-deep-plum)]" />
+                  <Store className="size-3.5 text-[var(--color-deep-plum)]" />
                   <span>Update profile</span>
                 </Link>
+
                 <Link
                   to="/vendor/portfolio"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/28 bg-white/12 px-5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-white/18"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-white/28 bg-white/12 px-4 text-xs font-black text-white transition hover:-translate-y-0.5 hover:bg-white/18"
                 >
-                  <Images className="size-4" />
+                  <Images className="size-3.5" />
                   Manage portfolio
                 </Link>
               </div>

@@ -17,7 +17,6 @@ import {
   type VendorServicePackage,
 } from '../features/packages/package.api';
 import { getVendorOnboardingProfile } from '../features/vendors/vendor.api';
-import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const packageFormSchema = z.object({
   categoryId: z.string().trim().min(1, 'Choose a service category.'),
@@ -363,12 +362,6 @@ export function VendorPackagesPage() {
               >
                 Try again
               </button>
-
-              <PageBackButton
-                fallback="/vendor/dashboard"
-                label="Vendor dashboard"
-                className="btn-secondary text-sm font-bold"
-              />
             </div>
 
             <p className="mt-6 text-xs font-semibold text-[var(--color-charcoal)]/46">
@@ -382,224 +375,113 @@ export function VendorPackagesPage() {
   return (
     <div className="workspace-shell relative">
       <div className="workspace-container max-w-7xl">
-        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
-          />
-
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
-
-              <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                  Vendor workspace
-                </p>
-
-                <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
-                  Package management
-                </h1>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="btn-primary w-fit text-sm font-bold"
-              onClick={openCreateDialog}
-            >
-              <PackagePlus className="size-4" />
-              Create package
-            </button>
-          </div>
-        </header>
-
-        <main className="pb-10 pt-6">
-          <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+        <main className="pb-6 pt-2">
+          {/* Compact package overview */}
+          <section className="relative isolate overflow-hidden rounded-[1.6rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_16px_44px_rgba(64,42,51,0.08)] backdrop-blur-2xl">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
+              className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -bottom-36 left-[32%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
+              className="pointer-events-none absolute -bottom-32 left-[30%] size-64 rounded-full bg-[rgba(142,92,103,0.08)] blur-3xl"
             />
 
-            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10 lg:p-10">
-              <div>
-                <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <Layers3 className="size-4" />
+            <div className="relative grid gap-4 px-5 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-7 lg:px-6">
+              <div className="min-w-0">
+                <div className="soft-chip w-fit text-[0.6rem] font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)]">
+                  <Layers3 className="size-3.5" />
                   Service packages
                 </div>
 
-                <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+                <h1 className="mt-2.5 max-w-3xl text-balance text-[1.85rem] font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-[2.15rem]">
                   Turn your services into clear customer-ready offers.
-                </h2>
+                </h1>
 
-                <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
+                <p className="mt-2 max-w-3xl text-[0.8rem] font-medium leading-5 text-[var(--color-charcoal)]/62">
                   Organise your services, starting prices, and package details so customers can
                   understand what you offer before requesting a quotation.
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-2.5">
-                  <span className="soft-chip text-xs font-black">
-                    <Layers3 className="size-4" />
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                  <span className="soft-chip text-[0.65rem] font-black">
+                    <Layers3 className="size-3.5" />
                     {sortedPackages.length} total
                   </span>
 
-                  <span className="soft-chip text-xs font-black">
-                    <span className="size-2 rounded-full bg-emerald-500" />
+                  <span className="soft-chip text-[0.65rem] font-black">
+                    <span className="size-1.5 rounded-full bg-emerald-500" />
                     {activePackageCount} active
                   </span>
 
-                  <span className="soft-chip text-xs font-black">
-                    <span className="size-2 rounded-full bg-[var(--color-muted-burgundy)]/55" />
+                  <span className="soft-chip text-[0.65rem] font-black">
+                    <span className="size-1.5 rounded-full bg-[var(--color-muted-burgundy)]/55" />
                     {inactivePackageCount} inactive
                   </span>
                 </div>
               </div>
 
-              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
-                />
+              <div className="flex flex-col gap-2 sm:flex-row lg:flex-col lg:items-end">
+                <div className="rounded-[1.15rem] border border-white/68 bg-white/46 px-3.5 py-2.5 shadow-[0_10px_26px_rgba(31,27,29,0.05)] backdrop-blur-xl lg:min-w-[16rem]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <Layers3 className="size-3.5" />
+                    </span>
 
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-5">
-                    <div>
-                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    <div className="min-w-0">
+                      <p className="text-[0.56rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
                         Package visibility
                       </p>
 
-                      <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      <p className="text-sm font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                         {activePackageCount > 0 ? 'Customer-ready' : 'Needs attention'}
-                      </h3>
-                    </div>
-
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
-                      <Layers3 className="size-5" />
+                      </p>
                     </div>
                   </div>
 
-                  <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                  <p className="mt-1.5 text-[0.65rem] font-semibold leading-4 text-[var(--color-charcoal)]/56">
                     {activePackageCount > 0
                       ? `${activePackageCount} ${
                           activePackageCount === 1 ? 'package is' : 'packages are'
-                        } currently available to customers.`
-                      : 'Activate at least one package so customers can understand your service options before requesting a quotation.'}
+                        } currently visible to customers.`
+                      : 'Activate a package so customers can explore your service options.'}
                   </p>
-
-                  <div className="mt-6 grid grid-cols-3 gap-3">
-                    <div className="rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
-                      <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                        {sortedPackages.length}
-                      </p>
-
-                      <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/46">
-                        Total
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
-                      <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                        {activePackageCount}
-                      </p>
-
-                      <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/46">
-                        Active
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
-                      <p className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                        {inactivePackageCount}
-                      </p>
-
-                      <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/46">
-                        Inactive
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid gap-2">
-                    <div className="flex items-center gap-3 text-xs font-bold leading-5 text-[var(--color-charcoal)]/55">
-                      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
-                        <Layers3 className="size-3.5" />
-                      </span>
-                      Keep service details clear and easy to compare.
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs font-bold leading-5 text-[var(--color-charcoal)]/55">
-                      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
-                        <PackagePlus className="size-3.5" />
-                      </span>
-                      Add packages when your service range grows.
-                    </div>
-                  </div>
                 </div>
-              </article>
+
+                <button
+                  type="button"
+                  className="btn-primary justify-center px-5 py-2.5 text-xs font-bold"
+                  onClick={openCreateDialog}
+                >
+                  <PackagePlus className="size-4" />
+                  Create package
+                </button>
+              </div>
             </div>
           </section>
 
           {sortedPackages.length > 0 ? (
-            <section className="mt-6">
-              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <p className="section-eyebrow">Service offers</p>
+            <section className="mt-2.5">
+              <div className="rounded-[1.25rem] border border-white/58 bg-white/36 px-4 py-2.5 shadow-[0_10px_28px_rgba(35,24,30,0.045)] backdrop-blur-xl">
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                    <div className="shrink-0">
+                      <p className="text-[0.55rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                        Service offers
+                      </p>
 
-                  <h2 className="section-title">Your service packages</h2>
+                      <h2 className="mt-0.5 text-base font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                        Your service packages
+                      </h2>
+                    </div>
 
-                  <p className="section-description">
-                    Search, filter, update visibility, edit details, or remove packages from your
-                    customer-facing service catalogue.
-                  </p>
-                </div>
+                    <p className="text-[0.65rem] font-medium text-[var(--color-charcoal)]/50">
+                      Search, filter, update visibility, edit details, or remove packages.
+                    </p>
+                  </div>
 
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  <span className="soft-chip text-xs font-black">
-                    <Layers3 className="size-4" />
-                    {sortedPackages.length} total
-                  </span>
-
-                  <span className="soft-chip text-xs font-black">{activePackageCount} active</span>
-                </div>
-              </div>
-
-              <div className="relative overflow-hidden rounded-[1.85rem] border border-white/58 bg-white/42 p-4 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-5">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-20 size-44 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl"
-                />
-
-                <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-                  <label className="relative block">
-                    <span className="sr-only">Search packages</span>
-
-                    <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
-
-                    <input
-                      type="search"
-                      className="form-field bg-white/38 pl-11 pr-11"
-                      placeholder="Search by package title, category, or description"
-                      value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.target.value)}
-                    />
-
-                    {searchQuery ? (
-                      <button
-                        type="button"
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--color-charcoal)]/48 transition hover:bg-white/50 hover:text-[var(--color-deep-plum)]"
-                        aria-label="Clear package search"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    ) : null}
-                  </label>
-
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex shrink-0 flex-wrap gap-1.5">
                     {(['all', 'active', 'inactive'] as const).map((filterOption) => {
                       const filterCount =
                         filterOption === 'all'
@@ -614,20 +496,20 @@ export function VendorPackagesPage() {
                           type="button"
                           onClick={() => setStatusFilter(filterOption)}
                           className={[
-                            'inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-black capitalize transition duration-300',
+                            'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.68rem] font-black capitalize transition duration-300',
                             statusFilter === filterOption
-                              ? 'bg-[var(--color-deep-plum)] text-white shadow-[0_10px_24px_rgba(91,61,82,0.18)]'
-                              : 'border border-white/60 bg-white/34 text-[var(--color-charcoal)] hover:bg-white/52 hover:text-[var(--color-deep-plum)]',
+                              ? 'bg-[var(--color-deep-plum)] text-white shadow-[0_7px_18px_rgba(91,61,82,0.16)]'
+                              : 'border border-white/60 bg-white/38 text-[var(--color-charcoal)] hover:bg-white/58 hover:text-[var(--color-deep-plum)]',
                           ].join(' ')}
                         >
                           {filterOption}
 
                           <span
                             className={[
-                              'rounded-full px-2 py-0.5 text-[0.68rem] font-black',
+                              'rounded-full px-1.5 py-0.5 text-[0.56rem] font-black',
                               statusFilter === filterOption
                                 ? 'bg-white/18 text-white'
-                                : 'bg-white/50 text-[var(--color-charcoal)]/58',
+                                : 'bg-white/55 text-[var(--color-charcoal)]/58',
                             ].join(' ')}
                           >
                             {filterCount}
@@ -637,25 +519,52 @@ export function VendorPackagesPage() {
                     })}
                   </div>
                 </div>
+
+                <label className="relative mt-2 block">
+                  <span className="sr-only">Search packages</span>
+
+                  <span className="pointer-events-none absolute inset-y-0 left-0 z-10 grid w-10 place-items-center">
+                    <Search className="size-3.5 text-[var(--color-charcoal)]/38" />
+                  </span>
+
+                  <input
+                    type="search"
+                    className="form-field !min-h-9 !py-1.5 !pl-10 !pr-10 text-sm"
+                    placeholder="Search packages by title, category, or description"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                  />
+
+                  {searchQuery ? (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute inset-y-0 right-1.5 z-10 my-auto grid size-6 place-items-center rounded-full text-[var(--color-charcoal)]/48 transition hover:bg-white/50 hover:text-[var(--color-deep-plum)]"
+                      aria-label="Clear package search"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  ) : null}
+                </label>
               </div>
             </section>
           ) : null}
 
           {sortedPackages.length === 0 ? (
-            <section className="mt-6 overflow-hidden rounded-[2rem] border border-white/60 bg-white/46 p-6 shadow-[0_20px_56px_rgba(31,27,29,0.07)] backdrop-blur-xl sm:p-8">
-              <div className="grid gap-8 lg:grid-cols-[0.58fr_1fr] lg:items-center">
-                <div className="grid min-h-72 place-items-center rounded-[1.75rem] border border-dashed border-[rgba(93,58,85,0.18)] bg-[linear-gradient(145deg,rgba(183,167,200,0.16),rgba(255,255,255,0.28))] p-6">
+            <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/46 p-5 shadow-[0_18px_50px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+              <div className="grid gap-5 lg:grid-cols-[0.42fr_1fr] lg:items-center">
+                <div className="grid min-h-48 place-items-center rounded-[1.4rem] border border-dashed border-[rgba(93,58,85,0.18)] bg-[linear-gradient(145deg,rgba(183,167,200,0.16),rgba(255,255,255,0.28))] p-5">
                   <div className="text-center">
-                    <div className="mx-auto grid size-16 place-items-center rounded-[1.4rem] bg-white/48 text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.08)]">
-                      <PackagePlus className="size-7" />
+                    <div className="mx-auto grid size-12 place-items-center rounded-[1.15rem] bg-white/48 text-[var(--color-deep-plum)] shadow-[0_12px_30px_rgba(31,27,29,0.08)]">
+                      <PackagePlus className="size-5" />
                     </div>
 
-                    <p className="mt-5 text-sm font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
+                    <p className="mt-3 text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
                       No packages yet
                     </p>
 
-                    <p className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                      Your service catalogue starts here.
+                    <p className="mt-1 text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      Your catalogue starts here.
                     </p>
                   </div>
                 </div>
@@ -663,40 +572,42 @@ export function VendorPackagesPage() {
                 <div className="max-w-2xl">
                   <p className="section-eyebrow">Build your offer</p>
 
-                  <h2 className="section-title">Create your first customer-ready package.</h2>
+                  <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    Create your first customer-ready package.
+                  </h2>
 
-                  <p className="section-description max-w-xl">
-                    Package your services into clear offers with a category, pricing, and useful
+                  <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/60">
+                    Package your services into a clear offer with a category, pricing, and useful
                     context so customers know what they can request.
                   </p>
 
-                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-[1.35rem] border border-white/56 bg-white/30 p-4">
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-[1.1rem] border border-white/56 bg-white/30 p-3">
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
                         Define the service
                       </p>
 
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                      <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
                         Give customers a clear package title.
                       </p>
                     </div>
 
-                    <div className="rounded-[1.35rem] border border-white/56 bg-white/30 p-4">
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                    <div className="rounded-[1.1rem] border border-white/56 bg-white/30 p-3">
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
                         Set expectations
                       </p>
 
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                      <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
                         Explain the service and starting price.
                       </p>
                     </div>
 
-                    <div className="rounded-[1.35rem] border border-white/56 bg-white/30 p-4">
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                    <div className="rounded-[1.1rem] border border-white/56 bg-white/30 p-3">
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
                         Publish when ready
                       </p>
 
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                      <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
                         Control whether customers can see it.
                       </p>
                     </div>
@@ -704,7 +615,7 @@ export function VendorPackagesPage() {
 
                   <button
                     type="button"
-                    className="btn-primary mt-7 text-sm font-bold"
+                    className="btn-primary mt-4 text-sm font-bold"
                     onClick={openCreateDialog}
                   >
                     <PackagePlus className="size-4" />
@@ -714,23 +625,23 @@ export function VendorPackagesPage() {
               </div>
             </section>
           ) : filteredPackages.length === 0 ? (
-            <section className="mt-6 grid min-h-72 place-items-center rounded-[2rem] border border-white/60 bg-white/46 p-8 text-center shadow-[0_20px_56px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+            <section className="mt-4 grid min-h-52 place-items-center rounded-[1.75rem] border border-white/60 bg-white/46 p-6 text-center shadow-[0_18px_50px_rgba(31,27,29,0.07)] backdrop-blur-xl">
               <div className="max-w-md">
-                <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
-                  <Search className="size-6" />
+                <div className="mx-auto grid size-11 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                  <Search className="size-5" />
                 </div>
 
-                <h2 className="mt-5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                <h2 className="mt-3 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                   No matching packages
                 </h2>
 
-                <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/60">
+                <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
                   No packages match your current search and status filter.
                 </p>
 
                 <button
                   type="button"
-                  className="btn-secondary mt-6 text-sm font-bold"
+                  className="btn-secondary mt-4 text-sm font-bold"
                   onClick={() => {
                     setSearchQuery('');
                     setStatusFilter('all');
@@ -742,7 +653,12 @@ export function VendorPackagesPage() {
               </div>
             </section>
           ) : (
-            <section className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <section
+              className={[
+                'mt-4 grid gap-4',
+                filteredPackages.length === 1 ? 'max-w-3xl grid-cols-1' : 'md:grid-cols-2',
+              ].join(' ')}
+            >
               {filteredPackages.map((servicePackage) => (
                 <PackageCard
                   key={servicePackage.id}
@@ -766,7 +682,7 @@ export function VendorPackagesPage() {
           {statusMutation.isError ? (
             <div
               role="alert"
-              className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-5 py-4 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+              className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
             >
               {getErrorMessage(statusMutation.error, 'We could not update the package status.')}
             </div>

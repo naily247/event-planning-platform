@@ -1,5 +1,5 @@
 import { ArrowLeft, CheckCircle2, Home, Sparkles } from 'lucide-react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 const platformHighlights = [
   'Discover and coordinate trusted vendors',
@@ -9,6 +9,9 @@ const platformHighlights = [
 
 export function AuthLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isRegisterFlow = location.pathname.startsWith('/register');
 
   const handleBack = () => {
     const historyIndex =
@@ -41,8 +44,18 @@ export function AuthLayout() {
         className="pointer-events-none fixed left-[42%] top-[38%] size-72 rounded-full bg-[var(--color-dusty-olive)]/8 blur-3xl"
       />
 
-      <div className="relative grid min-h-screen lg:grid-cols-[0.94fr_1.06fr]">
-        <section className="relative hidden overflow-hidden border-r border-white/55 bg-white/24 p-10 backdrop-blur-2xl lg:flex lg:flex-col lg:justify-between xl:p-14">
+      <div
+        className={`relative grid min-h-screen ${
+          isRegisterFlow
+            ? 'lg:grid-cols-[0.88fr_1.12fr]'
+            : 'lg:grid-cols-[0.94fr_1.06fr]'
+        }`}
+      >
+        <section
+          className={`relative hidden overflow-hidden border-r border-white/55 bg-white/24 backdrop-blur-2xl lg:flex lg:flex-col lg:justify-between ${
+            isRegisterFlow ? 'p-9 xl:p-11' : 'p-10 xl:p-14'
+          }`}
+        >
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -left-20 -top-20 size-72 rounded-full bg-[var(--color-lilac)]/16 blur-3xl"
@@ -68,36 +81,70 @@ export function AuthLayout() {
                 <img
                   src="/images/branding/eventure-logo-navbar.png"
                   alt="Eventure"
-                  className="relative h-16 w-auto max-w-[16rem] object-contain transition duration-300 group-hover:-translate-y-0.5 xl:h-18 xl:max-w-[18rem]"
+                  className={`relative w-auto object-contain transition duration-300 group-hover:-translate-y-0.5 ${
+                    isRegisterFlow
+                      ? 'h-14 max-w-[15rem] xl:h-16 xl:max-w-[16rem]'
+                      : 'h-16 max-w-[16rem] xl:h-18 xl:max-w-[18rem]'
+                  }`}
                 />
               </div>
             </Link>
 
-            <div className="mt-20 max-w-xl xl:mt-24">
+            <div
+              className={
+                isRegisterFlow
+                  ? 'mt-12 max-w-xl xl:mt-14'
+                  : 'mt-20 max-w-xl xl:mt-24'
+              }
+            >
               <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
                 <Sparkles className="size-4" />
                 One connected planning experience
               </div>
 
-              <h1 className="mt-7 text-balance text-5xl font-black leading-[0.97] tracking-[-0.06em] text-[var(--color-near-black)] xl:text-6xl">
+              <h1
+                className={`mt-7 text-balance font-black leading-[0.97] tracking-[-0.06em] text-[var(--color-near-black)] ${
+                  isRegisterFlow
+                    ? 'text-5xl xl:text-[3.45rem]'
+                    : 'text-5xl xl:text-6xl'
+                }`}
+              >
                 Every important event detail,
-                <span className="block text-[var(--color-deep-plum)]">ready when you are.</span>
+                <span className="block text-[var(--color-deep-plum)]">
+                  ready when you are.
+                </span>
               </h1>
 
-              <p className="mt-7 max-w-lg text-lg font-medium leading-8 text-[var(--color-charcoal)]/68">
+              <p
+                className={`max-w-lg font-medium text-[var(--color-charcoal)]/68 ${
+                  isRegisterFlow
+                    ? 'mt-5 text-base leading-7'
+                    : 'mt-7 text-lg leading-8'
+                }`}
+              >
                 Sign in or create your Eventure account to bring vendors, quotations, bookings and
                 event planning into one structured workspace.
               </p>
             </div>
           </div>
 
-          <div className="relative mt-14 grid max-w-xl gap-3">
+          <div
+            className={`relative grid max-w-xl gap-3 ${
+              isRegisterFlow ? 'mt-8' : 'mt-14'
+            }`}
+          >
             {platformHighlights.map((item, index) => (
               <div
                 key={item}
-                className="group flex items-center gap-4 rounded-[1.35rem] border border-white/58 bg-white/32 px-4 py-4 shadow-[0_14px_38px_rgba(31,27,29,0.06)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/46"
+                className={`group flex items-center gap-4 rounded-[1.35rem] border border-white/58 bg-white/32 px-4 shadow-[0_14px_38px_rgba(31,27,29,0.06)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/46 ${
+                  isRegisterFlow ? 'py-3' : 'py-4'
+                }`}
               >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--color-deep-plum)]/8 text-[var(--color-deep-plum)] transition duration-300 group-hover:bg-[var(--color-deep-plum)] group-hover:text-white">
+                <span
+                  className={`grid shrink-0 place-items-center rounded-xl bg-[var(--color-deep-plum)]/8 text-[var(--color-deep-plum)] transition duration-300 group-hover:bg-[var(--color-deep-plum)] group-hover:text-white ${
+                    isRegisterFlow ? 'size-9' : 'size-10'
+                  }`}
+                >
                   <CheckCircle2 className="size-4.5" />
                 </span>
 
@@ -113,9 +160,23 @@ export function AuthLayout() {
           </div>
         </section>
 
-        <section className="relative flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 sm:py-10 lg:px-12 xl:px-16">
-          <div className="w-full max-w-[32rem]">
-            <div className="mb-8 flex items-center justify-between gap-4 lg:mb-7">
+        <section
+          className={`relative flex min-h-screen items-center justify-center px-5 sm:px-8 ${
+            isRegisterFlow
+              ? 'py-5 lg:px-8 lg:py-5 xl:px-10'
+              : 'py-8 sm:py-10 lg:px-12 xl:px-16'
+          }`}
+        >
+          <div
+            className={`w-full ${
+              isRegisterFlow ? 'max-w-[50rem]' : 'max-w-[32rem]'
+            }`}
+          >
+            <div
+              className={`flex items-center justify-between gap-4 ${
+                isRegisterFlow ? 'mb-4 lg:mb-4' : 'mb-8 lg:mb-7'
+              }`}
+            >
               <button
                 type="button"
                 onClick={handleBack}
@@ -136,7 +197,9 @@ export function AuthLayout() {
 
             <Link
               to="/"
-              className="group mb-8 inline-flex rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 lg:hidden"
+              className={`group inline-flex rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 lg:hidden ${
+                isRegisterFlow ? 'mb-5' : 'mb-8'
+              }`}
               aria-label="Eventure home"
             >
               <img
@@ -150,7 +213,11 @@ export function AuthLayout() {
               <Outlet />
             </div>
 
-            <div className="mt-8 flex items-center justify-center text-center text-xs font-bold text-[var(--color-charcoal)]/38">
+            <div
+              className={`flex items-center justify-center text-center text-xs font-bold text-[var(--color-charcoal)]/38 ${
+                isRegisterFlow ? 'mt-4' : 'mt-8'
+              }`}
+            >
               <span>Eventure · Plan beautifully. Celebrate confidently.</span>
             </div>
           </div>

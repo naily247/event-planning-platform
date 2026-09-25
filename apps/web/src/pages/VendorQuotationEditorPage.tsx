@@ -491,7 +491,7 @@ export function VendorQuotationEditorPage() {
           </div>
         </header>
 
-        <div className="pb-10 pt-6">
+        <div className="pb-8 pt-5">
           {loading ? (
             <div className="grid min-h-[420px] place-items-center rounded-[2rem] border border-white/60 bg-white/44 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl">
               <div className="text-center">
@@ -544,107 +544,107 @@ export function VendorQuotationEditorPage() {
             </section>
           ) : (
             <>
-              <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
-                />
+              <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_20px_56px_rgba(64,42,51,0.09)] backdrop-blur-2xl">
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -right-24 -top-28 size-64 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
+  />
 
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-36 left-[28%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
-                />
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -bottom-32 left-[28%] size-64 rounded-full bg-[rgba(142,92,103,0.08)] blur-3xl"
+  />
 
-                <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10 lg:p-10">
-                  <div>
-                    <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
-                      <FileCheck2 className="size-4" />
-                      {draftExists ? 'Saved quotation draft' : 'New quotation'}
-                    </div>
+  <div className="relative grid gap-5 p-5 sm:p-6 lg:grid-cols-[1.35fr_0.65fr] lg:items-center lg:gap-7">
+    <div>
+      <div className="soft-chip w-fit text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
+        <FileCheck2 className="size-3.5" />
+        {draftExists ? 'Saved quotation draft' : 'New quotation'}
+      </div>
 
-                    <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-                      Build a clear offer your customer can confidently review.
-                    </h2>
+      <h2 className="mt-4 max-w-3xl text-balance text-3xl font-black leading-[1.04] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.5rem]">
+        Build a clear offer your customer can confidently review.
+      </h2>
 
-                    <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
-                      Prepare pricing, service inclusions, exclusions, terms and validity for{' '}
-                      <strong className="font-black text-[var(--color-near-black)]">
-                        {request.event.name}
-                      </strong>
-                      .
-                    </p>
+      <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/64">
+        Prepare pricing, service inclusions, exclusions, terms and validity for{' '}
+        <strong className="font-black text-[var(--color-near-black)]">
+          {request.event.name}
+        </strong>
+        .
+      </p>
 
-                    <div className="mt-7 flex flex-wrap gap-2.5">
-                      <span className="soft-chip text-xs font-black">
-                        <FileText className="size-4" />
-                        {request.status.replaceAll('_', ' ')}
-                      </span>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="soft-chip text-[0.68rem] font-black">
+          <FileText className="size-3.5" />
+          {request.status.replaceAll('_', ' ')}
+        </span>
 
-                      <span className="soft-chip text-xs font-black">
-                        <CircleDollarSign className="size-4" />
-                        Structured pricing
-                      </span>
+        <span className="soft-chip text-[0.68rem] font-black">
+          <CircleDollarSign className="size-3.5" />
+          Structured pricing
+        </span>
 
-                      <span className="soft-chip text-xs font-black">
-                        <ShieldCheck className="size-4" />
-                        Customer-ready terms
-                      </span>
-                    </div>
-                  </div>
+        <span className="soft-chip text-[0.68rem] font-black">
+          <ShieldCheck className="size-3.5" />
+          Customer-ready terms
+        </span>
+      </div>
+    </div>
 
-                  <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
-                    <div className="flex items-start justify-between gap-5">
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Quotation status
-                        </p>
+    <article className="relative overflow-hidden rounded-[1.5rem] border border-white/70 bg-white/52 p-4 shadow-[0_14px_38px_rgba(31,27,29,0.07)] backdrop-blur-2xl">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+            Quotation status
+          </p>
 
-                        <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                          {draftExists ? 'Draft in progress' : 'Ready to prepare'}
-                        </h3>
-                      </div>
+          <h3 className="mt-1.5 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+            {draftExists ? 'Draft in progress' : 'Ready to prepare'}
+          </h3>
+        </div>
 
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
-                        <FileCheck2 className="size-5" />
-                      </div>
-                    </div>
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+          <FileCheck2 className="size-4" />
+        </div>
+      </div>
 
-                    <div className="mt-6 grid gap-3">
-                      <div className="rounded-[1.2rem] border border-white/60 bg-white/34 p-4">
-                        <p className="text-[0.63rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
-                          Request
-                        </p>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+        <div className="rounded-[1rem] border border-white/60 bg-white/34 px-3.5 py-3">
+          <p className="text-[0.58rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+            Request
+          </p>
 
-                        <p className="mt-2 text-sm font-black text-[var(--color-near-black)]">
-                          {request.event.name}
-                        </p>
-                      </div>
+          <p className="mt-1 text-xs font-black text-[var(--color-near-black)]">
+            {request.event.name}
+          </p>
+        </div>
 
-                      <div className="rounded-[1.2rem] border border-white/60 bg-white/34 p-4">
-                        <div className="flex items-start gap-3">
-                          <CalendarClock className="mt-0.5 size-4 shrink-0 text-[var(--color-deep-plum)]" />
+        <div className="rounded-[1rem] border border-white/60 bg-white/34 px-3.5 py-3">
+          <div className="flex items-center gap-2.5">
+            <CalendarClock className="size-3.5 shrink-0 text-[var(--color-deep-plum)]" />
 
-                          <div>
-                            <p className="text-[0.63rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/40">
-                              Response deadline
-                            </p>
+            <div>
+              <p className="text-[0.58rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/40">
+                Response deadline
+              </p>
 
-                            <p className="mt-2 text-sm font-black text-[var(--color-near-black)]">
-                              {request.responseDueAt
-                                ? new Intl.DateTimeFormat('en-US', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric',
-                                  }).format(new Date(request.responseDueAt))
-                                : 'No deadline'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </div>
-              </section>
+              <p className="mt-1 text-xs font-black text-[var(--color-near-black)]">
+                {request.responseDueAt
+                  ? new Intl.DateTimeFormat('en-US', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    }).format(new Date(request.responseDueAt))
+                  : 'No deadline'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
 
               {editingDisabled ? (
                 <div className="mt-5 flex items-start gap-3 rounded-[1.5rem] border border-amber-200/80 bg-amber-50/70 p-5">
@@ -677,423 +677,431 @@ export function VendorQuotationEditorPage() {
                 </div>
               ) : null}
 
-              <div className="mt-6 grid gap-6 xl:grid-cols-[1.36fr_0.64fr]">
-                <section className="space-y-6">
-                  <div className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <CircleDollarSign className="size-5" />
-                      </div>
+              <div className="mt-5 grid gap-5 xl:grid-cols-[1.48fr_0.52fr]">
+  <section className="space-y-5">
+    {/* Pricing */}
+    <div className="rounded-[1.65rem] border border-white/58 bg-white/42 p-5 shadow-[0_14px_40px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+      <div className="flex items-center gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+          <CircleDollarSign className="size-4" />
+        </div>
 
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Financial details
-                        </p>
+        <div>
+          <p className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+            Financial details
+          </p>
 
-                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                          Pricing and deposit
-                        </h2>
+          <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+            Pricing and deposit
+          </h2>
+        </div>
+      </div>
 
-                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
-                          Define the total quotation value and any upfront payment required.
-                        </p>
-                      </div>
-                    </div>
+      <div className="mt-4 grid gap-4 border-t border-[rgba(93,58,85,0.08)] pt-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-xs font-black text-[var(--color-charcoal)]">
+            Proposed price (LKR)
+          </span>
 
-                    <div className="mt-6 grid gap-5 border-t border-[rgba(93,58,85,0.08)] pt-6 sm:grid-cols-2">
-                      <label className="block">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]">
-                          Proposed price (LKR)
-                        </span>
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            disabled={editingDisabled}
+            value={form.proposedPrice}
+            onChange={(event) => updateField('proposedPrice', event.target.value)}
+            placeholder="150000"
+            className={[
+              'form-field mt-1.5 bg-white/40',
+              errors.proposedPrice ? 'border-red-300 focus:ring-red-100' : '',
+            ].join(' ')}
+          />
 
-                        <input
-                          type="number"
-                          min="0.01"
-                          step="0.01"
-                          disabled={editingDisabled}
-                          value={form.proposedPrice}
-                          onChange={(event) => updateField('proposedPrice', event.target.value)}
-                          placeholder="150000"
-                          className={[
-                            'form-field mt-2 bg-white/40',
-                            errors.proposedPrice ? 'border-red-300 focus:ring-red-100' : '',
-                          ].join(' ')}
-                        />
+          {errors.proposedPrice ? (
+            <p className="mt-1.5 text-xs font-bold text-red-600">
+              {errors.proposedPrice}
+            </p>
+          ) : null}
+        </label>
 
-                        {errors.proposedPrice ? (
-                          <p className="mt-2 text-xs font-bold text-red-600">
-                            {errors.proposedPrice}
-                          </p>
-                        ) : null}
-                      </label>
+        <label className="block">
+          <span className="text-xs font-black text-[var(--color-charcoal)]">
+            Deposit amount
+            <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
+              Optional
+            </span>
+          </span>
 
-                      <label className="block">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]">
-                          Deposit amount
-                          <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
-                            Optional
-                          </span>
-                        </span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            disabled={editingDisabled}
+            value={form.depositAmount}
+            onChange={(event) => updateField('depositAmount', event.target.value)}
+            placeholder="50000"
+            className={[
+              'form-field mt-1.5 bg-white/40',
+              errors.depositAmount ? 'border-red-300 focus:ring-red-100' : '',
+            ].join(' ')}
+          />
 
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          disabled={editingDisabled}
-                          value={form.depositAmount}
-                          onChange={(event) => updateField('depositAmount', event.target.value)}
-                          placeholder="50000"
-                          className={[
-                            'form-field mt-2 bg-white/40',
-                            errors.depositAmount ? 'border-red-300 focus:ring-red-100' : '',
-                          ].join(' ')}
-                        />
+          {errors.depositAmount ? (
+            <p className="mt-1.5 text-xs font-bold text-red-600">
+              {errors.depositAmount}
+            </p>
+          ) : null}
+        </label>
+      </div>
+    </div>
 
-                        {errors.depositAmount ? (
-                          <p className="mt-2 text-xs font-bold text-red-600">
-                            {errors.depositAmount}
-                          </p>
-                        ) : null}
-                      </label>
-                    </div>
-                  </div>
+    {/* Service scope */}
+    <div className="rounded-[1.65rem] border border-white/58 bg-white/42 p-5 shadow-[0_14px_40px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+      <div className="flex items-center gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+          <FileText className="size-4" />
+        </div>
 
-                  <div className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <FileText className="size-5" />
-                      </div>
+        <div>
+          <p className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+            Service scope
+          </p>
 
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Service scope
-                        </p>
+          <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+            Inclusions & exclusions
+          </h2>
+        </div>
+      </div>
 
-                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                          Inclusions & exclusions
-                        </h2>
+      <p className="mt-3 text-xs font-medium leading-5 text-[var(--color-charcoal)]/54">
+        Clearly define what the quoted price covers and anything outside the offer.
+      </p>
 
-                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
-                          Clearly state what the quoted price covers and what remains outside the
-                          offer.
-                        </p>
-                      </div>
-                    </div>
+      <div className="mt-4 grid gap-4 border-t border-[rgba(93,58,85,0.08)] pt-4 lg:grid-cols-2">
+        <label className="block">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-black text-[var(--color-charcoal)]">
+              Inclusions
+            </span>
 
-                    <label className="mt-6 block border-t border-[rgba(93,58,85,0.08)] pt-6">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]">
-                          Inclusions
-                        </span>
+            <CharacterCount current={form.inclusions.length} maximum={5000} />
+          </div>
 
-                        <CharacterCount current={form.inclusions.length} maximum={5000} />
-                      </div>
+          <textarea
+            rows={5}
+            disabled={editingDisabled}
+            value={form.inclusions}
+            onChange={(event) => updateField('inclusions', event.target.value)}
+            placeholder="Describe everything included in this quotation..."
+            className={[
+              'form-field mt-1.5 min-h-32 resize-y bg-white/40 leading-6',
+              errors.inclusions ? 'border-red-300 focus:ring-red-100' : '',
+            ].join(' ')}
+          />
 
-                      <textarea
-                        rows={7}
-                        disabled={editingDisabled}
-                        value={form.inclusions}
-                        onChange={(event) => updateField('inclusions', event.target.value)}
-                        placeholder="Describe everything included in this quotation..."
-                        className={[
-                          'form-field mt-2 min-h-44 resize-y bg-white/40 leading-7',
-                          errors.inclusions ? 'border-red-300 focus:ring-red-100' : '',
-                        ].join(' ')}
-                      />
+          {errors.inclusions ? (
+            <p className="mt-1.5 text-xs font-bold text-red-600">
+              {errors.inclusions}
+            </p>
+          ) : null}
+        </label>
 
-                      {errors.inclusions ? (
-                        <p className="mt-2 text-xs font-bold text-red-600">{errors.inclusions}</p>
-                      ) : null}
-                    </label>
+        <label className="block">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-black text-[var(--color-charcoal)]">
+              Exclusions
+              <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
+                Optional
+              </span>
+            </span>
 
-                    <label className="mt-5 block">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]">
-                          Exclusions
-                          <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
-                            Optional
-                          </span>
-                        </span>
+            <CharacterCount current={form.exclusions.length} maximum={5000} />
+          </div>
 
-                        <CharacterCount current={form.exclusions.length} maximum={5000} />
-                      </div>
+          <textarea
+            rows={5}
+            disabled={editingDisabled}
+            value={form.exclusions}
+            onChange={(event) => updateField('exclusions', event.target.value)}
+            placeholder="List anything not included..."
+            className={[
+              'form-field mt-1.5 min-h-32 resize-y bg-white/40 leading-6',
+              errors.exclusions ? 'border-red-300 focus:ring-red-100' : '',
+            ].join(' ')}
+          />
 
-                      <textarea
-                        rows={5}
-                        disabled={editingDisabled}
-                        value={form.exclusions}
-                        onChange={(event) => updateField('exclusions', event.target.value)}
-                        placeholder="List anything not included..."
-                        className={[
-                          'form-field mt-2 min-h-36 resize-y bg-white/40 leading-7',
-                          errors.exclusions ? 'border-red-300 focus:ring-red-100' : '',
-                        ].join(' ')}
-                      />
+          {errors.exclusions ? (
+            <p className="mt-1.5 text-xs font-bold text-red-600">
+              {errors.exclusions}
+            </p>
+          ) : null}
+        </label>
+      </div>
+    </div>
 
-                      {errors.exclusions ? (
-                        <p className="mt-2 text-xs font-bold text-red-600">{errors.exclusions}</p>
-                      ) : null}
-                    </label>
-                  </div>
+    {/* Terms */}
+    <div className="rounded-[1.65rem] border border-white/58 bg-white/42 p-5 shadow-[0_14px_40px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+      <div className="flex items-center gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+          <ShieldCheck className="size-4" />
+        </div>
 
-                  <div className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <ShieldCheck className="size-5" />
-                      </div>
+        <div>
+          <p className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+            Conditions
+          </p>
 
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Conditions
-                        </p>
+          <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+            Terms & validity
+          </h2>
+        </div>
+      </div>
 
-                        <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                          Terms & validity
-                        </h2>
+      <div className="mt-4 grid gap-4 border-t border-[rgba(93,58,85,0.08)] pt-4 lg:grid-cols-[1.4fr_0.6fr]">
+        <label className="block">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-black text-[var(--color-charcoal)]">
+              Terms
+              <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
+                Optional
+              </span>
+            </span>
 
-                        <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
-                          Define payment, cancellation, timing, and validity conditions.
-                        </p>
-                      </div>
-                    </div>
+            <CharacterCount current={form.terms.length} maximum={5000} />
+          </div>
 
-                    <label className="mt-6 block border-t border-[rgba(93,58,85,0.08)] pt-6">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]">
-                          Terms
-                          <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
-                            Optional
-                          </span>
-                        </span>
+          <textarea
+            rows={4}
+            disabled={editingDisabled}
+            value={form.terms}
+            onChange={(event) => updateField('terms', event.target.value)}
+            placeholder="Payment terms, cancellation rules, timings and other conditions..."
+            className={[
+              'form-field mt-1.5 min-h-28 resize-y bg-white/40 leading-6',
+              errors.terms ? 'border-red-300 focus:ring-red-100' : '',
+            ].join(' ')}
+          />
 
-                        <CharacterCount current={form.terms.length} maximum={5000} />
-                      </div>
+          {errors.terms ? (
+            <p className="mt-1.5 text-xs font-bold text-red-600">
+              {errors.terms}
+            </p>
+          ) : null}
+        </label>
 
-                      <textarea
-                        rows={6}
-                        disabled={editingDisabled}
-                        value={form.terms}
-                        onChange={(event) => updateField('terms', event.target.value)}
-                        placeholder="Payment terms, cancellation rules, timings and other conditions..."
-                        className={[
-                          'form-field mt-2 min-h-40 resize-y bg-white/40 leading-7',
-                          errors.terms ? 'border-red-300 focus:ring-red-100' : '',
-                        ].join(' ')}
-                      />
+        <label className="block">
+          <span className="text-xs font-black text-[var(--color-charcoal)]">
+            Quotation expiry
+            <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
+              Optional
+            </span>
+          </span>
 
-                      {errors.terms ? (
-                        <p className="mt-2 text-xs font-bold text-red-600">{errors.terms}</p>
-                      ) : null}
-                    </label>
+          <input
+            type="datetime-local"
+            disabled={editingDisabled}
+            value={form.expiresAt}
+            onChange={(event) => updateField('expiresAt', event.target.value)}
+            className={[
+              'form-field mt-1.5 bg-white/40',
+              errors.expiresAt ? 'border-red-300 focus:ring-red-100' : '',
+            ].join(' ')}
+          />
 
-                    <label className="mt-5 block">
-                      <span className="text-sm font-black text-[var(--color-charcoal)]">
-                        Quotation expiry
-                        <span className="ml-2 font-semibold text-[var(--color-charcoal)]/40">
-                          Optional
-                        </span>
-                      </span>
+          <p className="mt-2 text-[0.68rem] font-medium leading-5 text-[var(--color-charcoal)]/45">
+            Set how long the customer can accept this offer.
+          </p>
 
-                      <input
-                        type="datetime-local"
-                        disabled={editingDisabled}
-                        value={form.expiresAt}
-                        onChange={(event) => updateField('expiresAt', event.target.value)}
-                        className={[
-                          'form-field mt-2 bg-white/40',
-                          errors.expiresAt ? 'border-red-300 focus:ring-red-100' : '',
-                        ].join(' ')}
-                      />
+          {errors.expiresAt ? (
+            <p className="mt-1.5 text-xs font-bold text-red-600">
+              {errors.expiresAt}
+            </p>
+          ) : null}
+        </label>
+      </div>
+    </div>
+  </section>
 
-                      {errors.expiresAt ? (
-                        <p className="mt-2 text-xs font-bold text-red-600">{errors.expiresAt}</p>
-                      ) : null}
-                    </label>
-                  </div>
-                </section>
+  <aside className="space-y-4 xl:sticky xl:top-6 xl:self-start">
+    {/* Financial summary */}
+    <section className="relative overflow-hidden rounded-[1.65rem] border border-white/58 bg-white/42 p-4 shadow-[0_14px_40px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+      <div className="flex items-center gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+          <CircleDollarSign className="size-4" />
+        </div>
 
-                <aside className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-                  <section className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <CircleDollarSign className="size-5" />
-                      </div>
+        <div>
+          <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
+            Quotation summary
+          </p>
 
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Quotation summary
-                        </p>
+          <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+            Financial breakdown
+          </h2>
+        </div>
+      </div>
 
-                        <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                          Financial breakdown
-                        </h2>
-                      </div>
-                    </div>
+      <dl className="mt-4 space-y-2">
+        <div className="flex items-center justify-between gap-3 rounded-[1rem] border border-white/58 bg-white/30 px-3.5 py-2.5">
+          <dt className="text-xs font-semibold text-[var(--color-charcoal)]/58">
+            Proposed price
+          </dt>
 
-                    <dl className="mt-5 space-y-3">
-                      <div className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-white/58 bg-white/30 px-4 py-3.5">
-                        <dt className="text-sm font-semibold text-[var(--color-charcoal)]/58">
-                          Proposed price
-                        </dt>
+          <dd className="text-xs font-black text-[var(--color-near-black)]">
+            {Number.isFinite(parsedPrice) && parsedPrice > 0
+              ? `LKR ${parsedPrice.toLocaleString('en-LK')}`
+              : '—'}
+          </dd>
+        </div>
 
-                        <dd className="text-sm font-black text-[var(--color-near-black)]">
-                          {Number.isFinite(parsedPrice) && parsedPrice > 0
-                            ? `LKR ${parsedPrice.toLocaleString('en-LK')}`
-                            : '—'}
-                        </dd>
-                      </div>
+        <div className="flex items-center justify-between gap-3 rounded-[1rem] border border-white/58 bg-white/30 px-3.5 py-2.5">
+          <dt className="text-xs font-semibold text-[var(--color-charcoal)]/58">
+            Deposit
+          </dt>
 
-                      <div className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-white/58 bg-white/30 px-4 py-3.5">
-                        <dt className="text-sm font-semibold text-[var(--color-charcoal)]/58">
-                          Deposit
-                        </dt>
+          <dd className="text-xs font-black text-[var(--color-near-black)]">
+            {parsedDeposit !== null && Number.isFinite(parsedDeposit)
+              ? `LKR ${parsedDeposit.toLocaleString('en-LK')}`
+              : 'Not required'}
+          </dd>
+        </div>
 
-                        <dd className="text-sm font-black text-[var(--color-near-black)]">
-                          {parsedDeposit !== null && Number.isFinite(parsedDeposit)
-                            ? `LKR ${parsedDeposit.toLocaleString('en-LK')}`
-                            : 'Not required'}
-                        </dd>
-                      </div>
+        <div className="rounded-[1rem] bg-[var(--color-deep-plum)] px-3.5 py-3 shadow-[0_12px_28px_rgba(91,61,82,0.18)]">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-xs font-bold text-white/72">
+              Remaining balance
+            </dt>
 
-                      <div className="rounded-[1.25rem] bg-[var(--color-deep-plum)] p-4 shadow-[0_14px_34px_rgba(91,61,82,0.20)]">
-                        <div className="flex items-center justify-between gap-4">
-                          <dt className="text-sm font-bold text-white/72">Remaining balance</dt>
+            <dd className="text-base font-black text-white">
+              {remainingBalance !== null && Number.isFinite(remainingBalance)
+                ? `LKR ${remainingBalance.toLocaleString('en-LK')}`
+                : '—'}
+            </dd>
+          </div>
+        </div>
+      </dl>
+    </section>
 
-                          <dd className="text-lg font-black text-white">
-                            {remainingBalance !== null && Number.isFinite(remainingBalance)
-                              ? `LKR ${remainingBalance.toLocaleString('en-LK')}`
-                              : '—'}
-                          </dd>
-                        </div>
-                      </div>
-                    </dl>
-                  </section>
+    {/* Review */}
+    <section className="rounded-[1.65rem] border border-white/58 bg-white/42 p-4 shadow-[0_14px_40px_rgba(35,24,30,0.06)] backdrop-blur-xl">
+      <div className="flex items-center gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(220,186,167,0.20)] text-[var(--color-rosewood)]">
+          <CalendarClock className="size-4" />
+        </div>
 
-                  <section className="rounded-[2rem] border border-white/58 bg-white/42 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(220,186,167,0.20)] text-[var(--color-rosewood)]">
-                        <CalendarClock className="size-5" />
-                      </div>
+        <div>
+          <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
+            Final review
+          </p>
 
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Final review
-                        </p>
+          <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+            Before sending
+          </h2>
+        </div>
+      </div>
 
-                        <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                          Before sending
-                        </h2>
-                      </div>
-                    </div>
+      <ul className="mt-3 space-y-1.5">
+        {[
+          'Confirm price and deposit.',
+          'Check service inclusions.',
+          'Review exclusions.',
+          'Review terms and cancellation.',
+          'Check quotation expiry.',
+        ].map((item) => (
+          <li
+            key={item}
+            className="flex items-center gap-2.5 rounded-xl px-1 py-1.5"
+          >
+            <CheckCircle2 className="size-3.5 shrink-0 text-emerald-700" />
 
-                    <ul className="mt-5 space-y-2.5">
-                      {[
-                        'Confirm the proposed price and deposit.',
-                        'Clearly state all service inclusions.',
-                        'List important exclusions.',
-                        'Review payment and cancellation terms.',
-                        'Check the quotation expiry.',
-                      ].map((item) => (
-                        <li
-                          key={item}
-                          className="flex items-start gap-3 rounded-[1.15rem] border border-white/58 bg-white/30 px-4 py-3"
-                        >
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-700" />
+            <span className="text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/62">
+              {item}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
 
-                          <span className="text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62">
-                            {item}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
+    {/* Actions */}
+    {!editingDisabled ? (
+      <section className="relative overflow-hidden rounded-[1.65rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(240,231,238,0.48))] p-4 shadow-[0_14px_40px_rgba(35,24,30,0.07)] backdrop-blur-xl">
+        <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
+          Quotation actions
+        </p>
 
-                  {!editingDisabled ? (
-                    <section className="relative overflow-hidden rounded-[2rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(240,231,238,0.48))] p-5 shadow-[0_18px_48px_rgba(35,24,30,0.08)] backdrop-blur-xl sm:p-6">
-                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                        Quotation actions
-                      </p>
+        <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+          Save or send
+        </h2>
 
-                      <h2 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                        Save or send
-                      </h2>
+        <p className="mt-1.5 text-xs font-medium leading-5 text-[var(--color-charcoal)]/54">
+          Save your progress or send the completed quotation.
+        </p>
 
-                      <p className="mt-2 text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
-                        Save progress safely or send the completed quotation to your customer.
-                      </p>
+        {isDirty ? (
+          <div className="mt-3 flex items-start gap-2.5 rounded-[1rem] border border-amber-200/75 bg-amber-50/70 p-3">
+            <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-amber-700" />
 
-                      {isDirty ? (
-                        <div className="mt-5 flex items-start gap-3 rounded-[1.2rem] border border-amber-200/75 bg-amber-50/70 p-4">
-                          <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-700" />
+            <div>
+              <p className="text-xs font-black text-amber-900">
+                Unsaved changes
+              </p>
 
-                          <div>
-                            <p className="text-sm font-black text-amber-900">
-                              Unsaved quotation changes
-                            </p>
+              <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-amber-700">
+                Save or send before leaving to keep these changes.
+              </p>
+            </div>
+          </div>
+        ) : draftExists ? (
+          <div className="mt-3 flex items-center gap-2.5 rounded-[1rem] border border-emerald-200/75 bg-emerald-50/60 p-3">
+            <CheckCircle2 className="size-3.5 shrink-0 text-emerald-700" />
 
-                            <p className="mt-1 text-xs font-semibold leading-5 text-amber-700">
-                              Save your draft or send the quotation before leaving if you want to
-                              keep these changes.
-                            </p>
-                          </div>
-                        </div>
-                      ) : draftExists ? (
-                        <div className="mt-5 flex items-start gap-3 rounded-[1.2rem] border border-emerald-200/75 bg-emerald-50/60 p-4">
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-700" />
+            <p className="text-xs font-black text-emerald-900">
+              Draft is up to date
+            </p>
+          </div>
+        ) : null}
 
-                          <div>
-                            <p className="text-sm font-black text-emerald-900">
-                              Draft is up to date
-                            </p>
+        <div className="mt-3 grid gap-2 border-t border-[rgba(93,58,85,0.08)] pt-3">
+          <button
+            type="button"
+            disabled={saveMutation.isPending || sendMutation.isPending || !isDirty}
+            onClick={handleSave}
+            className="btn-secondary w-full justify-center text-xs font-black disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {saveMutation.isPending ? (
+              <LoaderCircle className="size-4 animate-spin" />
+            ) : (
+              <Save className="size-4" />
+            )}
 
-                            <p className="mt-1 text-xs font-semibold leading-5 text-emerald-700">
-                              Your current quotation values match the last saved draft.
-                            </p>
-                          </div>
-                        </div>
-                      ) : null}
+            {saveMutation.isPending
+              ? 'Saving draft...'
+              : draftExists
+                ? isDirty
+                  ? 'Update draft'
+                  : 'Draft up to date'
+                : 'Save draft'}
+          </button>
 
-                      <div className="mt-5 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-5">
-                        <button
-                          type="button"
-                          disabled={saveMutation.isPending || sendMutation.isPending || !isDirty}
-                          onClick={handleSave}
-                          className="btn-secondary w-full justify-center text-sm font-black disabled:cursor-not-allowed disabled:opacity-45"
-                        >
-                          {saveMutation.isPending ? (
-                            <LoaderCircle className="size-4 animate-spin" />
-                          ) : (
-                            <Save className="size-4" />
-                          )}
+          <button
+            type="button"
+            disabled={saveMutation.isPending || sendMutation.isPending}
+            onClick={handleOpenSendConfirmation}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-deep-plum)] px-4 py-3 text-xs font-black !text-white shadow-[0_12px_28px_rgba(91,61,82,0.20)] transition hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {sendMutation.isPending ? (
+              <LoaderCircle className="size-4 animate-spin text-white" />
+            ) : (
+              <Send className="size-4 text-white" />
+            )}
 
-                          {saveMutation.isPending
-                            ? 'Saving draft...'
-                            : draftExists
-                              ? isDirty
-                                ? 'Update draft'
-                                : 'Draft up to date'
-                              : 'Save draft'}
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={saveMutation.isPending || sendMutation.isPending}
-                          onClick={handleOpenSendConfirmation}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-deep-plum)] px-5 py-3.5 text-sm font-black !text-white shadow-[0_14px_32px_rgba(91,61,82,0.22)] transition hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {sendMutation.isPending ? (
-                            <LoaderCircle className="size-4 animate-spin text-white" />
-                          ) : (
-                            <Send className="size-4 text-white" />
-                          )}
-
-                          <span className="text-white">Send quotation</span>
-                        </button>
-                      </div>
-                    </section>
-                  ) : null}
-                </aside>
-              </div>
+            <span className="text-white">Send quotation</span>
+          </button>
+        </div>
+      </section>
+    ) : null}
+  </aside>
+</div>
             </>
           )}
         </div>

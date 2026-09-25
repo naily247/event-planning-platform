@@ -699,34 +699,34 @@ export function MoodBoardWorkspacePage() {
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <PageBackButton
-              fallback={`/events/${eventId}`}
-              label="Event workspace"
-              className="shrink-0"
-            />
+        <header className="glass-card flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+  <div className="flex items-center gap-3">
+    <PageBackButton
+      fallback={`/events/${eventId}`}
+      label="Event workspace"
+      className="shrink-0"
+    />
 
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Mood board
-              </p>
+    <div>
+      <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+        Mood board
+      </p>
 
-              <h1 className="mt-1 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                {moodBoardSummary.event.name}
-              </h1>
-            </div>
-          </div>
+      <h1 className="mt-0.5 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+        {moodBoardSummary.event.name}
+      </h1>
+    </div>
+  </div>
 
-          <span
-            className="status-chip w-fit"
-            data-tone={getEventStatusTone(moodBoardSummary.event.status)}
-          >
-            {moodBoardSummary.event.status.replaceAll('_', ' ')}
-          </span>
-        </header>
+  <span
+    className="status-chip w-fit"
+    data-tone={getEventStatusTone(moodBoardSummary.event.status)}
+  >
+    {moodBoardSummary.event.status.replaceAll('_', ' ')}
+  </span>
+</header>
 
-        <main className="py-10">
+        <main className="py-5">
           <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
             <img
               src="/images/workspaces/shortcuts/moodboard.png"
@@ -893,7 +893,7 @@ export function MoodBoardWorkspacePage() {
             </div>
           ) : null}
 
-          <section className="relative mt-7 overflow-hidden rounded-[2.25rem] border border-white/64 bg-[linear-gradient(145deg,rgba(255,255,255,0.50),rgba(239,230,244,0.30))] p-5 shadow-[0_22px_64px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:p-7">
+          <section className="relative mt-5 overflow-hidden rounded-[2rem] border border-white/64 bg-[linear-gradient(145deg,rgba(255,255,255,0.50),rgba(239,230,244,0.30))] p-5 shadow-[0_20px_56px_rgba(31,27,29,0.08)] backdrop-blur-3xl">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
@@ -905,7 +905,7 @@ export function MoodBoardWorkspacePage() {
             />
 
             <div className="relative">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
@@ -920,15 +920,15 @@ export function MoodBoardWorkspacePage() {
                     </span>
                   </div>
 
-                  <p className="mt-5 text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                     Live mood board
                   </p>
 
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                  <h2 className="mt-1.5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                     Your visual direction, collected together.
                   </h2>
 
-                  <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
+                  <p className="mt-1.5 max-w-2xl text-sm font-semibold leading-5 text-[var(--color-charcoal)]/58">
                     A living preview of the images shaping this event. Titles remain visible so
                     every reference keeps its meaning.
                   </p>
@@ -949,8 +949,8 @@ export function MoodBoardWorkspacePage() {
                 </button>
               </div>
 
-              <div className="relative mt-6 min-h-[23rem] overflow-hidden rounded-[1.85rem] border border-white/72 bg-[linear-gradient(145deg,rgba(255,255,255,0.60),rgba(244,235,247,0.36))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_18px_46px_rgba(31,27,29,0.08)] sm:min-h-[28rem] sm:p-5">
-                <div
+              <div className="relative mt-4 min-h-[17rem] overflow-hidden rounded-[1.55rem] border border-white/72 bg-[linear-gradient(145deg,rgba(255,255,255,0.60),rgba(244,235,247,0.36))] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_14px_38px_rgba(31,27,29,0.07)] sm:min-h-[20rem] sm:p-4">
+                  <div
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_1px_1px,rgba(93,58,85,0.10)_1px,transparent_0)] [background-size:24px_24px]"
                 />
@@ -966,7 +966,7 @@ export function MoodBoardWorkspacePage() {
                 />
 
                 {previewItems.length > 0 ? (
-                  <div className="relative mx-auto h-[21rem] w-full max-w-5xl sm:h-[26rem]">
+                  <div className="relative mx-auto h-[15rem] w-full max-w-5xl sm:h-[18rem]">
                     {previewItems.map((item, index) => {
                       const layout = previewLayouts[index];
 
@@ -1010,7 +1010,7 @@ export function MoodBoardWorkspacePage() {
                     ) : null}
                   </div>
                 ) : (
-                  <div className="relative grid min-h-[21rem] place-items-center px-5 text-center sm:min-h-[26rem]">
+                  <div className="relative grid min-h-[15rem] place-items-center px-5 text-center sm:min-h-[18rem]">
                     <div>
                       <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.07)]">
                         <Images aria-hidden="true" className="size-8" />
@@ -1047,586 +1047,532 @@ export function MoodBoardWorkspacePage() {
             </div>
           </section>
 
-          <section className="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
-            <article className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(255,255,255,0.22))] p-6 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-7">
+          <section className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_15.5rem]">
+  <article className="relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(255,255,255,0.22))] p-5 shadow-[0_18px_52px_rgba(31,27,29,0.07)] backdrop-blur-3xl">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+    />
+
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -bottom-24 left-[18%] size-52 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl"
+    />
+
+    <div className="relative">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+              <Images aria-hidden="true" className="size-4" />
+            </div>
+
+            <span className="status-chip" data-tone="plum">
+              {pagination.total} {pagination.total === 1 ? 'idea' : 'ideas'}
+            </span>
+
+            <span className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+              Inspiration board
+            </span>
+          </div>
+
+          <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+            Ideas collected for this celebration.
+          </h2>
+
+          <p className="mt-1.5 max-w-2xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
+            Search, filter and review the references shaping the event’s visual direction.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="group/add-board-inspiration btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(93,58,85,0.20)]"
+          disabled={!isMoodBoardEditable}
+          title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
+          onClick={openCreateDialog}
+        >
+          <Plus
+            aria-hidden="true"
+            className="size-4 transition duration-300 group-hover/add-board-inspiration:rotate-90"
+          />
+          Add inspiration
+        </button>
+      </div>
+
+      <form
+  className="mt-3 rounded-[1.15rem] border border-white/56 bg-white/28 px-3 py-2.5 backdrop-blur-xl"
+  onSubmit={(event) => {
+    event.preventDefault();
+    submitSearch();
+  }}
+>
+  <div className="flex flex-col gap-2.5 xl:flex-row xl:items-end">
+    <label className="min-w-0 flex-1">
+      <span className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/48">
+        Search
+      </span>
+
+      <div className="mt-1 flex h-9 items-center gap-2 rounded-xl border border-white/60 bg-white/34 px-3 transition duration-300 focus-within:border-[rgba(93,58,85,0.24)] focus-within:bg-white/52">
+        <Search
+          aria-hidden="true"
+          className="size-3.5 shrink-0 text-[var(--color-charcoal)]/40"
+        />
+
+        <input
+          className="min-w-0 flex-1 bg-transparent text-xs font-semibold outline-none placeholder:text-[var(--color-charcoal)]/38"
+          type="search"
+          placeholder="Search inspiration"
+          value={searchInput}
+          onChange={(event) => {
+            setSearchInput(event.target.value);
+          }}
+        />
+      </div>
+    </label>
+
+    <label className="xl:w-[9.5rem]">
+      <span className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/48">
+        Category
+      </span>
+
+      <select
+        className="form-field mt-1 h-9 min-h-0 py-1.5 text-xs transition duration-300 focus:bg-white/52"
+        aria-label="Filter mood-board items by category"
+        value={categoryFilter}
+        onChange={(event) => {
+          setCategoryFilter(event.target.value as MoodBoardCategory | '');
+          setPage(1);
+        }}
+      >
+        <option value="">All categories</option>
+
+        {moodBoardCategories.map((itemCategory) => (
+          <option key={itemCategory} value={itemCategory}>
+            {categoryLabels[itemCategory]}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    <label className="xl:w-[9.5rem]">
+      <span className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/48">
+        Reference
+      </span>
+
+      <select
+        className="form-field mt-1 h-9 min-h-0 py-1.5 text-xs transition duration-300 focus:bg-white/52"
+        aria-label="Filter mood-board items by reference type"
+        value={visualFilter}
+        onChange={(event) => {
+          setVisualFilter(event.target.value as 'all' | 'images' | 'sources');
+          setPage(1);
+        }}
+      >
+        <option value="all">All references</option>
+        <option value="images">With images</option>
+        <option value="sources">With source links</option>
+      </select>
+    </label>
+
+    <label className="xl:w-[9.5rem]">
+      <span className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/48">
+        Sort
+      </span>
+
+      <select
+        className="form-field mt-1 h-9 min-h-0 py-1.5 text-xs transition duration-300 focus:bg-white/52"
+        aria-label="Sort mood-board items"
+        value={sort}
+        onChange={(event) => {
+          setSort(event.target.value as MoodBoardSort);
+          setPage(1);
+        }}
+      >
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="title_asc">Title A–Z</option>
+        <option value="title_desc">Title Z–A</option>
+        <option value="category_asc">Category A–Z</option>
+        <option value="category_desc">Category Z–A</option>
+      </select>
+    </label>
+
+    <div className="flex h-9 shrink-0 items-center justify-between gap-2 xl:justify-end">
+      {filtersAreActive ? (
+        <button
+          type="button"
+          className="btn-secondary h-9 min-h-0 justify-center px-3 py-1.5 text-[0.68rem] font-bold"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      ) : null}
+
+      <span className="whitespace-nowrap rounded-full border border-white/60 bg-white/34 px-3 py-2 text-[0.65rem] font-black text-[var(--color-charcoal)]/52">
+        {items.length} of {pagination.total} {pagination.total === 1 ? 'idea' : 'ideas'}
+      </span>
+    </div>
+  </div>
+</form>
+
+      {filtersAreActive ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-[1.1rem] border border-white/56 bg-white/24 px-3 py-2.5">
+          <span className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+            Active filters
+          </span>
+
+          {searchQuery ? (
+            <span className="status-chip" data-tone="plum">
+              Search: {searchQuery}
+            </span>
+          ) : null}
+
+          {categoryFilter ? (
+            <span className="status-chip" data-tone="blue">
+              {categoryLabels[categoryFilter]}
+            </span>
+          ) : null}
+
+          {visualFilter !== 'all' ? (
+            <span className="status-chip" data-tone="gray">
+              {visualFilter === 'images' ? 'With images' : 'With sources'}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {items.length > 0 ? (
+        <div className="mt-3.5 grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {items.map((item) => (
+            <article
+              key={item.id}
+              className="group/mood-item relative min-w-0 overflow-hidden rounded-[1.4rem] border border-white/60 bg-white/34 shadow-[0_12px_30px_rgba(31,27,29,0.055)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/85 hover:bg-white/48 hover:shadow-[0_20px_46px_rgba(31,27,29,0.10)]"
+            >
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+                className="pointer-events-none absolute -right-14 -top-14 z-10 size-40 rounded-full bg-[rgba(183,167,200,0.18)] opacity-0 blur-3xl transition duration-500 group-hover/mood-item:scale-125 group-hover/mood-item:opacity-100"
               />
 
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-24 left-[18%] size-52 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl"
-              />
+              {item.imageUrl ? (
+                <div className="relative h-32 overflow-hidden xl:h-28">
+                  <img
+                    className="size-full object-cover transition duration-500 group-hover/mood-item:scale-[1.045]"
+                    src={item.imageUrl}
+                    alt={item.title}
+                    loading="lazy"
+                  />
 
-              <div className="relative">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
-                        <Images aria-hidden="true" className="size-5" />
-                      </div>
-
-                      <span className="status-chip" data-tone="plum">
-                        {pagination.total} {pagination.total === 1 ? 'idea' : 'ideas'}
-                      </span>
-                    </div>
-
-                    <p className="mt-6 text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                      Inspiration board
-                    </p>
-
-                    <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                      Ideas collected for this celebration.
-                    </h2>
-
-                    <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
-                      Search, filter and review the references shaping the event’s visual direction.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="group/add-board-inspiration btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                    disabled={!isMoodBoardEditable}
-                    title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
-                    onClick={openCreateDialog}
-                  >
-                    <Plus
-                      aria-hidden="true"
-                      className="size-4 transition duration-300 group-hover/add-board-inspiration:rotate-90"
-                    />
-                    Add inspiration
-                  </button>
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.22)] via-transparent to-transparent"
+                  />
                 </div>
+              ) : (
+                <div className="grid h-32 place-items-center bg-[linear-gradient(135deg,rgba(183,167,200,0.30),rgba(175,201,216,0.26))] xl:h-28">
+                    <Link2
+                    aria-hidden="true"
+                    className="size-8 text-[var(--color-deep-plum)] transition duration-300 group-hover/mood-item:scale-110"
+                  />
+                </div>
+              )}
 
-                <form
-                  className="mt-7 rounded-[1.65rem] border border-white/56 bg-white/28 p-5 backdrop-blur-xl"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    submitSearch();
-                  }}
-                >
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem_11rem_12rem]">
-                    <label className="block">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        Search inspiration
-                      </span>
-
-                      <div className="mt-2 flex min-h-12 items-center gap-3 rounded-2xl border border-white/60 bg-white/34 px-4 transition duration-300 focus-within:border-[rgba(93,58,85,0.24)] focus-within:bg-white/52">
-                        <Search
-                          aria-hidden="true"
-                          className="size-5 shrink-0 text-[var(--color-charcoal)]/42"
-                        />
-
-                        <input
-                          className="w-full bg-transparent text-sm font-semibold outline-none placeholder:text-[var(--color-charcoal)]/40"
-                          type="search"
-                          placeholder="Titles, descriptions, sources or vendors"
-                          value={searchInput}
-                          onChange={(event) => {
-                            setSearchInput(event.target.value);
-                          }}
-                        />
-                      </div>
-                    </label>
-
-                    <label className="block">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        Category
-                      </span>
-
-                      <select
-                        className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                        aria-label="Filter mood-board items by category"
-                        value={categoryFilter}
-                        onChange={(event) => {
-                          setCategoryFilter(event.target.value as MoodBoardCategory | '');
-                          setPage(1);
-                        }}
-                      >
-                        <option value="">All categories</option>
-
-                        {moodBoardCategories.map((itemCategory) => (
-                          <option key={itemCategory} value={itemCategory}>
-                            {categoryLabels[itemCategory]}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label className="block">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        Reference
-                      </span>
-
-                      <select
-                        className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                        aria-label="Filter mood-board items by reference type"
-                        value={visualFilter}
-                        onChange={(event) => {
-                          setVisualFilter(event.target.value as 'all' | 'images' | 'sources');
-                          setPage(1);
-                        }}
-                      >
-                        <option value="all">All references</option>
-                        <option value="images">With images</option>
-                        <option value="sources">With source links</option>
-                      </select>
-                    </label>
-
-                    <label className="block">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        Sort order
-                      </span>
-
-                      <select
-                        className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                        aria-label="Sort mood-board items"
-                        value={sort}
-                        onChange={(event) => {
-                          setSort(event.target.value as MoodBoardSort);
-                          setPage(1);
-                        }}
-                      >
-                        <option value="newest">Newest first</option>
-                        <option value="oldest">Oldest first</option>
-                        <option value="title_asc">Title A–Z</option>
-                        <option value="title_desc">Title Z–A</option>
-                        <option value="category_asc">Category A–Z</option>
-                        <option value="category_desc">Category Z–A</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="submit"
-                        className="group/search-board btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(93,58,85,0.20)]"
-                      >
-                        <Search
-                          aria-hidden="true"
-                          className="size-4 transition duration-300 group-hover/search-board:scale-105"
-                        />
-                        Search
-                      </button>
-
-                      {filtersAreActive ? (
-                        <button
-                          type="button"
-                          className="btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
-                          onClick={clearFilters}
-                        >
-                          Clear filters
-                        </button>
-                      ) : null}
-                    </div>
-
-                    <p className="text-sm font-bold text-[var(--color-charcoal)]/52">
-                      Showing {items.length} of {pagination.total}{' '}
-                      {pagination.total === 1 ? 'idea' : 'ideas'}
-                    </p>
-                  </div>
-                </form>
-
-                {filtersAreActive ? (
-                  <div className="mt-5 flex flex-wrap items-center gap-2 rounded-[1.35rem] border border-white/56 bg-white/24 p-4">
-                    <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44">
-                      Active filters
+              <div className="relative border-t border-white/45 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="status-chip" data-tone="plum">
+                      {categoryLabels[item.category]}
                     </span>
 
-                    {searchQuery ? (
-                      <span className="status-chip" data-tone="plum">
-                        Search: {searchQuery}
-                      </span>
+                    <h3 className="mt-2 line-clamp-2 text-sm font-black leading-[1.15rem] tracking-[-0.02em] text-[var(--color-near-black)] transition duration-300 group-hover/mood-item:text-[var(--color-deep-plum)]">
+                     {item.title}
+                    </h3>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {item.sourceUrl ? (
+                      <a
+                        className="group/source-link grid size-8 place-items-center rounded-lg border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)]"
+                        href={item.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Open source for ${item.title}`}
+                      >
+                        <ExternalLink aria-hidden="true" className="size-3.5" />
+                      </a>
                     ) : null}
 
-                    {categoryFilter ? (
-                      <span className="status-chip" data-tone="blue">
-                        {categoryLabels[categoryFilter]}
-                      </span>
-                    ) : null}
+                    <button
+                      type="button"
+                      className="group/edit-mood-item grid size-8 place-items-center rounded-lg border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] disabled:cursor-not-allowed disabled:opacity-35"
+                      aria-label={`Edit ${item.title}`}
+                      disabled={!isMoodBoardEditable}
+                      title={
+                        !isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined
+                      }
+                      onClick={() => {
+                        openEditDialog(item);
+                      }}
+                    >
+                      <Pencil aria-hidden="true" className="size-3.5" />
+                    </button>
 
-                    {visualFilter !== 'all' ? (
-                      <span className="status-chip" data-tone="gray">
-                        {visualFilter === 'images' ? 'With images' : 'With sources'}
+                    <button
+                      type="button"
+                      className="group/delete-mood-item grid size-8 place-items-center rounded-lg border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] disabled:cursor-not-allowed disabled:opacity-35"
+                      aria-label={`Delete ${item.title}`}
+                      disabled={!isMoodBoardEditable}
+                      title={
+                        !isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined
+                      }
+                      onClick={() => {
+                        openDeleteDialog(item);
+                      }}
+                    >
+                      <Trash2 aria-hidden="true" className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {item.description ? (
+                  <div className="mt-2.5 rounded-xl border border-white/50 bg-white/28 px-2.5 py-2">
+  <p className="line-clamp-2 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/64">
+    {item.description}
+  </p>
+</div>
+                ) : null}
+
+                {item.colorTags.length > 0 ? (
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    {item.colorTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-white/60 bg-white/34 px-2.5 py-1 text-[0.65rem] font-black text-[var(--color-deep-plum)]"
+                      >
+                        {tag}
                       </span>
-                    ) : null}
+                    ))}
                   </div>
                 ) : null}
 
-                {items.length > 0 ? (
-                  <div className="mt-8 grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {items.map((item) => (
-                      <article
-                        key={item.id}
-                        className="group min-w-0 overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/34 shadow-[0_14px_36px_rgba(31,27,29,0.055)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/85 hover:bg-white/48 hover:shadow-[0_24px_58px_rgba(31,27,29,0.11)]"
-                      >
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute -right-14 -top-14 z-10 size-40 rounded-full bg-[rgba(183,167,200,0.18)] opacity-0 blur-3xl transition duration-500 group-hover/mood-item:scale-125 group-hover/mood-item:opacity-100"
-                        />
+                {item.vendor ? (
+                  <Link
+                    className="group/vendor-link mt-2 flex items-center gap-2 rounded-xl border border-white/50 bg-white/30 px-3 py-2 text-xs font-black text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/74 hover:bg-white/46"
+                    to={`/events/${eventId}/vendors/${item.vendor.slug}`}
+                    state={{
+                      returnTo: `/events/${eventId}/mood-board`,
+                      returnLabel: 'Back to mood board',
+                    }}
+                  >
+                    <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.22)] text-[#3b515b]">
+                      <Store aria-hidden="true" className="size-3.5" />
+                    </span>
 
-                        {item.imageUrl ? (
-                          <div className="relative overflow-hidden">
-                            <img
-                              className="aspect-[4/3] w-full object-cover transition duration-500 group-hover/mood-item:scale-[1.045]"
-                              src={item.imageUrl}
-                              alt={item.title}
-                              loading="lazy"
-                            />
+                    <span className="min-w-0 flex-1 truncate">{item.vendor.businessName}</span>
 
-                            <div
-                              aria-hidden="true"
-                              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.22)] via-transparent to-transparent"
-                            />
-                          </div>
-                        ) : (
-                          <div className="grid aspect-[4/3] place-items-center bg-[linear-gradient(135deg,rgba(183,167,200,0.30),rgba(175,201,216,0.26))]">
-                            <Link2
-                              aria-hidden="true"
-                              className="size-10 text-[var(--color-deep-plum)] transition duration-300 group-hover/mood-item:scale-110"
-                            />
-                          </div>
-                        )}
-
-                        <div className="relative border-t border-white/45 p-5">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="min-w-0">
-                              <span className="status-chip" data-tone="plum">
-                                {categoryLabels[item.category]}
-                              </span>
-
-                              <h3 className="mt-4 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/mood-item:text-[var(--color-deep-plum)]">
-                                {item.title}
-                              </h3>
-                            </div>
-
-                            <div className="flex shrink-0 items-center gap-2">
-                              {item.sourceUrl ? (
-                                <a
-                                  className="group/source-link grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.08)]"
-                                  href={item.sourceUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  aria-label={`Open source for ${item.title}`}
-                                >
-                                  <ExternalLink
-                                    aria-hidden="true"
-                                    className="size-4 transition duration-300 group-hover/source-link:-translate-y-0.5 group-hover/source-link:translate-x-0.5"
-                                  />
-                                </a>
-                              ) : null}
-
-                              <button
-                                type="button"
-                                className="group/edit-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                                aria-label={`Edit ${item.title}`}
-                                disabled={!isMoodBoardEditable}
-                                title={
-                                  !isMoodBoardEditable
-                                    ? (moodBoardLockedMessage ?? undefined)
-                                    : undefined
-                                }
-                                onClick={() => {
-                                  openEditDialog(item);
-                                }}
-                              >
-                                <Pencil
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/edit-mood-item:rotate-[3deg]"
-                                />
-                              </button>
-
-                              <button
-                                type="button"
-                                className="group/delete-mood-item grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.10)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                                aria-label={`Delete ${item.title}`}
-                                disabled={!isMoodBoardEditable}
-                                title={
-                                  !isMoodBoardEditable
-                                    ? (moodBoardLockedMessage ?? undefined)
-                                    : undefined
-                                }
-                                onClick={() => {
-                                  openDeleteDialog(item);
-                                }}
-                              >
-                                <Trash2
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/delete-mood-item:scale-105"
-                                />
-                              </button>
-                            </div>
-                          </div>
-
-                          {item.description ? (
-                            <div className="mt-4 rounded-[1.25rem] border border-white/50 bg-white/28 p-4 transition duration-300 group-hover/mood-item:border-white/72 group-hover/mood-item:bg-white/42">
-                              <p className="line-clamp-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
-                                {item.description}
-                              </p>
-                            </div>
-                          ) : null}
-
-                          {item.colorTags.length > 0 ? (
-                            <div className="mt-5 flex flex-wrap gap-2">
-                              {item.colorTags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="rounded-full border border-white/60 bg-white/34 px-3 py-1 text-xs font-black text-[var(--color-deep-plum)] transition duration-300 group-hover/mood-item:border-white/82 group-hover/mood-item:bg-white/48"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          ) : null}
-
-                          {item.vendor ? (
-                            <Link
-                              className="group/vendor-link mt-5 flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/30 px-4 py-3 text-sm font-black text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/74 hover:bg-white/46 hover:shadow-[0_12px_28px_rgba(31,27,29,0.07)]"
-                              to={`/events/${eventId}/vendors/${item.vendor.slug}`}
-                              state={{
-                                returnTo: `/events/${eventId}/mood-board`,
-                                returnLabel: 'Back to mood board',
-                              }}
-                            >
-                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.22)] text-[#3b515b]">
-                                <Store aria-hidden="true" className="size-4" />
-                              </span>
-
-                              <span className="min-w-0 flex-1 truncate">
-                                {item.vendor.businessName}
-                              </span>
-
-                              <ExternalLink
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/vendor-link:-translate-y-0.5 group-hover/vendor-link:translate-x-0.5"
-                              />
-                            </Link>
-                          ) : null}
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.50),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
-                    />
-
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
-                    />
-
-                    <div className="relative">
-                      <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
-                        <Palette aria-hidden="true" className="size-8" />
-                      </div>
-
-                      <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                        {filtersAreActive
-                          ? 'No inspiration matches these filters'
-                          : 'No inspiration added yet'}
-                      </p>
-
-                      <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
-                        {filtersAreActive
-                          ? 'Try changing the search term, category, reference type or sort order.'
-                          : 'Add your first visual reference, source link or creative idea to start shaping the event.'}
-                      </p>
-
-                      {filtersAreActive ? (
-                        <button
-                          type="button"
-                          className="btn-secondary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
-                          onClick={clearFilters}
-                        >
-                          Clear filters
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="group/first-inspiration btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                          disabled={!isMoodBoardEditable}
-                          title={
-                            !isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined
-                          }
-                          onClick={openCreateDialog}
-                        >
-                          <Plus
-                            aria-hidden="true"
-                            className="size-4 transition duration-300 group-hover/first-inspiration:rotate-90"
-                          />
-                          Add inspiration
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {pagination.totalPages > 1 ? (
-                  <div className="relative mt-8 overflow-hidden rounded-[1.5rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(228,238,243,0.32))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-xl sm:p-5">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                    />
-
-                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)]">
-                          <Images aria-hidden="true" className="size-4" />
-                        </span>
-
-                        <div>
-                          <p className="text-sm font-black text-[var(--color-near-black)]">
-                            Page {pagination.page} of {pagination.totalPages}
-                          </p>
-
-                          <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/50">
-                            {pagination.total} {pagination.total === 1 ? 'idea' : 'ideas'} in total
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          className="btn-secondary min-w-28 justify-center text-sm font-bold"
-                          disabled={!pagination.hasPreviousPage || itemsQuery.isFetching}
-                          onClick={() => {
-                            setPage((currentPage) => Math.max(currentPage - 1, 1));
-                          }}
-                        >
-                          Previous
-                        </button>
-
-                        <button
-                          type="button"
-                          className="btn-secondary min-w-28 justify-center text-sm font-bold"
-                          disabled={!pagination.hasNextPage || itemsQuery.isFetching}
-                          onClick={() => {
-                            setPage((currentPage) => currentPage + 1);
-                          }}
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                    <ExternalLink aria-hidden="true" className="size-3.5" />
+                  </Link>
                 ) : null}
               </div>
             </article>
+          ))}
+        </div>
+      ) : (
+        <div className="relative mt-5 overflow-hidden rounded-[1.4rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.50),rgba(255,255,255,0.24))] p-6 text-center shadow-[0_14px_34px_rgba(31,27,29,0.04)] backdrop-blur-xl">
+          <div className="relative">
+            <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+              <Palette aria-hidden="true" className="size-6" />
+            </div>
 
-            <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
-              <article className="group/category-panel relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_32px_86px_rgba(93,58,85,0.34)]">
-                <div
+            <p className="mt-4 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+              {filtersAreActive
+                ? 'No inspiration matches these filters'
+                : 'No inspiration added yet'}
+            </p>
+
+            <p className="mx-auto mt-2 max-w-lg text-xs font-semibold leading-5 text-[var(--color-charcoal)]/60">
+              {filtersAreActive
+                ? 'Try changing the search term, category, reference type or sort order.'
+                : 'Add your first visual reference, source link or creative idea to start shaping the event.'}
+            </p>
+
+            {filtersAreActive ? (
+              <button
+                type="button"
+                className="btn-secondary mt-4 justify-center text-xs font-bold"
+                onClick={clearFilters}
+              >
+                Clear filters
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="group/first-inspiration btn-primary mt-4 justify-center text-xs font-bold"
+                disabled={!isMoodBoardEditable}
+                title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
+                onClick={openCreateDialog}
+              >
+                <Plus
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-3xl transition duration-500 group-hover/category-panel:scale-125"
+                  className="size-3.5 transition duration-300 group-hover/first-inspiration:rotate-90"
                 />
+                Add inspiration
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                />
+      {pagination.totalPages > 1 ? (
+        <div className="relative mt-5 overflow-hidden rounded-[1.25rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(228,238,243,0.32))] px-4 py-3 shadow-[0_12px_30px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+          <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)]">
+                <Images aria-hidden="true" className="size-4" />
+              </span>
 
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/12 text-[var(--color-powder-blue)]">
-                      <Palette aria-hidden="true" className="size-6" />
-                    </div>
+              <div>
+                <p className="text-xs font-black text-[var(--color-near-black)]">
+                  Page {pagination.page} of {pagination.totalPages}
+                </p>
 
-                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74">
-                      {activeCategoryCount} active
-                    </span>
-                  </div>
+                <p className="mt-0.5 text-[0.65rem] font-semibold text-[var(--color-charcoal)]/50">
+                  {pagination.total} {pagination.total === 1 ? 'idea' : 'ideas'} in total
+                </p>
+              </div>
+            </div>
 
-                  <p className="mt-7 text-xs font-black uppercase tracking-[0.20em] text-white/48">
-                    Creative coverage
-                  </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="btn-secondary min-w-24 justify-center text-xs font-bold"
+                disabled={!pagination.hasPreviousPage || itemsQuery.isFetching}
+                onClick={() => {
+                  setPage((currentPage) => Math.max(currentPage - 1, 1));
+                }}
+              >
+                Previous
+              </button>
 
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
-                    Creative categories
-                  </h2>
+              <button
+                type="button"
+                className="btn-secondary min-w-24 justify-center text-xs font-bold"
+                disabled={!pagination.hasNextPage || itemsQuery.isFetching}
+                onClick={() => {
+                  setPage((currentPage) => currentPage + 1);
+                }}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  </article>
 
-                  <p className="mt-3 leading-7 text-white/68">
-                    See which parts of the event already have saved inspiration.
-                  </p>
+  <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+    <article className="group/category-panel relative overflow-hidden rounded-[1.65rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-5 text-[#fffaf5] shadow-[0_20px_56px_rgba(93,58,85,0.26)] transition-all duration-500 hover:-translate-y-0.5">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-3xl"
+      />
 
-                  <div className="mt-7 space-y-3">
-                    {moodBoardCategories
-                      .filter(
-                        (itemCategory) => moodBoardSummary.summary.categoryCounts[itemCategory] > 0,
-                      )
-                      .map((itemCategory) => (
-                        <div
-                          key={itemCategory}
-                          className="group/category-row flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.15]"
-                        >
-                          <span className="truncate text-sm font-black text-white/82">
-                            {categoryLabels[itemCategory]}
-                          </span>
+      <div className="relative">
+        <div className="flex items-center justify-between gap-3">
+          <div className="grid size-10 place-items-center rounded-xl border border-white/14 bg-white/12 text-[var(--color-powder-blue)]">
+            <Palette aria-hidden="true" className="size-5" />
+          </div>
 
-                          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/12 text-lg font-black">
-                            {moodBoardSummary.summary.categoryCounts[itemCategory]}
-                          </span>
-                        </div>
-                      ))}
+          <span className="rounded-full border border-white/14 bg-white/10 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-[0.14em] text-white/74">
+            {activeCategoryCount} active
+          </span>
+        </div>
 
-                    {activeCategoryCount === 0 ? (
-                      <div className="rounded-[1.35rem] border border-white/10 bg-white/10 p-4">
-                        <p className="text-sm font-semibold leading-6 text-white/64">
-                          Categories will appear here after inspiration items are added.
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </article>
+        <p className="mt-4 text-[0.65rem] font-black uppercase tracking-[0.18em] text-white/48">
+          Creative coverage
+        </p>
 
-              <article className="group/visual-story glass-card relative overflow-hidden p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)]">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-16 -right-12 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl transition duration-500 group-hover/visual-story:scale-125"
-                />
+        <h2 className="mt-1.5 text-xl font-black tracking-[-0.035em]">
+          Creative categories
+        </h2>
 
-                <div className="relative">
-                  <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                    <Sparkles aria-hidden="true" className="size-6" />
-                  </div>
+        <p className="mt-1.5 text-xs font-semibold leading-5 text-white/68">
+          See which parts of the event already have saved inspiration.
+        </p>
 
-                  <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                    Creative guidance
-                  </p>
+        <div className="mt-4 space-y-2">
+          {moodBoardCategories
+            .filter(
+              (itemCategory) => moodBoardSummary.summary.categoryCounts[itemCategory] > 0,
+            )
+            .map((itemCategory) => (
+              <div
+                key={itemCategory}
+                className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/10 px-3 py-2.5 backdrop-blur-xl"
+              >
+                <span className="truncate text-xs font-black text-white/82">
+                  {categoryLabels[itemCategory]}
+                </span>
 
-                  <h2 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                    Build a clear visual story
-                  </h2>
+                <span className="grid size-7 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/12 text-xs font-black">
+                  {moodBoardSummary.summary.categoryCounts[itemCategory]}
+                </span>
+              </div>
+            ))}
 
-                  <p className="mt-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
-                    Save references across styling, venue, stationery, food and entertainment so
-                    your choices feel connected rather than collected at random.
-                  </p>
+          {activeCategoryCount === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-white/10 p-3">
+              <p className="text-xs font-semibold leading-5 text-white/64">
+                Categories will appear here after inspiration items are added.
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </article>
 
-                  <button
-                    type="button"
-                    className="group/add-another-idea btn-secondary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
-                    disabled={!isMoodBoardEditable}
-                    title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
-                    onClick={openCreateDialog}
-                  >
-                    <Plus
-                      aria-hidden="true"
-                      className="size-4 transition duration-300 group-hover/add-another-idea:rotate-90"
-                    />
-                    Add another idea
-                  </button>
-                </div>
-              </article>
-            </aside>
-          </section>
+    <article className="group/visual-story glass-card relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:shadow-[0_20px_48px_rgba(31,27,29,0.09)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-16 -right-12 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
+      />
+
+      <div className="relative">
+        <div className="grid size-10 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+          <Sparkles aria-hidden="true" className="size-5" />
+        </div>
+
+        <p className="mt-4 text-[0.65rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
+          Creative guidance
+        </p>
+
+        <h2 className="mt-1.5 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+          Build a clear visual story
+        </h2>
+
+        <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/60">
+          Save references across styling, venue, stationery, food and entertainment so your
+          choices feel connected rather than collected at random.
+        </p>
+
+        <button
+          type="button"
+          className="group/add-another-idea btn-secondary mt-4 w-full justify-center text-xs font-bold"
+          disabled={!isMoodBoardEditable}
+          title={!isMoodBoardEditable ? (moodBoardLockedMessage ?? undefined) : undefined}
+          onClick={openCreateDialog}
+        >
+          <Plus
+            aria-hidden="true"
+            className="size-3.5 transition duration-300 group-hover/add-another-idea:rotate-90"
+          />
+          Add another idea
+        </button>
+      </div>
+    </article>
+  </aside>
+</section>
         </main>
       </div>
       {isCreateDialogOpen && isMoodBoardEditable ? (

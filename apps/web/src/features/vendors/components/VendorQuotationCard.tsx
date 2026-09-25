@@ -2,7 +2,7 @@ import {
   ArrowRight,
   CalendarClock,
   CircleAlert,
-  Eye,
+  Clock3,
   FileText,
   MapPin,
   UserRound,
@@ -32,7 +32,7 @@ const getDeadlineLabel = (value: string | null) => {
   const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
 
   if (difference <= 0) {
-    return 'Response deadline passed';
+    return 'Deadline passed';
   }
 
   if (days === 1) {
@@ -77,101 +77,112 @@ export function VendorQuotationCard({ quotationRequest }: VendorQuotationCardPro
     new Date(quotationRequest.responseDueAt).getTime() <= Date.now();
 
   return (
-    <article className="rounded-[1.75rem] border border-white/55 bg-white/24 p-5 shadow-[0_16px_45px_rgba(31,27,29,0.08)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/32">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-        <div className="flex min-w-0 items-start gap-4">
-          <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)]">
-            <FileText className="size-5" />
+    <article className="group rounded-[1.35rem] border border-white/60 bg-white/30 px-4 py-3.5 shadow-[0_10px_30px_rgba(31,27,29,0.055)] backdrop-blur-2xl transition duration-300 hover:border-white/80 hover:bg-white/42 hover:shadow-[0_14px_36px_rgba(31,27,29,0.08)] sm:px-4.5">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+              <FileText className="size-4" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                  {quotationRequest.package?.category?.name ?? 'Service request'}
+                </p>
+
+                <span className="hidden size-1 rounded-full bg-[var(--color-charcoal)]/20 sm:block" />
+
+                <p className="truncate text-[0.68rem] font-bold text-[var(--color-charcoal)]/48">
+                  {quotationRequest.event.name}
+                </p>
+              </div>
+
+              <h3 className="mt-1 truncate text-[1.05rem] font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                {quotationRequest.package?.title ?? 'Custom event service'}
+              </h3>
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-              {quotationRequest.package?.category?.name ?? 'Service request'}
-            </p>
-
-            <h3 className="mt-2 truncate text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-              {quotationRequest.package?.title ?? 'Custom event service'}
-            </h3>
-
-            <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/58">
-              {quotationRequest.event.name}
-            </p>
-          </div>
-        </div>
-
-        <span
-          className="status-chip w-fit shrink-0"
-          data-tone={getStatusTone(quotationRequest.status)}
-        >
-          {quotationRequest.status.replaceAll('_', ' ')}
-        </span>
-      </div>
-
-      <p className="mt-5 line-clamp-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-        {quotationRequest.requirements}
-      </p>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="flex items-center gap-3 rounded-2xl bg-white/26 px-4 py-3">
-          <UserRound className="size-4 shrink-0 text-[var(--color-deep-plum)]" />
-
-          <div className="min-w-0">
-            <p className="text-xs font-bold text-[var(--color-charcoal)]/48">Customer</p>
-
-            <p className="truncate text-sm font-black text-[var(--color-near-black)]">
-              {getCustomerName(quotationRequest)}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-2xl bg-white/26 px-4 py-3">
-          <MapPin className="size-4 shrink-0 text-[var(--color-deep-plum)]" />
-
-          <div className="min-w-0">
-            <p className="text-xs font-bold text-[var(--color-charcoal)]/48">Location</p>
-
-            <p className="truncate text-sm font-black text-[var(--color-near-black)]">
-              {quotationRequest.event.location ?? 'Not specified'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <span className="soft-chip text-xs font-bold">
-          <CalendarClock className="size-4" />
-          Event on {formatDate(quotationRequest.event.eventDate)}
-        </span>
-
-        <span
-          className={
-            deadlinePassed
-              ? 'inline-flex items-center gap-2 rounded-full bg-[rgba(124,74,90,0.12)] px-3 py-2 text-xs font-black text-[var(--color-muted-burgundy)]'
-              : 'soft-chip text-xs font-bold'
-          }
-        >
-          {deadlinePassed ? <CircleAlert className="size-4" /> : <Eye className="size-4" />}
-
-          {getDeadlineLabel(quotationRequest.responseDueAt)}
-        </span>
-      </div>
-
-      <div className="mt-6 flex flex-col justify-between gap-3 border-t border-white/45 pt-5 sm:flex-row sm:items-center">
-        <div>
-          <p className="text-xs font-bold text-[var(--color-charcoal)]/48">Received</p>
-
-          <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
-            {formatDate(quotationRequest.createdAt)}
+          <p className="mt-2.5 line-clamp-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/60">
+            {quotationRequest.requirements}
           </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/45 pt-3">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <UserRound className="size-3.5 shrink-0 text-[var(--color-deep-plum)]" />
+
+              <span className="text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+                Customer
+              </span>
+
+              <span className="max-w-[10rem] truncate text-[0.7rem] font-black text-[var(--color-near-black)]">
+                {getCustomerName(quotationRequest)}
+              </span>
+            </div>
+
+            <div className="flex min-w-0 items-center gap-1.5">
+              <MapPin className="size-3.5 shrink-0 text-[var(--color-deep-plum)]" />
+
+              <span className="max-w-[9rem] truncate text-[0.7rem] font-black text-[var(--color-near-black)]">
+                {quotationRequest.event.location ?? 'Not specified'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <CalendarClock className="size-3.5 shrink-0 text-[var(--color-deep-plum)]" />
+
+              <span className="text-[0.7rem] font-black text-[var(--color-near-black)]">
+                {formatDate(quotationRequest.event.eventDate)}
+              </span>
+            </div>
+
+            <div
+              className={
+                deadlinePassed
+                  ? 'inline-flex items-center gap-1.5 rounded-full bg-[rgba(124,74,90,0.10)] px-2.5 py-1 text-[0.65rem] font-black text-[var(--color-muted-burgundy)]'
+                  : 'inline-flex items-center gap-1.5 rounded-full bg-white/42 px-2.5 py-1 text-[0.65rem] font-black text-[var(--color-charcoal)]/64'
+              }
+            >
+              {deadlinePassed ? (
+                <CircleAlert className="size-3" />
+              ) : (
+                <Clock3 className="size-3" />
+              )}
+
+              {getDeadlineLabel(quotationRequest.responseDueAt)}
+            </div>
+          </div>
         </div>
 
-        <Link
-          to={`/vendor/quotation-requests/${quotationRequest.id}`}
-          className="btn-secondary text-sm font-bold"
-        >
-          View request
-          <ArrowRight className="size-4" />
-        </Link>
+        <div className="flex items-center justify-between gap-3 border-t border-white/45 pt-3 lg:h-full lg:min-w-[8.5rem] lg:flex-col lg:items-end lg:justify-between lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+          <span
+            className="status-chip w-fit shrink-0"
+            data-tone={getStatusTone(quotationRequest.status)}
+          >
+            {quotationRequest.status.replaceAll('_', ' ')}
+          </span>
+
+          <div className="flex items-center gap-3 lg:flex-col lg:items-end lg:gap-2">
+            <div className="text-right">
+              <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
+                Received
+              </p>
+
+              <p className="mt-0.5 whitespace-nowrap text-[0.68rem] font-black text-[var(--color-near-black)]">
+                {formatDate(quotationRequest.createdAt)}
+              </p>
+            </div>
+
+            <Link
+              to={`/vendor/quotation-requests/${quotationRequest.id}`}
+              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-[rgba(93,58,85,0.14)] bg-white/56 px-3 text-[0.68rem] font-black text-[var(--color-deep-plum)] shadow-[0_7px_20px_rgba(31,27,29,0.06)] transition hover:-translate-y-0.5 hover:bg-white/82"
+            >
+              View request
+              <ArrowRight className="size-3" />
+            </Link>
+          </div>
+        </div>
       </div>
     </article>
   );

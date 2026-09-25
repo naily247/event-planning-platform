@@ -1015,8 +1015,8 @@ export function EventDocumentsWorkspacePage() {
           ) : null}
 
           <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
-            <article className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.52),rgba(255,255,255,0.22))] p-6 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-7">
-              <div
+            <article className="relative overflow-hidden rounded-[1.7rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.52),rgba(255,255,255,0.22))] p-5 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-3xl sm:p-5">
+                          <div
                 aria-hidden="true"
                 className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
               />
@@ -1027,505 +1027,439 @@ export function EventDocumentsWorkspacePage() {
               />
 
               <div className="relative">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
-                        <FolderArchive aria-hidden="true" className="size-5" />
-                      </div>
+  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="min-w-0">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+          <FolderArchive aria-hidden="true" className="size-4" />
+        </div>
 
-                      <span className="status-chip" data-tone="plum">
-                        {pagination.total}{' '}
-                        {pagination.total === 1 ? 'document group' : 'document groups'}
-                      </span>
-                    </div>
+        <div>
+          <p className="text-[0.66rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+            Document library
+          </p>
 
-                    <p className="mt-6 text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                      Document library
-                    </p>
+          <h2 className="mt-1 text-[1.55rem] font-black leading-tight tracking-[-0.04em] text-[var(--color-near-black)] sm:text-[1.7rem]">
+            Files organised for this event.
+          </h2>
+        </div>
 
-                    <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                      Files organised for this event.
-                    </h2>
+        <span className="status-chip" data-tone="plum">
+          {pagination.total} {pagination.total === 1 ? 'document group' : 'document groups'}
+        </span>
+      </div>
 
-                    <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
-                      Search document groups, filter file types and categories, or focus on records
-                      linked to a vendor.
-                    </p>
-                  </div>
+      <p className="mt-2 max-w-2xl text-[0.78rem] font-semibold leading-5 text-[var(--color-charcoal)]/58">
+        Search document groups, filter file types and categories, or focus on records linked to a
+        vendor.
+      </p>
+    </div>
 
-                  <button
-                    type="button"
-                    className="group/library-add-document btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                    disabled={!isDocumentsEditable}
-                    title={!isDocumentsEditable ? (documentsLockedMessage ?? undefined) : undefined}
-                    onClick={openCreateDialog}
-                  >
-                    <Plus
-                      aria-hidden="true"
-                      className="size-4 transition duration-300 group-hover/library-add-document:rotate-90"
-                    />
-                    Add document
-                  </button>
-                </div>
+    <button
+      type="button"
+      className="group/library-add-document btn-primary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+      disabled={!isDocumentsEditable}
+      title={!isDocumentsEditable ? (documentsLockedMessage ?? undefined) : undefined}
+      onClick={openCreateDialog}
+    >
+      <Plus
+        aria-hidden="true"
+        className="size-4 transition duration-300 group-hover/library-add-document:rotate-90"
+      />
+      Add document
+    </button>
+  </div>
 
-                <form
-                  className="mt-7 rounded-[1.6rem] border border-white/56 bg-white/28 p-5 backdrop-blur-xl"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    submitSearch();
-                  }}
-                >
-                  <label className="block">
-                    <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                      Search documents
-                    </span>
+  <div className="mt-3 rounded-xl border border-white/52 bg-white/22 px-3 py-2.5 backdrop-blur-xl">
+  <div className="flex flex-col gap-2.5 xl:flex-row xl:items-end">
+    <label className="min-w-0 flex-[1.55]">
+      <span className="mb-1 block text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+        Search
+      </span>
 
-                    <div className="mt-2 flex min-h-12 items-center gap-3 rounded-2xl border border-white/58 bg-white/30 px-4 transition duration-300 focus-within:border-[rgba(93,58,85,0.22)] focus-within:bg-white/48">
-                      <Search
-                        aria-hidden="true"
-                        className="size-5 shrink-0 text-[var(--color-charcoal)]/42"
-                      />
+      <div className="flex h-9 items-center gap-2 rounded-lg border border-white/58 bg-white/34 px-2.5 transition focus-within:border-[rgba(93,58,85,0.24)] focus-within:bg-white/52">
+        <Search
+          aria-hidden="true"
+          className="size-3.5 shrink-0 text-[var(--color-charcoal)]/38"
+        />
 
-                      <input
-                        className="w-full bg-transparent text-sm font-semibold outline-none placeholder:text-[var(--color-charcoal)]/42"
-                        type="search"
-                        placeholder="Search titles, descriptions, filenames or vendors"
-                        value={searchInput}
-                        onChange={(event) => {
-                          setSearchInput(event.target.value);
-                        }}
-                      />
-                    </div>
-                  </label>
+        <input
+  className="min-w-0 flex-1 bg-transparent text-[0.72rem] font-semibold text-[var(--color-charcoal)] outline-none placeholder:text-[var(--color-charcoal)]/36"
+  type="search"
+  placeholder="Title, filename or vendor"
+  value={searchInput}
+  onChange={(event) => {
+    setSearchInput(event.target.value);
+  }}
+  onKeyDown={(event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      submitSearch();
+    }
+  }}
+/>
+      </div>
+    </label>
 
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <label className="space-y-2">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        Category
-                      </span>
+    <label className="min-w-0 flex-1">
+      <span className="mb-1 block text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+        Category
+      </span>
 
-                      <select
-                        className="form-field min-h-12 transition duration-300 focus:bg-white/52"
-                        aria-label="Filter documents by category"
-                        value={categoryFilter}
-                        onChange={(event) => {
-                          setCategoryFilter(event.target.value as EventDocumentCategory | '');
-                          setPage(1);
-                        }}
-                      >
-                        <option value="">All categories</option>
+      <select
+        className="form-field h-9 min-h-0 rounded-lg px-2.5 py-0 text-[0.7rem] font-semibold"
+        aria-label="Filter documents by category"
+        value={categoryFilter}
+        onChange={(event) => {
+          setCategoryFilter(event.target.value as EventDocumentCategory | '');
+          setPage(1);
+        }}
+      >
+        <option value="">All categories</option>
 
-                        {eventDocumentCategories.map((documentCategory) => (
-                          <option key={documentCategory} value={documentCategory}>
-                            {categoryLabels[documentCategory]}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+        {eventDocumentCategories.map((categoryOption) => (
+          <option key={categoryOption} value={categoryOption}>
+            {categoryLabels[categoryOption]}
+          </option>
+        ))}
+      </select>
+    </label>
 
-                    <label className="space-y-2">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        File type
-                      </span>
+    <label className="min-w-0 flex-1">
+      <span className="mb-1 block text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+        File type
+      </span>
 
-                      <select
-                        className="form-field min-h-12 transition duration-300 focus:bg-white/52"
-                        aria-label="Filter documents by file type"
-                        value={fileTypeFilter}
-                        onChange={(event) => {
-                          setFileTypeFilter(event.target.value as FileTypeFilter);
-                          setPage(1);
-                        }}
-                      >
-                        <option value="all">All file types</option>
-                        <option value="PDF">PDF files</option>
-                        <option value="IMAGE">Images</option>
-                      </select>
-                    </label>
+      <select
+        className="form-field h-9 min-h-0 rounded-lg px-2.5 py-0 text-[0.7rem] font-semibold"
+        aria-label="Filter documents by file type"
+        value={fileTypeFilter}
+        onChange={(event) => {
+          setFileTypeFilter(event.target.value as FileTypeFilter);
+          setPage(1);
+        }}
+      >
+        <option value="all">All file types</option>
+        <option value="pdf">PDF</option>
+        <option value="image">Images</option>
+      </select>
+    </label>
 
-                    <label className="space-y-2">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        Vendor link
-                      </span>
+    <label className="min-w-0 flex-1">
+      <span className="mb-1 block text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+        Vendor
+      </span>
 
-                      <select
-                        className="form-field min-h-12 transition duration-300 focus:bg-white/52"
-                        aria-label="Filter documents by linked vendor"
-                        value={vendorFilter}
-                        onChange={(event) => {
-                          setVendorFilter(event.target.value as VendorFilter);
-                          setPage(1);
-                        }}
-                      >
-                        <option value="all">All vendor links</option>
-                        <option value="linked">Linked vendor</option>
-                        <option value="unlinked">No vendor</option>
-                      </select>
-                    </label>
+      <select
+        className="form-field h-9 min-h-0 rounded-lg px-2.5 py-0 text-[0.7rem] font-semibold"
+        aria-label="Filter documents by vendor link"
+        value={vendorFilter}
+        onChange={(event) => {
+          setVendorFilter(event.target.value as VendorFilter);
+          setPage(1);
+        }}
+      >
+        <option value="all">All documents</option>
+        <option value="linked">Vendor linked</option>
+        <option value="unlinked">No vendor</option>
+      </select>
+    </label>
 
-                    <label className="space-y-2">
-                      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
-                        Sort order
-                      </span>
+    <label className="min-w-0 flex-1">
+      <span className="mb-1 block text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
+        Sort
+      </span>
 
-                      <select
-                        className="form-field min-h-12 transition duration-300 focus:bg-white/52"
-                        aria-label="Sort event documents"
-                        value={sort}
-                        onChange={(event) => {
-                          setSort(event.target.value as EventDocumentSort);
-                          setPage(1);
-                        }}
-                      >
-                        <option value="newest">Newest first</option>
-                        <option value="oldest">Oldest first</option>
-                        <option value="title_asc">Title A–Z</option>
-                        <option value="title_desc">Title Z–A</option>
-                        <option value="category_asc">Category A–Z</option>
-                        <option value="category_desc">Category Z–A</option>
-                      </select>
-                    </label>
-                  </div>
+      <select
+        className="form-field h-9 min-h-0 rounded-lg px-2.5 py-0 text-[0.7rem] font-semibold"
+        aria-label="Sort documents"
+        value={sort}
+        onChange={(event) => {
+          setSort(event.target.value as EventDocumentSort);
+          setPage(1);
+        }}
+      >
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="title_asc">Title A–Z</option>
+        <option value="title_desc">Title Z–A</option>
+      </select>
+    </label>
 
-                  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-bold text-[var(--color-charcoal)]/52">
-                      Showing {documents.length}{' '}
-                      {documents.length === 1 ? 'document group' : 'document groups'} on this page
-                    </p>
-
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="submit"
-                        className="group/search-documents btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                      >
-                        <Search
-                          aria-hidden="true"
-                          className="size-4 transition duration-300 group-hover/search-documents:scale-105"
-                        />
-                        Search
-                      </button>
-
-                      {filtersAreActive ? (
-                        <button
-                          type="button"
-                          className="btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
-                          onClick={clearFilters}
-                        >
-                          Clear filters
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-                </form>
+    <div className="flex shrink-0 items-center gap-1.5">
+      {filtersAreActive ? (
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center rounded-lg border border-[rgba(93,58,85,0.12)] bg-white/30 px-3 text-[0.68rem] font-black text-[var(--color-deep-plum)] transition hover:bg-white/55"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      ) : null}
+    </div>
+  </div>
+</div>
 
                 {documents.length > 0 ? (
                   <div className="mt-8 grid gap-5 xl:grid-cols-2">
                     {documents.map((document) => (
-                      <article
-                        key={document.id}
-                        className="group/document-card relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.48),rgba(255,255,255,0.22))] shadow-[0_18px_50px_rgba(31,27,29,0.055)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(232,225,240,0.58))] hover:shadow-[0_30px_72px_rgba(31,27,29,0.12)]"
-                      >
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent"
-                        />
+  <article
+    key={document.id}
+    className="group/document-row overflow-hidden rounded-[1.15rem] border border-white/62 bg-white/30 shadow-[0_10px_28px_rgba(31,27,29,0.045)] backdrop-blur-xl transition-all duration-300 hover:border-white/86 hover:bg-white/42 hover:shadow-[0_14px_34px_rgba(31,27,29,0.065)]"
+  >
+    <div className="px-4 py-3.5 sm:px-5">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(13rem,0.65fr)_auto] lg:items-center">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+            <FolderArchive aria-hidden="true" className="size-4" />
+          </span>
 
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.16)] opacity-60 blur-3xl transition duration-500 group-hover/document-card:scale-125 group-hover/document-card:bg-[rgba(183,167,200,0.30)] group-hover/document-card:opacity-100"
-                        />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="min-w-0 truncate text-[0.95rem] font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                {document.title}
+              </h3>
 
-                        <div className="relative p-4 sm:p-5">
-                          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-start gap-4">
-                                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(93,58,85,0.11)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/document-card:-translate-y-0.5 group-hover/document-card:scale-105">
-                                  <FolderArchive aria-hidden="true" className="size-6" />
-                                </div>
+              <span
+                className="rounded-full border border-[rgba(93,58,85,0.12)] bg-[rgba(93,58,85,0.07)] px-2 py-0.5 text-[0.58rem] font-black uppercase tracking-[0.11em] text-[var(--color-deep-plum)]"
+              >
+                {categoryLabels[document.category]}
+              </span>
+            </div>
 
-                                <div className="min-w-0">
-                                  <span className="status-chip" data-tone="plum">
-                                    {categoryLabels[document.category]}
-                                  </span>
+            {document.description ? (
+              <p className="mt-1 line-clamp-2 max-w-2xl text-[0.72rem] font-semibold leading-[1.15rem] text-[var(--color-charcoal)]/58">
+                {document.description}
+              </p>
+            ) : (
+              <p className="mt-1 text-[0.7rem] font-semibold text-[var(--color-charcoal)]/38">
+                No description added.
+              </p>
+            )}
+          </div>
+        </div>
 
-                                  <h3 className="mt-3 truncate text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/document-card:text-[var(--color-deep-plum)]">
-                                    {document.title}
-                                  </h3>
+        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1.5 lg:border-l lg:border-white/58 lg:pl-4">
+          <span className="inline-flex items-center gap-1.5 text-[0.68rem] font-bold text-[var(--color-charcoal)]/52">
+            <Files
+              aria-hidden="true"
+              className="size-3.5 text-[var(--color-deep-plum)]"
+            />
+            {document.files.length} {document.files.length === 1 ? 'file' : 'files'}
+          </span>
 
-                                  <p className="mt-2 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                                    Document group
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
+          <span className="inline-flex items-center gap-1.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+            <Paperclip
+              aria-hidden="true"
+              className="size-3.5 text-[var(--color-rosewood)]"
+            />
+            {formatCreatedDate(document.createdAt)}
+          </span>
 
-                            <div className="flex shrink-0 items-center gap-2">
-                              <button
-                                type="button"
-                                className="group/edit-document grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.18)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-[rgba(93,58,85,0.14)] hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                                aria-label={`Edit ${document.title}`}
-                                disabled={!isDocumentsEditable}
-                                title={
-                                  !isDocumentsEditable
-                                    ? (documentsLockedMessage ?? undefined)
-                                    : undefined
-                                }
-                                onClick={() => {
-                                  openEditDialog(document);
-                                }}
-                              >
-                                <Pencil
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/edit-document:rotate-[3deg] group-hover/edit-document:scale-105"
-                                />
-                              </button>
+          {document.vendor ? (
+            <Link
+              className="inline-flex min-w-0 items-center gap-1.5 text-[0.68rem] font-black text-[#405964] transition hover:text-[var(--color-deep-plum)]"
+              to={`/vendors/${document.vendor.slug}`}
+            >
+              <Store aria-hidden="true" className="size-3.5 shrink-0" />
 
-                              <button
-                                type="button"
-                                className="group/delete-document grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.28)] hover:bg-[rgba(124,74,90,0.14)] hover:shadow-[0_12px_28px_rgba(124,74,90,0.10)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                                aria-label={`Delete ${document.title}`}
-                                disabled={!isDocumentsEditable}
-                                title={
-                                  !isDocumentsEditable
-                                    ? (documentsLockedMessage ?? undefined)
-                                    : undefined
-                                }
-                                onClick={() => {
-                                  if (!isDocumentsEditable) {
-                                    return;
-                                  }
+              <span className="max-w-[11rem] truncate">
+                {document.vendor.businessName}
+              </span>
 
-                                  deleteDocumentMutation.reset();
-                                  setDocumentToDelete(document);
-                                }}
-                              >
-                                <Trash2
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/delete-document:scale-105"
-                                />
-                              </button>
-                            </div>
-                          </div>
+              <ExternalLink aria-hidden="true" className="size-3 shrink-0" />
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/38">
+              <Store aria-hidden="true" className="size-3.5" />
+              No vendor
+            </span>
+          )}
+        </div>
 
-                          {document.description ? (
-                            <div className="mt-5 rounded-[1.35rem] border border-white/50 bg-white/30 p-4 transition duration-300 group-hover/document-card:border-white/74 group-hover/document-card:bg-white/44">
-                              <p className="line-clamp-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/66">
-                                {document.description}
-                              </p>
-                            </div>
-                          ) : null}
+        <div className="flex items-center gap-1.5 lg:justify-end">
+          <button
+            type="button"
+            className="group/edit-document grid size-8 place-items-center rounded-lg border border-[rgba(93,58,85,0.13)] bg-white/34 text-[var(--color-deep-plum)] transition-all duration-200 hover:border-[rgba(93,58,85,0.24)] hover:bg-white/60 disabled:cursor-not-allowed disabled:opacity-35"
+            aria-label={`Edit ${document.title}`}
+            disabled={!isDocumentsEditable}
+            title={
+              !isDocumentsEditable
+                ? (documentsLockedMessage ?? undefined)
+                : `Edit ${document.title}`
+            }
+            onClick={() => {
+              openEditDialog(document);
+            }}
+          >
+            <Pencil aria-hidden="true" className="size-3.5" />
+          </button>
 
-                          <div className="mt-5 flex flex-wrap items-center gap-3">
-                            <span className="inline-flex items-center gap-2 rounded-xl border border-white/50 bg-white/30 px-3 py-2 text-xs font-black text-[var(--color-charcoal)]/56 transition duration-300 group-hover/document-card:border-white/72 group-hover/document-card:bg-white/44">
-                              <Files
-                                aria-hidden="true"
-                                className="size-4 text-[var(--color-deep-plum)]"
-                              />
-                              {document.files.length}{' '}
-                              {document.files.length === 1 ? 'file' : 'files'}
-                            </span>
+          <button
+            type="button"
+            className="group/delete-document grid size-8 place-items-center rounded-lg border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.055)] text-[var(--color-muted-burgundy)] transition-all duration-200 hover:border-[rgba(124,74,90,0.25)] hover:bg-[rgba(124,74,90,0.11)] disabled:cursor-not-allowed disabled:opacity-35"
+            aria-label={`Delete ${document.title}`}
+            disabled={!isDocumentsEditable}
+            title={
+              !isDocumentsEditable
+                ? (documentsLockedMessage ?? undefined)
+                : `Delete ${document.title}`
+            }
+            onClick={() => {
+              if (!isDocumentsEditable) {
+                return;
+              }
 
-                            <span className="inline-flex items-center gap-2 rounded-xl border border-white/50 bg-white/30 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/54 transition duration-300 group-hover/document-card:border-white/72 group-hover/document-card:bg-white/44">
-                              <Paperclip
-                                aria-hidden="true"
-                                className="size-4 text-[var(--color-rosewood)]"
-                              />
-                              Added {formatCreatedDate(document.createdAt)}
-                            </span>
-                          </div>
+              deleteDocumentMutation.reset();
+              setDocumentToDelete(document);
+            }}
+          >
+            <Trash2 aria-hidden="true" className="size-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
 
-                          {document.vendor ? (
-                            <Link
-                              className="group/vendor-document mt-5 flex items-center gap-3 rounded-[1.35rem] border border-[rgba(175,201,216,0.22)] bg-[rgba(222,236,242,0.30)] px-4 py-4 text-sm font-black text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(175,201,216,0.34)] hover:bg-[rgba(222,236,242,0.44)] hover:shadow-[0_12px_28px_rgba(31,27,29,0.07)]"
-                              to={`/vendors/${document.vendor.slug}`}
-                            >
-                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] transition duration-300 group-hover/vendor-document:scale-105">
-                                <Store aria-hidden="true" className="size-4" />
-                              </span>
+    <div className="border-t border-white/58 bg-white/[0.16] px-4 py-2.5 sm:px-5">
+      <div className="space-y-1.5">
+        {document.files.map((file) => {
+          const imageFile = isImageFile(file);
 
-                              <span className="min-w-0 flex-1 truncate">
-                                {document.vendor.businessName}
-                              </span>
+          return (
+            <div
+              key={file.id}
+              className="flex min-w-0 flex-col gap-2 rounded-xl border border-white/52 bg-white/28 px-3 py-2 sm:flex-row sm:items-center"
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                <span
+                  className={`grid size-8 shrink-0 place-items-center rounded-lg ${
+                    imageFile
+                      ? 'bg-[rgba(175,201,216,0.20)] text-[#405964]'
+                      : 'bg-[rgba(124,74,90,0.09)] text-[var(--color-muted-burgundy)]'
+                  }`}
+                >
+                  {imageFile ? (
+                    <FileImage aria-hidden="true" className="size-3.5" />
+                  ) : (
+                    <FileText aria-hidden="true" className="size-3.5" />
+                  )}
+                </span>
 
-                              <ExternalLink
-                                aria-hidden="true"
-                                className="size-4 shrink-0 transition duration-300 group-hover/vendor-document:-translate-y-0.5 group-hover/vendor-document:translate-x-0.5"
-                              />
-                            </Link>
-                          ) : (
-                            <div className="mt-5 flex items-center gap-3 rounded-[1.35rem] border border-dashed border-white/62 bg-white/22 px-4 py-4">
-                              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/34 text-[var(--color-charcoal)]/44">
-                                <Store aria-hidden="true" className="size-4" />
-                              </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[0.72rem] font-black text-[var(--color-near-black)]">
+                    {file.originalName}
+                  </p>
 
-                              <p className="text-sm font-semibold text-[var(--color-charcoal)]/52">
-                                No vendor linked to this document group.
-                              </p>
-                            </div>
-                          )}
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                    <span className="text-[0.58rem] font-black uppercase tracking-[0.1em] text-[var(--color-charcoal)]/42">
+                      {imageFile ? 'Image' : 'PDF'}
+                    </span>
 
-                          <div className="mt-4 space-y-3">
-                            {document.files.map((file) => (
-                              <article
-                                key={file.id}
-                                className="group/file-row relative overflow-hidden rounded-[1.35rem] border border-white/56 bg-[linear-gradient(145deg,rgba(255,255,255,0.48),rgba(255,255,255,0.24))] p-3 shadow-[0_10px_28px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.80),rgba(225,236,241,0.46))] hover:shadow-[0_18px_42px_rgba(31,27,29,0.08)]"
-                              >
-                                <div
-                                  aria-hidden="true"
-                                  className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl transition duration-500 group-hover/file-row:scale-125 group-hover/file-row:bg-[rgba(175,201,216,0.24)]"
-                                />
+                    <span className="text-[0.62rem] font-semibold text-[var(--color-charcoal)]/42">
+                      {formatFileSize(file.fileSize)}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-                                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
-                                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                                    {isImageFile(file) ? (
-                                      <div className="relative shrink-0 overflow-hidden rounded-2xl border border-white/56 shadow-[0_8px_22px_rgba(31,27,29,0.06)]">
-                                        <img
-                                          className="size-14 object-cover transition duration-500 group-hover/file-row:scale-105"
-                                          src={file.fileUrl}
-                                          alt=""
-                                          loading="lazy"
-                                        />
+              <div className="flex shrink-0 items-center gap-1">
+                <a
+                  className="grid size-7 place-items-center rounded-lg border border-white/58 bg-white/34 text-[var(--color-charcoal)]/66 transition hover:bg-white/66 hover:text-[var(--color-deep-plum)]"
+                  href={file.fileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open ${file.originalName}`}
+                  title="Open file"
+                >
+                  <ExternalLink aria-hidden="true" className="size-3.5" />
+                </a>
 
-                                        <div
-                                          aria-hidden="true"
-                                          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.12)] to-transparent"
-                                        />
-                                      </div>
-                                    ) : (
-                                      <div className="grid size-14 shrink-0 place-items-center rounded-2xl border border-[rgba(124,74,90,0.12)] bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)] shadow-[0_8px_22px_rgba(31,27,29,0.05)] transition duration-300 group-hover/file-row:-translate-y-0.5 group-hover/file-row:scale-105">
-                                        <FileText aria-hidden="true" className="size-6" />
-                                      </div>
-                                    )}
+                <a
+                  className="grid size-7 place-items-center rounded-lg border border-white/58 bg-white/34 text-[var(--color-charcoal)]/66 transition hover:bg-white/66 hover:text-[var(--color-deep-plum)]"
+                  href={file.fileUrl}
+                  download
+                  aria-label={`Download ${file.originalName}`}
+                  title="Download file"
+                >
+                  <Download aria-hidden="true" className="size-3.5" />
+                </a>
 
-                                    <div className="min-w-0 flex-1">
-                                      <p className="truncate text-sm font-black text-[var(--color-near-black)] transition duration-300 group-hover/file-row:text-[var(--color-deep-plum)]">
-                                        {file.originalName}
-                                      </p>
+                <button
+                  type="button"
+                  className="grid size-7 place-items-center rounded-lg border border-[rgba(93,58,85,0.12)] bg-[rgba(93,58,85,0.05)] text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.10)] disabled:cursor-not-allowed disabled:opacity-35"
+                  aria-label={`Replace ${file.originalName}`}
+                  disabled={!isDocumentsEditable}
+                  title={
+                    !isDocumentsEditable
+                      ? (documentsLockedMessage ?? undefined)
+                      : 'Replace file'
+                  }
+                  onClick={() => {
+                    openReplaceFileDialog(document, file);
+                  }}
+                >
+                  <Replace aria-hidden="true" className="size-3.5" />
+                </button>
 
-                                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                                        <span className="rounded-lg border border-white/48 bg-white/30 px-2.5 py-1 text-[0.7rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
-                                          {isImageFile(file) ? 'Image' : 'PDF'}
-                                        </span>
+                <button
+                  type="button"
+                  className="grid size-7 place-items-center rounded-lg border border-[rgba(124,74,90,0.12)] bg-[rgba(124,74,90,0.045)] text-[var(--color-muted-burgundy)] transition hover:bg-[rgba(124,74,90,0.10)] disabled:cursor-not-allowed disabled:opacity-25"
+                  aria-label={`Delete ${file.originalName}`}
+                  disabled={!isDocumentsEditable || document.files.length <= 1}
+                  title={
+                    !isDocumentsEditable
+                      ? (documentsLockedMessage ?? undefined)
+                      : document.files.length <= 1
+                        ? 'A document group must keep at least one file.'
+                        : 'Delete file'
+                  }
+                  onClick={() => {
+                    if (!isDocumentsEditable || document.files.length <= 1) {
+                      return;
+                    }
 
-                                        <span className="text-xs font-semibold text-[var(--color-charcoal)]/48">
-                                          {formatFileSize(file.fileSize)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
+                    deleteFileMutation.reset();
+                    setFileToDelete({
+                      document,
+                      file,
+                    });
+                  }}
+                >
+                  <Trash2 aria-hidden="true" className="size-3.5" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-                                  <div className="flex shrink-0 items-center gap-2 sm:justify-end">
-                                    <a
-                                      className="group/open-file grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-[rgba(93,58,85,0.13)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.07)]"
-                                      href={file.fileUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      aria-label={`Open ${file.originalName}`}
-                                    >
-                                      <ExternalLink
-                                        aria-hidden="true"
-                                        className="size-4 transition duration-300 group-hover/open-file:-translate-y-0.5 group-hover/open-file:translate-x-0.5"
-                                      />
-                                    </a>
-
-                                    <a
-                                      className="group/download-file grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-[rgba(93,58,85,0.13)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.07)]"
-                                      href={file.fileUrl}
-                                      download={file.originalName}
-                                      aria-label={`Download ${file.originalName}`}
-                                    >
-                                      <Download
-                                        aria-hidden="true"
-                                        className="size-4 transition duration-300 group-hover/download-file:translate-y-0.5"
-                                      />
-                                    </a>
-
-                                    <button
-                                      type="button"
-                                      className="group/replace-file grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.14)] bg-[rgba(93,58,85,0.07)] text-[var(--color-deep-plum)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-[rgba(93,58,85,0.13)] hover:shadow-[0_10px_22px_rgba(31,27,29,0.07)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                                      aria-label={`Replace ${file.originalName}`}
-                                      disabled={!isDocumentsEditable}
-                                      title={
-                                        !isDocumentsEditable
-                                          ? (documentsLockedMessage ?? undefined)
-                                          : undefined
-                                      }
-                                      onClick={() => {
-                                        openReplaceFileDialog(document, file);
-                                      }}
-                                    >
-                                      <Replace
-                                        aria-hidden="true"
-                                        className="size-4 transition duration-300 group-hover/replace-file:rotate-12"
-                                      />
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      className="group/delete-file grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.24)] hover:bg-[rgba(124,74,90,0.13)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.08)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                                      aria-label={`Delete ${file.originalName}`}
-                                      disabled={!isDocumentsEditable || document.files.length <= 1}
-                                      title={
-                                        !isDocumentsEditable
-                                          ? (documentsLockedMessage ?? undefined)
-                                          : document.files.length <= 1
-                                            ? 'At least one file must remain in a document group.'
-                                            : undefined
-                                      }
-                                      onClick={() => {
-                                        if (!isDocumentsEditable) {
-                                          return;
-                                        }
-
-                                        deleteFileMutation.reset();
-                                        setFileToDelete({
-                                          document,
-                                          file,
-                                        });
-                                      }}
-                                    >
-                                      <Trash2
-                                        aria-hidden="true"
-                                        className="size-4 transition duration-300 group-hover/delete-file:scale-105"
-                                      />
-                                    </button>
-                                  </div>
-                                </div>
-                              </article>
-                            ))}
-                          </div>
-
-                          <button
-                            type="button"
-                            className="group/add-document-file mt-5 flex w-full items-center justify-center gap-2 rounded-[1.35rem] border border-white/56 bg-white/28 px-5 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/48 hover:shadow-[0_16px_34px_rgba(31,27,29,0.08)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                            disabled={
-                              !isDocumentsEditable ||
-                              document.files.length >= EVENT_DOCUMENT_MAX_FILES
-                            }
-                            title={
-                              !isDocumentsEditable
-                                ? (documentsLockedMessage ?? undefined)
-                                : undefined
-                            }
-                            onClick={() => {
-                              openAddFilesDialog(document);
-                            }}
-                          >
-                            <FilePlus2
-                              aria-hidden="true"
-                              className="size-4 transition duration-300 group-hover/add-document-file:rotate-[4deg] group-hover/add-document-file:scale-105"
-                            />
-
-                            {!isDocumentsEditable
-                              ? 'Document library locked'
-                              : document.files.length >= EVENT_DOCUMENT_MAX_FILES
-                                ? 'Maximum files added'
-                                : 'Add another file'}
-                          </button>
-                        </div>
-                      </article>
-                    ))}
+      {document.files.length < EVENT_DOCUMENT_MAX_FILES ? (
+        <div className="mt-2 flex justify-end">
+          <button
+            type="button"
+            className="inline-flex min-h-7 items-center gap-1.5 rounded-lg px-2.5 text-[0.68rem] font-black text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.06)] disabled:cursor-not-allowed disabled:opacity-35"
+            disabled={!isDocumentsEditable}
+            title={
+              !isDocumentsEditable
+                ? (documentsLockedMessage ?? undefined)
+                : 'Add another file'
+            }
+            onClick={() => {
+              openAddFilesDialog(document);
+            }}
+          >
+            <FilePlus2 aria-hidden="true" className="size-3.5" />
+            Add file
+          </button>
+        </div>
+      ) : (
+        <p className="mt-2 text-right text-[0.62rem] font-bold text-[var(--color-charcoal)]/38">
+          Maximum of {EVENT_DOCUMENT_MAX_FILES} files reached
+        </p>
+      )}
+    </div>
+  </article>
+))}
                   </div>
                 ) : (
                   <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.50),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
@@ -1810,95 +1744,98 @@ export function EventDocumentsWorkspacePage() {
 
       {isCreateDialogOpen && isDocumentsEditable ? (
         <WorkspaceModal labelledBy="create-event-document-title" size="large">
-          <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <div className="flex items-center gap-3">
-                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)]">
-                  <FilePlus2 aria-hidden="true" className="size-6" />
+          <div className="flex items-start justify-between gap-5 border-b border-[rgba(93,58,85,0.10)] pb-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+                  <FilePlus2 aria-hidden="true" className="size-5" />
                 </div>
 
-                <span className="rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
+                <span className="rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] px-2.5 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
                   New document group
                 </span>
+
+                <div className="ml-0 flex flex-wrap gap-1.5 sm:ml-1">
+                  <span className="status-chip" data-tone="plum">
+                    <Files aria-hidden="true" className="size-3.5" />
+                    Up to {EVENT_DOCUMENT_MAX_FILES} files
+                  </span>
+
+                  <span className="status-chip" data-tone="blue">
+                    <Upload aria-hidden="true" className="size-3.5" />
+                    10 MB each
+                  </span>
+
+                  <span className="status-chip" data-tone="gray">
+                    <FileImage aria-hidden="true" className="size-3.5" />
+                    PDF or image
+                  </span>
+                </div>
               </div>
 
               <h2
                 id="create-event-document-title"
-                className="mt-6 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
+                className="mt-3 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[1.8rem]"
               >
                 Add files to the event library.
               </h2>
 
-              <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
+              <p className="mt-1.5 max-w-3xl text-sm font-semibold leading-5 text-[var(--color-charcoal)]/60">
                 Create one organised document group containing up to three related PDF or image
                 files.
               </p>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <span className="status-chip" data-tone="plum">
-                  <Files aria-hidden="true" className="size-3.5" />
-                  Up to {EVENT_DOCUMENT_MAX_FILES} files
-                </span>
-
-                <span className="status-chip" data-tone="blue">
-                  <Upload aria-hidden="true" className="size-3.5" />
-                  10 MB each
-                </span>
-
-                <span className="status-chip" data-tone="gray">
-                  <FileImage aria-hidden="true" className="size-3.5" />
-                  PDF or image
-                </span>
-              </div>
             </div>
 
             <button
               type="button"
-              className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
+              className="grid size-9 shrink-0 place-items-center rounded-xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Close document form"
               disabled={createDocumentMutation.isPending}
               onClick={closeCreateDialog}
             >
-              <X aria-hidden="true" className="size-5" />
+              <X aria-hidden="true" className="size-4" />
             </button>
           </div>
 
-          <div className="mt-8 grid gap-5">
-            <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/30 p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
+          <div className="mt-4 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+            <section className="relative overflow-hidden rounded-[1.35rem] border border-white/60 bg-white/30 p-4 shadow-[0_12px_30px_rgba(31,27,29,0.04)] backdrop-blur-xl">
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+                className="pointer-events-none absolute -right-14 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
               />
 
               <div className="relative">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                  Document details
-                </p>
+                <div className="flex flex-wrap items-end justify-between gap-2">
+                  <div>
+                    <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+                      Document details
+                    </p>
 
-                <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                  Describe and organise this group.
-                </h3>
+                    <h3 className="mt-1 text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      Describe and organise this group.
+                    </h3>
+                  </div>
 
-                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                  Give the group a clear title, choose its category and optionally connect it to a
-                  vendor.
-                </p>
+                  <p className="max-w-xs text-right text-xs font-semibold leading-4 text-[var(--color-charcoal)]/48">
+                    Title and category are required.
+                  </p>
+                </div>
 
-                <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <label className="block">
-                    <span className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-black text-[var(--color-charcoal)]/74">
                         Title
                         <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
                       </span>
 
-                      <span className="text-xs font-black tabular-nums text-[var(--color-charcoal)]/44">
+                      <span className="text-[0.68rem] font-black tabular-nums text-[var(--color-charcoal)]/42">
                         {title.length.toLocaleString('en-LK')} / 150
                       </span>
                     </span>
 
                     <input
-                      className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                      className="form-field mt-1.5 min-h-10 transition duration-300 focus:bg-white/52"
                       type="text"
                       maxLength={150}
                       value={title}
@@ -1909,20 +1846,16 @@ export function EventDocumentsWorkspacePage() {
                         setTitle(event.target.value);
                       }}
                     />
-
-                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                      Use a short title that makes this group easy to recognise.
-                    </p>
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                    <span className="text-xs font-black text-[var(--color-charcoal)]/74">
                       Category
                       <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
                     </span>
 
                     <select
-                      className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                      className="form-field mt-1.5 min-h-10 transition duration-300 focus:bg-white/52"
                       value={category}
                       disabled={createDocumentMutation.isPending}
                       onChange={(event) => {
@@ -1936,26 +1869,22 @@ export function EventDocumentsWorkspacePage() {
                         </option>
                       ))}
                     </select>
-
-                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                      The category controls where this group appears in your archive.
-                    </p>
                   </label>
                 </div>
 
-                <label className="mt-5 block">
-                  <span className="flex items-center justify-between gap-4">
-                    <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                <label className="mt-3 block">
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-black text-[var(--color-charcoal)]/74">
                       Description
                     </span>
 
-                    <span className="text-xs font-black tabular-nums text-[var(--color-charcoal)]/44">
+                    <span className="text-[0.68rem] font-black tabular-nums text-[var(--color-charcoal)]/42">
                       {description.length.toLocaleString('en-LK')} / 2,000
                     </span>
                   </span>
 
                   <textarea
-                    className="form-field mt-2 min-h-32 resize-y transition duration-300 focus:bg-white/52"
+                    className="form-field mt-1.5 min-h-20 resize-y transition duration-300 focus:bg-white/52"
                     maxLength={2000}
                     value={description}
                     disabled={createDocumentMutation.isPending}
@@ -1965,19 +1894,15 @@ export function EventDocumentsWorkspacePage() {
                       setDescription(event.target.value);
                     }}
                   />
-
-                  <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                    Optional. Include details that will help you identify the correct files later.
-                  </p>
                 </label>
 
-                <label className="mt-5 block">
-                  <span className="text-sm font-black text-[var(--color-charcoal)]/74">
+                <label className="mt-3 block">
+                  <span className="text-xs font-black text-[var(--color-charcoal)]/74">
                     Linked vendor
                   </span>
 
                   <select
-                    className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
+                    className="form-field mt-1.5 min-h-10 transition duration-300 focus:bg-white/52"
                     value={vendorId}
                     disabled={createDocumentMutation.isPending || vendorsQuery.isLoading}
                     onChange={(event) => {
@@ -1996,60 +1921,55 @@ export function EventDocumentsWorkspacePage() {
                     ))}
                   </select>
 
-                  <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                    Optional. Link this group when the files belong to a specific vendor.
+                  <p className="mt-1.5 text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/46">
+                    Optional. Connect the files to a specific event vendor.
                   </p>
                 </label>
               </div>
             </section>
 
-            <section className="group/document-upload relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.68),rgba(220,235,242,0.40))] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-white/86 hover:shadow-[0_22px_58px_rgba(31,27,29,0.09)] sm:p-6">
+            <section className="group/document-upload relative overflow-hidden rounded-[1.35rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.68),rgba(220,235,242,0.40))] p-4 shadow-[0_12px_32px_rgba(31,27,29,0.05)] backdrop-blur-xl transition-all duration-300 hover:border-white/86 hover:shadow-[0_18px_44px_rgba(31,27,29,0.08)]">
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/document-upload:scale-125"
+                className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/document-upload:scale-125"
               />
 
               <div className="relative">
-                <div className="flex items-start gap-4">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/document-upload:-translate-y-0.5 group-hover/document-upload:scale-105">
-                    <Upload aria-hidden="true" className="size-6" />
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_8px_20px_rgba(31,27,29,0.05)] transition duration-300 group-hover/document-upload:-translate-y-0.5">
+                    <Upload aria-hidden="true" className="size-5" />
                   </span>
 
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                       File upload
                     </p>
 
-                    <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/document-upload:text-[var(--color-deep-plum)]">
+                    <h3 className="mt-0.5 text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/document-upload:text-[var(--color-deep-plum)]">
                       Choose document files
                       <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
                     </h3>
-
-                    <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                      Add one to three related PDF or image files to this document group.
-                    </p>
                   </div>
                 </div>
 
-                <label className="mt-6 block cursor-pointer">
+                <label className="mt-3 block cursor-pointer">
                   <span className="sr-only">Choose document files</span>
 
-                  <div className="rounded-[1.5rem] border border-dashed border-[rgba(93,58,85,0.28)] bg-white/28 p-6 text-center transition-all duration-300 hover:border-[rgba(93,58,85,0.40)] hover:bg-white/42">
-                    <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(31,27,29,0.05)]">
-                      <FilePlus2 aria-hidden="true" className="size-7" />
+                  <div className="rounded-[1.2rem] border border-dashed border-[rgba(93,58,85,0.28)] bg-white/28 px-4 py-4 text-center transition-all duration-300 hover:border-[rgba(93,58,85,0.40)] hover:bg-white/42">
+                    <div className="mx-auto grid size-10 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+                      <FilePlus2 aria-hidden="true" className="size-5" />
                     </div>
 
-                    <p className="mt-4 text-sm font-black text-[var(--color-near-black)]">
+                    <p className="mt-2.5 text-sm font-black text-[var(--color-near-black)]">
                       Select files from your device
                     </p>
 
-                    <p className="mx-auto mt-2 max-w-md text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
-                      PDF, JPEG, PNG or WebP. Maximum {EVENT_DOCUMENT_MAX_FILES} files and 10 MB per
-                      file.
+                    <p className="mx-auto mt-1 max-w-sm text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
+                      PDF, JPEG, PNG or WebP · Up to {EVENT_DOCUMENT_MAX_FILES} files · 10 MB each
                     </p>
 
-                    <span className="btn-secondary mt-5 inline-flex justify-center text-sm font-bold">
-                      <Upload aria-hidden="true" className="size-4" />
+                    <span className="btn-secondary mt-3 inline-flex justify-center text-xs font-bold">
+                      <Upload aria-hidden="true" className="size-3.5" />
                       Browse files
                     </span>
 
@@ -2067,15 +1987,15 @@ export function EventDocumentsWorkspacePage() {
                   </div>
                 </label>
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs font-semibold text-[var(--color-charcoal)]/48">
+                <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[0.7rem] font-semibold text-[var(--color-charcoal)]/48">
                     {selectedFiles.length} of {EVENT_DOCUMENT_MAX_FILES} files selected
                   </p>
 
                   {selectedFiles.length > 0 ? (
                     <button
                       type="button"
-                      className="text-xs font-black text-[var(--color-muted-burgundy)] transition hover:text-[var(--color-rosewood)]"
+                      className="text-[0.7rem] font-black text-[var(--color-muted-burgundy)] transition hover:text-[var(--color-rosewood)]"
                       disabled={createDocumentMutation.isPending}
                       onClick={() => {
                         createDocumentMutation.reset();
@@ -2088,54 +2008,43 @@ export function EventDocumentsWorkspacePage() {
                 </div>
 
                 {selectedFiles.length > 0 ? (
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-3 space-y-2">
                     {selectedFiles.map((file) => {
                       const isSelectedImage = file.type.startsWith('image/');
 
                       return (
                         <article
                           key={`${file.name}-${file.size}-${file.lastModified}`}
-                          className="group/selected-file relative overflow-hidden rounded-[1.35rem] border border-white/58 bg-white/34 p-4 shadow-[0_10px_28px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-white/48 hover:shadow-[0_16px_38px_rgba(31,27,29,0.08)]"
+                          className="group/selected-file relative overflow-hidden rounded-xl border border-white/58 bg-white/34 px-3 py-2.5 shadow-[0_8px_22px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-white/48"
                         >
-                          <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl transition duration-500 group-hover/selected-file:scale-125"
-                          />
-
-                          <div className="relative flex items-center gap-3">
+                          <div className="relative flex items-center gap-2.5">
                             <span
-                              className={`grid size-11 shrink-0 place-items-center rounded-2xl shadow-[0_8px_20px_rgba(31,27,29,0.05)] ${
+                              className={`grid size-9 shrink-0 place-items-center rounded-xl ${
                                 isSelectedImage
                                   ? 'bg-[rgba(175,201,216,0.24)] text-[#3b515b]'
                                   : 'bg-[rgba(124,74,90,0.11)] text-[var(--color-muted-burgundy)]'
                               }`}
                             >
                               {isSelectedImage ? (
-                                <FileImage aria-hidden="true" className="size-5" />
+                                <FileImage aria-hidden="true" className="size-4" />
                               ) : (
-                                <FileText aria-hidden="true" className="size-5" />
+                                <FileText aria-hidden="true" className="size-4" />
                               )}
                             </span>
 
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-black text-[var(--color-near-black)] transition duration-300 group-hover/selected-file:text-[var(--color-deep-plum)]">
+                              <p className="truncate text-xs font-black text-[var(--color-near-black)]">
                                 {file.name}
                               </p>
 
-                              <div className="mt-2 flex flex-wrap items-center gap-2">
-                                <span className="rounded-lg border border-white/50 bg-white/32 px-2.5 py-1 text-[0.7rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
-                                  {isSelectedImage ? 'Image' : 'PDF'}
-                                </span>
-
-                                <span className="text-xs font-semibold text-[var(--color-charcoal)]/48">
-                                  {formatFileSize(file.size)}
-                                </span>
-                              </div>
+                              <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+                                {isSelectedImage ? 'Image' : 'PDF'} · {formatFileSize(file.size)}
+                              </p>
                             </div>
 
                             <button
                               type="button"
-                              className="group/remove-selected-file grid size-9 shrink-0 place-items-center rounded-xl border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.24)] hover:bg-[rgba(124,74,90,0.13)] hover:shadow-[0_10px_22px_rgba(124,74,90,0.08)]"
+                              className="group/remove-selected-file grid size-8 shrink-0 place-items-center rounded-lg border border-[rgba(124,74,90,0.14)] bg-[rgba(124,74,90,0.07)] text-[var(--color-muted-burgundy)] transition-all duration-300 hover:bg-[rgba(124,74,90,0.13)]"
                               aria-label={`Remove ${file.name}`}
                               disabled={createDocumentMutation.isPending}
                               onClick={() => {
@@ -2147,7 +2056,7 @@ export function EventDocumentsWorkspacePage() {
                             >
                               <X
                                 aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/remove-selected-file:rotate-90"
+                                className="size-3.5 transition duration-300 group-hover/remove-selected-file:rotate-90"
                               />
                             </button>
                           </div>
@@ -2156,38 +2065,39 @@ export function EventDocumentsWorkspacePage() {
                     })}
                   </div>
                 ) : (
-                  <div className="mt-5 rounded-[1.35rem] border border-dashed border-white/70 bg-white/22 p-4">
-                    <div className="flex items-start gap-3">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <Paperclip aria-hidden="true" className="size-4" />
+                  <div className="mt-3 rounded-xl border border-dashed border-white/70 bg-white/22 p-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <Paperclip aria-hidden="true" className="size-3.5" />
                       </span>
 
-                      <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                        No files selected yet. At least one valid file is required before this
-                        document group can be created.
+                      <p className="text-xs font-semibold leading-4 text-[var(--color-charcoal)]/54">
+                        No files selected yet. At least one valid file is required.
                       </p>
                     </div>
                   </div>
                 )}
               </div>
             </section>
+          </div>
 
+          <div className="mt-3 grid gap-2">
             {vendorsQuery.isError ? (
               <div
                 role="alert"
-                className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                className="rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-3.5 py-3"
               >
-                <div className="flex items-start gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                    <CircleAlert aria-hidden="true" className="size-4" />
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                    <CircleAlert aria-hidden="true" className="size-3.5" />
                   </span>
 
-                  <div>
-                    <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black text-[var(--color-muted-burgundy)]">
                       Vendor options unavailable
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                    <p className="mt-0.5 text-xs font-semibold leading-4 text-[var(--color-charcoal)]/66">
                       {getApiErrorMessage(vendorsQuery.error)}
                     </p>
                   </div>
@@ -2198,68 +2108,67 @@ export function EventDocumentsWorkspacePage() {
             {createDocumentMutation.isError ? (
               <div
                 role="alert"
-                className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
+                className="rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-3.5 py-3"
               >
-                <div className="flex items-start gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                    <CircleAlert aria-hidden="true" className="size-4" />
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                    <CircleAlert aria-hidden="true" className="size-3.5" />
                   </span>
 
-                  <div>
-                    <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black text-[var(--color-muted-burgundy)]">
                       Document could not be created
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+                    <p className="mt-0.5 text-xs font-semibold leading-4 text-[var(--color-charcoal)]/66">
                       {getApiErrorMessage(createDocumentMutation.error)}
                     </p>
                   </div>
                 </div>
               </div>
             ) : null}
+          </div>
 
-            <div className="flex flex-col gap-5 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                  <FolderArchive aria-hidden="true" className="size-4" />
-                </span>
+          <div className="mt-4 flex flex-col gap-3 border-t border-white/55 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                <FolderArchive aria-hidden="true" className="size-3.5" />
+              </span>
 
-                <p className="max-w-md text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
-                  The uploaded files will be stored together as one document group in this event’s
-                  library.
-                </p>
-              </div>
+              <p className="max-w-lg text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
+                Files are stored together as one document group in this event&apos;s library.
+              </p>
+            </div>
 
-              <div className="flex flex-col-reverse gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  className="btn-secondary justify-center text-sm font-bold"
-                  disabled={createDocumentMutation.isPending}
-                  onClick={closeCreateDialog}
-                >
-                  Cancel
-                </button>
+            <div className="flex shrink-0 flex-col-reverse gap-2 sm:flex-row">
+              <button
+                type="button"
+                className="btn-secondary justify-center text-sm font-bold"
+                disabled={createDocumentMutation.isPending}
+                onClick={closeCreateDialog}
+              >
+                Cancel
+              </button>
 
-                <button
-                  type="button"
-                  className="group/create-document btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                  disabled={createDocumentMutation.isPending}
-                  onClick={() => {
-                    createDocumentMutation.mutate();
-                  }}
-                >
-                  {createDocumentMutation.isPending ? (
-                    <LoaderCircle className="size-4 animate-spin" />
-                  ) : (
-                    <Upload
-                      aria-hidden="true"
-                      className="size-4 transition duration-300 group-hover/create-document:-translate-y-0.5"
-                    />
-                  )}
+              <button
+                type="button"
+                className="group/create-document btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
+                disabled={createDocumentMutation.isPending}
+                onClick={() => {
+                  createDocumentMutation.mutate();
+                }}
+              >
+                {createDocumentMutation.isPending ? (
+                  <LoaderCircle className="size-4 animate-spin" />
+                ) : (
+                  <Upload
+                    aria-hidden="true"
+                    className="size-4 transition duration-300 group-hover/create-document:-translate-y-0.5"
+                  />
+                )}
 
-                  {createDocumentMutation.isPending ? 'Uploading document...' : 'Add document'}
-                </button>
-              </div>
+                {createDocumentMutation.isPending ? 'Uploading document...' : 'Add document'}
+              </button>
             </div>
           </div>
         </WorkspaceModal>

@@ -105,25 +105,15 @@ function getStatusTone(status: AdminAccountStatus) {
   }
 }
 
-function getRoleTone(role: AdminUserRole) {
-  switch (role) {
-    case 'ADMIN':
-      return 'violet';
-
-    case 'VENDOR':
-      return 'amber';
-
-    case 'CUSTOMER':
-    default:
-      return 'sky';
-  }
+function getRoleTone(_role: AdminUserRole) {
+  return 'violet';
 }
 
 function UserAvatar({ user }: { user: AdminUser }) {
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
 
   return (
-    <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-100 to-indigo-100 text-sm font-black text-violet-700 shadow-[0_8px_20px_rgba(124,58,237,0.10)]">
+    <div className="grid size-9 shrink-0 place-items-center rounded-xl border border-[rgba(91,61,82,0.10)] bg-[rgba(183,167,200,0.14)] text-xs font-black text-[var(--color-deep-plum)]">
       {initials}
     </div>
   );
@@ -281,42 +271,50 @@ export function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(196,181,253,0.22),transparent_32%),radial-gradient(circle_at_top_right,rgba(167,243,208,0.18),transparent_28%),linear-gradient(180deg,#fbfaff_0%,#f8fbff_48%,#fbfdfb_100%)]">
-      <div className="workspace-container">
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#fbf9fa_0%,#f7f3f6_48%,#f5f3f8_100%)]">
+      <div className="pointer-events-none absolute -left-40 top-40 size-[30rem] rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+      <div className="pointer-events-none absolute -right-44 top-[34rem] size-[32rem] rounded-full bg-[rgba(214,190,177,0.10)] blur-3xl" />
+
+      <div className="relative mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
         <AdminWorkspaceNav />
 
-        <main className="py-8">
-          <section className="relative overflow-hidden rounded-[2rem] border border-violet-200/80 bg-gradient-to-br from-violet-100 via-indigo-50 to-fuchsia-50 p-6 shadow-[0_24px_70px_rgba(109,94,245,0.10)] sm:p-8">
-            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-violet-300/25 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 left-1/3 size-72 rounded-full bg-indigo-300/18 blur-3xl" />
-            <div className="relative">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+        <main className="py-4">
+          <section className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(91,61,82,0.10)] bg-[linear-gradient(135deg,#fbf8fa_0%,#f5eff5_54%,#f1edf5_100%)] px-6 py-5 shadow-[0_18px_50px_rgba(64,42,51,0.07)] sm:px-7 sm:py-6">
+            <div className="pointer-events-none absolute -right-16 -top-28 size-72 rounded-full border border-[rgba(91,61,82,0.07)]" />
+            <div className="pointer-events-none absolute -right-2 -top-10 size-48 rounded-full border border-[rgba(91,61,82,0.06)]" />
+
+            <div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
               <div>
-                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-violet-200/80 bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-violet-700 shadow-sm">
-                  <Users className="size-4" />
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(91,61,82,0.10)] bg-white/60 px-3 py-1.5 text-[0.64rem] font-extrabold uppercase tracking-[0.17em] text-[var(--color-deep-plum)]">
+                  <Users className="size-3.5" />
                   Account administration
                 </div>
 
-                <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
+                <h1 className="mt-4 max-w-4xl text-balance text-[2.25rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.7rem]">
                   Manage platform users safely and clearly.
                 </h1>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
+                <p className="mt-3 max-w-2xl text-pretty text-sm font-medium leading-6 text-[var(--color-charcoal)]/68">
                   Search customer, vendor, and administrator accounts, inspect their platform
                   activity, and suspend or reactivate eligible users.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-violet-100/90 bg-white/78 px-5 py-4 shadow-[0_12px_30px_rgba(109,94,245,0.09)] backdrop-blur">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                  Matching users
-                </p>
+              <div className="min-w-[180px] rounded-[1.15rem] border border-[rgba(91,61,82,0.09)] bg-white/62 px-4 py-3 backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[0.6rem] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                      Matching users
+                    </p>
 
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                  {usersQuery.isLoading ? '—' : (pagination?.total ?? 0)}
-                </p>
+                    <p className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {usersQuery.isLoading ? '—' : (pagination?.total ?? 0)}
+                    </p>
+                  </div>
+
+                  <Users className="size-4 text-[var(--color-rosewood)]" />
+                </div>
               </div>
-            </div>
             </div>
           </section>
 
@@ -360,101 +358,138 @@ export function AdminUsersPage() {
             </section>
           ) : (
             <>
-              <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <article className="rounded-[1.6rem] border border-emerald-100/90 bg-gradient-to-br from-emerald-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(16,185,129,0.08)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
-                    <UserRoundCheck className="size-5" />
+              <section className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <article className="rounded-[1.4rem] border border-[rgba(91,61,82,0.09)] bg-white/78 px-4 py-3.5 shadow-[0_14px_38px_rgba(64,42,51,0.06)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid size-9 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+                      <UserRoundCheck className="size-4" />
+                    </div>
+
+                    <span className="rounded-full bg-emerald-50 px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.12em] text-emerald-700">
+                      Active
+                    </span>
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Active on this page
-                  </p>
+                  <div className="mt-2.5 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/56">
+                      Active on this page
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {pageSummary.active}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {pageSummary.active}
+                    </p>
+                  </div>
                 </article>
 
-                <article className="rounded-[1.6rem] border border-rose-100/90 bg-gradient-to-br from-rose-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(244,63,94,0.08)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-rose-100 text-rose-700">
-                    <Ban className="size-5" />
+                <article className="rounded-[1.4rem] border border-[rgba(91,61,82,0.09)] bg-white/78 px-4 py-3.5 shadow-[0_14px_38px_rgba(64,42,51,0.06)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid size-9 place-items-center rounded-xl bg-rose-50 text-rose-700">
+                      <Ban className="size-4" />
+                    </div>
+
+                    <span className="rounded-full bg-rose-50 px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.12em] text-rose-700">
+                      Suspended
+                    </span>
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Suspended on this page
-                  </p>
+                  <div className="mt-2.5 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/56">
+                      Suspended on this page
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {pageSummary.suspended}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {pageSummary.suspended}
+                    </p>
+                  </div>
                 </article>
 
-                <article className="rounded-[1.6rem] border border-amber-100/90 bg-gradient-to-br from-amber-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(245,158,11,0.08)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-amber-100 text-amber-700">
-                    <Store className="size-5" />
+                <article className="rounded-[1.4rem] border border-[rgba(91,61,82,0.09)] bg-white/78 px-4 py-3.5 shadow-[0_14px_38px_rgba(64,42,51,0.06)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                      <Store className="size-4" />
+                    </div>
+
+                    <span className="rounded-full bg-[rgba(183,167,200,0.10)] px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.12em] text-[var(--color-deep-plum)]">
+                      Vendor
+                    </span>
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Vendors on this page
-                  </p>
+                  <div className="mt-2.5 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/56">
+                      Vendors on this page
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {pageSummary.vendors}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {pageSummary.vendors}
+                    </p>
+                  </div>
                 </article>
 
-                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/90 via-white to-white p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-sky-100 text-sky-700">
-                    <CircleUserRound className="size-5" />
+                <article className="rounded-[1.4rem] border border-[rgba(91,61,82,0.09)] bg-white/78 px-4 py-3.5 shadow-[0_14px_38px_rgba(64,42,51,0.06)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                      <CircleUserRound className="size-4" />
+                    </div>
+
+                    <span className="rounded-full bg-[rgba(183,167,200,0.10)] px-2 py-1 text-[0.58rem] font-extrabold uppercase tracking-[0.12em] text-[var(--color-deep-plum)]">
+                      Customer
+                    </span>
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Customers on this page
-                  </p>
+                  <div className="mt-2.5 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/56">
+                      Customers on this page
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {pageSummary.customers}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {pageSummary.customers}
+                    </p>
+                  </div>
                 </article>
               </section>
+              <section className="mt-4 rounded-[1.75rem] border border-[rgba(91,61,82,0.10)] bg-white/82 p-4 shadow-[0_18px_50px_rgba(64,42,51,0.07)] backdrop-blur-xl sm:p-5">
+                <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
+                  <div>
+                    <p className="section-eyebrow">User directory</p>
 
-              <section className="mt-6 rounded-[2rem] border border-violet-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(109,94,245,0.09)] backdrop-blur sm:p-7">
-                <div>
-                  <p className="section-eyebrow">User directory</p>
+                    <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      Search and filter accounts
+                    </h2>
 
-                  <h2 className="section-title">Search and filter accounts</h2>
+                    <p className="mt-1 text-xs font-medium leading-5 text-[var(--color-charcoal)]/58">
+                      Narrow the directory by role, status, name, or email address.
+                    </p>
+                  </div>
 
-                  <p className="section-description">
-                    Narrow the directory by role, status, name, or email address.
-                  </p>
+                  {filtersAreActive ? (
+                    <button
+                      type="button"
+                      className="btn-secondary min-h-0 px-4 py-2 text-xs"
+                      onClick={clearFilters}
+                    >
+                      Clear filters
+                    </button>
+                  ) : null}
                 </div>
 
-                <div className="mt-6 grid gap-3 lg:grid-cols-[1.5fr_0.75fr_0.9fr_0.9fr]">
+                <div className="mt-4 grid gap-2.5 lg:grid-cols-[1.35fr_0.75fr_0.85fr_0.85fr]">
                   <form
-                    className="flex gap-2"
+                    className="relative min-w-0"
                     onSubmit={(event) => {
                       event.preventDefault();
                       submitSearch();
                     }}
                   >
-                    <div className="relative min-w-0 flex-1">
-                      <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
-
-                      <input
-                        className="form-field !pl-11"
-                        value={searchInput}
-                        onChange={(event) => setSearchInput(event.target.value)}
-                        placeholder="Search name or email"
-                      />
-                    </div>
-
-                    <button type="submit" className="btn-primary shrink-0 px-5 text-sm">
-                      Search
-                    </button>
+                    <input
+                      className="form-field !min-h-0 !h-10 !rounded-xl !py-2 !pr-20 !pl-10 !text-sm"
+                      value={searchInput}
+                      onChange={(event) => setSearchInput(event.target.value)}
+                      placeholder="Search name or email"
+                    />
                   </form>
 
                   <select
-                    className="form-field"
+                    className="form-field !min-h-0 !h-10 !rounded-xl !py-2 !text-sm"
                     value={roleFilter}
                     onChange={(event) => {
                       setRoleFilter(event.target.value as AdminUserRole | 'ALL');
@@ -471,7 +506,7 @@ export function AdminUsersPage() {
                   </select>
 
                   <select
-                    className="form-field"
+                    className="form-field !min-h-0 !h-10 !rounded-xl !py-2 !text-sm"
                     value={statusFilter}
                     onChange={(event) => {
                       setStatusFilter(event.target.value as AdminAccountStatus | 'ALL');
@@ -488,7 +523,7 @@ export function AdminUsersPage() {
                   </select>
 
                   <select
-                    className="form-field"
+                    className="form-field !min-h-0 !h-10 !rounded-xl !py-2 !text-sm"
                     value={sort}
                     onChange={(event) => {
                       setSort(event.target.value as AdminUserSort);
@@ -503,43 +538,33 @@ export function AdminUsersPage() {
                   </select>
                 </div>
 
-                {filtersAreActive ? (
-                  <button
-                    type="button"
-                    className="btn-secondary mt-4 text-sm"
-                    onClick={clearFilters}
-                  >
-                    Clear filters
-                  </button>
-                ) : null}
-
                 {users.length > 0 ? (
-                  <div className="mt-7 overflow-hidden rounded-[1.5rem] border border-violet-100/90 bg-white">
+                  <div className="mt-4 overflow-hidden rounded-[1.2rem] border border-[rgba(91,61,82,0.09)] bg-white/72">
                     <div className="overflow-x-auto">
                       <table className="min-w-full border-collapse">
                         <thead>
-                          <tr className="border-b border-violet-100 bg-gradient-to-r from-violet-50/90 via-indigo-50/65 to-sky-50/70 text-left">
-                            <th className="px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                          <tr className="border-b border-[rgba(91,61,82,0.08)] bg-[rgba(183,167,200,0.09)] text-left">
+                            <th className="px-4 py-2.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
                               User
                             </th>
 
-                            <th className="px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                            <th className="px-4 py-2.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
                               Role
                             </th>
 
-                            <th className="px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                            <th className="px-4 py-2.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
                               Status
                             </th>
 
-                            <th className="px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                            <th className="px-4 py-2.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
                               Vendor profile
                             </th>
 
-                            <th className="px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                            <th className="px-4 py-2.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
                               Joined
                             </th>
 
-                            <th className="px-5 py-4 text-right text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                            <th className="px-4 py-2.5 text-right text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
                               Action
                             </th>
                           </tr>
@@ -549,31 +574,31 @@ export function AdminUsersPage() {
                           {users.map((user) => (
                             <tr
                               key={user.id}
-                              className="border-b border-violet-50 transition hover:bg-violet-50/45 last:border-b-0"
+                              className="border-b border-[rgba(91,61,82,0.06)] transition hover:bg-[rgba(183,167,200,0.07)] last:border-b-0"
                             >
-                              <td className="px-5 py-4">
+                              <td className="px-4 py-2.5">
                                 <div className="flex items-center gap-3">
                                   <UserAvatar user={user} />
 
-                                  <div>
-                                    <p className="text-sm font-black text-[var(--color-near-black)]">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-xs font-black text-[var(--color-near-black)]">
                                       {user.firstName} {user.lastName}
                                     </p>
 
-                                    <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/52">
+                                    <p className="mt-0.5 truncate text-[0.68rem] font-semibold text-[var(--color-charcoal)]/52">
                                       {user.email}
                                     </p>
                                   </div>
                                 </div>
                               </td>
 
-                              <td className="px-5 py-4">
+                              <td className="px-4 py-2.5">
                                 <span className="status-chip" data-tone={getRoleTone(user.role)}>
                                   {userRoleLabels[user.role]}
                                 </span>
                               </td>
 
-                              <td className="px-5 py-4">
+                              <td className="px-4 py-2.5">
                                 <span
                                   className="status-chip"
                                   data-tone={getStatusTone(user.status)}
@@ -582,32 +607,32 @@ export function AdminUsersPage() {
                                 </span>
                               </td>
 
-                              <td className="px-5 py-4">
+                              <td className="px-4 py-2.5">
                                 {user.vendorProfile ? (
                                   <div>
-                                    <p className="text-sm font-bold text-[var(--color-near-black)]">
+                                    <p className="text-xs font-bold text-[var(--color-near-black)]">
                                       {user.vendorProfile.businessName}
                                     </p>
 
-                                    <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/48">
+                                    <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
                                       {user.vendorProfile.verificationStatus}
                                     </p>
                                   </div>
                                 ) : (
-                                  <span className="text-sm font-semibold text-[var(--color-charcoal)]/38">
+                                  <span className="text-xs font-semibold text-[var(--color-charcoal)]/38">
                                     —
                                   </span>
                                 )}
                               </td>
 
-                              <td className="px-5 py-4 text-sm font-semibold text-[var(--color-charcoal)]/58">
+                              <td className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold text-[var(--color-charcoal)]/58">
                                 {formatDate(user.createdAt)}
                               </td>
 
-                              <td className="px-5 py-4 text-right">
+                              <td className="px-4 py-2.5 text-right">
                                 <button
                                   type="button"
-                                  className="min-h-0 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-xs font-black text-violet-700 transition hover:border-violet-300 hover:bg-violet-100"
+                                  className="min-h-0 rounded-xl border border-[rgba(91,61,82,0.12)] bg-[rgba(183,167,200,0.10)] px-3 py-1.5 text-xs font-black text-[var(--color-deep-plum)] transition hover:border-[rgba(91,61,82,0.20)] hover:bg-[rgba(183,167,200,0.17)]"
                                   onClick={() => openUser(user.id)}
                                 >
                                   View
@@ -620,21 +645,21 @@ export function AdminUsersPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="empty-surface mt-7">
-                    <Users className="mx-auto size-8 text-violet-700/64" />
+                  <div className="mt-4 rounded-[1.2rem] border border-dashed border-[rgba(91,61,82,0.14)] bg-[rgba(183,167,200,0.06)] px-5 py-7 text-center">
+                    <Users className="mx-auto size-7 text-[var(--color-deep-plum)]/60" />
 
-                    <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
+                    <h3 className="mt-3 text-base font-black text-[var(--color-near-black)]">
                       No users match these filters
                     </h3>
 
-                    <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                    <p className="mx-auto mt-1 max-w-lg text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
                       Try changing the search term, role, status, or sort order.
                     </p>
 
                     {filtersAreActive ? (
                       <button
                         type="button"
-                        className="btn-secondary mt-5 text-sm"
+                        className="btn-secondary mt-4 text-sm"
                         onClick={clearFilters}
                       >
                         Clear filters
@@ -644,8 +669,8 @@ export function AdminUsersPage() {
                 )}
 
                 {pagination && pagination.totalPages > 1 ? (
-                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-50/70 to-sky-50/60 px-5 py-4 sm:flex-row">
-                    <p className="text-sm font-semibold text-[var(--color-charcoal)]/58">
+                  <div className="mt-4 flex flex-col items-center justify-between gap-3 rounded-[1.1rem] border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.07)] px-4 py-3 sm:flex-row">
+                    <p className="text-xs font-semibold text-[var(--color-charcoal)]/58">
                       Page{' '}
                       <span className="font-black text-[var(--color-near-black)]">
                         {pagination.page}
@@ -659,7 +684,7 @@ export function AdminUsersPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="btn-secondary min-h-0 px-4 py-2.5 text-sm"
+                        className="btn-secondary min-h-0 px-3.5 py-2 text-xs"
                         disabled={!pagination.hasPreviousPage || usersQuery.isFetching}
                         onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
                       >
@@ -669,7 +694,7 @@ export function AdminUsersPage() {
 
                       <button
                         type="button"
-                        className="btn-secondary min-h-0 px-4 py-2.5 text-sm"
+                        className="btn-secondary min-h-0 px-3.5 py-2 text-xs"
                         disabled={!pagination.hasNextPage || usersQuery.isFetching}
                         onClick={() => setPage((currentPage) => currentPage + 1)}
                       >
@@ -699,7 +724,7 @@ export function AdminUsersPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-user-detail-title"
-            className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/80 bg-[#fbfaff] p-6 shadow-2xl sm:p-7"
+            className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[1.75rem] border border-white/80 bg-[#fbf9fa] p-5 shadow-2xl sm:p-6"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -736,19 +761,19 @@ export function AdminUsersPage() {
               </div>
             ) : selectedUser ? (
               <>
-                <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
-                  <div className="flex items-center gap-4">
-                    <div className="grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-lg font-black text-violet-700">
+                <div className="mt-4 flex flex-col justify-between gap-4 rounded-[1.25rem] border border-[rgba(91,61,82,0.09)] bg-white/72 px-4 py-3.5 sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-11 place-items-center rounded-xl border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.14)] text-sm font-black text-[var(--color-deep-plum)]">
                       {selectedUser.firstName.charAt(0)}
                       {selectedUser.lastName.charAt(0)}
                     </div>
 
                     <div>
-                      <p className="text-xl font-black text-[var(--color-near-black)]">
+                      <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                         {selectedUser.firstName} {selectedUser.lastName}
                       </p>
 
-                      <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                      <p className="mt-0.5 text-xs font-semibold text-[var(--color-charcoal)]/54">
                         {selectedUser.email}
                       </p>
                     </div>
@@ -765,81 +790,95 @@ export function AdminUsersPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/80 bg-white/64 p-5">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[1.1rem] border border-[rgba(91,61,82,0.08)] bg-white/64 px-4 py-3">
+                    <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
                       Joined
                     </p>
 
-                    <p className="mt-2 font-bold text-[var(--color-near-black)]">
+                    <p className="mt-1.5 text-sm font-bold text-[var(--color-near-black)]">
                       {formatDateTime(selectedUser.createdAt)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/80 bg-white/64 p-5">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                  <div className="rounded-[1.1rem] border border-[rgba(91,61,82,0.08)] bg-white/64 px-4 py-3">
+                    <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
                       Last updated
                     </p>
 
-                    <p className="mt-2 font-bold text-[var(--color-near-black)]">
+                    <p className="mt-1.5 text-sm font-bold text-[var(--color-near-black)]">
                       {formatDateTime(selectedUser.updatedAt)}
                     </p>
                   </div>
                 </div>
 
                 {selectedUser.customer ? (
-                  <section className="mt-6 rounded-[1.6rem] border border-sky-100 bg-gradient-to-br from-sky-50/75 via-white to-white p-5 shadow-[0_16px_40px_rgba(14,165,233,0.07)]">
+                  <section className="mt-3 rounded-[1.25rem] border border-[rgba(91,61,82,0.09)] bg-white/64 p-4">
                     <p className="section-eyebrow">Customer profile</p>
 
-                    <h3 className="section-title">Customer information</h3>
+                    <div className="mt-2 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                      <h3 className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        Customer information
+                      </h3>
 
-                    <div className="mt-5 rounded-2xl border border-white/80 bg-white/58 p-5">
-                      <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                        Phone
-                      </p>
+                      <div className="rounded-xl bg-[rgba(183,167,200,0.09)] px-3.5 py-2">
+                        <p className="text-[0.58rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/44">
+                          Phone
+                        </p>
 
-                      <p className="mt-2 font-bold text-[var(--color-near-black)]">
-                        {selectedUser.customer.phone}
-                      </p>
+                        <p className="mt-0.5 text-xs font-bold text-[var(--color-near-black)]">
+                          {selectedUser.customer.phone}
+                        </p>
+                      </div>
                     </div>
                   </section>
                 ) : null}
 
                 {selectedUser.vendorProfile ? (
-                  <section className="mt-6 rounded-[1.6rem] border border-amber-100 bg-gradient-to-br from-amber-50/75 via-white to-white p-5 shadow-[0_16px_40px_rgba(245,158,11,0.07)]">
-                    <p className="section-eyebrow">Vendor profile</p>
+                  <section className="mt-3 rounded-[1.25rem] border border-[rgba(91,61,82,0.09)] bg-white/64 p-4">
+                    <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                      <div>
+                        <p className="section-eyebrow">Vendor profile</p>
 
-                    <h3 className="section-title">{selectedUser.vendorProfile.businessName}</h3>
+                        <h3 className="mt-1 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                          {selectedUser.vendorProfile.businessName}
+                        </h3>
+                      </div>
 
-                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-white/80 bg-white/58 p-5">
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-[0.1em] text-amber-700">
+                        {selectedUser.vendorProfile.verificationStatus}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-xl bg-[rgba(183,167,200,0.07)] px-3.5 py-2.5">
+                        <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/44">
                           Verification
                         </p>
 
-                        <p className="mt-2 font-bold text-[var(--color-near-black)]">
+                        <p className="mt-1 text-xs font-bold text-[var(--color-near-black)]">
                           {selectedUser.vendorProfile.verificationStatus}
                         </p>
                       </div>
 
-                      <div className="rounded-2xl border border-white/80 bg-white/58 p-5">
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                      <div className="rounded-xl bg-[rgba(183,167,200,0.07)] px-3.5 py-2.5">
+                        <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/44">
                           Base location
                         </p>
 
-                        <p className="mt-2 font-bold text-[var(--color-near-black)]">
+                        <p className="mt-1 text-xs font-bold text-[var(--color-near-black)]">
                           {selectedUser.vendorProfile.baseLocation ?? 'Not provided'}
                         </p>
                       </div>
                     </div>
 
                     {selectedUser.vendorProfile.description ? (
-                      <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[var(--color-charcoal)]/68">
+                      <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-[var(--color-charcoal)]/64">
                         {selectedUser.vendorProfile.description}
                       </p>
                     ) : null}
 
-                    <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       {selectedUser.vendorProfile.categories.map((category) => (
                         <span key={category.id} className="soft-chip text-xs font-bold">
                           {category.name}
@@ -849,44 +888,56 @@ export function AdminUsersPage() {
                   </section>
                 ) : null}
 
-                <section className="mt-6 rounded-[1.6rem] border border-violet-100 bg-gradient-to-br from-violet-50/75 via-white to-white p-5 shadow-[0_16px_40px_rgba(109,94,245,0.07)]">
-                  <p className="section-eyebrow">Platform activity</p>
+                <section className="mt-3 rounded-[1.25rem] border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.055)] p-4">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="section-eyebrow">Platform activity</p>
 
-                  <h3 className="section-title">Account usage</h3>
+                      <h3 className="mt-1 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        Account usage
+                      </h3>
+                    </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-2xl bg-white/58 p-4">
-                      <p className="text-xs font-bold text-[var(--color-charcoal)]/48">Events</p>
+                    <ShieldCheck className="size-4 text-[var(--color-deep-plum)]/55" />
+                  </div>
 
-                      <p className="mt-2 text-2xl font-black text-[var(--color-near-black)]">
+                  <div className="mt-3 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+                    <div className="rounded-xl border border-[rgba(91,61,82,0.07)] bg-white/72 px-3 py-2.5">
+                      <p className="text-[0.66rem] font-bold text-[var(--color-charcoal)]/48">
+                        Events
+                      </p>
+
+                      <p className="mt-1 text-xl font-black text-[var(--color-near-black)]">
                         {selectedUser._count.createdEvents}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-white/58 p-4">
-                      <p className="text-xs font-bold text-[var(--color-charcoal)]/48">
+                    <div className="rounded-xl border border-[rgba(91,61,82,0.07)] bg-white/72 px-3 py-2.5">
+                      <p className="text-[0.66rem] font-bold text-[var(--color-charcoal)]/48">
                         Payments submitted
                       </p>
 
-                      <p className="mt-2 text-2xl font-black text-[var(--color-near-black)]">
+                      <p className="mt-1 text-xl font-black text-[var(--color-near-black)]">
                         {selectedUser._count.submittedPayments}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-white/58 p-4">
-                      <p className="text-xs font-bold text-[var(--color-charcoal)]/48">Reviews</p>
+                    <div className="rounded-xl border border-[rgba(91,61,82,0.07)] bg-white/72 px-3 py-2.5">
+                      <p className="text-[0.66rem] font-bold text-[var(--color-charcoal)]/48">
+                        Reviews
+                      </p>
 
-                      <p className="mt-2 text-2xl font-black text-[var(--color-near-black)]">
+                      <p className="mt-1 text-xl font-black text-[var(--color-near-black)]">
                         {selectedUser._count.customerReviews}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-white/58 p-4">
-                      <p className="text-xs font-bold text-[var(--color-charcoal)]/48">
+                    <div className="rounded-xl border border-[rgba(91,61,82,0.07)] bg-white/72 px-3 py-2.5">
+                      <p className="text-[0.66rem] font-bold text-[var(--color-charcoal)]/48">
                         Complaints submitted
                       </p>
 
-                      <p className="mt-2 text-2xl font-black text-[var(--color-near-black)]">
+                      <p className="mt-1 text-xl font-black text-[var(--color-near-black)]">
                         {selectedUser._count.submittedComplaints}
                       </p>
                     </div>
@@ -902,7 +953,7 @@ export function AdminUsersPage() {
                   </div>
                 ) : null}
 
-                <div className="mt-6 flex flex-col justify-between gap-4 border-t border-zinc-200 pt-6 sm:flex-row sm:items-center">
+                <div className="mt-4 flex flex-col justify-between gap-3 border-t border-[rgba(91,61,82,0.09)] pt-4 sm:flex-row sm:items-center">
                   <div>
                     <p className="font-black text-[var(--color-near-black)]">Account controls</p>
 

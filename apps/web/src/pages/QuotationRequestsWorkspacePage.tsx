@@ -53,6 +53,24 @@ type ApiErrorResponse = {
   };
 };
 
+type CustomerEvent = {
+  id: string;
+  name: string;
+  description: string | null;
+  eventType: string;
+  eventDate: string;
+  location: string | null;
+  guestCount: number | null;
+  status: 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  createdAt: string;
+  updatedAt: string;
+};
+
+type EventResponse = {
+  success: true;
+  data: CustomerEvent;
+};
+
 type PublicPackage = {
   id: string;
   title: string;
@@ -293,6 +311,16 @@ export function QuotationRequestsWorkspacePage() {
   const [selectedPackage, setSelectedPackage] = useState<PublicPackage | null>(null);
   const [requirements, setRequirements] = useState('');
   const [responseDueAt, setResponseDueAt] = useState('');
+
+  const eventQuery = useQuery({
+    queryKey: ['customer', 'events', eventId],
+    enabled: Boolean(eventId),
+    queryFn: async () => {
+      const response = await api.get<EventResponse>(`/events/${eventId}`);
+
+      return response.data.data;
+    },
+  });
 
   const requestsQuery = useQuery({
     queryKey: [
@@ -570,11 +598,11 @@ export function QuotationRequestsWorkspacePage() {
     setPage(1);
   };
 
-  const isLoading = requestsQuery.isLoading || summaryQueries.isLoading;
+  const isLoading = eventQuery.isLoading || requestsQuery.isLoading || summaryQueries.isLoading;
 
-  const isError = requestsQuery.isError || summaryQueries.isError;
+  const isError = eventQuery.isError || requestsQuery.isError || summaryQueries.isError;
 
-  const firstError = requestsQuery.error ?? summaryQueries.error;
+  const firstError = eventQuery.error ?? requestsQuery.error ?? summaryQueries.error;
 
   const requestCounts = summaryQueries.data;
 
@@ -606,7 +634,7 @@ export function QuotationRequestsWorkspacePage() {
     );
   }
 
-  if (isError || !eventId || !requestsQuery.data || !requestCounts) {
+  if (isError || !eventId || !eventQuery.data || !requestsQuery.data || !requestCounts) {
     return (
       <div className="app-shell grid min-h-screen place-items-center px-4 py-10">
         <div className="glass-card grid min-h-80 w-full max-w-3xl place-items-center p-10 text-center">
@@ -629,7 +657,11 @@ export function QuotationRequestsWorkspacePage() {
                   type="button"
                   className="btn-primary text-sm font-bold"
                   onClick={() => {
-                    void Promise.all([requestsQuery.refetch(), summaryQueries.refetch()]);
+                    void Promise.all([
+                      eventQuery.refetch(),
+                      requestsQuery.refetch(),
+                      summaryQueries.refetch(),
+                    ]);
                   }}
                 >
                   Try again
@@ -650,19 +682,15 @@ export function QuotationRequestsWorkspacePage() {
   const requests = requestsQuery.data.quotationRequests;
   const pagination = requestsQuery.data.pagination;
 
-  const eventDetails = requests[0]?.event ?? null;
+  const eventDetails = eventQuery.data;
 
-  const isQuotationEditable =
-    eventDetails !== null ? canManageWorkspace(eventDetails.status, 'QUOTATIONS') : false;
+  const isQuotationEditable = canManageWorkspace(eventDetails.status, 'QUOTATIONS');
 
-  const quotationLockedMessage =
-    eventDetails !== null ? getWorkspaceLockedMessage(eventDetails.status, 'QUOTATIONS') : '';
+  const quotationLockedMessage = getWorkspaceLockedMessage(eventDetails.status, 'QUOTATIONS');
 
-  const isBookingCreationAllowed =
-    eventDetails !== null ? canManageWorkspace(eventDetails.status, 'BOOKINGS') : false;
+  const isBookingCreationAllowed = canManageWorkspace(eventDetails.status, 'BOOKINGS');
 
-  const bookingLockedMessage =
-    eventDetails !== null ? getWorkspaceLockedMessage(eventDetails.status, 'BOOKINGS') : '';
+  const bookingLockedMessage = getWorkspaceLockedMessage(eventDetails.status, 'BOOKINGS');
 
   const awaitingVendorCount = requestCounts.SENT + requestCounts.VIEWED;
 
@@ -674,8 +702,8 @@ export function QuotationRequestsWorkspacePage() {
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
+        <header className="glass-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
             <PageBackButton
               fallback={`/events/${eventId}`}
               label="Event workspace"
@@ -683,23 +711,23 @@ export function QuotationRequestsWorkspacePage() {
             />
 
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+              <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                 Quotation requests
               </p>
 
-              <h1 className="mt-1 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+              <h1 className="mt-0.5 text-xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
                 {eventDetails?.name ?? 'Event quotations'}
               </h1>
             </div>
           </div>
 
           <span className="status-chip w-fit" data-tone="plum">
-            <MessageSquareQuote className="size-4" />
+            <MessageSquareQuote className="size-3.5" />
             {totalRequests} requests
           </span>
         </header>
 
-        <main className="py-10">
+        <main className="py-6">
           <section className="relative isolate min-h-[22rem] overflow-hidden rounded-[2.5rem] border border-white/68 bg-[#fffaf6] px-6 py-5 shadow-[0_26px_78px_rgba(31,27,29,0.11)] sm:px-7 sm:py-6 lg:px-8 lg:py-6">
             <img
               src="/images/workspaces/shortcuts/quotations.png"
@@ -917,7 +945,7 @@ export function QuotationRequestsWorkspacePage() {
             </div>
           ) : null}
 
-          <section className="mt-7 grid gap-5 lg:grid-cols-[1fr_0.3fr]">
+          <section className="mt-5">
             <article className="glass-card p-6 sm:p-7">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
@@ -992,91 +1020,92 @@ export function QuotationRequestsWorkspacePage() {
               ) : null}
 
               {requests.length > 0 ? (
-                <div className="mt-8 space-y-4">
+                <div className="mt-6 space-y-3">
                   {requests.map((request) => (
                     <article
                       key={request.id}
-                      className="group/request relative overflow-hidden rounded-[1.65rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] p-4 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/88 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(231,222,240,0.58))] hover:shadow-[0_28px_68px_rgba(31,27,29,0.11)] sm:p-5"
+                      className="group/request relative overflow-hidden rounded-[1.4rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.42),rgba(255,255,255,0.20))] px-4 py-3.5 shadow-[0_14px_34px_rgba(31,27,29,0.045)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.80),rgba(231,222,240,0.48))] hover:shadow-[0_20px_46px_rgba(31,27,29,0.09)] sm:px-5 sm:py-4"
                     >
                       <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.16)] opacity-60 blur-3xl transition duration-500 group-hover/request:scale-125 group-hover/request:bg-[rgba(183,167,200,0.30)] group-hover/request:opacity-100"
+                        className="pointer-events-none absolute -right-16 -top-20 size-40 rounded-full bg-[rgba(183,167,200,0.13)] opacity-60 blur-3xl transition duration-500 group-hover/request:scale-125 group-hover/request:bg-[rgba(183,167,200,0.24)]"
                       />
 
                       <div className="relative">
-                        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span
-                                className="status-chip transition duration-300 group-hover/request:-translate-y-0.5 group-hover/request:scale-[1.02] group-hover/request:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                                className="status-chip transition duration-300 group-hover/request:-translate-y-0.5"
                                 data-tone={getRequestTone(request.status)}
                               >
                                 {quotationRequestStatusLabels[request.status]}
                               </span>
 
                               {request.package?.category ? (
-                                <span
-                                  className="status-chip transition duration-300 group-hover/request:-translate-y-0.5 group-hover/request:bg-white/54"
-                                  data-tone="gray"
-                                >
+                                <span className="status-chip" data-tone="gray">
                                   <Tags className="size-3.5" />
                                   {request.package.category.name}
                                 </span>
                               ) : null}
                             </div>
 
-                            <h3 className="mt-4 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] transition duration-300 group-hover/request:translate-x-0.5 group-hover/request:text-[var(--color-deep-plum)]">
-                              {request.package?.title ?? 'Custom service request'}
-                            </h3>
+                            <div className="mt-2.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                              <h3 className="text-[1.18rem] font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/request:text-[var(--color-deep-plum)]">
+                                {request.package?.title ?? 'Custom service request'}
+                              </h3>
 
-                            <Link
-                              to={`/vendors/${request.vendor.slug}`}
-                              state={{
-                                returnTo: `/events/${eventId}/quotations`,
-                                returnLabel: 'Back to quotations',
-                              }}
-                              className="group/vendor-link mt-3 inline-flex items-center gap-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:translate-x-0.5 hover:text-[var(--color-rosewood)]"
-                            >
-                              <Store
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/vendor-link:-translate-y-0.5 group-hover/vendor-link:scale-105"
-                              />
-                              {request.vendor.businessName}
-                            </Link>
+                              <span className="hidden h-4 w-px bg-[rgba(93,58,85,0.14)] sm:block" />
 
-                            <p className="mt-4 max-w-3xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64 transition duration-300 group-hover/request:text-[var(--color-charcoal)]/74">
+                              <Link
+                                to={`/vendors/${request.vendor.slug}`}
+                                state={{
+                                  returnTo: `/events/${eventId}/quotations`,
+                                  returnLabel: 'Back to quotations',
+                                }}
+                                className="group/vendor-link inline-flex w-fit items-center gap-1.5 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 hover:text-[var(--color-rosewood)]"
+                              >
+                                <Store
+                                  aria-hidden="true"
+                                  className="size-3.5 transition duration-300 group-hover/vendor-link:-translate-y-0.5"
+                                />
+                                {request.vendor.businessName}
+                              </Link>
+                            </div>
+
+                            <p className="mt-2 max-w-3xl line-clamp-2 text-[0.82rem] font-semibold leading-5 text-[var(--color-charcoal)]/62 transition duration-300 group-hover/request:text-[var(--color-charcoal)]/72">
                               {request.requirements}
                             </p>
 
-                            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                              <div className="rounded-2xl border border-white/46 bg-white/28 p-4 transition duration-300 group-hover/request:border-white/72 group-hover/request:bg-white/42">
-                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/request:text-[var(--color-rosewood)]/70">
-                                  {' '}
+                            <div className="mt-3 flex flex-wrap items-stretch divide-x divide-[rgba(93,58,85,0.10)] rounded-[1rem] border border-white/48 bg-white/24 px-1 py-2">
+                              <div className="min-w-[9.5rem] flex-1 px-3">
+                                <p className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                                   Base price
                                 </p>
-                                <p className="mt-2 font-black text-[var(--color-near-black)] transition duration-300 group-hover/request:text-[var(--color-deep-plum)]">
+
+                                <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                                   {formatCurrency(request.package?.basePrice ?? null)}
                                 </p>
                               </div>
 
-                              <div className="rounded-2xl border border-white/46 bg-white/28 p-4 transition duration-300 group-hover/request:border-white/72 group-hover/request:bg-white/42">
-                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/request:text-[var(--color-rosewood)]/70">
-                                  {' '}
+                              <div className="min-w-[11rem] flex-1 px-3">
+                                <p className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                                   Response deadline
                                 </p>
-                                <p className="mt-2 font-black text-[var(--color-near-black)] transition duration-300 group-hover/request:text-[var(--color-deep-plum)]">
+
+                                <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                                   {request.responseDueAt
                                     ? formatDate(request.responseDueAt)
                                     : 'No deadline'}
                                 </p>
                               </div>
 
-                              <div className="rounded-2xl border border-white/46 bg-white/28 p-4 transition duration-300 group-hover/request:border-white/72 group-hover/request:bg-white/42">
-                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/request:text-[var(--color-rosewood)]/70">
-                                  {' '}
+                              <div className="min-w-[10rem] flex-1 px-3">
+                                <p className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                                   Requested
                                 </p>
-                                <p className="mt-2 font-black text-[var(--color-near-black)] transition duration-300 group-hover/request:text-[var(--color-deep-plum)]">
+
+                                <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                                   {formatDate(request.createdAt)}
                                 </p>
                               </div>
@@ -1085,7 +1114,7 @@ export function QuotationRequestsWorkspacePage() {
 
                           <button
                             type="button"
-                            className="group/view-quotations btn-secondary shrink-0 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.10)]"
+                            className="group/view-quotations btn-secondary shrink-0 justify-center px-4 py-2 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-white/52 hover:shadow-[0_10px_24px_rgba(31,27,29,0.08)]"
                             onClick={() => {
                               setSelectedRequest(request);
                               acceptQuotationMutation.reset();
@@ -1093,7 +1122,7 @@ export function QuotationRequestsWorkspacePage() {
                           >
                             <MessageSquareQuote
                               aria-hidden="true"
-                              className="size-4 transition duration-300 group-hover/view-quotations:rotate-[4deg] group-hover/view-quotations:scale-105"
+                              className="size-4 transition duration-300 group-hover/view-quotations:rotate-[4deg]"
                             />
                             View quotations
                           </button>
@@ -1181,24 +1210,47 @@ export function QuotationRequestsWorkspacePage() {
                   </div>
                 </div>
               ) : null}
-            </article>
 
-            <aside className="space-y-5">
-              <article className="glass-card p-6">
-                <PackageCheck className="size-6 text-[var(--color-deep-plum)]" />
+              <div className="mt-5 flex flex-col gap-4 rounded-[1.25rem] border border-[rgba(93,58,85,0.10)] bg-[linear-gradient(135deg,rgba(255,255,255,0.30),rgba(239,232,244,0.28))] px-4 py-3.5 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                    <PackageCheck aria-hidden="true" className="size-4" />
+                  </span>
 
-                <h2 className="mt-6 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  Before accepting
-                </h2>
+                  <div>
+                    <p className="text-[0.6rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+                      Before accepting
+                    </p>
 
-                <div className="mt-4 space-y-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
-                  <p>Review the final proposed price.</p>
-                  <p>Check the required deposit.</p>
-                  <p>Read all inclusions and exclusions.</p>
-                  <p>Confirm the expiry date and vendor terms.</p>
+                    <p className="mt-0.5 text-sm font-black text-[var(--color-near-black)]">
+                      Give the final proposal one last check.
+                    </p>
+                  </div>
                 </div>
-              </article>
-            </aside>
+
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold text-[var(--color-charcoal)]/60">
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="size-3.5 text-[var(--color-deep-plum)]" />
+                    Final price
+                  </span>
+
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="size-3.5 text-[var(--color-deep-plum)]" />
+                    Required deposit
+                  </span>
+
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="size-3.5 text-[var(--color-deep-plum)]" />
+                    Inclusions & exclusions
+                  </span>
+
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="size-3.5 text-[var(--color-deep-plum)]" />
+                    Expiry & terms
+                  </span>
+                </div>
+              </div>
+            </article>
           </section>
         </main>
       </div>
@@ -1600,7 +1652,7 @@ export function QuotationRequestsWorkspacePage() {
         >
           <div className="mx-auto flex min-h-full max-w-6xl items-start justify-center">
             <div
-              className="relative w-full overflow-hidden rounded-[2.2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.88),rgba(246,239,248,0.84))] p-6 shadow-[0_40px_110px_rgba(31,27,29,0.24)] backdrop-blur-3xl sm:p-8"
+              className="relative w-full overflow-hidden rounded-[2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.88),rgba(246,239,248,0.84))] p-5 shadow-[0_40px_110px_rgba(31,27,29,0.24)] backdrop-blur-3xl sm:p-6"
               onClick={(event) => {
                 event.stopPropagation();
               }}
@@ -1616,9 +1668,9 @@ export function QuotationRequestsWorkspacePage() {
               />
 
               <div className="relative">
-                <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-4 border-b border-[rgba(93,58,85,0.10)] pb-5 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+                    <div className="soft-chip mb-3 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
                       <MessageSquareQuote aria-hidden="true" className="size-4" />
                       Quotation comparison
                     </div>
@@ -1641,7 +1693,7 @@ export function QuotationRequestsWorkspacePage() {
 
                     <h2
                       id="quotation-comparison-title"
-                      className="mt-5 max-w-4xl text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
+                      className="mt-3 max-w-4xl text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2rem]"
                     >
                       {selectedRequest.package?.title ?? 'Vendor quotation'}
                     </h2>
@@ -1662,7 +1714,7 @@ export function QuotationRequestsWorkspacePage() {
                       {selectedRequest.vendor.businessName}
                     </Link>
 
-                    <p className="mt-4 max-w-3xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
+                    <p className="mt-2.5 max-w-3xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
                       Review every quotation version, compare pricing and terms, then choose the
                       proposal that best fits this event.
                     </p>
@@ -1701,7 +1753,7 @@ export function QuotationRequestsWorkspacePage() {
                 ) : null}
 
                 {quotationsQuery.data && quotationsQuery.data.length > 0 ? (
-                  <div className="mt-8 grid gap-5 lg:grid-cols-2">
+                  <div className="mt-6 grid gap-5">
                     {quotationsQuery.data.map((quotation) => {
                       const expired = isQuotationExpired(quotation);
 
@@ -1723,7 +1775,7 @@ export function QuotationRequestsWorkspacePage() {
                       return (
                         <article
                           key={quotation.id}
-                          className={`group/quotation relative overflow-hidden rounded-[1.75rem] border p-5 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_72px_rgba(31,27,29,0.12)] sm:p-6 ${
+                          className={`group/quotation relative overflow-hidden rounded-[1.75rem] border p-5 backdrop-blur-2xl transition-all duration-300 hover:shadow-[0_30px_72px_rgba(31,27,29,0.12)] sm:p-6 ${
                             quotation.status === 'ACCEPTED'
                               ? 'border-[rgba(142,151,115,0.36)] bg-[linear-gradient(145deg,rgba(244,248,235,0.82),rgba(255,255,255,0.50))] shadow-[0_22px_58px_rgba(61,69,47,0.10)]'
                               : 'border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.60),rgba(238,229,244,0.40))] shadow-[0_20px_52px_rgba(31,27,29,0.07)] hover:border-white/88'
@@ -1735,203 +1787,215 @@ export function QuotationRequestsWorkspacePage() {
                           />
 
                           <div className="relative">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                              <div>
+                            <div className="flex flex-col gap-3 border-b border-[rgba(93,58,85,0.08)] pb-4 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="flex flex-wrap items-center gap-3">
                                 <span
-                                  className="status-chip transition duration-300 group-hover/quotation:-translate-y-0.5 group-hover/quotation:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                                  className="status-chip"
                                   data-tone={getQuotationTone(quotation.status)}
                                 >
                                   {quotationStatusLabels[quotation.status]}
                                 </span>
 
-                                <h3 className="mt-4 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/quotation:text-[var(--color-deep-plum)]">
+                                <h3 className="text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/quotation:text-[var(--color-deep-plum)]">
                                   Quotation version {quotation.version}
                                 </h3>
                               </div>
 
-                              <div className="sm:text-right">
-                                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/40">
+                              <div className="flex items-center gap-2 sm:text-right">
+                                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/40">
                                   Submitted
                                 </p>
 
-                                <p className="mt-1 text-sm font-black text-[var(--color-charcoal)]/62">
+                                <span className="hidden text-[var(--color-charcoal)]/24 sm:inline">
+                                  •
+                                </span>
+
+                                <p className="text-sm font-black text-[var(--color-charcoal)]/62">
                                   {formatDate(quotation.createdAt)}
                                 </p>
                               </div>
                             </div>
 
-                            <div className="mt-6 rounded-[1.5rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(242,233,247,0.52))] p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
-                              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                                Proposed price
-                              </p>
-
-                              <p className="mt-3 break-words text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] sm:text-4xl">
-                                {formatCurrency(quotation.proposedPrice)}
-                              </p>
-
-                              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                                <div className="rounded-2xl border border-white/52 bg-white/32 p-4">
-                                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
-                                    Deposit
+                            <div className="mt-4 grid gap-4 lg:grid-cols-[0.9fr_1.35fr]">
+                              <div className="grid content-start gap-4">
+                                <section className="rounded-[1.4rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(242,233,247,0.52))] p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
+                                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                                    Proposed price
                                   </p>
 
-                                  <p className="mt-2 font-black text-[var(--color-deep-plum)]">
-                                    {quotation.depositAmount
-                                      ? formatCurrency(quotation.depositAmount)
-                                      : 'No deposit'}
-                                  </p>
-                                </div>
-
-                                <div className="rounded-2xl border border-white/52 bg-white/32 p-4">
-                                  <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
-                                    Remaining balance
+                                  <p className="mt-2 break-words text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)]">
+                                    {formatCurrency(quotation.proposedPrice)}
                                   </p>
 
-                                  <p className="mt-2 font-black text-[var(--color-deep-plum)]">
-                                    {remainingBalance !== null
-                                      ? formatCurrency(String(remainingBalance))
-                                      : 'Not available'}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
+                                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
+                                    <div className="rounded-xl border border-white/52 bg-white/34 px-4 py-3">
+                                      <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                                        Deposit
+                                      </p>
 
-                            <div className="mt-5 grid gap-4">
-                              <section className="rounded-[1.35rem] border border-[rgba(142,151,115,0.18)] bg-[rgba(235,241,219,0.34)] p-5 transition duration-300 group-hover/quotation:bg-[rgba(235,241,219,0.46)]">
-                                <div className="flex items-center gap-3">
-                                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#4d5739]">
-                                    <CheckCircle2 aria-hidden="true" className="size-4" />
-                                  </span>
+                                      <p className="mt-1.5 text-sm font-black text-[var(--color-deep-plum)]">
+                                        {quotation.depositAmount
+                                          ? formatCurrency(quotation.depositAmount)
+                                          : 'No deposit'}
+                                      </p>
+                                    </div>
 
-                                  <p className="text-sm font-black text-[var(--color-near-black)]">
-                                    Inclusions
-                                  </p>
-                                </div>
+                                    <div className="rounded-xl border border-white/52 bg-white/34 px-4 py-3">
+                                      <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                                        Remaining balance
+                                      </p>
 
-                                <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
-                                  {quotation.inclusions}
-                                </p>
-                              </section>
-
-                              {quotation.exclusions ? (
-                                <section className="rounded-[1.35rem] border border-[rgba(142,92,103,0.16)] bg-[rgba(245,225,230,0.30)] p-5 transition duration-300 group-hover/quotation:bg-[rgba(245,225,230,0.42)]">
-                                  <div className="flex items-center gap-3">
-                                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.16)] text-[var(--color-muted-burgundy)]">
-                                      <X aria-hidden="true" className="size-4" />
-                                    </span>
-
-                                    <p className="text-sm font-black text-[var(--color-near-black)]">
-                                      Exclusions
-                                    </p>
+                                      <p className="mt-1.5 text-sm font-black text-[var(--color-deep-plum)]">
+                                        {remainingBalance !== null
+                                          ? formatCurrency(String(remainingBalance))
+                                          : 'Not available'}
+                                      </p>
+                                    </div>
                                   </div>
-
-                                  <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
-                                    {quotation.exclusions}
-                                  </p>
                                 </section>
-                              ) : null}
 
-                              {quotation.terms ? (
-                                <section className="rounded-[1.35rem] border border-[rgba(175,201,216,0.24)] bg-[rgba(222,236,242,0.34)] p-5 transition duration-300 group-hover/quotation:bg-[rgba(222,236,242,0.46)]">
-                                  <div className="flex items-center gap-3">
-                                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.26)] text-[#3b515b]">
-                                      <FileText aria-hidden="true" className="size-4" />
-                                    </span>
-
-                                    <p className="text-sm font-black text-[var(--color-near-black)]">
-                                      Terms
-                                    </p>
-                                  </div>
-
-                                  <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
-                                    {quotation.terms}
-                                  </p>
-                                </section>
-                              ) : null}
-                            </div>
-
-                            <div
-                              className={`mt-5 rounded-[1.35rem] border p-4 ${
-                                expired
-                                  ? 'border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)]'
-                                  : 'border-white/54 bg-white/30'
-                              }`}
-                            >
-                              <div className="flex items-start gap-3">
-                                <span
-                                  className={`grid size-9 shrink-0 place-items-center rounded-xl ${
+                                <section
+                                  className={`rounded-[1.35rem] border p-4 ${
                                     expired
-                                      ? 'bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]'
-                                      : 'bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]'
+                                      ? 'border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)]'
+                                      : 'border-white/54 bg-white/30'
                                   }`}
                                 >
-                                  <Clock3 aria-hidden="true" className="size-4" />
-                                </span>
+                                  <div className="flex items-center gap-3">
+                                    <span
+                                      className={`grid size-9 shrink-0 place-items-center rounded-xl ${
+                                        expired
+                                          ? 'bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]'
+                                          : 'bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]'
+                                      }`}
+                                    >
+                                      <Clock3 aria-hidden="true" className="size-4" />
+                                    </span>
 
-                                <div>
-                                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44">
-                                    Quotation expiry
-                                  </p>
+                                    <div className="min-w-0">
+                                      <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                                        Quotation expiry
+                                      </p>
 
-                                  <p className="mt-2 font-black text-[var(--color-near-black)]">
-                                    {quotation.expiresAt
-                                      ? formatDate(quotation.expiresAt)
-                                      : 'No expiry date'}
-                                  </p>
+                                      <p className="mt-1 font-black text-[var(--color-near-black)]">
+                                        {quotation.expiresAt
+                                          ? formatDate(quotation.expiresAt)
+                                          : 'No expiry date'}
+                                      </p>
+                                    </div>
+                                  </div>
 
                                   {expired ? (
-                                    <p className="mt-2 text-sm font-bold text-[var(--color-muted-burgundy)]">
+                                    <p className="mt-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]">
                                       This quotation has expired and can no longer be accepted.
                                     </p>
                                   ) : null}
-                                </div>
+                                </section>
+
+                                {canAccept ? (
+                                  <button
+                                    type="button"
+                                    className="group/accept-quotation btn-primary w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
+                                    disabled={!isQuotationEditable}
+                                    title={
+                                      !isQuotationEditable ? quotationLockedMessage : undefined
+                                    }
+                                    onClick={() => {
+                                      if (!isQuotationEditable) {
+                                        return;
+                                      }
+
+                                      acceptQuotationMutation.reset();
+                                      setQuotationToAccept(quotation);
+                                    }}
+                                  >
+                                    <CheckCircle2
+                                      aria-hidden="true"
+                                      className="size-4 transition duration-300 group-hover/accept-quotation:scale-110"
+                                    />
+                                    Accept quotation
+                                  </button>
+                                ) : null}
+
+                                {quotation.status === 'ACCEPTED' ? (
+                                  <button
+                                    type="button"
+                                    className="group/create-booking btn-primary w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
+                                    disabled={!isBookingCreationAllowed}
+                                    title={
+                                      !isBookingCreationAllowed ? bookingLockedMessage : undefined
+                                    }
+                                    onClick={() => {
+                                      if (!isBookingCreationAllowed) {
+                                        return;
+                                      }
+
+                                      openCreateBookingDialog(quotation);
+                                    }}
+                                  >
+                                    <CalendarRange
+                                      aria-hidden="true"
+                                      className="size-4 transition duration-300 group-hover/create-booking:scale-110"
+                                    />
+                                    Create booking
+                                  </button>
+                                ) : null}
+                              </div>
+
+                              <div className="grid content-start gap-3">
+                                <section className="rounded-[1.3rem] border border-[rgba(142,151,115,0.18)] bg-[rgba(235,241,219,0.34)] p-4 transition duration-300 group-hover/quotation:bg-[rgba(235,241,219,0.46)]">
+                                  <div className="flex items-center gap-3">
+                                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(142,151,115,0.20)] text-[#4d5739]">
+                                      <CheckCircle2 aria-hidden="true" className="size-4" />
+                                    </span>
+
+                                    <p className="text-sm font-black text-[var(--color-near-black)]">
+                                      Inclusions
+                                    </p>
+                                  </div>
+
+                                  <p className="mt-2.5 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
+                                    {quotation.inclusions}
+                                  </p>
+                                </section>
+
+                                {quotation.exclusions ? (
+                                  <section className="rounded-[1.3rem] border border-[rgba(142,92,103,0.16)] bg-[rgba(245,225,230,0.30)] p-4 transition duration-300 group-hover/quotation:bg-[rgba(245,225,230,0.42)]">
+                                    <div className="flex items-center gap-3">
+                                      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(142,92,103,0.16)] text-[var(--color-muted-burgundy)]">
+                                        <X aria-hidden="true" className="size-4" />
+                                      </span>
+
+                                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                                        Exclusions
+                                      </p>
+                                    </div>
+
+                                    <p className="mt-2.5 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
+                                      {quotation.exclusions}
+                                    </p>
+                                  </section>
+                                ) : null}
+
+                                {quotation.terms ? (
+                                  <section className="rounded-[1.3rem] border border-[rgba(175,201,216,0.24)] bg-[rgba(222,236,242,0.34)] p-4 transition duration-300 group-hover/quotation:bg-[rgba(222,236,242,0.46)]">
+                                    <div className="flex items-center gap-3">
+                                      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.26)] text-[#3b515b]">
+                                        <FileText aria-hidden="true" className="size-4" />
+                                      </span>
+
+                                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                                        Terms
+                                      </p>
+                                    </div>
+
+                                    <p className="mt-2.5 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
+                                      {quotation.terms}
+                                    </p>
+                                  </section>
+                                ) : null}
                               </div>
                             </div>
-
-                            {canAccept ? (
-                              <button
-                                type="button"
-                                className="group/accept-quotation btn-primary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
-                                disabled={!isQuotationEditable}
-                                title={!isQuotationEditable ? quotationLockedMessage : undefined}
-                                onClick={() => {
-                                  if (!isQuotationEditable) {
-                                    return;
-                                  }
-
-                                  acceptQuotationMutation.reset();
-                                  setQuotationToAccept(quotation);
-                                }}
-                              >
-                                <CheckCircle2
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/accept-quotation:scale-110"
-                                />
-                                Accept quotation
-                              </button>
-                            ) : null}
-
-                            {quotation.status === 'ACCEPTED' ? (
-                              <button
-                                type="button"
-                                className="group/create-booking btn-primary mt-6 w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.24)]"
-                                disabled={!isBookingCreationAllowed}
-                                title={!isBookingCreationAllowed ? bookingLockedMessage : undefined}
-                                onClick={() => {
-                                  if (!isBookingCreationAllowed) {
-                                    return;
-                                  }
-
-                                  openCreateBookingDialog(quotation);
-                                }}
-                              >
-                                <CalendarRange
-                                  aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/create-booking:scale-110"
-                                />
-                                Create booking
-                              </button>
-                            ) : null}
                           </div>
                         </article>
                       );

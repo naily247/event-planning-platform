@@ -970,9 +970,9 @@ export function EventWorkspacePage() {
           </header>
         </div>
 
-        <main className="py-10">
+        <main className="py-7 sm:py-8">
           <section
-            className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/68 px-5 pb-8 pt-6 shadow-[0_22px_64px_rgba(31,27,29,0.10)] sm:px-7 sm:pb-9 sm:pt-7 lg:min-h-[34rem] lg:px-9 lg:pb-10 lg:pt-8"
+            className="relative isolate overflow-hidden rounded-[2.1rem] border border-white/68 px-5 pb-6 pt-5 shadow-[0_20px_58px_rgba(31,27,29,0.10)] sm:px-7 sm:pb-7 sm:pt-6 lg:min-h-[29rem] lg:px-8 lg:pb-7 lg:pt-7"
             style={{
               background: workspaceHeroTheme.background,
             }}
@@ -1036,10 +1036,10 @@ export function EventWorkspacePage() {
               }}
             />
 
-            <div className="relative grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
+            <div className="relative grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-8">
               <div
                 data-hero-content="true"
-                className="lg:order-2 lg:flex lg:min-h-[25rem] lg:items-center lg:justify-end"
+                className="lg:order-2 lg:flex lg:min-h-[21rem] lg:items-center lg:justify-end"
               >
                 <div className="w-full lg:max-w-[31rem]">
                   <div className="flex flex-wrap items-center gap-3">
@@ -1056,11 +1056,11 @@ export function EventWorkspacePage() {
                     </span>
                   </div>
 
-                  <h1 className="mt-5 max-w-[30rem] text-balance text-4xl font-black leading-[1.01] tracking-[-0.05em] text-[var(--color-near-black)] drop-shadow-[0_1px_0_rgba(255,255,255,0.28)] sm:text-[2.8rem] lg:text-[3.05rem]">
+                  <h1 className="mt-4 max-w-[30rem] text-balance text-4xl font-black leading-[1.01] tracking-[-0.05em] text-[var(--color-near-black)] drop-shadow-[0_1px_0_rgba(255,255,255,0.28)] sm:text-[2.65rem] lg:text-[2.8rem]">
                     {event.name}
                   </h1>
 
-                  <div className="mt-5 max-w-[29rem] rounded-[1.35rem] border border-white/38 bg-white/18 px-5 py-4 shadow-[0_14px_38px_rgba(31,27,29,0.08)] backdrop-blur-2xl">
+<div className="mt-4 max-w-[29rem] rounded-[1.3rem] border border-white/38 bg-white/18 px-5 py-3.5 shadow-[0_12px_34px_rgba(31,27,29,0.08)] backdrop-blur-2xl">
                     <p className="text-pretty text-base font-semibold leading-7 text-[var(--color-charcoal)]/76">
                       {event.requirements ??
                         'Coordinate vendors, budgets, guests and every important milestone from one organised workspace.'}
@@ -1069,7 +1069,7 @@ export function EventWorkspacePage() {
                 </div>
               </div>
 
-              <aside className="relative min-h-[21rem] lg:order-1 lg:min-h-[23rem]">
+              <aside className="relative min-h-[20rem] lg:order-1 lg:min-h-[20.5rem]">
                 <div className="mb-4 flex items-center justify-between gap-4 lg:absolute lg:left-4 lg:top-0 lg:z-40 lg:mb-0">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
@@ -1162,7 +1162,7 @@ export function EventWorkspacePage() {
                 </div>
 
                 {/* Desktop: intentionally scattered and overlapping composition */}
-                <div className="relative hidden h-[23rem] lg:block">
+                <div className="relative hidden h-[20.5rem] lg:block">
                   <article
                     data-snapshot-card="true"
                     role="button"
@@ -1175,7 +1175,7 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('date');
                       }
                     }}
-                    className={`group/snapshot-card absolute left-[3%] top-[2.8rem] w-[59%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(248,231,228,0.58))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute left-[3%] top-[2.4rem] w-[59%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(248,231,228,0.58))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'date'
                         ? 'z-50 -translate-y-3 translate-x-1 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
                         : 'z-20 -translate-x-1 translate-y-1 scale-[0.975] rotate-[-6deg] opacity-[0.74] brightness-[0.95] shadow-[0_18px_44px_rgba(31,27,29,0.12)]'
@@ -1193,7 +1193,7 @@ export function EventWorkspacePage() {
                       </div>
 
                       <span
-                        className={`grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition-all duration-300 ${
+                        className={`grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] transition-all duration-300 ${
                           activeSnapshotCard === 'date'
                             ? 'scale-110 rotate-[6deg]'
                             : 'scale-100 rotate-0'
@@ -1216,7 +1216,7 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('location');
                       }
                     }}
-                    className={`group/snapshot-card absolute right-[4%] top-[5.1rem] w-[47%] cursor-pointer rounded-[1.65rem] border border-white/74 bg-[linear-gradient(145deg,rgba(248,244,251,0.90),rgba(220,207,230,0.76))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute right-[4%] top-[4.3rem] w-[47%] cursor-pointer rounded-[1.65rem] border border-white/74 bg-[linear-gradient(145deg,rgba(248,244,251,0.90),rgba(220,207,230,0.76))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'location'
                         ? 'z-50 -translate-y-3 -translate-x-2 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
                         : 'z-30 translate-x-2 translate-y-2 scale-[0.965] rotate-[6.5deg] opacity-[0.72] brightness-[0.94] shadow-[0_18px_46px_rgba(31,27,29,0.13)]'
@@ -1253,7 +1253,7 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('guests');
                       }
                     }}
-                    className={`group/snapshot-card absolute bottom-[2.6rem] left-[8%] w-[38%] cursor-pointer rounded-[1.6rem] border border-white/72 bg-[linear-gradient(145deg,rgba(250,250,242,0.76),rgba(222,222,195,0.60))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute bottom-[2rem] left-[8%] w-[38%]cursor-pointer rounded-[1.6rem] border border-white/72 bg-[linear-gradient(145deg,rgba(250,250,242,0.76),rgba(222,222,195,0.60))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'guests'
                         ? 'z-50 -translate-y-3 translate-x-2 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
                         : 'z-10 -translate-x-2 translate-y-3 scale-[0.95] rotate-[5.5deg] opacity-[0.68] brightness-[0.93] shadow-[0_16px_40px_rgba(31,27,29,0.11)]'
@@ -1292,7 +1292,7 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('budget');
                       }
                     }}
-                    className={`group/snapshot-card absolute bottom-[1.6rem] right-[5%] w-[54%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,250,246,0.82),rgba(239,214,207,0.68))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute bottom-[1rem] right-[5%] w-[54%] cursor-pointer rounded-[1.8rem] border border-white/76 bg-[linear-gradient(145deg,rgba(255,250,246,0.82),rgba(239,214,207,0.68))] p-5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'budget'
                         ? 'z-50 -translate-y-3 -translate-x-2 scale-[1.065] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.28)] ring-1 ring-white/70'
                         : 'z-40 -translate-x-1 -translate-y-1 scale-[0.985] rotate-[2.5deg] opacity-[0.80] brightness-[0.97] shadow-[0_24px_58px_rgba(31,27,29,0.17)]'
@@ -1310,7 +1310,7 @@ export function EventWorkspacePage() {
                       </div>
 
                       <span
-                        className={`grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(142,92,103,0.15)] text-[var(--color-rosewood)] transition-all duration-300 ${
+                        className={`grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(142,92,103,0.15)] text-[var(--color-rosewood)] transition-all duration-300 ${
                           activeSnapshotCard === 'budget'
                             ? 'scale-110 rotate-[5deg]'
                             : 'scale-100 rotate-0'
@@ -1333,7 +1333,7 @@ export function EventWorkspacePage() {
                         setActiveSnapshotCard('theme');
                       }
                     }}
-                    className={`group/snapshot-card absolute top-[9.4rem] left-[18%] w-[42%] cursor-pointer rounded-[1.5rem] border border-white/78 bg-[linear-gradient(135deg,rgba(255,255,255,0.84),rgba(235,222,228,0.72))] px-5 py-4 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
+                    className={`group/snapshot-card absolute top-[8rem] left-[18%] w-[42%] cursor-pointer rounded-[1.5rem] border border-white/78 bg-[linear-gradient(135deg,rgba(255,255,255,0.84),rgba(235,222,228,0.72))] px-4 py-3.5 backdrop-blur-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 ${
                       activeSnapshotCard === 'theme'
                         ? 'z-50 -translate-y-3 translate-x-1 scale-[1.07] rotate-0 opacity-100 brightness-100 shadow-[0_38px_88px_rgba(31,27,29,0.30)] ring-1 ring-white/75'
                         : 'z-[35] -translate-x-2 translate-y-1 scale-[0.955] rotate-[-3.5deg] opacity-[0.72] brightness-[0.94] shadow-[0_18px_46px_rgba(31,27,29,0.13)]'
@@ -1366,7 +1366,7 @@ export function EventWorkspacePage() {
             </div>
           </section>
 
-          <section className="mt-7">
+          <section className="mt-5">
             <article className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-[#fffaf5] shadow-[0_24px_68px_rgba(93,58,85,0.24)]">
               <div
                 aria-hidden="true"
@@ -1378,7 +1378,7 @@ export function EventWorkspacePage() {
                 className="pointer-events-none absolute -bottom-32 -left-24 size-72 rounded-full bg-[rgba(175,201,216,0.11)] blur-3xl"
               />
 
-              <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_0.82fr] lg:items-stretch lg:p-9">
+              <div className="relative grid gap-6 p-5 sm:p-6 lg:grid-cols-[1fr_0.82fr] lg:items-stretch lg:p-7">
                 <div className="flex flex-col">
                   <div className="flex flex-wrap items-start justify-between gap-5">
                     <div className="flex items-center gap-4">
@@ -1397,7 +1397,7 @@ export function EventWorkspacePage() {
                           Planning status
                         </p>
 
-                        <h2 className="mt-2 text-3xl font-black tracking-[-0.045em] sm:text-4xl">
+                        <h2 className="mt-1.5 text-3xl font-black tracking-[-0.045em] sm:text-[2.15rem]">
                           {event.status.replaceAll('_', ' ')}
                         </h2>
                       </div>
@@ -1408,11 +1408,11 @@ export function EventWorkspacePage() {
                     </span>
                   </div>
 
-                  <p className="mt-6 max-w-2xl text-base font-semibold leading-7 text-white/68">
+                  <p className="mt-4 max-w-2xl text-sm font-semibold leading-6 text-white/68">
                     {getEventStatusMessage(event.status)}
                   </p>
 
-                  <div className="mt-7 grid gap-4 border-t border-white/12 pt-6 sm:grid-cols-2">
+                  <div className="mt-5 grid gap-4 border-t border-white/12 pt-4 sm:grid-cols-2">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-white/42">
                         Last updated
@@ -1434,7 +1434,7 @@ export function EventWorkspacePage() {
                     </div>
                   </div>
 
-                  <div className="mt-auto flex flex-col gap-3 pt-8 sm:flex-row sm:flex-wrap">
+                  <div className="mt-auto flex flex-col gap-3 pt-5 sm:flex-row sm:flex-wrap">
                     {isEventEditable ? (
                       <button
                         type="button"
@@ -1468,7 +1468,7 @@ export function EventWorkspacePage() {
                   </div>
                 </div>
 
-                <div className="rounded-[1.6rem] border border-white/14 bg-white/[0.08] p-5 backdrop-blur-2xl sm:p-6">
+                <div className="rounded-[1.5rem] border border-white/14 bg-white/[0.08] p-5 backdrop-blur-2xl">
                   {primaryStatusAction ? (
                     <>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-white/46">
@@ -1481,7 +1481,7 @@ export function EventWorkspacePage() {
 
                       <button
                         type="button"
-                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_14px_32px_rgba(31,27,29,0.16)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(31,27,29,0.22)] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-black text-[var(--color-deep-plum)] shadow-[0_14px_32px_rgba(31,27,29,0.16)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(31,27,29,0.22)] disabled:cursor-not-allowed disabled:opacity-60"
                         disabled={updateEventStatusMutation.isPending}
                         onClick={() => {
                           updateEventStatusMutation.reset();
@@ -1571,9 +1571,9 @@ export function EventWorkspacePage() {
             </article>
           </section>
 
-          <section className="mt-6 space-y-6">
+          <section className="mt-5 space-y-5">
             <article className="glass-card overflow-hidden border-white/72 bg-white/30 shadow-[0_22px_64px_rgba(31,27,29,0.10)] backdrop-blur-2xl">
-              <div className="flex flex-col gap-5 border-b border-white/50 px-6 py-7 sm:flex-row sm:items-end sm:justify-between sm:px-8 sm:py-8">
+              <div className="flex flex-col gap-4 border-b border-white/50 px-5 py-5 sm:flex-row sm:items-end sm:justify-between sm:px-7 sm:py-6">
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
@@ -1591,7 +1591,7 @@ export function EventWorkspacePage() {
                     </div>
                   </div>
 
-                  <h2 className="mt-5 max-w-2xl text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-3xl sm:tracking-[-0.045em]">
+                  <h2 className="mt-4 max-w-2xl text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] sm:text-[1.7rem] sm:tracking-[-0.045em]">
                     {event.status === 'CANCELLED'
                       ? 'Planning has stopped for this event.'
                       : 'See exactly when each stage was reached.'}
@@ -1604,7 +1604,7 @@ export function EventWorkspacePage() {
               </div>
 
               {event.status === 'CANCELLED' ? (
-                <div className="p-6 sm:p-8">
+                <div className="p-5 sm:p-6">
                   <div className="grid gap-5 lg:grid-cols-[1fr_0.72fr]">
                     <div className="rounded-[1.6rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(124,74,90,0.07)] p-5 sm:p-6">
                       <div className="flex items-start gap-4">
@@ -1680,7 +1680,7 @@ export function EventWorkspacePage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-6 sm:p-8">
+                <div className="p-5 sm:p-6">
                   <div className="relative">
                     <div
                       aria-hidden="true"
@@ -1721,20 +1721,20 @@ export function EventWorkspacePage() {
                               <span
                                 className={
                                   isCurrent
-                                    ? 'grid size-12 shrink-0 place-items-center rounded-full border border-white/72 bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-white shadow-[0_12px_28px_rgba(93,58,85,0.24)] transition duration-300 group-hover/stage:scale-105'
+                                    ? 'grid size-10 shrink-0 place-items-center rounded-full border border-white/72 bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] text-white shadow-[0_12px_28px_rgba(93,58,85,0.24)] transition duration-300 group-hover/stage:scale-105'
                                     : isReached
-                                      ? 'grid size-12 shrink-0 place-items-center rounded-full border border-white/70 bg-[rgba(183,167,200,0.34)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.08)] transition duration-300 group-hover/stage:scale-105'
-                                      : 'grid size-12 shrink-0 place-items-center rounded-full border border-white/64 bg-white/38 text-[var(--color-charcoal)]/32 transition duration-300 group-hover/stage:scale-105'
+                                      ? 'grid size-10 shrink-0 place-items-center rounded-full border border-white/70 bg-[rgba(183,167,200,0.34)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.08)] transition duration-300 group-hover/stage:scale-105'
+                                      : 'grid size-10 shrink-0 place-items-center rounded-full border border-white/64 bg-white/38 text-[var(--color-charcoal)]/32 transition duration-300 group-hover/stage:scale-105'
                                 }
                               >
                                 {isReached ? (
-                                  <CheckCircle2 aria-hidden="true" className="size-5" />
+                                  <CheckCircle2 aria-hidden="true" className="size-4" />
                                 ) : (
                                   <span className="size-2 rounded-full bg-current" />
                                 )}
                               </span>
 
-                              <div className="min-w-0 sm:mt-4">
+                              <div className="min-w-0 sm:mt-3">
                                 <p
                                   className={
                                     isCurrent
@@ -1780,7 +1780,7 @@ export function EventWorkspacePage() {
                     </div>
                   </div>
 
-                  <div className="mt-7 flex flex-col gap-4 rounded-[1.45rem] border border-white/58 bg-white/26 p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="mt-5 flex flex-col gap-4 rounded-[1.35rem] border border-white/58 bg-white/26 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/42">
                         Current stage
@@ -1803,15 +1803,15 @@ export function EventWorkspacePage() {
               )}
             </article>
 
-            <section className="space-y-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <section className="mt-2 space-y-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
                     Workspace shortcuts
                   </p>
 
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                    Continue planning from here.
+<h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      Continue planning from here.
                   </h2>
 
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/58">
@@ -1824,8 +1824,8 @@ export function EventWorkspacePage() {
                 </span>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-                {workspaceSections
+<div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-5">
+                  {workspaceSections
                   .filter(({ label }) => {
                     if (label === 'Overview') {
                       return false;
@@ -1844,7 +1844,7 @@ export function EventWorkspacePage() {
                       <Link
                         key={label}
                         to={path(event.id)}
-                        className="group relative isolate min-h-[12.5rem] overflow-hidden rounded-[1.55rem] border border-white/72 bg-[rgba(255,252,248,0.76)] p-5 shadow-[0_16px_44px_rgba(31,27,29,0.08)] transition duration-300 hover:-translate-y-1 hover:border-white/95 hover:shadow-[0_26px_62px_rgba(31,27,29,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 xl:min-h-[14rem]"
+                        className="group relative isolate min-h-[11rem] overflow-hidden rounded-[1.45rem] border border-white/72 bg-[rgba(255,252,248,0.76)] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.08)] transition duration-300 hover:-translate-y-1 hover:border-white/95 hover:shadow-[0_22px_54px_rgba(31,27,29,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/40 xl:min-h-[11.5rem]"
                         style={{
                           animationDelay: `${Math.min(sectionIndex, 8) * 55}ms`,
                         }}
@@ -1887,17 +1887,17 @@ export function EventWorkspacePage() {
                             </span>
                           </div>
 
-                          <div className="mt-5">
-                            <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)] drop-shadow-[0_1px_0_rgba(255,255,255,0.36)]">
+                          <div className="mt-4">
+                            <p className="text-base font-black tracking-[-0.025em] text-[var(--color-near-black)] drop-shadow-[0_1px_0_rgba(255,255,255,0.36)]">
                               {label}
                             </p>
 
-                            <p className="mt-2 text-sm font-semibold leading-5 text-[var(--color-charcoal)]/66">
+                            <p className="mt-1.5 text-[0.82rem] font-semibold leading-5 text-[var(--color-charcoal)]/66">
                               {workspaceSectionDescriptions[label]}
                             </p>
                           </div>
 
-                          <p className="mt-auto pt-4 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]/78 transition duration-300 group-hover:text-[var(--color-deep-plum)]">
+                          <p className="mt-auto pt-3 text-[0.64rem] font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]/78 transition duration-300 group-hover:text-[var(--color-deep-plum)]">
                             Open workspace
                           </p>
                         </div>
@@ -1907,25 +1907,25 @@ export function EventWorkspacePage() {
               </div>
 
               {event.status !== 'COMPLETED' ? (
-                <div className="flex items-start gap-3 rounded-[1.35rem] border border-white/58 bg-white/22 px-4 py-3.5 backdrop-blur-xl">
+                <div className="flex items-center gap-3 rounded-[1.25rem] border border-white/58 bg-white/22 px-4 py-3 backdrop-blur-xl">
                   <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
                     <Star aria-hidden="true" className="size-4" />
                   </span>
 
-                  <p className="pt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                  <p className="text-sm font-semibold leading-5 text-[var(--color-charcoal)]/56">
                     Reviews become available after the event is completed and eligible vendor
                     services can receive verified feedback.
                   </p>
                 </div>
               ) : null}
-              <article className="overflow-hidden rounded-[1.65rem] border border-white/58 bg-white/22 shadow-[0_14px_38px_rgba(31,27,29,0.06)] backdrop-blur-2xl">
-                <div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <article className="overflow-hidden rounded-[1.5rem] border border-white/58 bg-white/22 shadow-[0_12px_32px_rgba(31,27,29,0.05)] backdrop-blur-2xl">
+                <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div className="flex items-start gap-4">
                     <span
                       className={
                         canDeleteEvent
-                          ? 'grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)]'
-                          : 'grid size-11 shrink-0 place-items-center rounded-2xl bg-white/32 text-[var(--color-charcoal)]/42'
+                          ? 'grid size-10 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.10)] text-[var(--color-muted-burgundy)]'
+                          : 'grid size-10 shrink-0 place-items-center rounded-2xl bg-white/32 text-[var(--color-charcoal)]/42'
                       }
                     >
                       <Trash2 aria-hidden="true" className="size-5" />

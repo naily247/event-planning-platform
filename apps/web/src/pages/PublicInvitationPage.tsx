@@ -272,11 +272,11 @@ export function PublicInvitationPage() {
 
   return (
     <div
-      className="app-shell relative isolate min-h-screen overflow-hidden px-4 py-5 text-[var(--color-charcoal)] sm:px-6 sm:py-6 lg:px-8"
-      style={{
-        fontFamily: invitationPageFontFamily,
-      }}
-    >
+  className="app-shell relative isolate min-h-screen overflow-hidden px-4 pb-4 pt-2 text-[var(--color-charcoal)] sm:px-6 sm:pb-5 sm:pt-3 lg:px-8"
+  style={{
+    fontFamily: invitationPageFontFamily,
+  }}
+>
       {invitationPageBackground ? (
         <div
           aria-hidden="true"
@@ -319,42 +319,9 @@ export function PublicInvitationPage() {
         </div>
       ) : null}
 
-      <div className="relative mx-auto max-w-6xl">
-        <header className="glass-card flex flex-col gap-5 rounded-[1.8rem] border border-white/55 bg-white/30 p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-6">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(145deg,rgba(93,58,85,0.16),rgba(255,255,255,0.36))] text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(93,58,85,0.08)]">
-              <Sparkles className="size-5" />
-            </div>
+      <div className="relative mx-auto w-full max-w-[86rem]">
 
-            <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--color-rosewood)]">
-                Event invitation
-              </p>
-
-              <h1 className="mt-1 truncate text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl">
-                {invitation.event.name}
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <span className="status-chip" data-tone={hasResponded ? 'green' : 'plum'}>
-              {hasResponded ? (
-                <CheckCircle2 className="size-3.5" />
-              ) : (
-                <Clock3 className="size-3.5" />
-              )}
-              {hasResponded ? 'RSVP received' : 'Awaiting RSVP'}
-            </span>
-
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(93,58,85,0.16)] bg-[linear-gradient(145deg,rgba(93,58,85,0.13),rgba(255,255,255,0.34))] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(93,58,85,0.07)]">
-              <Sparkles className="size-3.5" />
-              {invitation.event.eventType}
-            </span>
-          </div>
-        </header>
-
-        <main className="py-9 sm:py-11">
+        <main className="pt-0 pb-3 sm:pb-4">
           <InvitationHero
             eventName={invitation.event.name}
             eventType={invitation.event.eventType}
@@ -365,416 +332,432 @@ export function PublicInvitationPage() {
             expiresAt={invitation.invitation.expiresAt}
           />
 
-          <section className="mt-7 grid gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-            <aside className="space-y-5 lg:sticky lg:top-6">
-              <article className="glass-card overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-6 shadow-[0_24px_60px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-7">
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                  Event details
-                </p>
+          <section className="mt-5 grid gap-4 xl:grid-cols-[0.72fr_1.28fr] xl:items-stretch">
+  <aside className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[auto_1fr]">
+    <article className="glass-card overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-5 shadow-[0_20px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+            Event details
+          </p>
 
-                <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                  Everything you need to know.
-                </h2>
+          <h2 className="mt-1.5 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+            Everything you need to know.
+          </h2>
 
-                <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                  Keep these essential details close while planning your arrival.
-                </p>
+          <p className="mt-1.5 text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/52">
+            Essential details for your arrival.
+          </p>
+        </div>
 
-                <div className="mt-7 grid gap-3">
-                  <div className="group rounded-[1.4rem] border border-white/55 bg-white/28 p-5 shadow-[0_12px_30px_rgba(31,27,29,0.04)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/38 hover:shadow-[0_18px_38px_rgba(31,27,29,0.06)]">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
-                        <CalendarDays className="size-4.5" />
-                      </div>
+        <div className="grid size-9 shrink-0 place-items-center rounded-xl border border-white/55 bg-white/30 text-[var(--color-rosewood)] shadow-[0_10px_24px_rgba(31,27,29,0.04)]">
+          <CalendarDays className="size-4" />
+        </div>
+      </div>
 
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
-                          Date & time
-                        </p>
-                        <p className="mt-1 text-base font-black leading-6 text-[var(--color-near-black)]">
-                          {formatDateTime(invitation.event.eventDate)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+      <div className="mt-4 grid gap-2.5">
+        <div className="rounded-[1.05rem] border border-white/55 bg-white/28 px-3.5 py-3 shadow-[0_8px_20px_rgba(31,27,29,0.03)] backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
+              <CalendarDays className="size-3.5" />
+            </div>
 
-                  <div className="group rounded-[1.4rem] border border-white/55 bg-white/28 p-5 shadow-[0_12px_30px_rgba(31,27,29,0.04)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/38 hover:shadow-[0_18px_38px_rgba(31,27,29,0.06)]">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
-                        <MapPin className="size-4.5" />
-                      </div>
+            <div className="min-w-0">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                Date & time
+              </p>
 
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
-                          Venue
-                        </p>
-                        <p className="mt-1 text-base font-black leading-6 text-[var(--color-near-black)]">
-                          {invitation.event.location}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+              <p className="mt-0.5 text-xs font-black leading-4 text-[var(--color-near-black)]">
+                {formatDateTime(invitation.event.eventDate)}
+              </p>
+            </div>
+          </div>
+        </div>
 
-                  <div className="group rounded-[1.4rem] border border-white/55 bg-white/28 p-5 shadow-[0_12px_30px_rgba(31,27,29,0.04)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/38 hover:shadow-[0_18px_38px_rgba(31,27,29,0.06)]">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
-                        <Sparkles className="size-4.5" />
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/46">
-                          Theme
-                        </p>
-                        <p className="mt-1 text-base font-black leading-6 text-[var(--color-near-black)]">
-                          {invitation.event.theme ?? 'No theme specified'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </article>
-
-              <article className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_34px_90px_rgba(93,58,85,0.36)]">
-                <div className="pointer-events-none absolute -right-12 -top-14 size-44 rounded-full bg-white/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-16 left-6 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl border border-white/12 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_14px_30px_rgba(31,27,29,0.16)] backdrop-blur-xl">
-                      <UsersRound className="size-6" />
-                    </div>
-
-                    <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-white/72">
-                      {invitation.guest.partySize} guest
-                      {invitation.guest.partySize === 1 ? '' : 's'}
-                    </span>
-                  </div>
-
-                  <p className="mt-7 text-xs font-black uppercase tracking-[0.2em] text-white/52">
-                    Guest information
-                  </p>
-
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">Your party</h2>
-
-                  <p className="mt-4 leading-7 text-white/70">
-                    Update your party size and share meal preferences or dietary needs so the host
-                    can plan confidently.
-                  </p>
-
-                  <div className="mt-7 rounded-2xl border border-white/10 bg-white/8 px-4 py-4 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-white/46">
-                      Invited guest
-                    </p>
-
-                    <p className="mt-2 text-lg font-black">
-                      {invitation.guest.firstName} {invitation.guest.lastName}
-                    </p>
-                  </div>
-
-                  {hasResponded ? (
-                    <div className="mt-3 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm font-bold text-white/76 backdrop-blur-xl">
-                      <CheckCircle2 className="size-4 text-[var(--color-powder-blue)]" />
-                      Current response: {rsvpLabels[invitation.guest.status as PublicRsvpStatus]}
-                    </div>
-                  ) : null}
-                </div>
-              </article>
-            </aside>
-
-            <article className="glass-card relative overflow-hidden p-6 sm:p-8">
-              <div className="pointer-events-none absolute -right-16 top-28 size-56 rounded-full bg-[rgba(183,167,200,0.13)] blur-3xl" />
-
-              <div className="relative">
-                {submitRsvpMutation.isSuccess ? (
-                  <div className="mb-7 rounded-[1.6rem] border border-[rgba(142,151,115,0.28)] bg-[linear-gradient(145deg,rgba(142,151,115,0.16),rgba(255,255,255,0.30))] p-5 shadow-[0_18px_40px_rgba(61,69,47,0.06)]">
-                    <div className="flex items-start gap-4">
-                      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(142,151,115,0.24)] text-[#3d452f]">
-                        <CheckCircle2 className="size-5" />
-                      </div>
-
-                      <div>
-                        <p className="text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                          RSVP saved successfully
-                        </p>
-
-                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
-                          The host has received your latest response and guest information.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                      RSVP
-                    </p>
-
-                    <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-                      {hasResponded ? 'Update your response.' : 'Will you be joining us?'}
-                    </h2>
-
-                    <p className="mt-3 max-w-xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                      Choose the response that best reflects your plans, then confirm your party
-                      details below.
-                    </p>
-                  </div>
-
-                  {hasResponded ? (
-                    <span className="status-chip shrink-0" data-tone="green">
-                      <Check className="size-3.5" />
-                      Response on file
-                    </span>
-                  ) : null}
-                </div>
-
-                <form
-                  className="mt-9 grid gap-7"
-                  onSubmit={form.handleSubmit((values) => {
-                    form.clearErrors('root');
-
-                    if (!hasRsvpChanges(invitation, values)) {
-                      form.setError('root', {
-                        type: 'manual',
-                        message: 'No RSVP details were changed.',
-                      });
-
-                      return;
-                    }
-
-                    submitRsvpMutation.mutate(values);
-                  })}
-                >
-                  <fieldset disabled={submitRsvpMutation.isPending}>
-                    <legend className="mb-3 text-sm font-black text-[var(--color-charcoal)]/72">
-                      Your response
-                    </legend>
-
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      {publicRsvpStatuses.map((status) => {
-                        const isSelected = selectedStatus === status;
-
-                        return (
-                          <label
-                            key={status}
-                            className={`group relative cursor-pointer overflow-hidden rounded-[1.4rem] border p-5 transition duration-300 focus-within:ring-2 focus-within:ring-[rgba(93,58,85,0.26)] focus-within:ring-offset-2 focus-within:ring-offset-transparent ${
-                              isSelected
-                                ? rsvpToneClasses[status]
-                                : 'border-white/55 bg-white/24 hover:-translate-y-0.5 hover:bg-white/38 hover:shadow-[0_14px_30px_rgba(31,27,29,0.05)]'
-                            }`}
-                          >
-                            <input
-                              className="sr-only"
-                              type="radio"
-                              value={status}
-                              {...form.register('status', {
-                                onChange: clearSubmissionState,
-                              })}
-                            />
-
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <span className="block text-sm font-black leading-5 text-[var(--color-near-black)]">
-                                  {rsvpLabels[status]}
-                                </span>
-
-                                <span className="mt-2 block text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
-                                  {rsvpDescriptions[status]}
-                                </span>
-                              </div>
-
-                              <span
-                                className={`grid size-6 shrink-0 place-items-center rounded-full border transition ${
-                                  isSelected
-                                    ? 'border-[var(--color-deep-plum)] bg-[var(--color-deep-plum)] text-white'
-                                    : 'border-[rgba(31,27,29,0.18)] bg-white/30 text-transparent'
-                                }`}
-                              >
-                                <Check className="size-3.5" />
-                              </span>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </fieldset>
-
-                  <div className="rounded-[1.65rem] border border-white/52 bg-white/18 p-5 shadow-[0_16px_38px_rgba(31,27,29,0.035)] sm:p-6">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-10 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
-                        <UsersRound className="size-4.5" />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Party details
-                        </p>
-                        <p className="mt-0.5 text-xs font-semibold text-[var(--color-charcoal)]/46">
-                          Tell the host who to plan for.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-5">
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Party size
-                        </span>
-
-                        <div className="rounded-[1.35rem] border border-white/55 bg-white/24 p-1 shadow-[0_12px_28px_rgba(31,27,29,0.035)] backdrop-blur-xl transition focus-within:border-[rgba(93,58,85,0.28)] focus-within:bg-white/34 focus-within:shadow-[0_16px_34px_rgba(93,58,85,0.07)]">
-                          <input
-                            className="w-full rounded-[1.05rem] border-0 bg-transparent px-4 py-3.5 text-sm font-bold text-[var(--color-near-black)] outline-none placeholder:text-[var(--color-charcoal)]/32"
-                            type="number"
-                            min="1"
-                            max="100"
-                            step="1"
-                            disabled={submitRsvpMutation.isPending}
-                            {...form.register('partySize', {
-                              onChange: clearSubmissionState,
-                            })}
-                          />
-                        </div>
-
-                        {form.formState.errors.partySize ? (
-                          <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                            {form.formState.errors.partySize.message}
-                          </span>
-                        ) : (
-                          <span className="mt-2 block text-xs font-semibold text-[var(--color-charcoal)]/42">
-                            Include yourself and everyone attending with you.
-                          </span>
-                        )}
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[1.65rem] border border-white/52 bg-white/18 p-5 shadow-[0_16px_38px_rgba(31,27,29,0.035)] sm:p-6">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-10 place-items-center rounded-xl bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
-                        <UtensilsCrossed className="size-4.5" />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Meal information
-                        </p>
-                        <p className="mt-0.5 text-xs font-semibold text-[var(--color-charcoal)]/46">
-                          Optional details that help the host prepare.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-5">
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Meal preference
-                        </span>
-
-                        <div className="rounded-[1.35rem] border border-white/55 bg-white/24 p-1 shadow-[0_12px_28px_rgba(31,27,29,0.035)] backdrop-blur-xl transition focus-within:border-[rgba(93,58,85,0.28)] focus-within:bg-white/34 focus-within:shadow-[0_16px_34px_rgba(93,58,85,0.07)]">
-                          <input
-                            className="w-full rounded-[1.05rem] border-0 bg-transparent px-4 py-3.5 text-sm font-bold text-[var(--color-near-black)] outline-none placeholder:text-[var(--color-charcoal)]/32"
-                            type="text"
-                            placeholder="e.g. Vegetarian"
-                            disabled={submitRsvpMutation.isPending}
-                            {...form.register('mealPreference', {
-                              onChange: clearSubmissionState,
-                            })}
-                          />
-                        </div>
-
-                        {form.formState.errors.mealPreference ? (
-                          <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                            {form.formState.errors.mealPreference.message}
-                          </span>
-                        ) : (
-                          <span className="mt-2 block text-xs font-semibold text-[var(--color-charcoal)]/42">
-                            Mention your preferred meal type, if applicable.
-                          </span>
-                        )}
-                      </label>
-
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Dietary requirements
-                        </span>
-
-                        <div className="rounded-[1.35rem] border border-white/55 bg-white/24 p-1 shadow-[0_12px_28px_rgba(31,27,29,0.035)] backdrop-blur-xl transition focus-within:border-[rgba(93,58,85,0.28)] focus-within:bg-white/34 focus-within:shadow-[0_16px_34px_rgba(93,58,85,0.07)]">
-                          <textarea
-                            className="min-h-32 w-full resize-y rounded-[1.05rem] border-0 bg-transparent px-4 py-3.5 text-sm font-bold leading-6 text-[var(--color-near-black)] outline-none placeholder:text-[var(--color-charcoal)]/32"
-                            placeholder="Share allergies, intolerances or other dietary needs"
-                            disabled={submitRsvpMutation.isPending}
-                            {...form.register('dietaryRequirements', {
-                              onChange: clearSubmissionState,
-                            })}
-                          />
-                        </div>
-
-                        {form.formState.errors.dietaryRequirements ? (
-                          <span className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]">
-                            {form.formState.errors.dietaryRequirements.message}
-                          </span>
-                        ) : (
-                          <span className="mt-2 block text-xs font-semibold text-[var(--color-charcoal)]/42">
-                            This information is shared with the event host.
-                          </span>
-                        )}
-                      </label>
-                    </div>
-                  </div>
-
-                  {form.formState.errors.root?.message ? (
-                    <div
-                      role="alert"
-                      className="flex items-start gap-3 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                    >
-                      <CircleAlert className="mt-0.5 size-4 shrink-0" />
-                      {form.formState.errors.root.message}
-                    </div>
-                  ) : null}
-
-                  {submitRsvpMutation.isError ? (
-                    <div
-                      role="alert"
-                      className="flex items-start gap-3 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
-                    >
-                      <CircleAlert className="mt-0.5 size-4 shrink-0" />
-                      {getApiErrorMessage(submitRsvpMutation.error)}
-                    </div>
-                  ) : null}
-
-                  <div className="rounded-[1.55rem] border border-white/52 bg-[linear-gradient(145deg,rgba(255,255,255,0.30),rgba(255,255,255,0.18))] p-4 shadow-[0_16px_36px_rgba(31,27,29,0.04)] sm:flex sm:items-center sm:justify-between sm:gap-5">
-                    <div className="mb-4 sm:mb-0">
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
-                        Ready to send your response?
-                      </p>
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                        You can return to this link and update your RSVP before it expires.
-                      </p>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn-primary min-h-13 w-full shrink-0 justify-center rounded-[1.1rem] px-6 text-sm font-black shadow-[0_18px_38px_rgba(93,58,85,0.22)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(93,58,85,0.28)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 sm:w-auto"
-                      disabled={submitRsvpMutation.isPending}
-                    >
-                      {submitRsvpMutation.isPending ? (
-                        <LoaderCircle className="size-5 animate-spin" />
-                      ) : (
-                        <Send className="size-4.5" />
-                      )}
-
-                      {submitRsvpMutation.isPending
-                        ? 'Submitting RSVP...'
-                        : hasResponded
-                          ? 'Update my RSVP'
-                          : 'Submit my RSVP'}
-                    </button>
-                  </div>
-                </form>
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+          <div className="rounded-[1.05rem] border border-white/55 bg-white/28 px-3.5 py-3 shadow-[0_8px_20px_rgba(31,27,29,0.03)] backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
+                <MapPin className="size-3.5" />
               </div>
-            </article>
-          </section>
+
+              <div className="min-w-0">
+                <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                  Venue
+                </p>
+
+                <p className="mt-0.5 truncate text-xs font-black text-[var(--color-near-black)]">
+                  {invitation.event.location}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[1.05rem] border border-white/55 bg-white/28 px-3.5 py-3 shadow-[0_8px_20px_rgba(31,27,29,0.03)] backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
+                <Sparkles className="size-3.5" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                  Theme
+                </p>
+
+                <p className="mt-0.5 truncate text-xs font-black text-[var(--color-near-black)]">
+                  {invitation.event.theme ?? 'No theme specified'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article className="group relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-5 text-[#fffaf5] shadow-[0_22px_60px_rgba(93,58,85,0.26)]">
+      <div className="pointer-events-none absolute -right-12 -top-14 size-40 rounded-full bg-white/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 left-6 size-36 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl" />
+
+      <div className="relative flex h-full flex-col">
+        <div className="flex items-center justify-between gap-4">
+          <div className="grid size-9 place-items-center rounded-xl border border-white/12 bg-white/10 text-[var(--color-powder-blue)] backdrop-blur-xl">
+            <UsersRound className="size-4.5" />
+          </div>
+
+          <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1 text-[0.64rem] font-black uppercase tracking-[0.14em] text-white/72">
+            {invitation.guest.partySize} guest
+            {invitation.guest.partySize === 1 ? '' : 's'}
+          </span>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-[0.64rem] font-black uppercase tracking-[0.19em] text-white/48">
+            Guest information
+          </p>
+
+          <h2 className="mt-1.5 text-xl font-black tracking-[-0.04em]">Your party</h2>
+
+          <p className="mt-2 text-xs font-semibold leading-5 text-white/64">
+            Update your party size and share meal preferences or dietary needs so the host can
+            plan confidently.
+          </p>
+        </div>
+
+        <div className="mt-auto pt-4">
+          <div className="rounded-[1.1rem] border border-white/10 bg-white/8 px-4 py-3 backdrop-blur-xl">
+            <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-white/42">
+              Invited guest
+            </p>
+
+            <p className="mt-1 text-sm font-black">
+              {invitation.guest.firstName} {invitation.guest.lastName}
+            </p>
+          </div>
+
+          {hasResponded ? (
+            <div className="mt-2.5 flex items-center gap-2 rounded-[1rem] border border-white/10 bg-white/8 px-3.5 py-2.5 text-[0.68rem] font-bold text-white/74 backdrop-blur-xl">
+              <CheckCircle2 className="size-3.5 text-[var(--color-powder-blue)]" />
+              Current response: {rsvpLabels[invitation.guest.status as PublicRsvpStatus]}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </article>
+  </aside>
+
+  <article className="glass-card relative overflow-hidden rounded-[1.75rem] p-5 sm:p-6">
+    <div className="pointer-events-none absolute -right-16 top-20 size-56 rounded-full bg-[rgba(183,167,200,0.13)] blur-3xl" />
+
+    <div className="relative">
+      {submitRsvpMutation.isSuccess ? (
+        <div className="mb-4 rounded-[1.2rem] border border-[rgba(142,151,115,0.28)] bg-[linear-gradient(145deg,rgba(142,151,115,0.16),rgba(255,255,255,0.30))] px-4 py-3 shadow-[0_12px_28px_rgba(61,69,47,0.05)]">
+          <div className="flex items-center gap-3">
+            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.24)] text-[#3d452f]">
+              <CheckCircle2 className="size-4" />
+            </div>
+
+            <div>
+              <p className="text-sm font-black tracking-[-0.02em] text-[var(--color-near-black)]">
+                RSVP saved successfully
+              </p>
+
+              <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/56">
+                The host has received your latest response and guest information.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+            RSVP
+          </p>
+
+          <h2 className="mt-1.5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+            {hasResponded ? 'Update your response.' : 'Will you be joining us?'}
+          </h2>
+
+          <p className="mt-1.5 max-w-2xl text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
+            Choose the response that best reflects your plans, then confirm your party details.
+          </p>
+        </div>
+
+        {hasResponded ? (
+          <span className="status-chip shrink-0" data-tone="green">
+            <Check className="size-3.5" />
+            Response on file
+          </span>
+        ) : null}
+      </div>
+
+      <form
+        className="mt-4 grid gap-3.5"
+        onSubmit={form.handleSubmit((values) => {
+          form.clearErrors('root');
+
+          if (!hasRsvpChanges(invitation, values)) {
+            form.setError('root', {
+              type: 'manual',
+              message: 'No RSVP details were changed.',
+            });
+
+            return;
+          }
+
+          submitRsvpMutation.mutate(values);
+        })}
+      >
+        <fieldset disabled={submitRsvpMutation.isPending}>
+          <legend className="mb-2 text-[0.68rem] font-black text-[var(--color-charcoal)]/68">
+            Your response
+          </legend>
+
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            {publicRsvpStatuses.map((status) => {
+              const isSelected = selectedStatus === status;
+
+              return (
+                <label
+                  key={status}
+                  className={`group relative cursor-pointer overflow-hidden rounded-[1.05rem] border p-3 transition duration-300 focus-within:ring-2 focus-within:ring-[rgba(93,58,85,0.26)] focus-within:ring-offset-2 focus-within:ring-offset-transparent ${
+                    isSelected
+                      ? rsvpToneClasses[status]
+                      : 'border-white/55 bg-white/24 hover:-translate-y-0.5 hover:bg-white/38 hover:shadow-[0_12px_26px_rgba(31,27,29,0.05)]'
+                  }`}
+                >
+                  <input
+                    className="sr-only"
+                    type="radio"
+                    value={status}
+                    {...form.register('status', {
+                      onChange: clearSubmissionState,
+                    })}
+                  />
+
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="block text-xs font-black leading-4 text-[var(--color-near-black)]">
+                        {rsvpLabels[status]}
+                      </span>
+
+                      <span className="mt-1 block text-[0.6rem] font-bold uppercase tracking-[0.09em] text-[var(--color-charcoal)]/40">
+                        {rsvpDescriptions[status]}
+                      </span>
+                    </div>
+
+                    <span
+                      className={`grid size-5 shrink-0 place-items-center rounded-full border transition ${
+                        isSelected
+                          ? 'border-[var(--color-deep-plum)] bg-[var(--color-deep-plum)] text-white'
+                          : 'border-[rgba(31,27,29,0.18)] bg-white/30 text-transparent'
+                      }`}
+                    >
+                      <Check className="size-3" />
+                    </span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <div className="grid gap-3 lg:grid-cols-[0.68fr_1.32fr] lg:items-stretch">
+          <div className="rounded-[1.25rem] border border-white/52 bg-white/18 p-3.5 shadow-[0_10px_26px_rgba(31,27,29,0.03)]">
+            <div className="flex items-center gap-2.5">
+              <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                <UsersRound className="size-3.5" />
+              </div>
+
+              <div>
+                <p className="text-xs font-black text-[var(--color-near-black)]">Party details</p>
+                <p className="text-[0.62rem] font-semibold text-[var(--color-charcoal)]/44">
+                  Tell the host who to plan for.
+                </p>
+              </div>
+            </div>
+
+            <label className="mt-3 block">
+              <span className="mb-1.5 block text-[0.68rem] font-black text-[var(--color-charcoal)]/68">
+                Party size
+              </span>
+
+              <div className="rounded-[0.95rem] border border-white/55 bg-white/24 p-1 shadow-[0_8px_20px_rgba(31,27,29,0.025)] backdrop-blur-xl transition focus-within:border-[rgba(93,58,85,0.28)] focus-within:bg-white/34">
+                <input
+                  className="w-full rounded-[0.75rem] border-0 bg-transparent px-3 py-2 text-xs font-bold text-[var(--color-near-black)] outline-none placeholder:text-[var(--color-charcoal)]/32"
+                  type="number"
+                  min="1"
+                  max="100"
+                  step="1"
+                  disabled={submitRsvpMutation.isPending}
+                  {...form.register('partySize', {
+                    onChange: clearSubmissionState,
+                  })}
+                />
+              </div>
+
+              {form.formState.errors.partySize ? (
+                <span className="mt-1.5 block text-[0.66rem] font-bold leading-4 text-[var(--color-muted-burgundy)]">
+                  {form.formState.errors.partySize.message}
+                </span>
+              ) : (
+                <span className="mt-1.5 block text-[0.6rem] font-semibold leading-3.5 text-[var(--color-charcoal)]/40">
+                  Include yourself and everyone attending with you.
+                </span>
+              )}
+            </label>
+          </div>
+
+          <div className="rounded-[1.25rem] border border-white/52 bg-white/18 p-3.5 shadow-[0_10px_26px_rgba(31,27,29,0.03)]">
+            <div className="flex items-center gap-2.5">
+              <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.10)] text-[var(--color-rosewood)]">
+                <UtensilsCrossed className="size-3.5" />
+              </div>
+
+              <div>
+                <p className="text-xs font-black text-[var(--color-near-black)]">
+                  Meal information
+                </p>
+
+                <p className="text-[0.62rem] font-semibold text-[var(--color-charcoal)]/44">
+                  Optional details that help the host prepare.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2.5 sm:grid-cols-[0.8fr_1.2fr]">
+              <label className="block">
+                <span className="mb-1.5 block text-[0.68rem] font-black text-[var(--color-charcoal)]/68">
+                  Meal preference
+                </span>
+
+                <div className="rounded-[0.95rem] border border-white/55 bg-white/24 p-1 shadow-[0_8px_20px_rgba(31,27,29,0.025)] backdrop-blur-xl transition focus-within:border-[rgba(93,58,85,0.28)] focus-within:bg-white/34">
+                  <input
+                    className="w-full rounded-[0.75rem] border-0 bg-transparent px-3 py-2 text-xs font-bold text-[var(--color-near-black)] outline-none placeholder:text-[var(--color-charcoal)]/32"
+                    type="text"
+                    placeholder="e.g. Vegetarian"
+                    disabled={submitRsvpMutation.isPending}
+                    {...form.register('mealPreference', {
+                      onChange: clearSubmissionState,
+                    })}
+                  />
+                </div>
+
+                {form.formState.errors.mealPreference ? (
+                  <span className="mt-1.5 block text-[0.66rem] font-bold leading-4 text-[var(--color-muted-burgundy)]">
+                    {form.formState.errors.mealPreference.message}
+                  </span>
+                ) : (
+                  <span className="mt-1.5 block text-[0.6rem] font-semibold leading-3.5 text-[var(--color-charcoal)]/40">
+                    Preferred meal type, if applicable.
+                  </span>
+                )}
+              </label>
+
+              <label className="block">
+                <span className="mb-1.5 block text-[0.68rem] font-black text-[var(--color-charcoal)]/68">
+                  Dietary requirements
+                </span>
+
+                <div className="rounded-[0.95rem] border border-white/55 bg-white/24 p-1 shadow-[0_8px_20px_rgba(31,27,29,0.025)] backdrop-blur-xl transition focus-within:border-[rgba(93,58,85,0.28)] focus-within:bg-white/34">
+                  <textarea
+                    className="min-h-[3.9rem] w-full resize-y rounded-[0.75rem] border-0 bg-transparent px-3 py-2 text-xs font-bold leading-4 text-[var(--color-near-black)] outline-none placeholder:text-[var(--color-charcoal)]/32"
+                    placeholder="Share allergies, intolerances or other dietary needs"
+                    disabled={submitRsvpMutation.isPending}
+                    {...form.register('dietaryRequirements', {
+                      onChange: clearSubmissionState,
+                    })}
+                  />
+                </div>
+
+                {form.formState.errors.dietaryRequirements ? (
+                  <span className="mt-1.5 block text-[0.66rem] font-bold leading-4 text-[var(--color-muted-burgundy)]">
+                    {form.formState.errors.dietaryRequirements.message}
+                  </span>
+                ) : (
+                  <span className="mt-1.5 block text-[0.6rem] font-semibold leading-3.5 text-[var(--color-charcoal)]/40">
+                    Shared with the event host.
+                  </span>
+                )}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {form.formState.errors.root?.message ? (
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-3.5 py-2.5 text-xs font-bold leading-5 text-[var(--color-muted-burgundy)]"
+          >
+            <CircleAlert className="mt-0.5 size-4 shrink-0" />
+            {form.formState.errors.root.message}
+          </div>
+        ) : null}
+
+        {submitRsvpMutation.isError ? (
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-3.5 py-2.5 text-xs font-bold leading-5 text-[var(--color-muted-burgundy)]"
+          >
+            <CircleAlert className="mt-0.5 size-4 shrink-0" />
+            {getApiErrorMessage(submitRsvpMutation.error)}
+          </div>
+        ) : null}
+
+        <div className="rounded-[1.15rem] border border-white/52 bg-[linear-gradient(145deg,rgba(255,255,255,0.30),rgba(255,255,255,0.18))] px-4 py-2.5 shadow-[0_10px_26px_rgba(31,27,29,0.03)] sm:flex sm:items-center sm:justify-between sm:gap-4">
+          <div className="mb-3 sm:mb-0">
+            <p className="text-[0.68rem] font-black text-[var(--color-near-black)]">
+              Ready to send your response?
+            </p>
+
+            <p className="mt-0.5 text-[0.6rem] font-semibold leading-3.5 text-[var(--color-charcoal)]/46">
+              You can return to this link and update your RSVP before it expires.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            className="btn-primary min-h-10 w-full shrink-0 justify-center rounded-[0.95rem] px-5 text-xs font-black shadow-[0_12px_26px_rgba(93,58,85,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(93,58,85,0.24)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 sm:w-auto"
+            disabled={submitRsvpMutation.isPending}
+          >
+            {submitRsvpMutation.isPending ? (
+              <LoaderCircle className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
+
+            {submitRsvpMutation.isPending
+              ? 'Submitting RSVP...'
+              : hasResponded
+                ? 'Update my RSVP'
+                : 'Submit my RSVP'}
+          </button>
+        </div>
+      </form>
+    </div>
+  </article>
+</section>
         </main>
       </div>
     </div>

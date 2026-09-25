@@ -1043,7 +1043,7 @@ export function BookingsWorkspacePage() {
               </div>
 
               {bookings.length > 0 ? (
-                <div className="mt-8 space-y-4">
+                <div className="mt-5 space-y-3">
                   {bookings.map((booking) => {
                     const servicePackage = booking.acceptedQuotation.quotationRequest.package;
                     const existingReview = reviewsByBookingId.get(booking.id);
@@ -1051,174 +1051,171 @@ export function BookingsWorkspacePage() {
                     return (
                       <article
                         key={booking.id}
-                        className="group/booking relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-4 shadow-[0_18px_50px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(229,221,239,0.56))] hover:shadow-[0_30px_72px_rgba(31,27,29,0.12)] sm:p-5"
+                        className="group/booking relative overflow-hidden rounded-[1.55rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.42),rgba(255,255,255,0.22))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.76),rgba(229,221,239,0.48))] hover:shadow-[0_22px_54px_rgba(31,27,29,0.09)] sm:p-5"
                       >
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent" />
+
                         <div
                           aria-hidden="true"
-                          className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.16)] opacity-60 blur-3xl transition duration-500 group-hover/booking:scale-125 group-hover/booking:bg-[rgba(183,167,200,0.30)] group-hover/booking:opacity-100"
+                          className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-[rgba(183,167,200,0.14)] opacity-60 blur-3xl transition duration-500 group-hover/booking:scale-125 group-hover/booking:opacity-100"
                         />
-                        <div className="relative flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span
-                                className="status-chip transition duration-300 group-hover/booking:-translate-y-0.5 group-hover/booking:scale-[1.02] group-hover/booking:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
-                                data-tone={getBookingTone(booking.status)}
-                              >
-                                {bookingStatusLabels[booking.status]}
-                              </span>
 
-                              {servicePackage?.category ? (
+                        <div className="relative">
+                          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <span
-                                  className="status-chip transition duration-300 group-hover/booking:-translate-y-0.5 group-hover/booking:bg-white/54"
-                                  data-tone="gray"
+                                  className="status-chip"
+                                  data-tone={getBookingTone(booking.status)}
                                 >
-                                  <Tags className="size-3.5" />
-                                  {servicePackage.category.name}
+                                  {bookingStatusLabels[booking.status]}
                                 </span>
-                              ) : null}
+
+                                {servicePackage?.category ? (
+                                  <span className="status-chip" data-tone="gray">
+                                    <Tags className="size-3.5" />
+                                    {servicePackage.category.name}
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="min-w-0">
+                                  <h3 className="text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/booking:text-[var(--color-deep-plum)]">
+                                    {servicePackage?.title ?? 'Custom vendor service'}
+                                  </h3>
+
+                                  <Link
+                                    to={`/vendors/${booking.vendor.slug}`}
+                                    state={{
+                                      returnTo: `/events/${eventId}/bookings`,
+                                      returnLabel: 'Back to bookings',
+                                    }}
+                                    className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-black text-[var(--color-deep-plum)] transition hover:text-[var(--color-rosewood)]"
+                                  >
+                                    <Store aria-hidden="true" className="size-3.5" />
+                                    {booking.vendor.businessName}
+                                  </Link>
+                                </div>
+
+                                <p className="shrink-0 text-[0.68rem] font-bold text-[var(--color-charcoal)]/42">
+                                  Created {formatDateTime(booking.createdAt)}
+                                </p>
+                              </div>
+
+                              <div className="mt-4 grid gap-2.5 border-t border-[rgba(93,58,85,0.08)] pt-3 sm:grid-cols-3">
+                                <div className="flex items-center gap-3 rounded-xl bg-white/24 px-3 py-2.5">
+                                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)]">
+                                    <ReceiptText aria-hidden="true" className="size-3.5" />
+                                  </span>
+
+                                  <div className="min-w-0">
+                                    <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
+                                      Agreed cost
+                                    </p>
+
+                                    <p className="mt-0.5 truncate text-sm font-black text-[var(--color-near-black)]">
+                                      {formatCurrency(booking.agreedCost)}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 rounded-xl bg-white/24 px-3 py-2.5">
+                                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)]">
+                                    <WalletCards aria-hidden="true" className="size-3.5" />
+                                  </span>
+
+                                  <div className="min-w-0">
+                                    <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
+                                      Deposit
+                                    </p>
+
+                                    <p className="mt-0.5 truncate text-sm font-black text-[var(--color-near-black)]">
+                                      {booking.acceptedQuotation.depositAmount
+                                        ? formatCurrency(booking.acceptedQuotation.depositAmount)
+                                        : 'No deposit'}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 rounded-xl bg-white/24 px-3 py-2.5">
+                                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)]">
+                                    <CalendarClock aria-hidden="true" className="size-3.5" />
+                                  </span>
+
+                                  <div className="min-w-0">
+                                    <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
+                                      Service starts
+                                    </p>
+
+                                    <p className="mt-0.5 text-xs font-black leading-5 text-[var(--color-near-black)]">
+                                      {formatDateTime(booking.serviceStart)}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
 
-                            <h3 className="mt-4 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)] transition duration-300 group-hover/booking:translate-x-0.5 group-hover/booking:text-[var(--color-deep-plum)]">
-                              {' '}
-                              {servicePackage?.title ?? 'Custom vendor service'}
-                            </h3>
-
-                            <Link
-                              to={`/vendors/${booking.vendor.slug}`}
-                              state={{
-                                returnTo: `/events/${eventId}/bookings`,
-                                returnLabel: 'Back to bookings',
-                              }}
-                              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[rgba(93,58,85,0.07)] px-3 py-2 text-sm font-black text-[var(--color-deep-plum)] transition hover:bg-[rgba(93,58,85,0.12)]"
-                            >
-                              <Store
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/booking-vendor:-translate-y-0.5 group-hover/booking-vendor:scale-105"
-                              />
-                              {booking.vendor.businessName}
-                            </Link>
-
-                            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.15fr_1fr_1.25fr_1fr]">
-                              <div className="rounded-2xl border border-white/45 bg-white/30 p-4 transition duration-300 group-hover/booking:border-white/74 group-hover/booking:bg-white/44">
-                                <div className="flex items-center justify-between gap-3">
-                                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/booking:text-[var(--color-rosewood)]/72">
-                                    Agreed cost
-                                  </p>
-
-                                  <ReceiptText className="size-4 text-[var(--color-deep-plum)]/70 transition duration-300 group-hover/booking:-translate-y-0.5 group-hover/booking:scale-105" />
-                                </div>
-
-                                <p className="mt-3 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                                  {formatCurrency(booking.agreedCost)}
-                                </p>
-                              </div>
-
-                              <div className="rounded-2xl border border-white/45 bg-white/30 p-4">
-                                <div className="flex items-center justify-between gap-3">
-                                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                                    Deposit
-                                  </p>
-
-                                  <WalletCards className="size-4 text-[var(--color-deep-plum)]/70 transition duration-300 group-hover/booking:-translate-y-0.5 group-hover/booking:scale-105" />
-                                </div>
-
-                                <p className="mt-3 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
-                                  {booking.acceptedQuotation.depositAmount
-                                    ? formatCurrency(booking.acceptedQuotation.depositAmount)
-                                    : 'No deposit'}
-                                </p>
-                              </div>
-
-                              <div className="rounded-2xl border border-white/45 bg-white/30 p-4">
-                                <div className="flex items-center justify-between gap-3">
-                                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                                    Service starts
-                                  </p>
-
-                                  <CalendarClock className="size-4 text-[var(--color-deep-plum)]/70 transition duration-300 group-hover/booking:-translate-y-0.5 group-hover/booking:scale-105" />
-                                </div>
-
-                                <p className="mt-3 text-sm font-black leading-6 text-[var(--color-near-black)]">
-                                  {formatDateTime(booking.serviceStart)}
-                                </p>
-                              </div>
-
-                              <div className="rounded-2xl border border-white/45 bg-white/30 p-4">
-                                <div className="flex items-center justify-between gap-3">
-                                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                                    Created
-                                  </p>
-
-                                  <Clock3 className="size-4 text-[var(--color-deep-plum)]/70 transition duration-300 group-hover/booking:-translate-y-0.5 group-hover/booking:scale-105" />
-                                </div>
-
-                                <p className="mt-3 text-sm font-black leading-6 text-[var(--color-near-black)]">
-                                  {formatDateTime(booking.createdAt)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex shrink-0 flex-col gap-3 border-t border-white/50 pt-5 sm:flex-row xl:min-w-44 xl:border-l xl:border-t-0 xl:pl-5 xl:pt-0 xl:flex-col">
-                            <button
-                              type="button"
-                              className="group/view-booking btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.10)]"
-                              onClick={() => {
-                                setSelectedBookingId(booking.id);
-                              }}
-                            >
-                              <FileText
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/view-booking:rotate-[3deg] group-hover/view-booking:scale-105"
-                              />
-                              View details
-                            </button>
-
-                            {booking.status === 'COMPLETED' ? (
-                              existingReview ? (
-                                <Link
-                                  to={`/events/${eventId}/reviews`}
-                                  className="group/view-review btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
-                                >
-                                  <Star className="size-4 fill-current" />
-                                  View review
-                                </Link>
-                              ) : (
-                                <button
-                                  type="button"
-                                  className="group/write-review btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(93,58,85,0.22)]"
-                                  onClick={() => {
-                                    openReviewDialog(booking);
-                                  }}
-                                >
-                                  <Star className="size-4 fill-current" />
-                                  Write review
-                                </button>
-                              )
-                            ) : null}
-
-                            {isCustomerCancellable(booking.status) ? (
+                            <div className="flex shrink-0 flex-wrap gap-2 border-t border-white/50 pt-3 lg:w-40 lg:flex-col lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
                               <button
                                 type="button"
-                                className="group/cancel-booking flex items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.34)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.13)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                                disabled={!isBookingWorkspaceMutable}
-                                title={
-                                  !isBookingWorkspaceMutable
-                                    ? (bookingWorkspaceLockedMessage ?? undefined)
-                                    : undefined
-                                }
+                                className="group/view-booking btn-secondary flex-1 justify-center text-xs font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.24)] hover:bg-white/52 lg:flex-none"
                                 onClick={() => {
-                                  openCancelDialog(booking);
+                                  setSelectedBookingId(booking.id);
                                 }}
                               >
-                                <Ban
+                                <FileText
                                   aria-hidden="true"
-                                  className="size-4 transition duration-300 group-hover/cancel-booking:rotate-[-4deg]"
+                                  className="size-3.5 transition duration-300 group-hover/view-booking:rotate-[3deg]"
                                 />
-                                Cancel booking
+                                View details
                               </button>
-                            ) : null}
+
+                              {booking.status === 'COMPLETED' ? (
+                                existingReview ? (
+                                  <Link
+                                    to={`/events/${eventId}/reviews`}
+                                    className="group/view-review btn-secondary flex-1 justify-center text-xs font-bold lg:flex-none"
+                                  >
+                                    <Star className="size-3.5 fill-current" />
+                                    View review
+                                  </Link>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="group/write-review btn-primary flex-1 justify-center text-xs font-bold lg:flex-none"
+                                    onClick={() => {
+                                      openReviewDialog(booking);
+                                    }}
+                                  >
+                                    <Star className="size-3.5 fill-current" />
+                                    Write review
+                                  </button>
+                                )
+                              ) : null}
+
+                              {isCustomerCancellable(booking.status) ? (
+                                <button
+                                  type="button"
+                                  className="group/cancel-booking flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5 text-xs font-black text-[var(--color-muted-burgundy)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.32)] hover:bg-[rgba(124,74,90,0.14)] disabled:cursor-not-allowed disabled:opacity-40 lg:flex-none"
+                                  disabled={!isBookingWorkspaceMutable}
+                                  title={
+                                    !isBookingWorkspaceMutable
+                                      ? (bookingWorkspaceLockedMessage ?? undefined)
+                                      : undefined
+                                  }
+                                  onClick={() => {
+                                    openCancelDialog(booking);
+                                  }}
+                                >
+                                  <Ban
+                                    aria-hidden="true"
+                                    className="size-3.5 transition duration-300 group-hover/cancel-booking:rotate-[-4deg]"
+                                  />
+                                  Cancel booking
+                                </button>
+                              ) : null}
+                            </div>
                           </div>
                         </div>
                       </article>
@@ -1226,14 +1223,14 @@ export function BookingsWorkspacePage() {
                   })}
                 </div>
               ) : (
-                <div className="mt-8 rounded-[1.5rem] border border-dashed border-white/70 bg-white/20 p-8 text-center">
-                  <PackageCheck className="mx-auto size-9 text-[var(--color-deep-plum)]" />
+                <div className="mt-5 rounded-[1.4rem] border border-dashed border-white/70 bg-white/20 p-6 text-center">
+                  <PackageCheck className="mx-auto size-8 text-[var(--color-deep-plum)]" />
 
-                  <p className="mt-4 text-xl font-black text-[var(--color-near-black)]">
+                  <p className="mt-3 text-lg font-black text-[var(--color-near-black)]">
                     {filtersAreActive ? 'No bookings match this filter' : 'No bookings created yet'}
                   </p>
 
-                  <p className="mt-2 leading-7 text-[var(--color-charcoal)]/62">
+                  <p className="mx-auto mt-1.5 max-w-lg text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
                     {filtersAreActive
                       ? 'Try changing the booking status or sorting option.'
                       : 'Accept a vendor quotation and create a booking request from the quotation workflow.'}
@@ -1242,7 +1239,7 @@ export function BookingsWorkspacePage() {
                   {filtersAreActive ? (
                     <button
                       type="button"
-                      className="btn-secondary mt-5 text-sm font-bold"
+                      className="btn-secondary mt-4 text-sm font-bold"
                       onClick={clearFilters}
                     >
                       Clear filters
@@ -1250,7 +1247,7 @@ export function BookingsWorkspacePage() {
                   ) : (
                     <Link
                       to={`/events/${eventId}/quotations`}
-                      className="btn-primary mt-5 text-sm font-bold"
+                      className="btn-primary mt-4 text-sm font-bold"
                     >
                       <ReceiptText className="size-4" />
                       Open quotations
@@ -1295,64 +1292,72 @@ export function BookingsWorkspacePage() {
               ) : null}
             </article>
 
-            <aside className="space-y-5">
-              <article className="glass-card p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                    <Clock3 className="size-6" />
+            <aside>
+              <article className="glass-card p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                      <Clock3 className="size-4" />
+                    </div>
+
+                    <div>
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
+                        Booking flow
+                      </p>
+
+                      <h2 className="mt-0.5 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                        Booking lifecycle
+                      </h2>
+                    </div>
                   </div>
 
-                  <span className="rounded-full bg-white/30 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/52">
+                  <span className="rounded-full bg-white/30 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/48">
                     4 stages
                   </span>
                 </div>
 
-                <h2 className="mt-6 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                  Booking lifecycle
-                </h2>
-
-                <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                  Each booking moves through a clear sequence before the service is completed.
+                <p className="mt-3 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+                  Follow each vendor commitment from confirmation through service completion.
                 </p>
 
-                <div className="mt-6 space-y-1">
+                <div className="mt-4 border-t border-[rgba(93,58,85,0.08)] pt-3">
                   {[
                     {
                       number: '01',
                       title: 'Vendor response',
-                      description: 'The vendor confirms or rejects the booking request.',
+                      description: 'Vendor confirms or rejects the request.',
                     },
                     {
                       number: '02',
                       title: 'Deposit readiness',
-                      description: 'A required deposit moves the booking into payment progress.',
+                      description: 'Required deposits move into payment.',
                     },
                     {
                       number: '03',
                       title: 'Active service',
-                      description: 'The vendor commitment becomes active for the event.',
+                      description: 'The commitment becomes active.',
                     },
                     {
                       number: '04',
                       title: 'Service completion',
-                      description: 'The vendor marks the service completed after delivery.',
+                      description: 'The vendor records completed delivery.',
                     },
                   ].map(({ number, title, description }, index, stages) => (
-                    <div key={number} className="relative flex gap-4">
-                      <div className="flex w-10 shrink-0 flex-col items-center">
-                        <span className="grid size-10 place-items-center rounded-xl bg-[rgba(93,58,85,0.09)] text-xs font-black text-[var(--color-deep-plum)]">
+                    <div key={number} className="relative flex gap-3">
+                      <div className="flex w-8 shrink-0 flex-col items-center">
+                        <span className="grid size-8 place-items-center rounded-lg bg-[rgba(93,58,85,0.08)] text-[0.62rem] font-black text-[var(--color-deep-plum)]">
                           {number}
                         </span>
 
                         {index < stages.length - 1 ? (
-                          <span className="my-1 h-full min-h-8 w-px bg-[rgba(93,58,85,0.14)]" />
+                          <span className="my-1 h-full min-h-5 w-px bg-[rgba(93,58,85,0.12)]" />
                         ) : null}
                       </div>
 
-                      <div className="pb-5">
-                        <p className="text-sm font-black text-[var(--color-near-black)]">{title}</p>
+                      <div className="pb-3">
+                        <p className="text-xs font-black text-[var(--color-near-black)]">{title}</p>
 
-                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                        <p className="mt-0.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/52">
                           {description}
                         </p>
                       </div>
@@ -1365,9 +1370,9 @@ export function BookingsWorkspacePage() {
         </main>
       </div>
 
-      {selectedBookingId ? (
+            {selectedBookingId ? (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.58)] px-4 py-6 backdrop-blur-xl sm:py-8"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.58)] px-3 py-3 backdrop-blur-xl sm:px-4 sm:py-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="booking-details-title"
@@ -1377,121 +1382,116 @@ export function BookingsWorkspacePage() {
             }
           }}
         >
-          <div className="mx-auto flex min-h-full max-w-5xl items-start justify-center">
+          <div className="mx-auto flex min-h-full max-w-6xl items-start justify-center">
             <div
-              className="relative w-full overflow-hidden rounded-[2.25rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.88),rgba(245,238,248,0.84))] p-6 shadow-[0_42px_120px_rgba(31,27,29,0.26)] backdrop-blur-3xl sm:p-8"
+              className="relative w-full overflow-hidden rounded-[1.75rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.90),rgba(245,238,248,0.86))] p-4 shadow-[0_36px_100px_rgba(31,27,29,0.24)] backdrop-blur-3xl sm:p-5"
               onClick={(event) => {
                 event.stopPropagation();
               }}
             >
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
+                className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
               />
 
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute left-[24%] top-[-7rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+                className="pointer-events-none absolute left-[24%] top-[-7rem] size-56 rounded-full bg-[rgba(175,201,216,0.14)] blur-3xl"
               />
 
               <div className="relative">
-                <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="soft-chip mb-5 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                      <PackageCheck aria-hidden="true" className="size-4" />
-                      Booking overview
-                    </div>
-
-                    {selectedBookingQuery.data ? (
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span
-                          className="status-chip"
-                          data-tone={getBookingTone(selectedBookingQuery.data.status)}
-                        >
-                          {bookingStatusLabels[selectedBookingQuery.data.status]}
-                        </span>
-
-                        {selectedBookingQuery.data.acceptedQuotation.quotationRequest.package
-                          ?.category ? (
-                          <span className="status-chip" data-tone="gray">
-                            <Tags aria-hidden="true" className="size-3.5" />
-
-                            {
-                              selectedBookingQuery.data.acceptedQuotation.quotationRequest.package
-                                .category.name
-                            }
-                          </span>
-                        ) : null}
+                <div className="flex items-start justify-between gap-4 border-b border-[rgba(93,58,85,0.10)] pb-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="soft-chip w-fit text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
+                        <PackageCheck aria-hidden="true" className="size-3.5" />
+                        Booking overview
                       </div>
-                    ) : null}
-
-                    <h2
-                      id="booking-details-title"
-                      className="mt-5 max-w-4xl text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
-                    >
-                      {selectedBookingQuery.data?.acceptedQuotation.quotationRequest.package
-                        ?.title ?? 'Custom vendor service'}
-                    </h2>
-
-                    <div className="mt-4 flex flex-wrap items-center gap-3">
-                      <Link
-                        to={`/vendors/${selectedBookingQuery.data?.vendor.slug ?? ''}`}
-                        state={{
-                          returnTo: `/events/${eventId}/bookings`,
-                          returnLabel: 'Back to bookings',
-                        }}
-                        className={`group/details-vendor inline-flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.10)] bg-[rgba(93,58,85,0.07)] px-3 py-2 text-sm font-black text-[var(--color-deep-plum)] transition duration-300 ${
-                          selectedBookingQuery.data
-                            ? 'hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.20)] hover:bg-[rgba(93,58,85,0.13)] hover:text-[var(--color-rosewood)]'
-                            : 'pointer-events-none opacity-60'
-                        }`}
-                      >
-                        <Store
-                          aria-hidden="true"
-                          className="size-4 transition duration-300 group-hover/details-vendor:-translate-y-0.5"
-                        />
-
-                        {selectedBookingQuery.data?.vendor.businessName ?? 'Vendor booking'}
-                      </Link>
 
                       {selectedBookingQuery.data ? (
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-white/52 bg-white/32 px-3 py-2 text-sm font-bold text-[var(--color-charcoal)]/64">
-                          <CalendarClock
-                            aria-hidden="true"
-                            className="size-4 text-[var(--color-rosewood)]"
-                          />
+                        <>
+                          <span
+                            className="status-chip"
+                            data-tone={getBookingTone(selectedBookingQuery.data.status)}
+                          >
+                            {bookingStatusLabels[selectedBookingQuery.data.status]}
+                          </span>
 
-                          {formatDateTime(selectedBookingQuery.data.serviceStart)}
-                        </span>
+                          {selectedBookingQuery.data.acceptedQuotation.quotationRequest.package
+                            ?.category ? (
+                            <span className="status-chip" data-tone="gray">
+                              <Tags aria-hidden="true" className="size-3.5" />
+                              {
+                                selectedBookingQuery.data.acceptedQuotation.quotationRequest.package
+                                  .category.name
+                              }
+                            </span>
+                          ) : null}
+                        </>
                       ) : null}
                     </div>
 
-                    <p className="mt-5 max-w-3xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62 sm:text-base">
-                      Review vendor information, service timing, agreed pricing, payment activity
-                      and the accepted quotation from one detailed view.
-                    </p>
+                    <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="min-w-0">
+                        <h2
+                          id="booking-details-title"
+                          className="text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[1.8rem]"
+                        >
+                          {selectedBookingQuery.data?.acceptedQuotation.quotationRequest.package
+                            ?.title ?? 'Custom vendor service'}
+                        </h2>
+
+                        <p className="mt-1.5 text-xs font-semibold text-[var(--color-charcoal)]/50">
+                          Vendor service, quotation, payment and booking activity
+                        </p>
+                      </div>
+
+                      {selectedBookingQuery.data ? (
+                        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                          <Link
+                            to={`/vendors/${selectedBookingQuery.data.vendor.slug}`}
+                            state={{
+                              returnTo: `/events/${eventId}/bookings`,
+                              returnLabel: 'Back to bookings',
+                            }}
+                            className="group/details-vendor inline-flex items-center gap-2 rounded-xl border border-[rgba(93,58,85,0.10)] bg-[rgba(93,58,85,0.07)] px-3 py-2 text-xs font-black text-[var(--color-deep-plum)] transition duration-300 hover:border-[rgba(93,58,85,0.20)] hover:bg-[rgba(93,58,85,0.13)] hover:text-[var(--color-rosewood)]"
+                          >
+                            <Store aria-hidden="true" className="size-3.5" />
+                            {selectedBookingQuery.data.vendor.businessName}
+                          </Link>
+
+                          <span className="inline-flex items-center gap-2 rounded-xl border border-white/52 bg-white/32 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/64">
+                            <CalendarClock
+                              aria-hidden="true"
+                              className="size-3.5 text-[var(--color-rosewood)]"
+                            />
+                            {formatDateTime(selectedBookingQuery.data.serviceStart)}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
 
                   <button
                     type="button"
-                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/25"
+                    className="grid size-9 shrink-0 place-items-center rounded-xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] backdrop-blur-xl transition duration-300 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/25"
                     aria-label="Close booking details"
                     onClick={closeBookingDetails}
                   >
-                    <X aria-hidden="true" className="size-5" />
+                    <X aria-hidden="true" className="size-4" />
                   </button>
                 </div>
 
                 {selectedBookingQuery.isLoading ? (
-                  <div className="mt-8 grid min-h-64 place-items-center rounded-2xl bg-white/18">
-                    <LoaderCircle className="size-8 animate-spin text-[var(--color-deep-plum)]" />
+                  <div className="mt-4 grid min-h-48 place-items-center rounded-2xl bg-white/18">
+                    <LoaderCircle className="size-7 animate-spin text-[var(--color-deep-plum)]" />
                   </div>
                 ) : null}
 
                 {selectedBookingQuery.isError ? (
                   <div
                     role="alert"
-                    className="mt-8 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
                   >
                     {getApiErrorMessage(selectedBookingQuery.error)}
                   </div>
@@ -2066,148 +2066,117 @@ function BookingDetails({
     !hasPendingManualPayment &&
     !hasVerifiedPayment;
 
-  return (
-    <div className="mt-8 space-y-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="status-chip" data-tone={getBookingTone(booking.status)}>
-          {bookingStatusLabels[booking.status]}
-        </span>
-
-        {servicePackage?.category ? (
-          <span className="status-chip" data-tone="gray">
-            <Tags className="size-3.5" />
-            {servicePackage.category.name}
-          </span>
-        ) : null}
-      </div>
-
-      <section className="grid gap-5 lg:grid-cols-2">
-        <article className="group/vendor-info relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(240,231,246,0.48))] p-5 shadow-[0_16px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)] sm:p-6">
+    return (
+    <div className="mt-4 space-y-3">
+      {/* Vendor + service schedule */}
+      <section className="grid gap-3 lg:grid-cols-[0.8fr_1.2fr]">
+        <article className="relative overflow-hidden rounded-[1.35rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.68),rgba(240,231,246,0.42))] p-4 shadow-[0_12px_34px_rgba(31,27,29,0.045)] backdrop-blur-2xl">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl transition duration-500 group-hover/vendor-info:scale-125 group-hover/vendor-info:bg-[rgba(183,167,200,0.30)]"
+            className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
           />
 
           <div className="relative">
-            <div className="flex items-start justify-between gap-4">
-              <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/vendor-info:-translate-y-0.5 group-hover/vendor-info:scale-105">
-                <Store aria-hidden="true" className="size-6" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                  <Store aria-hidden="true" className="size-4" />
+                </span>
+
+                <div className="min-w-0">
+                  <p className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                    Vendor
+                  </p>
+
+                  <h3 className="mt-0.5 truncate text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                    {booking.vendor.businessName}
+                  </h3>
+                </div>
               </div>
 
-              <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
-                Vendor
-              </span>
+              <Link
+                to={`/vendors/${booking.vendor.slug}`}
+                state={{
+                  returnTo: `/events/${booking.event.id}/bookings`,
+                  returnLabel: 'Back to bookings',
+                }}
+                className="group/vendor-profile inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/60 bg-white/38 px-3 py-2 text-xs font-black text-[var(--color-deep-plum)] transition duration-300 hover:bg-white/58"
+              >
+                <Store aria-hidden="true" className="size-3.5" />
+                View profile
+              </Link>
             </div>
 
-            <h3 className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/vendor-info:text-[var(--color-deep-plum)]">
-              {booking.vendor.businessName}
-            </h3>
-
-            <div className="mt-5 space-y-3">
-              {booking.vendor.baseLocation ? (
-                <div className="flex items-start gap-3 rounded-2xl border border-transparent bg-white/28 p-4 transition duration-300 group-hover/vendor-info:border-white/62 group-hover/vendor-info:bg-white/42">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-rosewood)] transition duration-300 group-hover/vendor-info:-translate-y-0.5 group-hover/vendor-info:scale-105">
-                    <MapPin aria-hidden="true" className="size-4" />
-                  </span>
-
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Location
-                    </p>
-
-                    <p className="mt-1 break-words text-sm font-bold text-[var(--color-charcoal)]/70">
+            {(booking.vendor.baseLocation || booking.vendor.contactPhone) && (
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 border-t border-[rgba(93,58,85,0.08)] pt-3">
+                {booking.vendor.baseLocation ? (
+                  <div className="flex min-w-0 items-center gap-2">
+                    <MapPin
+                      aria-hidden="true"
+                      className="size-3.5 shrink-0 text-[var(--color-rosewood)]"
+                    />
+                    <span className="text-xs font-bold text-[var(--color-charcoal)]/64">
                       {booking.vendor.baseLocation}
-                    </p>
+                    </span>
                   </div>
-                </div>
-              ) : null}
+                ) : null}
 
-              {booking.vendor.contactPhone ? (
-                <div className="flex items-start gap-3 rounded-2xl border border-transparent bg-white/28 p-4 transition duration-300 group-hover/vendor-info:border-white/62 group-hover/vendor-info:bg-white/42">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-rosewood)] transition duration-300 group-hover/vendor-info:-translate-y-0.5 group-hover/vendor-info:scale-105">
-                    <Phone aria-hidden="true" className="size-4" />
-                  </span>
-
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Contact
-                    </p>
-
-                    <p className="mt-1 break-words text-sm font-bold text-[var(--color-charcoal)]/70">
+                {booking.vendor.contactPhone ? (
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Phone
+                      aria-hidden="true"
+                      className="size-3.5 shrink-0 text-[var(--color-rosewood)]"
+                    />
+                    <span className="text-xs font-bold text-[var(--color-charcoal)]/64">
                       {booking.vendor.contactPhone}
-                    </p>
+                    </span>
                   </div>
-                </div>
-              ) : null}
-            </div>
-
-            <Link
-              to={`/vendors/${booking.vendor.slug}`}
-              state={{
-                returnTo: `/events/${booking.event.id}/bookings`,
-                returnLabel: 'Back to bookings',
-              }}
-              className="group/vendor-profile btn-secondary mt-5 w-fit text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
-            >
-              <Store
-                aria-hidden="true"
-                className="size-4 transition duration-300 group-hover/vendor-profile:-translate-y-0.5 group-hover/vendor-profile:scale-105"
-              />
-              View vendor profile
-            </Link>
+                ) : null}
+              </div>
+            )}
           </div>
         </article>
 
-        <article className="group/service-card relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(220,235,242,0.44))] p-5 shadow-[0_16px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)] sm:p-6">
+        <article className="relative overflow-hidden rounded-[1.35rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.68),rgba(220,235,242,0.40))] p-4 shadow-[0_12px_34px_rgba(31,27,29,0.045)] backdrop-blur-2xl">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -bottom-16 -left-16 size-44 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl transition duration-500 group-hover/service-card:scale-125"
+            className="pointer-events-none absolute -bottom-12 -left-12 size-32 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl"
           />
 
           <div className="relative">
-            <div className="flex items-start justify-between gap-4">
-              <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/service-card:-translate-y-0.5 group-hover/service-card:scale-105">
-                <CalendarClock aria-hidden="true" className="size-6" />
-              </div>
-
-              <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/50 backdrop-blur-xl">
-                Schedule
+            <div className="flex items-center gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)]">
+                <CalendarClock aria-hidden="true" className="size-4" />
               </span>
+
+              <div>
+                <p className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                  Schedule
+                </p>
+
+                <h3 className="mt-0.5 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                  Service timeline
+                </h3>
+              </div>
             </div>
 
-            <h3 className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/service-card:text-[var(--color-deep-plum)]">
-              Service timeline
-            </h3>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="rounded-xl border border-white/52 bg-white/34 px-3 py-2.5">
+                <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                  Service starts
+                </p>
 
-            <div className="mt-5 space-y-3">
-              <div className="rounded-2xl border border-white/45 bg-white/30 p-4 transition duration-300 group-hover/service-card:border-white/72 group-hover/service-card:bg-white/44">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/45 transition duration-300 group-hover/service-card:text-[var(--color-rosewood)]/72">
-                    Service starts
-                  </p>
-
-                  <span className="grid size-8 place-items-center rounded-xl bg-[rgba(175,201,216,0.26)] text-[var(--color-deep-plum)] transition duration-300 group-hover/service-card:-translate-y-0.5 group-hover/service-card:scale-105">
-                    <CalendarClock aria-hidden="true" className="size-4" />
-                  </span>
-                </div>
-
-                <p className="mt-3 font-black leading-6 text-[var(--color-near-black)] transition duration-300 group-hover/service-card:text-[var(--color-deep-plum)]">
+                <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                   {formatDateTime(booking.serviceStart)}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/45 bg-white/30 p-4 transition duration-300 group-hover/service-card:border-white/72 group-hover/service-card:bg-white/44">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/45 transition duration-300 group-hover/service-card:text-[var(--color-rosewood)]/72">
-                    Service ends
-                  </p>
+              <div className="rounded-xl border border-white/52 bg-white/34 px-3 py-2.5">
+                <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                  Service ends
+                </p>
 
-                  <span className="grid size-8 place-items-center rounded-xl bg-[rgba(175,201,216,0.26)] text-[var(--color-deep-plum)] transition duration-300 group-hover/service-card:-translate-y-0.5 group-hover/service-card:scale-105">
-                    <Clock3 aria-hidden="true" className="size-4" />
-                  </span>
-                </div>
-
-                <p className="mt-3 font-black leading-6 text-[var(--color-near-black)] transition duration-300 group-hover/service-card:text-[var(--color-deep-plum)]">
+                <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                   {booking.serviceEnd ? formatDateTime(booking.serviceEnd) : 'Not specified'}
                 </p>
               </div>
@@ -2216,39 +2185,35 @@ function BookingDetails({
         </article>
       </section>
 
-      <section className="group/accepted-quotation relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(241,230,246,0.48))] p-5 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:shadow-[0_26px_66px_rgba(31,27,29,0.10)] sm:p-6">
+      {/* Accepted quotation */}
+      <section className="relative overflow-hidden rounded-[1.45rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(241,230,246,0.44))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-2xl">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl transition duration-500 group-hover/accepted-quotation:scale-125 group-hover/accepted-quotation:bg-[rgba(183,167,200,0.30)]"
-        />
-
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-24 left-[18%] size-52 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+          className="pointer-events-none absolute -right-20 -top-20 size-52 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
         />
 
         <div className="relative">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
-              <div className="flex items-center gap-3">
-                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/accepted-quotation:-translate-y-0.5 group-hover/accepted-quotation:scale-105">
-                  <ReceiptText aria-hidden="true" className="size-6" />
-                </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="grid size-8 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                  <ReceiptText aria-hidden="true" className="size-4" />
+                </span>
 
-                <span className="rounded-full border border-[rgba(89,133,113,0.18)] bg-[rgba(89,133,113,0.10)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#3f735d]">
+                <span className="rounded-full border border-[rgba(89,133,113,0.18)] bg-[rgba(89,133,113,0.10)] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#3f735d]">
                   Accepted
+                </span>
+
+                <span className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+                  Accepted quotation
                 </span>
               </div>
 
-              <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                Accepted quotation
-              </p>
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <h3 className="text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                  {servicePackage?.title ?? 'Custom vendor service'}
+                </h3>
 
-              <h3 className="mt-3 max-w-2xl text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] transition duration-300 group-hover/accepted-quotation:text-[var(--color-deep-plum)]">
-                {servicePackage?.title ?? 'Custom vendor service'}
-              </h3>
-
-              <div className="mt-4 flex flex-wrap items-center gap-2">
                 <span className="status-chip" data-tone="gray">
                   Version {booking.acceptedQuotation.version}
                 </span>
@@ -2262,783 +2227,583 @@ function BookingDetails({
               </div>
             </div>
 
-            <div className="relative min-w-[15rem] overflow-hidden rounded-[1.55rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.76),rgba(234,222,241,0.56))] px-6 py-5 shadow-[0_16px_38px_rgba(31,27,29,0.07)] lg:text-right">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
-              />
+            <div className="shrink-0 rounded-[1.15rem] border border-white/58 bg-white/38 px-4 py-3 lg:min-w-[13.5rem] lg:text-right">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                Agreed amount
+              </p>
 
-              <div className="relative">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                  Agreed amount
-                </p>
+              <p className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                {formatCurrency(booking.agreedCost)}
+              </p>
 
-                <p className="mt-3 break-words text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                  {formatCurrency(booking.agreedCost)}
-                </p>
-
-                <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/48">
-                  Final accepted service value
-                </p>
-              </div>
+              <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/46">
+                Final accepted service value
+              </p>
             </div>
           </div>
 
-          <div className="mt-7 grid gap-4 lg:grid-cols-3">
-            <div className="rounded-2xl border border-white/48 bg-white/30 p-4 transition duration-300 group-hover/accepted-quotation:border-white/74 group-hover/accepted-quotation:bg-white/44">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/accepted-quotation:text-[var(--color-rosewood)]/72">
-                  Proposed price
-                </p>
-
-                <ReceiptText
-                  aria-hidden="true"
-                  className="size-4 text-[var(--color-deep-plum)]/68 transition duration-300 group-hover/accepted-quotation:-translate-y-0.5"
-                />
-              </div>
-
-              <p className="mt-3 font-black text-[var(--color-near-black)]">
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            <div className="rounded-xl border border-white/48 bg-white/28 px-3 py-2.5">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                Proposed price
+              </p>
+              <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                 {formatCurrency(booking.acceptedQuotation.proposedPrice)}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/48 bg-white/30 p-4 transition duration-300 group-hover/accepted-quotation:border-white/74 group-hover/accepted-quotation:bg-white/44">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/accepted-quotation:text-[var(--color-rosewood)]/72">
-                  Deposit
-                </p>
-
-                <WalletCards
-                  aria-hidden="true"
-                  className="size-4 text-[var(--color-deep-plum)]/68 transition duration-300 group-hover/accepted-quotation:-translate-y-0.5"
-                />
-              </div>
-
-              <p className="mt-3 font-black text-[var(--color-near-black)]">
+            <div className="rounded-xl border border-white/48 bg-white/28 px-3 py-2.5">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                Deposit
+              </p>
+              <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                 {booking.acceptedQuotation.depositAmount
                   ? formatCurrency(booking.acceptedQuotation.depositAmount)
                   : 'No deposit'}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/48 bg-white/30 p-4 transition duration-300 group-hover/accepted-quotation:border-white/74 group-hover/accepted-quotation:bg-white/44">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44 transition duration-300 group-hover/accepted-quotation:text-[var(--color-rosewood)]/72">
-                  Base package
-                </p>
-
-                <PackageCheck
-                  aria-hidden="true"
-                  className="size-4 text-[var(--color-deep-plum)]/68 transition duration-300 group-hover/accepted-quotation:-translate-y-0.5"
-                />
-              </div>
-
-              <p className="mt-3 font-black text-[var(--color-near-black)]">
+            <div className="rounded-xl border border-white/48 bg-white/28 px-3 py-2.5">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                Base package
+              </p>
+              <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
                 {formatCurrency(servicePackage?.basePrice ?? null)}
               </p>
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4">
-            <section className="rounded-[1.4rem] border border-[rgba(89,133,113,0.18)] bg-[rgba(222,238,228,0.34)] p-5 transition duration-300 group-hover/accepted-quotation:bg-[rgba(222,238,228,0.46)]">
-              <div className="flex items-center gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(89,133,113,0.16)] text-[#3f735d]">
-                  <CheckCircle2 aria-hidden="true" className="size-4" />
+          <div className="mt-3 grid gap-2 lg:grid-cols-2">
+            <section className="rounded-[1.15rem] border border-[rgba(89,133,113,0.18)] bg-[rgba(222,238,228,0.30)] p-3.5">
+              <div className="flex items-center gap-2">
+                <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(89,133,113,0.16)] text-[#3f735d]">
+                  <CheckCircle2 aria-hidden="true" className="size-3.5" />
                 </span>
 
-                <p className="text-sm font-black text-[var(--color-near-black)]">Inclusions</p>
+                <p className="text-xs font-black text-[var(--color-near-black)]">Inclusions</p>
               </div>
 
-              <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+              <p className="mt-2 whitespace-pre-wrap text-xs font-semibold leading-5 text-[var(--color-charcoal)]/66">
                 {booking.acceptedQuotation.inclusions}
               </p>
             </section>
 
             {booking.acceptedQuotation.exclusions ? (
-              <section className="rounded-[1.4rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(245,225,230,0.30)] p-5 transition duration-300 group-hover/accepted-quotation:bg-[rgba(245,225,230,0.42)]">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                    <X aria-hidden="true" className="size-4" />
+              <section className="rounded-[1.15rem] border border-[rgba(124,74,90,0.16)] bg-[rgba(245,225,230,0.28)] p-3.5">
+                <div className="flex items-center gap-2">
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                    <X aria-hidden="true" className="size-3.5" />
                   </span>
 
-                  <p className="text-sm font-black text-[var(--color-near-black)]">Exclusions</p>
+                  <p className="text-xs font-black text-[var(--color-near-black)]">Exclusions</p>
                 </div>
 
-                <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+                <p className="mt-2 whitespace-pre-wrap text-xs font-semibold leading-5 text-[var(--color-charcoal)]/66">
                   {booking.acceptedQuotation.exclusions}
                 </p>
               </section>
             ) : null}
-
-            {booking.acceptedQuotation.terms ? (
-              <section className="rounded-[1.4rem] border border-[rgba(175,201,216,0.24)] bg-[rgba(222,236,242,0.34)] p-5 transition duration-300 group-hover/accepted-quotation:bg-[rgba(222,236,242,0.46)]">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.26)] text-[#3b515b]">
-                    <FileText aria-hidden="true" className="size-4" />
-                  </span>
-
-                  <p className="text-sm font-black text-[var(--color-near-black)]">Terms</p>
-                </div>
-
-                <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
-                  {booking.acceptedQuotation.terms}
-                </p>
-              </section>
-            ) : null}
           </div>
+
+          {booking.acceptedQuotation.terms ? (
+            <section className="mt-2 rounded-[1.15rem] border border-[rgba(175,201,216,0.24)] bg-[rgba(222,236,242,0.30)] px-3.5 py-3">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.26)] text-[#3b515b]">
+                  <FileText aria-hidden="true" className="size-3.5" />
+                </span>
+
+                <div className="min-w-0">
+                  <p className="text-xs font-black text-[var(--color-near-black)]">Terms</p>
+
+                  <p className="mt-1.5 whitespace-pre-wrap text-xs font-semibold leading-5 text-[var(--color-charcoal)]/66">
+                    {booking.acceptedQuotation.terms}
+                  </p>
+                </div>
+              </div>
+            </section>
+          ) : null}
         </div>
       </section>
 
-      <section className="group/payment-history relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(225,237,243,0.46))] p-5 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:border-white/88 hover:shadow-[0_26px_66px_rgba(31,27,29,0.10)] sm:p-6">
+      {/* Payment history */}
+      <section className="relative overflow-hidden rounded-[1.45rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(225,237,243,0.42))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-2xl">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl transition duration-500 group-hover/payment-history:scale-125"
-        />
-
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-24 left-[12%] size-52 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+          className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl"
         />
 
         <div className="relative">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <div className="flex items-center gap-3">
-                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/payment-history:-translate-y-0.5 group-hover/payment-history:scale-105">
-                  <Landmark aria-hidden="true" className="size-6" />
-                </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="grid size-8 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b]">
+                  <Landmark aria-hidden="true" className="size-4" />
+                </span>
 
-                <span className="rounded-full border border-[rgba(175,201,216,0.28)] bg-[rgba(175,201,216,0.16)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#3b515b]">
+                <span className="rounded-full border border-[rgba(175,201,216,0.28)] bg-[rgba(175,201,216,0.16)] px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#3b515b]">
                   {paymentsCount} {paymentsCount === 1 ? 'payment' : 'payments'}
+                </span>
+
+                <span className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+                  Deposit payments
                 </span>
               </div>
 
-              <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                Deposit payments
-              </p>
+              <div className="mt-2">
+                <h3 className="text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                  Payment history
+                </h3>
 
-              <h3 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] transition duration-300 group-hover/payment-history:text-[var(--color-deep-plum)]">
-                Payment history
-              </h3>
-
-              <p className="mt-3 max-w-xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
-                Review submitted transfers, Stripe checkout activity, verification results and
-                supporting payment documents for this booking.
-              </p>
-            </div>
-
-            <div className="relative min-w-[15rem] overflow-hidden rounded-[1.55rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(215,232,239,0.56))] px-6 py-5 shadow-[0_16px_38px_rgba(31,27,29,0.07)] lg:text-right">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl"
-              />
-
-              <div className="relative">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                  Required deposit
-                </p>
-
-                <p className="mt-3 break-words text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                  {booking.acceptedQuotation.depositAmount
-                    ? formatCurrency(booking.acceptedQuotation.depositAmount)
-                    : 'No deposit'}
-                </p>
-
-                <p className="mt-2 text-xs font-semibold text-[var(--color-charcoal)]/48">
-                  Based on the accepted quotation
+                <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/56">
+                  Review transfers, Stripe activity, verification results and payment documents.
                 </p>
               </div>
+            </div>
+
+            <div className="shrink-0 rounded-xl border border-white/54 bg-white/36 px-4 py-2.5 lg:min-w-[13.5rem] lg:text-right">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                Required deposit
+              </p>
+
+              <p className="mt-1 text-lg font-black text-[var(--color-near-black)]">
+                {booking.acceptedQuotation.depositAmount
+                  ? formatCurrency(booking.acceptedQuotation.depositAmount)
+                  : 'No deposit'}
+              </p>
+
+              <p className="text-[0.65rem] font-semibold text-[var(--color-charcoal)]/44">
+                Based on accepted quotation
+              </p>
             </div>
           </div>
 
           {paymentsLoading ? (
-            <div className="mt-7 grid min-h-40 place-items-center rounded-[1.5rem] border border-white/52 bg-white/24">
-              <div className="text-center">
-                <LoaderCircle className="mx-auto size-8 animate-spin text-[var(--color-deep-plum)]" />
-
-                <p className="mt-4 text-sm font-bold text-[var(--color-charcoal)]/58">
-                  Loading payment history
-                </p>
-              </div>
+            <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-white/52 bg-white/24 px-4 py-5">
+              <LoaderCircle className="size-5 animate-spin text-[var(--color-deep-plum)]" />
+              <p className="text-xs font-bold text-[var(--color-charcoal)]/58">
+                Loading payment history
+              </p>
             </div>
           ) : null}
 
           {paymentsError ? (
             <div
               role="alert"
-              className="mt-7 rounded-[1.5rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-5"
+              className="mt-3 rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-3.5"
             >
               <div className="flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                  <CircleAlert aria-hidden="true" className="size-5" />
-                </span>
+                <CircleAlert
+                  aria-hidden="true"
+                  className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
+                />
 
-                <div>
-                  <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-black text-[var(--color-muted-burgundy)]">
                     Payment history unavailable
                   </p>
 
-                  <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
+                  <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/64">
                     {paymentsError}
                   </p>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                className="btn-secondary mt-5 text-sm font-bold"
-                onClick={onRetryPayments}
-              >
-                Try again
-              </button>
+                <button
+                  type="button"
+                  className="btn-secondary shrink-0 text-xs font-bold"
+                  onClick={onRetryPayments}
+                >
+                  Try again
+                </button>
+              </div>
             </div>
           ) : null}
 
           {!paymentsLoading && !paymentsError && payments.length > 0 ? (
-            <div className="mt-7 space-y-4">
+            <div className="mt-3 space-y-2">
               {payments.map((payment) => (
                 <article
                   key={payment.id}
-                  className="group/payment relative overflow-hidden rounded-[1.6rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.62),rgba(224,236,242,0.36))] p-5 shadow-[0_16px_45px_rgba(31,27,29,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:shadow-[0_22px_60px_rgba(31,27,29,0.09)] sm:p-6"
+                  className="rounded-[1.15rem] border border-white/60 bg-white/32 p-3.5"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -right-14 -top-14 size-36 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl transition duration-500 group-hover/payment:scale-125 group-hover/payment:bg-[rgba(175,201,216,0.28)]"
-                  />
+                  <div className="grid gap-3 lg:grid-cols-[auto_1fr_auto] lg:items-center">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="status-chip" data-tone={getPaymentTone(payment.status)}>
+                        {getPaymentStatusLabel(payment)}
+                      </span>
 
-                  <div className="relative">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span
-                            className="status-chip transition duration-300 group-hover/payment:-translate-y-0.5 group-hover/payment:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
-                            data-tone={getPaymentTone(payment.status)}
-                          >
-                            {getPaymentStatusLabel(payment)}
-                          </span>
+                      <span className="status-chip" data-tone="gray">
+                        {paymentMethodLabels[payment.method]}
+                      </span>
+                    </div>
 
-                          <span className="status-chip" data-tone="gray">
-                            {paymentMethodLabels[payment.method]}
-                          </span>
-                        </div>
-
-                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-2xl border border-white/50 bg-white/34 p-4 transition duration-300 group-hover/payment:border-white/74 group-hover/payment:bg-white/48">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                                Payment amount
-                              </p>
-
-                              <WalletCards
-                                aria-hidden="true"
-                                className="size-4 text-[var(--color-deep-plum)]/68 transition duration-300 group-hover/payment:-translate-y-0.5"
-                              />
-                            </div>
-
-                            <p className="mt-3 break-words text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                              {formatCurrency(payment.amount)}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-white/50 bg-white/34 p-4 transition duration-300 group-hover/payment:border-white/74 group-hover/payment:bg-white/48">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                                Reference
-                              </p>
-
-                              <ReceiptText
-                                aria-hidden="true"
-                                className="size-4 text-[var(--color-deep-plum)]/68 transition duration-300 group-hover/payment:-translate-y-0.5"
-                              />
-                            </div>
-
-                            <p className="mt-3 break-words text-sm font-black leading-6 text-[var(--color-near-black)]">
-                              {payment.referenceNumber}
-                            </p>
-                          </div>
-                        </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                          Amount
+                        </p>
+                        <p className="mt-0.5 text-sm font-black text-[var(--color-near-black)]">
+                          {formatCurrency(payment.amount)}
+                        </p>
                       </div>
 
-                      <div className="rounded-2xl border border-white/50 bg-white/34 px-4 py-3 lg:min-w-[12rem] lg:text-right">
-                        <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                          Submitted
+                      <div>
+                        <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                          Reference
                         </p>
-
-                        <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
-                          {formatDateTime(payment.createdAt)}
+                        <p className="mt-0.5 break-words text-xs font-black text-[var(--color-near-black)]">
+                          {payment.referenceNumber}
                         </p>
                       </div>
                     </div>
 
-                    {payment.proofFileUrl ? (
-                      <a
-                        href={payment.proofFileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group/payment-proof btn-secondary mt-5 w-fit text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
-                      >
-                        <Download
-                          aria-hidden="true"
-                          className="size-4 transition duration-300 group-hover/payment-proof:-translate-y-0.5"
-                        />
-                        View payment proof
-                      </a>
-                    ) : null}
+                    <div className="lg:text-right">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                        Submitted
+                      </p>
+                      <p className="mt-0.5 text-xs font-black text-[var(--color-near-black)]">
+                        {formatDateTime(payment.createdAt)}
+                      </p>
+                    </div>
+                  </div>
 
-                    {payment.proofFileOriginalName ? (
-                      <div className="mt-4 rounded-2xl border border-white/46 bg-white/28 px-4 py-3">
-                        <p className="break-words text-xs font-semibold text-[var(--color-charcoal)]/54">
+                  {payment.proofFileUrl ||
+                  payment.proofFileOriginalName ||
+                  payment.reviewedAt ||
+                  payment.rejectionReason ? (
+                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/52 pt-3">
+                      {payment.proofFileUrl ? (
+                        <a
+                          href={payment.proofFileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-secondary text-xs font-bold"
+                        >
+                          <Download aria-hidden="true" className="size-3.5" />
+                          View payment proof
+                        </a>
+                      ) : null}
+
+                      {payment.proofFileOriginalName ? (
+                        <span className="break-all text-[0.68rem] font-semibold text-[var(--color-charcoal)]/54">
                           {payment.proofFileOriginalName}
                           {payment.proofFileSize
                             ? ` · ${formatFileSize(payment.proofFileSize)}`
                             : ''}
-                        </p>
-                      </div>
-                    ) : null}
+                        </span>
+                      ) : null}
 
-                    {payment.reviewedAt ? (
-                      <p className="mt-4 text-xs font-bold text-[var(--color-charcoal)]/46">
-                        Reviewed {formatDateTime(payment.reviewedAt)}
-                      </p>
-                    ) : null}
+                      {payment.reviewedAt ? (
+                        <span className="text-[0.68rem] font-bold text-[var(--color-charcoal)]/46">
+                          Reviewed {formatDateTime(payment.reviewedAt)}
+                        </span>
+                      ) : null}
 
-                    {payment.rejectionReason ? (
-                      <div className="mt-4 rounded-[1.35rem] border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.08)] p-4">
-                        <div className="flex items-start gap-3">
-                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                            <CircleAlert aria-hidden="true" className="size-4" />
-                          </span>
-
-                          <div>
-                            <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-muted-burgundy)]">
-                              Rejection reason
-                            </p>
-
-                            <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
-                              {payment.rejectionReason}
-                            </p>
-                          </div>
+                      {payment.rejectionReason ? (
+                        <div className="w-full rounded-xl border border-[rgba(124,74,90,0.20)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
+                          <p className="text-[0.62rem] font-black uppercase tracking-[0.13em] text-[var(--color-muted-burgundy)]">
+                            Rejection reason
+                          </p>
+                          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/68">
+                            {payment.rejectionReason}
+                          </p>
                         </div>
-                      </div>
-                    ) : null}
-                  </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>
           ) : null}
 
           {!paymentsLoading && !paymentsError && payments.length === 0 ? (
-            <div className="mt-7 rounded-[1.6rem] border border-dashed border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.44),rgba(255,255,255,0.20))] p-8 text-center backdrop-blur-xl">
-              <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
-                <WalletCards aria-hidden="true" className="size-8" />
+            <div className="mt-3 flex items-start gap-3 rounded-xl border border-dashed border-white/75 bg-white/28 px-4 py-3">
+              <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b]">
+                <WalletCards aria-hidden="true" className="size-4" />
+              </span>
+
+              <div>
+                <p className="text-xs font-black text-[var(--color-near-black)]">
+                  No payments submitted
+                </p>
+
+                <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
+                  Deposit-payment actions become available after the vendor confirms the booking and
+                  the accepted quotation requires a deposit.
+                </p>
               </div>
-
-              <p className="mt-6 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                No payments submitted
-              </p>
-
-              <p className="mx-auto mt-3 max-w-md text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
-                Deposit-payment actions become available after the vendor confirms the booking and
-                the accepted quotation requires a deposit.
-              </p>
             </div>
           ) : null}
 
           {canSubmitManualDeposit || canStartStripeCheckout ? (
-            <div className="relative mt-7 overflow-hidden rounded-[1.5rem] border border-[rgba(93,58,85,0.18)] bg-[linear-gradient(145deg,rgba(239,229,244,0.68),rgba(255,255,255,0.38))] p-5 shadow-[0_14px_34px_rgba(93,58,85,0.06)]">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
-              />
+            <div className="mt-3 flex flex-col gap-3 rounded-[1.15rem] border border-[rgba(93,58,85,0.16)] bg-[rgba(239,229,244,0.44)] p-3.5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
+                  <CreditCard aria-hidden="true" className="size-3.5" />
+                </span>
 
-              <div className="relative">
-                <div className="flex items-start gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(93,58,85,0.10)] text-[var(--color-deep-plum)]">
-                    <CreditCard aria-hidden="true" className="size-4" />
-                  </span>
+                <div className="min-w-0">
+                  <p className="text-[0.68rem] font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
+                    Deposit required
+                  </p>
 
-                  <div>
-                    <p className="text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                      Deposit required
-                    </p>
-
-                    <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
-                      {pendingStripePayment
-                        ? 'Your Stripe checkout has started but has not been completed yet.'
-                        : 'Submit your bank-transfer reference with an optional receipt, or continue securely through Stripe Checkout.'}
-                    </p>
-                  </div>
+                  <p className="mt-1 max-w-xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62">
+                    {pendingStripePayment
+                      ? 'Your Stripe checkout has started but has not been completed yet.'
+                      : 'Submit your bank-transfer reference with an optional receipt, or continue securely through Stripe Checkout.'}
+                  </p>
                 </div>
+              </div>
 
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  {canSubmitManualDeposit ? (
-                    <button
-                      type="button"
-                      className="group/bank-transfer btn-primary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                      onClick={() => {
-                        onOpenPayment(booking);
-                      }}
-                    >
-                      <Landmark
-                        aria-hidden="true"
-                        className="size-4 transition duration-300 group-hover/bank-transfer:-translate-y-0.5"
-                      />
-                      Submit bank transfer
-                    </button>
-                  ) : null}
-
-                  {canStartStripeCheckout ? (
-                    <button
-                      type="button"
-                      className="group/stripe-payment btn-secondary justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
-                      disabled={stripeCheckoutPending}
-                      onClick={() => {
-                        onStripeCheckout(booking);
-                      }}
-                    >
-                      {stripeCheckoutPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                      ) : (
-                        <CreditCard
-                          aria-hidden="true"
-                          className="size-4 transition duration-300 group-hover/stripe-payment:-translate-y-0.5"
-                        />
-                      )}
-
-                      {stripeCheckoutPending
-                        ? 'Opening Stripe...'
-                        : pendingStripePayment
-                          ? 'Continue Stripe checkout'
-                          : 'Pay with Stripe'}
-                    </button>
-                  ) : null}
-                </div>
-
-                {stripeCheckoutError ? (
-                  <div
-                    role="alert"
-                    className="mt-5 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold text-[var(--color-muted-burgundy)]"
+              <div className="flex shrink-0 flex-wrap gap-2">
+                {canSubmitManualDeposit ? (
+                  <button
+                    type="button"
+                    className="btn-primary justify-center text-xs font-bold"
+                    onClick={() => {
+                      onOpenPayment(booking);
+                    }}
                   >
-                    {stripeCheckoutError}
-                  </div>
+                    <Landmark aria-hidden="true" className="size-3.5" />
+                    Submit bank transfer
+                  </button>
+                ) : null}
+
+                {canStartStripeCheckout ? (
+                  <button
+                    type="button"
+                    className="btn-secondary justify-center text-xs font-bold"
+                    disabled={stripeCheckoutPending}
+                    onClick={() => {
+                      onStripeCheckout(booking);
+                    }}
+                  >
+                    {stripeCheckoutPending ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <CreditCard aria-hidden="true" className="size-3.5" />
+                    )}
+
+                    {stripeCheckoutPending
+                      ? 'Opening Stripe...'
+                      : pendingStripePayment
+                        ? 'Continue Stripe checkout'
+                        : 'Pay with Stripe'}
+                  </button>
                 ) : null}
               </div>
+
+              {stripeCheckoutError ? (
+                <div
+                  role="alert"
+                  className="w-full rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-3 py-2 text-xs font-bold text-[var(--color-muted-burgundy)] lg:basis-full"
+                >
+                  {stripeCheckoutError}
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>
       </section>
 
+      {/* Vendor response */}
       {booking.vendorResponseNote ? (
-        <section className="group/vendor-response relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.70),rgba(220,235,242,0.44))] p-6 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:shadow-[0_26px_66px_rgba(31,27,29,0.10)] sm:p-7">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl transition duration-500 group-hover/vendor-response:scale-125"
-          />
+        <section className="relative overflow-hidden rounded-[1.35rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.68),rgba(220,235,242,0.40))] p-4 shadow-[0_12px_34px_rgba(31,27,29,0.045)] backdrop-blur-2xl">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b]">
+                <FileText aria-hidden="true" className="size-4" />
+              </span>
 
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-20 left-[12%] size-44 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl"
-          />
-
-          <div className="relative">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#3b515b] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/vendor-response:-translate-y-0.5 group-hover/vendor-response:scale-105">
-                    <FileText aria-hidden="true" className="size-6" />
-                  </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
+                    Vendor response
+                  </span>
 
-                  <span className="rounded-full border border-[rgba(175,201,216,0.28)] bg-[rgba(175,201,216,0.16)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#3b515b]">
+                  <span className="rounded-full border border-[rgba(175,201,216,0.28)] bg-[rgba(175,201,216,0.16)] px-2 py-0.5 text-[0.58rem] font-black uppercase tracking-[0.12em] text-[#3b515b]">
                     Vendor note
                   </span>
                 </div>
 
-                <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                  Vendor response
-                </p>
-
-                <h3 className="mt-3 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/vendor-response:text-[var(--color-deep-plum)]">
+                <h3 className="mt-1 text-base font-black text-[var(--color-near-black)]">
                   Update from {booking.vendor.businessName}
                 </h3>
 
-                <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/58">
-                  The vendor added this note while responding to the booking request.
-                </p>
-              </div>
-
-              {booking.vendorRespondedAt ? (
-                <div className="rounded-[1.35rem] border border-white/52 bg-white/34 px-4 py-3 sm:min-w-[12rem] sm:text-right">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                    Responded
-                  </p>
-
-                  <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
-                    {formatDateTime(booking.vendorRespondedAt)}
-                  </p>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="mt-6 rounded-[1.45rem] border border-white/52 bg-white/34 p-5 transition duration-300 group-hover/vendor-response:border-white/74 group-hover/vendor-response:bg-white/46">
-              <div className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b]">
-                  <FileText aria-hidden="true" className="size-4" />
-                </span>
-
-                <p className="whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
+                <p className="mt-1.5 whitespace-pre-wrap text-xs font-semibold leading-5 text-[var(--color-charcoal)]/66">
                   {booking.vendorResponseNote}
                 </p>
               </div>
             </div>
+
+            {booking.vendorRespondedAt ? (
+              <div className="shrink-0 rounded-xl border border-white/52 bg-white/34 px-3 py-2 lg:text-right">
+                <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                  Responded
+                </p>
+
+                <p className="mt-0.5 text-xs font-black text-[var(--color-near-black)]">
+                  {formatDateTime(booking.vendorRespondedAt)}
+                </p>
+              </div>
+            ) : null}
           </div>
         </section>
       ) : null}
 
+      {/* Cancellation state */}
       {cancellation ? (
-        <section className="group/cancellation-state relative overflow-hidden rounded-[1.75rem] border border-[rgba(124,74,90,0.24)] bg-[linear-gradient(145deg,rgba(250,238,242,0.76),rgba(255,255,255,0.42))] p-6 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.32)] hover:shadow-[0_26px_66px_rgba(124,74,90,0.12)] sm:p-7">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(210,146,160,0.20)] blur-3xl transition duration-500 group-hover/cancellation-state:scale-125"
-          />
+        <section className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(249,238,242,0.56)] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
+                <Ban aria-hidden="true" className="size-4" />
+              </span>
 
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-20 left-[14%] size-44 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl"
-          />
-
-          <div className="relative">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/cancellation-state:-translate-y-0.5 group-hover/cancellation-state:scale-105">
-                    <Ban aria-hidden="true" className="size-6" />
-                  </div>
-
-                  <span className="rounded-full border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.10)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-muted-burgundy)]">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-muted-burgundy)]">
+                    {cancellation.label}
+                  </span>
+                  <span className="status-chip" data-tone="red">
                     Booking ended
                   </span>
                 </div>
 
-                <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-muted-burgundy)]">
-                  {cancellation.label}
-                </p>
-
-                <h3 className="mt-3 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/cancellation-state:text-[var(--color-muted-burgundy)]">
+                <h3 className="mt-1.5 text-base font-black text-[var(--color-near-black)]">
                   This vendor commitment was cancelled.
                 </h3>
 
-                <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
-                  The booking is no longer active. Review the cancellation reason and recorded time
-                  below.
+                <p className="mt-1.5 whitespace-pre-wrap text-xs font-semibold leading-5 text-[var(--color-charcoal)]/66">
+                  <span className="font-black text-[var(--color-muted-burgundy)]">
+                    Cancellation reason:
+                  </span>{' '}
+                  {cancellation.reason}
                 </p>
               </div>
-
-              {cancellation.cancelledAt ? (
-                <div className="rounded-[1.35rem] border border-white/52 bg-white/34 px-4 py-3 sm:min-w-[12rem] sm:text-right">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                    Cancelled
-                  </p>
-
-                  <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
-                    {formatDateTime(cancellation.cancelledAt)}
-                  </p>
-                </div>
-              ) : null}
             </div>
 
-            <div className="mt-6 rounded-[1.45rem] border border-[rgba(124,74,90,0.16)] bg-white/34 p-5 transition duration-300 group-hover/cancellation-state:border-[rgba(124,74,90,0.24)] group-hover/cancellation-state:bg-white/46">
-              <div className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                  <FileText aria-hidden="true" className="size-4" />
-                </span>
-
-                <div className="min-w-0">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-muted-burgundy)]">
-                    Cancellation reason
-                  </p>
-
-                  <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
-                    {cancellation.reason}
-                  </p>
-                </div>
+            {cancellation.cancelledAt ? (
+              <div className="shrink-0 rounded-xl border border-white/52 bg-white/34 px-3 py-2 sm:text-right">
+                <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                  Cancelled
+                </p>
+                <p className="mt-0.5 text-xs font-black text-[var(--color-near-black)]">
+                  {formatDateTime(cancellation.cancelledAt)}
+                </p>
               </div>
-            </div>
+            ) : null}
           </div>
         </section>
       ) : null}
 
+      {/* Completion state */}
       {booking.vendorCompletedAt ? (
-        <section className="group/completion-state relative overflow-hidden rounded-[1.75rem] border border-[rgba(89,133,113,0.24)] bg-[linear-gradient(145deg,rgba(234,246,239,0.78),rgba(255,255,255,0.44))] p-6 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(89,133,113,0.34)] hover:shadow-[0_26px_66px_rgba(89,133,113,0.12)] sm:p-7">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(170,210,190,0.22)] blur-3xl transition duration-500 group-hover/completion-state:scale-125"
-          />
+        <section className="rounded-[1.35rem] border border-[rgba(89,133,113,0.22)] bg-[rgba(234,246,239,0.58)] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(89,133,113,0.16)] text-[#3f735d]">
+                <CheckCircle2 aria-hidden="true" className="size-4" />
+              </span>
 
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-20 left-[14%] size-44 rounded-full bg-[rgba(175,201,216,0.12)] blur-3xl"
-          />
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[#3f735d]">
+                    Service completed
+                  </span>
 
-          <div className="relative">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(89,133,113,0.16)] text-[#3f735d] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/completion-state:-translate-y-0.5 group-hover/completion-state:scale-105">
-                    <CheckCircle2 aria-hidden="true" className="size-6" />
-                  </div>
-
-                  <span className="rounded-full border border-[rgba(89,133,113,0.20)] bg-[rgba(89,133,113,0.11)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#3f735d]">
+                  <span className="rounded-full border border-[rgba(89,133,113,0.20)] bg-[rgba(89,133,113,0.11)] px-2 py-0.5 text-[0.58rem] font-black uppercase tracking-[0.12em] text-[#3f735d]">
                     Service delivered
                   </span>
                 </div>
 
-                <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[#3f735d]">
-                  Service completed
-                </p>
-
-                <h3 className="mt-3 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/completion-state:text-[#3f735d]">
+                <h3 className="mt-1.5 text-base font-black text-[var(--color-near-black)]">
                   This vendor commitment is complete.
                 </h3>
 
-                <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62">
                   The vendor confirmed that the agreed service was delivered for this event.
                 </p>
               </div>
-
-              <div className="rounded-[1.35rem] border border-white/52 bg-white/34 px-4 py-3 sm:min-w-[12rem] sm:text-right">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                  Completed
-                </p>
-
-                <p className="mt-2 text-sm font-black leading-6 text-[var(--color-near-black)]">
-                  {formatDateTime(booking.vendorCompletedAt)}
-                </p>
-              </div>
             </div>
 
-            <div className="mt-6 rounded-[1.45rem] border border-[rgba(89,133,113,0.16)] bg-white/34 p-5 transition duration-300 group-hover/completion-state:border-[rgba(89,133,113,0.24)] group-hover/completion-state:bg-white/46">
-              <div className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(89,133,113,0.14)] text-[#3f735d]">
-                  <Sparkles aria-hidden="true" className="size-4" />
-                </span>
+            <div className="shrink-0 rounded-xl border border-white/52 bg-white/34 px-3 py-2 sm:text-right">
+              <p className="text-[0.58rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
+                Completed
+              </p>
 
-                <p className="text-sm font-semibold leading-7 text-[var(--color-charcoal)]/68">
-                  The vendor marked this booking as completed on{' '}
-                  <span className="font-black text-[var(--color-near-black)]">
-                    {formatDateTime(booking.vendorCompletedAt)}
-                  </span>
-                  .
-                </p>
-              </div>
+              <p className="mt-0.5 text-xs font-black text-[var(--color-near-black)]">
+                {formatDateTime(booking.vendorCompletedAt)}
+              </p>
             </div>
           </div>
         </section>
       ) : null}
 
+      {/* Review */}
       {booking.status === 'COMPLETED' ? (
-        <section className="group/review-state relative overflow-hidden rounded-[1.75rem] border border-[rgba(130,72,77,0.22)] bg-[linear-gradient(145deg,rgba(249,236,230,0.76),rgba(255,255,255,0.44))] p-6 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(130,72,77,0.30)] hover:shadow-[0_26px_66px_rgba(130,72,77,0.12)] sm:p-7">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-16 -right-10 size-48 rounded-full bg-[rgba(220,183,150,0.22)] blur-3xl transition duration-500 group-hover/review-state:scale-125"
-          />
+        <section className="rounded-[1.35rem] border border-[rgba(130,72,77,0.20)] bg-[rgba(249,236,230,0.56)] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(130,72,77,0.13)] text-[var(--color-rosewood)]">
+                <Star aria-hidden="true" className="size-4 fill-current" />
+              </span>
 
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -left-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl"
-          />
+              <div>
+                <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-rosewood)]">
+                  Vendor review
+                </p>
 
-          <div className="relative flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-3">
-                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(130,72,77,0.13)] text-[var(--color-rosewood)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/review-state:-translate-y-0.5 group-hover/review-state:scale-105">
-                  <Star aria-hidden="true" className="size-6 fill-current" />
-                </div>
+                <h3 className="mt-1 text-base font-black text-[var(--color-near-black)]">
+                  {hasReview ? 'You reviewed this completed service.' : 'How was your experience?'}
+                </h3>
 
-                <span className="rounded-full border border-[rgba(130,72,77,0.18)] bg-[rgba(130,72,77,0.09)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
-                  Completed service
-                </span>
-              </div>
-
-              <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                Vendor review
-              </p>
-
-              <h3 className="mt-3 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/review-state:text-[var(--color-rosewood)]">
-                {hasReview ? 'You reviewed this completed service.' : 'How was your experience?'}
-              </h3>
-
-              <p className="mt-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64">
-                {hasReview
-                  ? 'Your verified review is available in this event’s Reviews workspace.'
-                  : 'Share an overall rating and optional feedback about the service quality and vendor communication.'}
-              </p>
-
-              <div className="mt-5 rounded-[1.4rem] border border-white/52 bg-white/34 p-5 transition duration-300 group-hover/review-state:border-white/72 group-hover/review-state:bg-white/46">
-                <div className="flex items-start gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(130,72,77,0.12)] text-[var(--color-rosewood)]">
-                    <Star aria-hidden="true" className="size-4 fill-current" />
-                  </span>
-
-                  <p className="text-sm font-semibold leading-7 text-[var(--color-charcoal)]/66">
-                    {hasReview
-                      ? 'You can revisit your feedback, rating and review details at any time.'
-                      : 'Your review helps future customers understand the quality and reliability of this vendor.'}
-                  </p>
-                </div>
+                <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62">
+                  {hasReview
+                    ? 'Your verified review is available in this event’s Reviews workspace.'
+                    : 'Share an overall rating and optional feedback about the service quality and vendor communication.'}
+                </p>
               </div>
             </div>
 
-            <div className="shrink-0">
-              {hasReview ? (
-                <Link
-                  to={`/events/${booking.event.id}/reviews`}
-                  className="group/view-completed-review btn-secondary w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(130,72,77,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)] sm:w-auto"
-                >
-                  <Star
-                    aria-hidden="true"
-                    className="size-4 fill-current transition duration-300 group-hover/view-completed-review:scale-110"
-                  />
-                  View review
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  className="group/write-completed-review btn-primary w-full justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] sm:w-auto"
-                  onClick={() => {
-                    onOpenReview(booking);
-                  }}
-                >
-                  <Star
-                    aria-hidden="true"
-                    className="size-4 fill-current transition duration-300 group-hover/write-completed-review:scale-110 group-hover/write-completed-review:rotate-[4deg]"
-                  />
-                  Write review
-                </button>
-              )}
-            </div>
+            {hasReview ? (
+              <Link
+                to={`/events/${booking.event.id}/reviews`}
+                className="btn-secondary shrink-0 justify-center text-xs font-bold"
+              >
+                <Star aria-hidden="true" className="size-3.5 fill-current" />
+                View review
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="btn-primary shrink-0 justify-center text-xs font-bold"
+                onClick={() => {
+                  onOpenReview(booking);
+                }}
+              >
+                <Star aria-hidden="true" className="size-3.5 fill-current" />
+                Write review
+              </button>
+            )}
           </div>
         </section>
       ) : null}
 
+      {/* Cancel action */}
       {isCustomerCancellable(booking.status) ? (
-        <section className="group/cancel-action relative overflow-hidden rounded-[1.65rem] border border-[rgba(124,74,90,0.18)] bg-[linear-gradient(145deg,rgba(249,238,242,0.62),rgba(255,255,255,0.38))] p-5 shadow-[0_16px_42px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:border-[rgba(124,74,90,0.28)] hover:shadow-[0_22px_58px_rgba(124,74,90,0.10)] sm:p-6">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(210,146,160,0.18)] blur-3xl transition duration-500 group-hover/cancel-action:scale-125"
-          />
-
-          <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-start gap-4">
-              <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/cancel-action:-translate-y-0.5 group-hover/cancel-action:scale-105">
-                <Ban aria-hidden="true" className="size-5" />
+        <section className="rounded-[1.25rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(249,238,242,0.48)] px-4 py-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.12)] text-[var(--color-muted-burgundy)]">
+                <Ban aria-hidden="true" className="size-3.5" />
               </span>
 
               <div className="min-w-0">
-                <p className="text-sm font-black text-[var(--color-near-black)] transition duration-300 group-hover/cancel-action:text-[var(--color-muted-burgundy)]">
+                <p className="text-xs font-black text-[var(--color-near-black)]">
                   Need to end this vendor commitment?
                 </p>
 
-                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+                <p className="mt-0.5 text-[0.7rem] font-semibold leading-5 text-[var(--color-charcoal)]/56">
                   Cancellation remains available while this booking is awaiting confirmation,
                   confirmed, deposit pending or active.
                 </p>
@@ -3047,7 +2812,7 @@ function BookingDetails({
 
             <button
               type="button"
-              className="group/cancel-details flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-[rgba(124,74,90,0.26)] bg-[rgba(124,74,90,0.10)] px-5 py-3 text-sm font-black text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(124,74,90,0.36)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_16px_34px_rgba(124,74,90,0.14)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+              className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[rgba(124,74,90,0.24)] bg-[rgba(124,74,90,0.08)] px-3.5 py-2 text-xs font-black text-[var(--color-muted-burgundy)] transition duration-300 hover:bg-[rgba(124,74,90,0.14)] disabled:cursor-not-allowed disabled:opacity-40"
               disabled={!canMutateBooking}
               title={!canMutateBooking ? (bookingLockedMessage ?? undefined) : undefined}
               onClick={() => {
@@ -3058,10 +2823,7 @@ function BookingDetails({
                 onCancel(booking);
               }}
             >
-              <Ban
-                aria-hidden="true"
-                className="size-4 transition duration-300 group-hover/cancel-details:rotate-[-4deg]"
-              />
+              <Ban aria-hidden="true" className="size-3.5" />
               Cancel booking
             </button>
           </div>

@@ -87,67 +87,77 @@ export function VendorProfileHealth({
   const remainingCount = healthItems.length - completedCount;
 
   return (
-    <section className="overflow-hidden rounded-[2rem] border border-white/60 bg-white/58 shadow-[0_28px_68px_rgba(62,42,51,0.11)] backdrop-blur-xl">
+    <section className="overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/58 shadow-[0_24px_60px_rgba(62,42,51,0.10)] backdrop-blur-xl">
       <div className="grid lg:grid-cols-[0.36fr_0.64fr]">
-        <div className="relative overflow-hidden bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-white sm:p-9">
+        <div className="relative overflow-hidden bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-5 text-white sm:p-6">
           <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-20 size-64 rounded-full bg-black/10 blur-3xl" />
 
-          <div className="relative">
-            <div className="grid size-12 place-items-center rounded-2xl bg-white/12">
-              <BadgeCheck className="size-6" />
+          <div className="relative flex h-full flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 place-items-center rounded-xl bg-white/12">
+                  <BadgeCheck className="size-5" />
+                </div>
+
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.22em] text-white/58">
+                  Profile health
+                </p>
+              </div>
+
+              <div className="mt-4 flex items-end gap-2.5">
+                <p className="text-[2.65rem] font-black leading-none tracking-[-0.065em]">
+                  {completionPercentage}%
+                </p>
+
+                <p className="pb-1 text-xs font-bold text-white/66">complete</p>
+              </div>
+
+              <p className="mt-3 max-w-sm text-xs font-semibold leading-5 text-white/72">
+                {remainingCount === 0
+                  ? 'Your profile includes all recommended business information.'
+                  : `${remainingCount} profile ${
+                      remainingCount === 1 ? 'detail remains' : 'details remain'
+                    } before your business profile is fully complete.`}
+              </p>
             </div>
 
-            <p className="mt-6 text-xs font-black uppercase tracking-[0.24em] text-white/58">
-              Profile health
-            </p>
+            <div className="mt-5">
+              <div className="h-1.5 overflow-hidden rounded-full bg-white/14">
+                <div
+                  className="h-full rounded-full bg-white transition-[width] duration-700 ease-out"
+                  style={{ width: `${completionPercentage}%` }}
+                />
+              </div>
 
-            <div className="mt-4 flex items-end gap-3">
-              <p className="text-5xl font-black tracking-[-0.065em]">{completionPercentage}%</p>
+              <div className="mt-3 flex items-center justify-between text-[0.68rem] font-black">
+                <span className="text-white/62">
+                  {completedCount}/{healthItems.length} complete
+                </span>
 
-              <p className="pb-1 text-sm font-bold text-white/66">complete</p>
-            </div>
-
-            <p className="mt-4 max-w-sm text-sm font-semibold leading-6 text-white/72">
-              {remainingCount === 0
-                ? 'Your profile includes all recommended business information.'
-                : `${remainingCount} profile ${
-                    remainingCount === 1 ? 'detail remains' : 'details remain'
-                  } before your business profile is fully complete.`}
-            </p>
-
-            <div className="mt-7 h-2 overflow-hidden rounded-full bg-white/14">
-              <div
-                className="h-full rounded-full bg-white transition-[width] duration-700 ease-out"
-                style={{ width: `${completionPercentage}%` }}
-              />
-            </div>
-
-            <div className="mt-6 flex items-center justify-between text-xs font-black">
-              <span className="text-white/62">
-                {completedCount}/{healthItems.length} complete
-              </span>
-
-              <span className="text-white">
-                {remainingCount === 0 ? 'Profile ready' : `${remainingCount} remaining`}
-              </span>
+                <span className="text-white">
+                  {remainingCount === 0 ? 'Profile ready' : `${remainingCount} remaining`}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="p-7 sm:p-9">
+        <div className="p-5 sm:p-6">
           <div>
             <p className="section-eyebrow">Profile checklist</p>
 
-            <h2 className="section-title">Strengthen what customers see</h2>
+            <h2 className="mt-1.5 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+              Strengthen what customers see
+            </h2>
 
-            <p className="section-description">
+            <p className="mt-1.5 max-w-3xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
               Each completed detail helps customers understand your business and trust the
               information shown across Eventure.
             </p>
           </div>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
             {healthItems.map((item) => {
               const Icon = item.icon;
 
@@ -156,39 +166,39 @@ export function VendorProfileHealth({
                   key={item.label}
                   className={
                     item.complete
-                      ? 'rounded-2xl border border-[rgba(142,151,115,0.22)] bg-[rgba(142,151,115,0.09)] p-4'
-                      : 'rounded-2xl border border-[rgba(142,92,103,0.16)] bg-[rgba(142,92,103,0.06)] p-4'
+                      ? 'rounded-[1.15rem] border border-[rgba(142,151,115,0.22)] bg-[rgba(142,151,115,0.09)] px-3.5 py-3'
+                      : 'rounded-[1.15rem] border border-[rgba(142,92,103,0.16)] bg-[rgba(142,92,103,0.06)] px-3.5 py-3'
                   }
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2.5">
                     <div
                       className={
                         item.complete
-                          ? 'grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.20)] text-[#46503a]'
-                          : 'grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,92,103,0.12)] text-[var(--color-rosewood)]'
+                          ? 'grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(142,151,115,0.20)] text-[#46503a]'
+                          : 'grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(142,92,103,0.12)] text-[var(--color-rosewood)]'
                       }
                     >
-                      {item.complete ? <Check className="size-4" /> : <Icon className="size-4" />}
+                      {item.complete ? <Check className="size-3.5" /> : <Icon className="size-3.5" />}
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm font-black text-[var(--color-near-black)]">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <h3 className="text-xs font-black text-[var(--color-near-black)]">
                           {item.label}
                         </h3>
 
                         <span
                           className={
                             item.complete
-                              ? 'rounded-full bg-[rgba(142,151,115,0.16)] px-2 py-0.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[#46503a]'
-                              : 'rounded-full bg-[rgba(142,92,103,0.11)] px-2 py-0.5 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-rosewood)]'
+                              ? 'rounded-full bg-[rgba(142,151,115,0.16)] px-1.5 py-0.5 text-[0.54rem] font-black uppercase tracking-[0.11em] text-[#46503a]'
+                              : 'rounded-full bg-[rgba(142,92,103,0.11)] px-1.5 py-0.5 text-[0.54rem] font-black uppercase tracking-[0.11em] text-[var(--color-rosewood)]'
                           }
                         >
                           {item.complete ? 'Complete' : 'Missing'}
                         </span>
                       </div>
 
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
+                      <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/54">
                         {item.description}
                       </p>
                     </div>
@@ -199,10 +209,10 @@ export function VendorProfileHealth({
           </div>
 
           {remainingCount > 0 ? (
-            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-[rgba(184,145,87,0.20)] bg-[rgba(184,145,87,0.08)] p-4">
-              <CircleAlert className="mt-0.5 size-5 shrink-0 text-[#7a5b2f]" />
+            <div className="mt-3 flex items-start gap-2.5 rounded-[1.1rem] border border-[rgba(184,145,87,0.20)] bg-[rgba(184,145,87,0.08)] px-3.5 py-2.5">
+              <CircleAlert className="mt-0.5 size-4 shrink-0 text-[#7a5b2f]" />
 
-              <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
+              <p className="text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/66">
                 Complete the missing items when editing becomes available to give customers a
                 stronger and more complete view of your business.
               </p>

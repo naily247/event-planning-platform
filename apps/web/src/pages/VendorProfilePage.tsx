@@ -34,7 +34,6 @@ import {
   updateVendorOnboardingProfile,
   type VendorOnboarding,
 } from '../features/vendors/vendor.api';
-import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const optionalDescriptionSchema = z
   .string()
@@ -445,199 +444,146 @@ export function VendorProfilePage() {
   return (
     <div className="workspace-shell relative">
       <div className="workspace-container max-w-7xl">
-        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
-          />
-
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
-
-              <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                  Vendor workspace
-                </p>
-
-                <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
-                  Business profile
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="hidden text-xs font-bold text-[var(--color-charcoal)]/46 sm:inline">
-                Customer-facing identity
-              </span>
-
-              <span className="status-chip w-fit" data-tone={statusContent.statusTone}>
-                {statusContent.label}
-              </span>
-            </div>
-          </div>
-        </header>
-
-        <main className="pb-10 pt-6">
-          <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/62 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.67)_52%,rgba(229,221,237,0.58)_100%)] shadow-[0_24px_72px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+        <main className="pb-8 pt-4">
+          <section className="relative isolate overflow-hidden rounded-[1.75rem] border border-white/62 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.67)_52%,rgba(229,221,237,0.58)_100%)] shadow-[0_20px_58px_rgba(64,42,51,0.09)] backdrop-blur-2xl">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-24 -top-28 size-80 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+              className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-[rgba(183,167,200,0.22)] blur-3xl"
             />
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -bottom-36 left-[34%] size-80 rounded-full bg-[rgba(142,92,103,0.11)] blur-3xl"
-            />
-
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] bg-[linear-gradient(135deg,transparent,rgba(255,255,255,0.26))] lg:block"
-            />
-
-            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-10 lg:p-10">
+            <div className="relative grid gap-5 p-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:px-6 lg:py-5">
               <div className="min-w-0">
-                <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <Store className="size-4" />
+                <div className="soft-chip w-fit text-[0.65rem] font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
+                  <Store className="size-3.5" />
                   Business profile
                 </div>
 
-                <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.02] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+                <h1 className="mt-3 max-w-3xl text-balance text-[2rem] font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-[2.25rem]">
                   Shape how customers experience your business.
-                </h2>
+                </h1>
 
-                <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
-                  Maintain the identity, story, contact details, locations, and services customers
-                  use when deciding whether your business is right for their event.
+                <p className="mt-2.5 max-w-2xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/64">
+                  Maintain the identity, contact details, locations, and services customers use when
+                  considering your business.
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-2.5">
+                <div className="mt-3 flex flex-wrap gap-2">
                   <span className="soft-chip text-xs font-black">
-                    <Building2 className="size-4" />
+                    <Building2 className="size-3.5" />
                     {businessName}
                   </span>
 
                   <span className="soft-chip text-xs font-black">
-                    <Store className="size-4" />
+                    <Store className="size-3.5" />
                     {primaryCategory}
                   </span>
 
                   <span className="soft-chip text-xs font-black">
-                    <MapPin className="size-4" />
+                    <MapPin className="size-3.5" />
                     {baseLocation}
                   </span>
                 </div>
               </div>
 
-              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`grid size-12 shrink-0 place-items-center rounded-2xl ${statusContent.tone}`}
-                      >
-                        <StatusIcon className="size-6" />
-                      </div>
-
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                          Profile status
-                        </p>
-
-                        <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                          {statusContent.title}
-                        </h3>
-                      </div>
+              <article className="rounded-[1.4rem] border border-white/70 bg-white/50 p-4 shadow-[0_14px_38px_rgba(31,27,29,0.07)] backdrop-blur-2xl">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className={`grid size-9 shrink-0 place-items-center rounded-xl ${statusContent.tone}`}
+                    >
+                      <StatusIcon className="size-4" />
                     </div>
 
-                    <span className="status-chip shrink-0" data-tone={statusContent.statusTone}>
-                      {statusContent.label}
-                    </span>
-                  </div>
+                    <div className="min-w-0">
+                      <p className="text-[0.6rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
+                        Profile status
+                      </p>
 
-                  <p className="mt-5 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/60">
-                    {statusContent.description}
-                  </p>
-
-                  <div className="mt-7 rounded-[1.35rem] border border-white/64 bg-white/36 p-4">
-                    <div className="flex items-end justify-between gap-5">
-                      <div>
-                        <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44">
-                          Profile completion
-                        </p>
-
-                        <p className="mt-2 text-4xl font-black tracking-[-0.06em] text-[var(--color-near-black)]">
-                          {onboarding.completion.percentage}%
-                        </p>
-                      </div>
-
-                      <p className="pb-1 text-right text-xs font-black leading-5 text-[var(--color-deep-plum)]">
-                        {onboarding.completion.percentage < 100
-                          ? `${100 - onboarding.completion.percentage}% remaining`
-                          : onboarding.profile.verificationStatus === 'APPROVED'
-                            ? 'Profile complete'
-                            : 'Ready for review'}
+                      <p className="mt-0.5 text-base font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                        {statusContent.title}
                       </p>
                     </div>
-
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),var(--color-valendor-lilac))] transition-[width] duration-700"
-                        style={{
-                          width: `${onboarding.completion.percentage}%`,
-                        }}
-                      />
-                    </div>
                   </div>
+
+                  <span className="status-chip shrink-0" data-tone={statusContent.statusTone}>
+                    {statusContent.label}
+                  </span>
+                </div>
+
+                <p className="mt-2.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
+                  {statusContent.description}
+                </p>
+
+                <div className="mt-3 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                      Profile completion
+                    </p>
+
+                    <p className="mt-0.5 text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                      {onboarding.completion.percentage}%
+                    </p>
+                  </div>
+
+                  <p className="pb-0.5 text-right text-[0.65rem] font-black text-[var(--color-deep-plum)]">
+                    {onboarding.completion.percentage < 100
+                      ? `${100 - onboarding.completion.percentage}% remaining`
+                      : onboarding.profile.verificationStatus === 'APPROVED'
+                        ? 'Profile complete'
+                        : 'Ready for review'}
+                  </p>
+                </div>
+
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),var(--color-valendor-lilac))] transition-[width] duration-700"
+                    style={{
+                      width: `${onboarding.completion.percentage}%`,
+                    }}
+                  />
                 </div>
               </article>
             </div>
           </section>
 
-          <section className="mt-6 overflow-hidden rounded-[2rem] border border-white/60 bg-white/58 shadow-[0_28px_68px_rgba(62,42,51,0.11)] backdrop-blur-xl">
-            <div className="grid lg:grid-cols-[0.7fr_1.3fr]">
-              <div className="relative flex min-h-[34rem] flex-col overflow-hidden bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-white sm:p-9">
-                <div className="pointer-events-none absolute -right-16 -top-12 size-56 rounded-full bg-white/10 blur-2xl" />
-                <div className="pointer-events-none absolute -bottom-20 -left-16 size-56 rounded-full bg-black/10 blur-3xl" />
+          <section className="mt-4 overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/58 shadow-[0_18px_48px_rgba(62,42,51,0.08)] backdrop-blur-xl">
+            <div className="grid lg:grid-cols-[0.42fr_0.58fr]">
+              <div className="relative flex min-h-[25rem] flex-col overflow-hidden bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-5 text-white">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-2xl" />
 
-                <div className="relative">
-                  <p className="text-xs font-black uppercase tracking-[0.24em] text-white/62">
-                    Business identity
-                  </p>
+                <div className="relative flex shrink-0 items-center gap-3">
+                  <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full border border-white/25 bg-white p-1">
+                    {businessLogoUrl ? (
+                      <img
+                        src={businessLogoUrl}
+                        alt={`${businessName} logo`}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center rounded-full bg-[linear-gradient(135deg,#8f6277,#58374f)] text-sm font-black text-white">
+                        {businessInitials}
+                      </div>
+                    )}
+                  </div>
 
-                  <div className="mt-7 flex items-center gap-4">
-                    <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-full border border-white/25 bg-white p-1.5 shadow-[0_20px_44px_rgba(22,12,18,0.25)]">
-                      {businessLogoUrl ? (
-                        <img
-                          src={businessLogoUrl}
-                          alt={`${businessName} logo`}
-                          className="h-full w-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="grid h-full w-full place-items-center rounded-full bg-[linear-gradient(135deg,#8f6277,#58374f)] text-xl font-black text-white">
-                          {businessInitials}
-                        </div>
-                      )}
-                    </div>
+                  <div className="min-w-0">
+                    <p className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-white/55">
+                      Customer-facing identity
+                    </p>
 
-                    <div className="min-w-0">
-                      <p className="truncate text-lg font-black tracking-[-0.03em] text-white">
-                        {businessName}
-                      </p>
+                    <p className="mt-1 truncate text-base font-black tracking-[-0.03em]">
+                      {businessName}
+                    </p>
 
-                      <p className="mt-1 text-sm font-semibold text-white/60">{primaryCategory}</p>
-                    </div>
+                    <p className="mt-0.5 text-xs font-semibold text-white/60">
+                      {primaryCategory} · {baseLocation}
+                    </p>
                   </div>
                 </div>
 
-                <div className="relative mt-8">
+                <div className="relative mt-4 flex min-h-0 flex-1">
                   {featuredPortfolioItem ? (
-                    <div className="group relative overflow-hidden rounded-[1.6rem] border border-white/18 bg-black/10 shadow-[0_22px_50px_rgba(20,10,16,0.28)]">
+                    <div className="group relative min-h-[18rem] w-full flex-1 overflow-hidden rounded-[1.2rem] border border-white/18 bg-black/10">
                       <img
                         src={featuredPortfolioItem.imageUrl}
                         alt={
@@ -645,53 +591,42 @@ export function VendorProfilePage() {
                             ? featuredPortfolioItem.title
                             : `${businessName} featured portfolio work`
                         }
-                        className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.025]"
+                        className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]"
                       />
 
-                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_42%,rgba(24,13,20,0.78)_100%)]" />
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_38%,rgba(24,13,20,0.82)_100%)]" />
 
-                      <div className="absolute inset-x-0 bottom-0 p-5">
-                        <div className="flex flex-wrap items-end justify-between gap-3">
-                          <div>
-                            <p className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-white/60">
-                              {featuredPortfolioItem.isFeatured
-                                ? 'Featured work'
-                                : 'Portfolio work'}
-                            </p>
+                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+                        <div className="min-w-0">
+                          <p className="text-[0.58rem] font-black uppercase tracking-[0.17em] text-white/62">
+                            {featuredPortfolioItem.isFeatured ? 'Featured work' : 'Portfolio work'}
+                          </p>
 
-                            <p className="mt-1 line-clamp-2 text-base font-black text-white">
-                              {featuredPortfolioItem.title ?? 'Selected portfolio work'}
-                            </p>
-                          </div>
-
-                          <Link
-                            to="/vendor/portfolio"
-                            className="inline-flex shrink-0 items-center rounded-full border border-white/20 bg-white/12 px-3 py-2 text-xs font-black text-white backdrop-blur-md transition hover:bg-white/18"
-                          >
-                            View portfolio
-                          </Link>
+                          <p className="mt-1 truncate text-sm font-black text-white">
+                            {featuredPortfolioItem.title ?? 'Selected portfolio work'}
+                          </p>
                         </div>
+
+                        <Link
+                          to="/vendor/portfolio"
+                          className="shrink-0 rounded-full border border-white/24 bg-white/14 px-3 py-2 text-[0.65rem] font-black text-white backdrop-blur-md transition hover:bg-white/22"
+                        >
+                          View portfolio
+                        </Link>
                       </div>
                     </div>
                   ) : (
-                    <div className="grid min-h-72 place-items-center rounded-[1.6rem] border border-dashed border-white/22 bg-white/[0.06] px-6 text-center">
+                    <div className="grid min-h-[18rem] w-full flex-1 place-items-center rounded-[1.2rem] border border-dashed border-white/22 bg-white/[0.06] px-4 text-center">
                       <div>
-                        <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-white/10">
-                          <Sparkles className="size-5 text-white/75" />
-                        </div>
+                        <Sparkles className="mx-auto size-4 text-white/70" />
 
-                        <p className="mt-4 text-sm font-black text-white">
+                        <p className="mt-2 text-xs font-black text-white">
                           Your portfolio will appear here.
-                        </p>
-
-                        <p className="mx-auto mt-2 max-w-xs text-xs font-semibold leading-5 text-white/58">
-                          Add real work to your portfolio to strengthen your customer-facing
-                          business identity.
                         </p>
 
                         <Link
                           to="/vendor/portfolio"
-                          className="mt-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black text-white transition hover:bg-white/16"
+                          className="mt-2 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[0.65rem] font-black text-white transition hover:bg-white/16"
                         >
                           Manage portfolio
                         </Link>
@@ -699,41 +634,18 @@ export function VendorProfilePage() {
                     </div>
                   )}
                 </div>
-
-                <div className="relative mt-8">
-                  <p className="text-sm font-bold text-white/66">Customer-facing identity</p>
-
-                  <p className="mt-2 max-w-sm text-sm leading-6 text-white/78">
-                    Your logo, business details and selected work help customers recognise and
-                    understand your business throughout Eventure.
-                  </p>
-                </div>
               </div>
 
-              <div className="p-7 sm:p-9 lg:p-10">
-                <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
+              <div className="p-5">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                   <div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                        {businessName}
-                      </h2>
+                    <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Public profile preview
+                    </p>
 
-                      <span className="status-chip" data-tone={statusContent.statusTone}>
-                        {statusContent.label}
-                      </span>
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="soft-chip text-xs font-black">
-                        <Building2 className="size-4" />
-                        {primaryCategory}
-                      </span>
-
-                      <span className="soft-chip text-xs font-black">
-                        <MapPin className="size-4" />
-                        {baseLocation}
-                      </span>
-                    </div>
+                    <h2 className="mt-1 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      What customers currently see
+                    </h2>
                   </div>
 
                   {onboarding.profile.verificationStatus === 'APPROVED' ? (
@@ -744,15 +656,15 @@ export function VendorProfilePage() {
                         returnTo: '/vendor/profile',
                         returnLabel: 'Back to business profile',
                       }}
-                      className="btn-secondary w-fit text-sm font-bold"
+                      className="btn-secondary w-fit text-xs font-bold"
                     >
                       View public profile
-                      <ExternalLink className="size-4" />
+                      <ExternalLink className="size-3.5" />
                     </Link>
                   ) : null}
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-3">
                   <VendorPublicPreviewCard
                     businessName={businessName}
                     slug={onboarding.profile.slug}
@@ -768,7 +680,7 @@ export function VendorProfilePage() {
             </div>
           </section>
 
-          <div className="mt-6">
+          <div className="mt-4">
             <VendorProfileHealth
               businessName={onboarding.profile.businessName}
               description={onboarding.profile.description}
@@ -791,31 +703,33 @@ export function VendorProfilePage() {
             </section>
           ) : null}
 
-          <form className="mt-6 grid gap-6" onSubmit={onSave}>
-            <section className="workspace-panel">
-              <div className="grid gap-8 lg:grid-cols-[0.34fr_0.66fr]">
-                <div>
+          <form className="mt-4 grid gap-4" onSubmit={onSave}>
+            <section className="workspace-panel !p-4 sm:!px-5 sm:!py-4">
+              <div className="grid gap-4 lg:grid-cols-[0.28fr_0.72fr] lg:items-start">
+                <div className="lg:pt-0.5">
                   <p className="section-eyebrow">Business story</p>
 
-                  <h2 className="section-title">Introduce your business</h2>
+                  <h2 className="mt-1 text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    Introduce your business
+                  </h2>
 
-                  <p className="section-description">
-                    Give customers a clear name and a useful description of your experience,
-                    services, approach, and style.
+                  <p className="mt-1.5 max-w-sm text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
+                    Give customers a clear name and useful description of your experience, services,
+                    approach, and style.
                   </p>
                 </div>
 
-                <div className="grid gap-5">
+                <div className="grid gap-2.5">
                   <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/68">
                       Business name
                     </span>
 
                     <span className="relative block">
-                      <Building2 className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+                      <Building2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
 
                       <input
-                        className="form-field !pl-12 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
+                        className="form-field !min-h-10 !py-2 !pl-10 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
                         type="text"
                         aria-invalid={Boolean(form.formState.errors.businessName)}
                         disabled={!isEditable || saveMutation.isPending}
@@ -831,16 +745,16 @@ export function VendorProfilePage() {
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 flex items-center justify-between gap-4">
-                      <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                    <span className="mb-1 flex items-center justify-between gap-4">
+                      <span className="text-[0.7rem] font-black text-[var(--color-charcoal)]/68">
                         Business description
                       </span>
 
                       <span
                         className={
                           descriptionLength > 2000
-                            ? 'text-xs font-black text-[var(--color-rosewood)]'
-                            : 'text-xs font-bold text-[var(--color-charcoal)]/42'
+                            ? 'text-[0.68rem] font-black text-[var(--color-rosewood)]'
+                            : 'text-[0.68rem] font-bold text-[var(--color-charcoal)]/42'
                         }
                       >
                         {descriptionLength}/2000
@@ -848,15 +762,15 @@ export function VendorProfilePage() {
                     </span>
 
                     <textarea
-                      className="form-field min-h-44 resize-y disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
+                      className="form-field min-h-[4.25rem] resize-y !py-2.5 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
                       placeholder="Describe your experience, style, services, and what makes your business distinctive."
                       aria-invalid={Boolean(form.formState.errors.description)}
                       disabled={!isEditable || saveMutation.isPending}
                       {...form.register('description')}
                     />
 
-                    <span className="mt-2 flex flex-col gap-1">
-                      <span className="text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                    <span className="mt-1 flex flex-col gap-0.5">
+                      <span className="text-[0.65rem] font-semibold leading-4 text-[var(--color-charcoal)]/44">
                         Mention your experience, event types, service style, and what makes your
                         business distinctive.
                       </span>
@@ -878,37 +792,39 @@ export function VendorProfilePage() {
               </div>
             </section>
 
-            <section className="grid gap-6 lg:grid-cols-2">
-              <div className="workspace-panel">
-                <div>
+            <section className="grid gap-4 lg:grid-cols-2">
+              <div className="workspace-panel !p-4 sm:!p-5">
+                <div className="flex flex-col gap-1">
                   <p className="section-eyebrow">Contact information</p>
 
-                  <h2 className="section-title">How customers can reach you</h2>
+                  <h2 className="text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    How customers can reach you
+                  </h2>
 
-                  <p className="section-description">
+                  <p className="text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
                     Keep your direct contact details accurate and professional.
                   </p>
                 </div>
 
-                <div className="mt-7 grid gap-5">
+                <div className="mt-3 grid gap-3">
                   <label className="block">
-                    <span className="mb-2 flex items-center justify-between gap-4">
-                      <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                    <span className="mb-1 flex items-center justify-between gap-4">
+                      <span className="text-[0.7rem] font-black text-[var(--color-charcoal)]/68">
                         Contact phone
                       </span>
 
                       {!onboarding.profile.contactPhone ? (
-                        <span className="rounded-full bg-[rgba(142,92,103,0.11)] px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-[0.12em] text-[var(--color-rosewood)]">
+                        <span className="rounded-full bg-[rgba(142,92,103,0.11)] px-2 py-0.5 text-[0.58rem] font-black uppercase tracking-[0.12em] text-[var(--color-rosewood)]">
                           Missing
                         </span>
                       ) : null}
                     </span>
 
                     <span className="relative block">
-                      <Phone className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+                      <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
 
                       <input
-                        className="form-field !pl-12 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
+                        className="form-field !min-h-10 !py-2 !pl-10 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
                         type="tel"
                         placeholder="+94771234567"
                         aria-invalid={Boolean(form.formState.errors.contactPhone)}
@@ -917,7 +833,7 @@ export function VendorProfilePage() {
                       />
                     </span>
 
-                    <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                    <span className="mt-1 block text-[0.64rem] font-semibold leading-4 text-[var(--color-charcoal)]/46">
                       Use international format so customers can contact your business reliably.
                     </span>
 
@@ -929,15 +845,15 @@ export function VendorProfilePage() {
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/68">
                       Website
                     </span>
 
                     <span className="relative block">
-                      <Globe2 className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+                      <Globe2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
 
                       <input
-                        className="form-field !pl-12 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
+                        className="form-field !min-h-10 !py-2 !pl-10 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
                         type="url"
                         placeholder="https://example.com"
                         aria-invalid={Boolean(form.formState.errors.website)}
@@ -955,28 +871,30 @@ export function VendorProfilePage() {
                 </div>
               </div>
 
-              <div className="workspace-panel">
-                <div>
+              <div className="workspace-panel !p-4 sm:!p-5">
+                <div className="flex flex-col gap-1">
                   <p className="section-eyebrow">Business presence</p>
 
-                  <h2 className="section-title">Where you provide services</h2>
+                  <h2 className="text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    Where you provide services
+                  </h2>
 
-                  <p className="section-description">
+                  <p className="text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
                     Help customers understand your primary location and the areas you cover.
                   </p>
                 </div>
 
-                <div className="mt-7 grid gap-5">
+                <div className="mt-3 grid gap-3">
                   <label className="block">
-                    <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/68">
                       Base location
                     </span>
 
                     <span className="relative block">
-                      <MapPin className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+                      <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
 
                       <input
-                        className="form-field !pl-12 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
+                        className="form-field !min-h-10 !py-2 !pl-10 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
                         type="text"
                         placeholder="Colombo"
                         aria-invalid={Boolean(form.formState.errors.baseLocation)}
@@ -993,18 +911,18 @@ export function VendorProfilePage() {
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 flex items-center justify-between gap-4">
-                      <span className="text-sm font-black text-[var(--color-charcoal)]/72">
+                    <span className="mb-1 flex items-center justify-between gap-4">
+                      <span className="text-[0.7rem] font-black text-[var(--color-charcoal)]/68">
                         Service areas
                       </span>
 
-                      <span className="text-xs font-bold text-[var(--color-charcoal)]/42">
+                      <span className="text-[0.68rem] font-bold text-[var(--color-charcoal)]/42">
                         {selectedServiceAreas.length}/20
                       </span>
                     </span>
 
                     <input
-                      className="form-field disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
+                      className="form-field !min-h-10 !py-2 disabled:cursor-not-allowed disabled:border-[rgba(64,51,56,0.08)] disabled:bg-[rgba(227,230,232,0.58)] disabled:text-[var(--color-charcoal)]/62 disabled:opacity-100"
                       type="text"
                       placeholder="Colombo, Gampaha, Kandy"
                       aria-invalid={Boolean(form.formState.errors.serviceAreas)}
@@ -1012,24 +930,24 @@ export function VendorProfilePage() {
                       {...form.register('serviceAreas')}
                     />
 
-                    <span className="mt-2 block text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
-                      Separate multiple areas using commas.
-                    </span>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="mr-1 text-[0.64rem] font-semibold text-[var(--color-charcoal)]/46">
+                        Separate using commas.
+                      </span>
 
-                    {selectedServiceAreas.length > 0 ? (
-                      <span className="mt-4 flex flex-wrap gap-2">
-                        {selectedServiceAreas.map((area) => (
+                      {selectedServiceAreas.length > 0 ? (
+                        selectedServiceAreas.map((area) => (
                           <span
                             key={area}
-                            className="inline-flex items-center gap-2 rounded-full border border-[rgba(93,58,85,0.12)] bg-[rgba(93,58,85,0.07)] px-3 py-1.5 text-xs font-black text-[var(--color-deep-plum)]"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(93,58,85,0.12)] bg-[rgba(93,58,85,0.07)] px-2.5 py-1 text-[0.65rem] font-black text-[var(--color-deep-plum)]"
                           >
-                            <MapPin className="size-3.5" />
+                            <MapPin className="size-3" />
                             {area}
 
                             {isEditable ? (
                               <button
                                 type="button"
-                                className="grid size-5 place-items-center rounded-full text-[var(--color-charcoal)]/45 transition hover:bg-white/70 hover:text-[var(--color-rosewood)]"
+                                className="grid size-4 place-items-center rounded-full text-[var(--color-charcoal)]/45 transition hover:bg-white/70 hover:text-[var(--color-rosewood)]"
                                 aria-label={`Remove ${area}`}
                                 onClick={() => {
                                   const remainingAreas = selectedServiceAreas.filter(
@@ -1042,18 +960,17 @@ export function VendorProfilePage() {
                                   });
                                 }}
                               >
-                                <X className="size-3" />
+                                <X className="size-2.5" />
                               </button>
                             ) : null}
                           </span>
-                        ))}
-                      </span>
-                    ) : (
-                      <span className="mt-4 flex items-center gap-2 rounded-2xl border border-dashed border-[rgba(93,58,85,0.16)] bg-white/20 px-4 py-3 text-xs font-semibold text-[var(--color-charcoal)]/52">
-                        <MapPin className="size-4 text-[var(--color-deep-plum)]/60" />
-                        No additional service areas have been added.
-                      </span>
-                    )}
+                        ))
+                      ) : (
+                        <span className="text-[0.65rem] font-semibold text-[var(--color-charcoal)]/48">
+                          No additional service areas added.
+                        </span>
+                      )}
+                    </div>
 
                     {form.formState.errors.serviceAreas ? (
                       <span className="field-error block">
@@ -1065,25 +982,26 @@ export function VendorProfilePage() {
               </div>
             </section>
 
-            <section className="workspace-panel">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <section className="workspace-panel !p-4 sm:!px-5 sm:!py-4">
+              <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                 <div>
                   <p className="section-eyebrow">Service categories</p>
 
-                  <h2 className="section-title">What does your business provide?</h2>
+                  <h2 className="mt-1 text-lg font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    What does your business provide?
+                  </h2>
 
-                  <p className="section-description">
-                    Select up to five categories. These help customers discover your business in the
-                    marketplace.
+                  <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/50">
+                    Select up to five categories customers can use to discover your business.
                   </p>
                 </div>
 
-                <span className="soft-chip w-fit text-xs font-black">
+                <span className="soft-chip w-fit !px-3 !py-1.5 text-[0.68rem] font-black">
                   {selectedCategoryIds.length}/5 selected
                 </span>
               </div>
 
-              <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-3 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4">
                 {categories.map((category) => {
                   const isSelected = selectedCategoryIds.includes(category.id);
 
@@ -1093,11 +1011,11 @@ export function VendorProfilePage() {
                       className={
                         !isEditable
                           ? isSelected
-                            ? 'rounded-2xl border border-[rgba(93,58,85,0.20)] bg-[rgba(93,58,85,0.08)] p-4'
-                            : 'rounded-2xl border border-white/45 bg-white/16 p-4 opacity-55'
+                            ? 'flex min-h-10 items-center justify-between gap-2 rounded-xl border border-[rgba(93,58,85,0.20)] bg-[rgba(93,58,85,0.08)] px-3 py-2'
+                            : 'flex min-h-10 items-center justify-between gap-2 rounded-xl border border-white/45 bg-white/16 px-3 py-2 opacity-50'
                           : isSelected
-                            ? 'cursor-pointer rounded-2xl border border-[rgba(93,58,85,0.30)] bg-[rgba(93,58,85,0.11)] p-4 shadow-[0_12px_28px_rgba(72,49,61,0.08)] transition hover:-translate-y-0.5'
-                            : 'cursor-pointer rounded-2xl border border-white/55 bg-white/24 p-4 transition hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.16)] hover:bg-white/42'
+                            ? 'flex min-h-10 cursor-pointer items-center justify-between gap-2 rounded-xl border border-[rgba(93,58,85,0.30)] bg-[rgba(93,58,85,0.11)] px-3 py-2 shadow-[0_6px_18px_rgba(72,49,61,0.06)] transition hover:-translate-y-0.5'
+                            : 'flex min-h-10 cursor-pointer items-center justify-between gap-2 rounded-xl border border-white/55 bg-white/24 px-3 py-2 transition hover:border-[rgba(93,58,85,0.16)] hover:bg-white/42'
                       }
                     >
                       <input
@@ -1112,26 +1030,18 @@ export function VendorProfilePage() {
                         {...form.register('categoryIds')}
                       />
 
-                      <span className="flex items-center justify-between gap-3">
-                        <span>
-                          <span className="block text-sm font-black text-[var(--color-near-black)]">
-                            {category.name}
-                          </span>
+                      <span className="min-w-0 truncate text-[0.7rem] font-black text-[var(--color-near-black)]">
+                        {category.name}
+                      </span>
 
-                          <span className="mt-1 block text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
-                            Helps customers discover this service
-                          </span>
-                        </span>
-
-                        <span
-                          className={
-                            isSelected
-                              ? 'grid size-8 place-items-center rounded-xl bg-[var(--color-deep-plum)] text-white'
-                              : 'grid size-8 place-items-center rounded-xl bg-white/38 text-transparent'
-                          }
-                        >
-                          <Check className="size-4" />
-                        </span>
+                      <span
+                        className={
+                          isSelected
+                            ? 'grid size-5 shrink-0 place-items-center rounded-md bg-[var(--color-deep-plum)] text-white'
+                            : 'grid size-5 shrink-0 place-items-center rounded-md bg-white/38 text-transparent'
+                        }
+                      >
+                        <Check className="size-3" />
                       </span>
                     </label>
                   );
@@ -1139,7 +1049,7 @@ export function VendorProfilePage() {
               </div>
 
               {form.formState.errors.categoryIds ? (
-                <p className="field-error mt-4">{form.formState.errors.categoryIds.message}</p>
+                <p className="field-error mt-2">{form.formState.errors.categoryIds.message}</p>
               ) : null}
             </section>
 
@@ -1155,14 +1065,14 @@ export function VendorProfilePage() {
               </div>
             ) : null}
 
-            <section className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-white shadow-[0_26px_60px_rgba(75,44,62,0.22)] sm:p-8">
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <section className="overflow-hidden rounded-[1.6rem] bg-[linear-gradient(135deg,var(--color-deep-plum),var(--color-muted-burgundy))] px-5 py-4 text-white shadow-[0_18px_46px_rgba(75,44,62,0.18)] sm:px-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.22em] text-white/58">
                     Profile controls
                   </p>
 
-                  <p className="mt-3 text-xl font-black">
+                  <p className="mt-1.5 text-base font-black">
                     {isEditable
                       ? form.formState.isDirty
                         ? 'You have unsaved profile changes.'
@@ -1170,7 +1080,7 @@ export function VendorProfilePage() {
                       : 'This profile is currently locked for editing.'}
                   </p>
 
-                  <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/68">
+                  <p className="mt-1 max-w-2xl text-xs font-semibold leading-5 text-white/66">
                     {onboarding.profile.verificationStatus === 'APPROVED'
                       ? onboarding.completion.percentage < 100
                         ? 'Your business is approved. Add the remaining details later to strengthen the information customers see.'

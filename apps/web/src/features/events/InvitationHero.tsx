@@ -229,9 +229,9 @@ export function InvitationHero({
     ? 'border-white/24 bg-black/34'
     : 'border-white/58 bg-white/44';
 
-  return (
+    return (
     <section
-      className="relative isolate overflow-hidden rounded-[2.3rem] border border-white/45 shadow-[0_28px_90px_rgba(31,27,29,0.16)]"
+      className="relative isolate overflow-hidden rounded-[2.15rem] border border-white/45 shadow-[0_24px_75px_rgba(31,27,29,0.15)]"
       aria-label={isPreview ? `${eventName} invitation design preview` : `${eventName} invitation`}
       style={{
         background: template.background,
@@ -257,7 +257,7 @@ export function InvitationHero({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-20 h-[42%] bg-[linear-gradient(180deg,transparent,rgba(17,16,18,0.18))]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-20 h-[38%] bg-[linear-gradient(180deg,transparent,rgba(17,16,18,0.18))]"
       />
 
       <div
@@ -270,35 +270,35 @@ export function InvitationHero({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-32 -top-32 -z-10 size-[28rem] rounded-full bg-white/18 blur-3xl"
+        className="pointer-events-none absolute -left-32 -top-32 -z-10 size-[26rem] rounded-full bg-white/18 blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-40 left-[18%] -z-10 size-[30rem] rounded-full bg-white/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-40 left-[18%] -z-10 size-[28rem] rounded-full bg-white/10 blur-3xl"
       />
 
-      <div className="relative grid min-h-[34rem] gap-8 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end lg:p-9">
+      <div className="relative grid min-h-[25rem] gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center lg:gap-6 lg:p-6">
         <div
-          className={`max-w-[48rem] rounded-[1.8rem] border p-5 shadow-[0_22px_65px_rgba(31,27,29,0.12)] backdrop-blur-[10px] sm:p-7 ${textSurfaceClassName}`}
+          className={`max-w-[46rem] rounded-[1.65rem] border p-5 shadow-[0_18px_55px_rgba(31,27,29,0.11)] backdrop-blur-[10px] sm:p-6 ${textSurfaceClassName}`}
         >
           <div
-            className="inline-flex w-fit items-center gap-2 rounded-full border border-white/38 bg-white/16 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] shadow-[0_10px_26px_rgba(31,27,29,0.08)] backdrop-blur-xl"
+            className="inline-flex w-fit items-center gap-2 rounded-full border border-white/38 bg-white/16 px-3.5 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.2em] shadow-[0_8px_22px_rgba(31,27,29,0.08)] backdrop-blur-xl"
             style={{
               color: template.textColor,
             }}
           >
             {isPreview ? (
-              <Eye aria-hidden="true" className="size-4" />
+              <Eye aria-hidden="true" className="size-3.5" />
             ) : (
-              <Sparkles aria-hidden="true" className="size-4" />
+              <Sparkles aria-hidden="true" className="size-3.5" />
             )}
 
             {isPreview ? 'Invitation preview' : 'You’re invited'}
           </div>
 
           <p
-            className="mt-7 text-xs font-black uppercase tracking-[0.22em]"
+            className="mt-4 text-[0.68rem] font-black uppercase tracking-[0.2em]"
             style={{
               color: selectedAccent,
             }}
@@ -307,7 +307,7 @@ export function InvitationHero({
           </p>
 
           <h2
-            className="mt-4 max-w-4xl text-balance text-[2.65rem] font-black leading-[0.96] sm:text-5xl lg:text-[3.55rem]"
+            className="mt-2.5 max-w-4xl text-balance text-[2.25rem] font-black leading-[0.98] sm:text-[2.7rem] lg:text-[3rem]"
             style={{
               color: template.textColor,
               ...getFontStyle(selectedFont),
@@ -319,7 +319,7 @@ export function InvitationHero({
           </h2>
 
           <p
-            className="mt-6 max-w-2xl text-pretty text-base font-semibold leading-7 sm:text-lg sm:leading-8"
+            className="mt-4 max-w-2xl text-pretty text-sm font-semibold leading-6 sm:text-[0.95rem] sm:leading-6"
             style={{
               color: template.mutedTextColor,
             }}
@@ -329,9 +329,9 @@ export function InvitationHero({
               : `You’re invited to ${eventName}. Review the celebration details and let the host know whether you’ll be joining.`}
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <span
-              className="rounded-full border border-white/36 bg-white/16 px-4 py-2 text-xs font-black shadow-[0_8px_22px_rgba(31,27,29,0.07)] backdrop-blur-xl"
+              className="rounded-full border border-white/36 bg-white/16 px-3.5 py-1.5 text-[0.68rem] font-black shadow-[0_7px_18px_rgba(31,27,29,0.07)] backdrop-blur-xl"
               style={{
                 color: template.textColor,
               }}
@@ -340,7 +340,7 @@ export function InvitationHero({
             </span>
 
             <span
-              className="rounded-full border border-white/36 bg-white/16 px-4 py-2 text-xs font-black shadow-[0_8px_22px_rgba(31,27,29,0.07)] backdrop-blur-xl"
+              className="rounded-full border border-white/36 bg-white/16 px-3.5 py-1.5 text-[0.68rem] font-black shadow-[0_7px_18px_rgba(31,27,29,0.07)] backdrop-blur-xl"
               style={{
                 color: template.textColor,
               }}
@@ -351,9 +351,9 @@ export function InvitationHero({
         </div>
 
         <aside
-          className={`relative overflow-hidden rounded-[1.8rem] border p-3 shadow-[0_24px_70px_rgba(31,27,29,0.18)] backdrop-blur-2xl ${secondarySurfaceClassName}`}
+          className={`relative overflow-hidden rounded-[1.65rem] border p-2.5 shadow-[0_20px_58px_rgba(31,27,29,0.17)] backdrop-blur-2xl ${secondarySurfaceClassName}`}
         >
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.35rem] border border-white/38 bg-black/10">
+          <div className="relative aspect-[16/10] overflow-hidden rounded-[1.2rem] border border-white/38 bg-black/10">
             <img
               src={secondaryBackground.imagePath}
               alt={secondaryBackground.alt}
@@ -365,28 +365,28 @@ export function InvitationHero({
               className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(180deg,transparent,rgba(16,16,18,0.56))]"
             />
 
-            <span className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/28 px-3 py-1.5 text-[0.65rem] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-xl">
-              <Images aria-hidden="true" className="size-3.5" />
+            <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-black/28 px-2.5 py-1 text-[0.58rem] font-black uppercase tracking-[0.13em] text-white shadow-[0_7px_20px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+              <Images aria-hidden="true" className="size-3" />
               Companion artwork
             </span>
           </div>
 
-          <div className="relative px-2 pb-2 pt-5">
+          <div className="relative px-2 pb-1.5 pt-3">
             <div
-              className="grid size-11 place-items-center rounded-2xl border border-white/36 bg-white/16 shadow-[0_10px_26px_rgba(31,27,29,0.08)]"
+              className="grid size-9 place-items-center rounded-xl border border-white/36 bg-white/16 shadow-[0_8px_22px_rgba(31,27,29,0.08)]"
               style={{
                 color: selectedAccent,
               }}
             >
               {isPreview ? (
-                <Sparkles aria-hidden="true" className="size-5" />
+                <Sparkles aria-hidden="true" className="size-4" />
               ) : (
-                <Clock3 aria-hidden="true" className="size-5" />
+                <Clock3 aria-hidden="true" className="size-4" />
               )}
             </div>
 
             <p
-              className="mt-5 text-xs font-black uppercase tracking-[0.16em]"
+              className="mt-3 text-[0.64rem] font-black uppercase tracking-[0.15em]"
               style={{
                 color: template.mutedTextColor,
               }}
@@ -395,7 +395,7 @@ export function InvitationHero({
             </p>
 
             <p
-              className="mt-2 text-xl font-black leading-7 tracking-[-0.035em]"
+              className="mt-1.5 text-base font-black leading-5 tracking-[-0.025em]"
               style={{
                 color: template.textColor,
               }}
@@ -408,7 +408,7 @@ export function InvitationHero({
             </p>
 
             <p
-              className="mt-3 text-sm font-semibold leading-6"
+              className="mt-2 text-xs font-semibold leading-5"
               style={{
                 color: template.mutedTextColor,
               }}
@@ -423,3 +423,4 @@ export function InvitationHero({
     </section>
   );
 }
+

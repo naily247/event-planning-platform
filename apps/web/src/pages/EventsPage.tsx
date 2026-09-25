@@ -1188,564 +1188,567 @@ export function EventsPage() {
       </div>
 
       {isCreateFormOpen ? (
-        <div
-          className="events-modal-backdrop fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.46)] px-4 py-6 backdrop-blur-md sm:py-8"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="create-event-title"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              closeCreateForm();
-            }
-          }}
-        >
-          <style>
-            {`
-    @keyframes eventPreviewSwap {
-      0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.985);
-        filter: saturate(0.88);
+  <div
+    className="events-modal-backdrop fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.46)] px-4 py-2 backdrop-blur-md sm:py-3"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="create-event-title"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) {
+        closeCreateForm();
       }
+    }}
+  >
+    <style>
+      {`
+        @keyframes eventPreviewSwap {
+          0% {
+            opacity: 0;
+            transform: translateY(10px) scale(0.985);
+            filter: saturate(0.88);
+          }
 
-      55% {
-        opacity: 1;
-      }
+          55% {
+            opacity: 1;
+          }
 
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: saturate(1);
-      }
-    }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: saturate(1);
+          }
+        }
 
-    @media (prefers-reduced-motion: reduce) {
-      .event-preview-swap {
-        animation: none !important;
-      }
-    }
-  `}
-          </style>
-          <div className="events-modal-panel mx-auto max-w-6xl">
-            <div className="overflow-hidden rounded-[2.25rem] border border-white/62 bg-[rgba(251,247,243,0.94)] shadow-[0_34px_110px_rgba(31,27,29,0.24)] backdrop-blur-2xl">
-              <div className="flex items-start justify-between gap-5 border-b border-white/65 px-6 py-6 sm:px-8">
+        @media (prefers-reduced-motion: reduce) {
+          .event-preview-swap {
+            animation: none !important;
+          }
+        }
+      `}
+    </style>
+
+    <div className="events-modal-panel mx-auto max-w-6xl">
+      <div className="overflow-hidden rounded-[2rem] border border-white/62 bg-[rgba(251,247,243,0.94)] shadow-[0_34px_110px_rgba(31,27,29,0.24)] backdrop-blur-2xl">
+        <div className="flex items-start justify-between gap-5 border-b border-white/65 px-6 py-3.5 sm:px-7 sm:py-4">
+          <div>
+            <div className="soft-chip mb-2 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
+              <Sparkles aria-hidden="true" className="size-4" />
+              New event
+            </div>
+
+            <h2
+              id="create-event-title"
+              className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[2rem]"
+            >
+              Create your event workspace.
+            </h2>
+
+            <p className="mt-1.5 max-w-2xl text-sm leading-5 text-[var(--color-charcoal)]/64">
+              Add the essential details and see your Eventure workspace take shape before it is
+              created.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="grid size-10 shrink-0 place-items-center rounded-full border border-white/60 bg-white/44 text-[var(--color-charcoal)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] transition hover:-translate-y-0.5 hover:bg-white/72 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
+            aria-label="Close create event form"
+            disabled={createEventMutation.isPending}
+            onClick={closeCreateForm}
+          >
+            <X aria-hidden="true" className="size-5" />
+          </button>
+        </div>
+
+        <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
+          <form
+            className="grid gap-3 p-5 sm:p-5 lg:border-r lg:border-white/65"
+            noValidate
+            onSubmit={onSubmit}
+          >
+            <section>
+              <div className="mb-2 flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                  <CalendarCheck2 aria-hidden="true" className="size-4" />
+                </span>
+
                 <div>
-                  <div className="soft-chip mb-4 w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                    <Sparkles aria-hidden="true" className="size-4" />
-                    New event
-                  </div>
+                  <p className="text-sm font-black text-[var(--color-near-black)]">
+                    Event basics
+                  </p>
 
-                  <h2
-                    id="create-event-title"
-                    className="text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl"
-                  >
-                    Create your event workspace.
-                  </h2>
-
-                  <p className="mt-3 max-w-2xl leading-7 text-[var(--color-charcoal)]/64">
-                    Add the essential details and see your Eventure workspace take shape before it
-                    is created.
+                  <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/50">
+                    Name the event and choose its identity.
                   </p>
                 </div>
-
-                <button
-                  type="button"
-                  className="grid size-11 shrink-0 place-items-center rounded-full border border-white/60 bg-white/44 text-[var(--color-charcoal)] shadow-[0_10px_26px_rgba(31,27,29,0.07)] transition hover:-translate-y-0.5 hover:bg-white/72 hover:text-[var(--color-deep-plum)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/45"
-                  aria-label="Close create event form"
-                  disabled={createEventMutation.isPending}
-                  onClick={closeCreateForm}
-                >
-                  <X aria-hidden="true" className="size-5" />
-                </button>
               </div>
 
-              <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
-                <form
-                  className="grid gap-7 p-6 sm:p-8 lg:border-r lg:border-white/65"
-                  noValidate
-                  onSubmit={onSubmit}
-                >
-                  <section>
-                    <div className="mb-5 flex items-center gap-3">
-                      <span className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
-                        <CalendarCheck2 aria-hidden="true" className="size-4" />
-                      </span>
+              <div className="grid gap-x-4 gap-y-2.5 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Event name
+                  </span>
 
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Event basics
-                        </p>
-                        <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/50">
-                          Name the event and choose its identity.
-                        </p>
-                      </div>
-                    </div>
+                  <input
+                    className="form-field"
+                    placeholder="Sophia's birthday celebration"
+                    type="text"
+                    autoComplete="off"
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.name)}
+                    aria-describedby={
+                      form.formState.errors.name ? 'create-event-name-error' : undefined
+                    }
+                    {...form.register('name')}
+                  />
 
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Event name
-                        </span>
-
-                        <input
-                          className="form-field"
-                          placeholder="Sophia's birthday celebration"
-                          type="text"
-                          autoComplete="off"
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.name)}
-                          aria-describedby={
-                            form.formState.errors.name ? 'create-event-name-error' : undefined
-                          }
-                          {...form.register('name')}
-                        />
-
-                        {form.formState.errors.name ? (
-                          <span
-                            id="create-event-name-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.name.message}
-                          </span>
-                        ) : null}
-                      </label>
-
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Event type
-                        </span>
-
-                        <select
-                          className="form-field"
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.eventType)}
-                          aria-describedby={
-                            form.formState.errors.eventType ? 'create-event-type-error' : undefined
-                          }
-                          {...form.register('eventType')}
-                        >
-                          <option value="" disabled>
-                            Choose an event type
-                          </option>
-
-                          {eventTypeOptions.map((eventType) => (
-                            <option key={eventType} value={eventType}>
-                              {eventType}
-                            </option>
-                          ))}
-                        </select>
-
-                        {form.formState.errors.eventType ? (
-                          <span
-                            id="create-event-type-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.eventType.message}
-                          </span>
-                        ) : null}
-                      </label>
-                    </div>
-                  </section>
-
-                  <section className="border-t border-white/65 pt-7">
-                    <div className="mb-5 flex items-center gap-3">
-                      <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[var(--color-deep-plum)]">
-                        <MapPin aria-hidden="true" className="size-4" />
-                      </span>
-
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Schedule and scale
-                        </p>
-                        <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/50">
-                          Set when, where and how large the event will be.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Date and time
-                        </span>
-
-                        <input
-                          className="form-field"
-                          type="datetime-local"
-                          min={getMinimumDateTime()}
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.eventDate)}
-                          aria-describedby={
-                            form.formState.errors.eventDate ? 'create-event-date-error' : undefined
-                          }
-                          {...form.register('eventDate')}
-                        />
-
-                        {form.formState.errors.eventDate ? (
-                          <span
-                            id="create-event-date-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.eventDate.message}
-                          </span>
-                        ) : null}
-                      </label>
-
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Location
-                        </span>
-
-                        <input
-                          className="form-field"
-                          placeholder="Colombo"
-                          type="text"
-                          autoComplete="off"
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.location)}
-                          aria-describedby={
-                            form.formState.errors.location
-                              ? 'create-event-location-error'
-                              : undefined
-                          }
-                          {...form.register('location')}
-                        />
-
-                        {form.formState.errors.location ? (
-                          <span
-                            id="create-event-location-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.location.message}
-                          </span>
-                        ) : null}
-                      </label>
-
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Estimated guests
-                        </span>
-
-                        <input
-                          className="form-field"
-                          placeholder="150"
-                          type="number"
-                          min="1"
-                          max="1000000"
-                          step="1"
-                          inputMode="numeric"
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.guestCount)}
-                          aria-describedby={
-                            form.formState.errors.guestCount
-                              ? 'create-event-guest-count-error'
-                              : undefined
-                          }
-                          {...form.register('guestCount')}
-                        />
-
-                        {form.formState.errors.guestCount ? (
-                          <span
-                            id="create-event-guest-count-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.guestCount.message}
-                          </span>
-                        ) : null}
-                      </label>
-
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Planned budget
-                        </span>
-
-                        <input
-                          className="form-field"
-                          placeholder="1500000"
-                          type="number"
-                          min="0.01"
-                          max="9999999999.99"
-                          step="0.01"
-                          inputMode="decimal"
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.plannedBudget)}
-                          aria-describedby={
-                            form.formState.errors.plannedBudget
-                              ? 'create-event-budget-error'
-                              : undefined
-                          }
-                          {...form.register('plannedBudget')}
-                        />
-
-                        {form.formState.errors.plannedBudget ? (
-                          <span
-                            id="create-event-budget-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.plannedBudget.message}
-                          </span>
-                        ) : null}
-                      </label>
-                    </div>
-                  </section>
-
-                  <section className="border-t border-white/65 pt-7">
-                    <div className="mb-5 flex items-center gap-3">
-                      <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
-                        <Sparkles aria-hidden="true" className="size-4" />
-                      </span>
-
-                      <div>
-                        <p className="text-sm font-black text-[var(--color-near-black)]">
-                          Style and requirements
-                        </p>
-                        <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/50">
-                          Describe the atmosphere and important planning needs.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-5">
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Theme
-                        </span>
-
-                        <input
-                          className="form-field"
-                          placeholder="Modern ivory and plum"
-                          type="text"
-                          autoComplete="off"
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.theme)}
-                          aria-describedby={
-                            form.formState.errors.theme ? 'create-event-theme-error' : undefined
-                          }
-                          {...form.register('theme')}
-                        />
-
-                        {form.formState.errors.theme ? (
-                          <span
-                            id="create-event-theme-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.theme.message}
-                          </span>
-                        ) : null}
-                      </label>
-
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/72">
-                          Planning requirements
-                        </span>
-
-                        <textarea
-                          className="form-field min-h-32 resize-y"
-                          placeholder="Describe the event style, services and important details..."
-                          disabled={createEventMutation.isPending}
-                          aria-invalid={Boolean(form.formState.errors.requirements)}
-                          aria-describedby={
-                            form.formState.errors.requirements
-                              ? 'create-event-requirements-error'
-                              : undefined
-                          }
-                          {...form.register('requirements')}
-                        />
-
-                        {form.formState.errors.requirements ? (
-                          <span
-                            id="create-event-requirements-error"
-                            className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
-                          >
-                            {form.formState.errors.requirements.message}
-                          </span>
-                        ) : null}
-                      </label>
-                    </div>
-                  </section>
-
-                  {createEventMutation.isError ? (
-                    <div
-                      role="alert"
-                      className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+                  {form.formState.errors.name ? (
+                    <span
+                      id="create-event-name-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
                     >
-                      {getApiErrorMessage(createEventMutation.error)}
-                    </div>
+                      {form.formState.errors.name.message}
+                    </span>
                   ) : null}
+                </label>
 
-                  <div className="flex flex-col-reverse gap-3 border-t border-white/65 pt-6 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      className="btn-secondary justify-center text-sm font-bold"
-                      disabled={createEventMutation.isPending}
-                      onClick={closeCreateForm}
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Event type
+                  </span>
+
+                  <select
+                    className="form-field"
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.eventType)}
+                    aria-describedby={
+                      form.formState.errors.eventType ? 'create-event-type-error' : undefined
+                    }
+                    {...form.register('eventType')}
+                  >
+                    <option value="" disabled>
+                      Choose an event type
+                    </option>
+
+                    {eventTypeOptions.map((eventType) => (
+                      <option key={eventType} value={eventType}>
+                        {eventType}
+                      </option>
+                    ))}
+                  </select>
+
+                  {form.formState.errors.eventType ? (
+                    <span
+                      id="create-event-type-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
                     >
-                      Cancel
-                    </button>
+                      {form.formState.errors.eventType.message}
+                    </span>
+                  ) : null}
+                </label>
+              </div>
+            </section>
 
-                    <button
-                      type="submit"
-                      className="btn-primary justify-center text-sm font-bold"
-                      disabled={createEventMutation.isPending}
-                    >
-                      {createEventMutation.isPending ? (
-                        <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-                      ) : (
-                        <Plus aria-hidden="true" className="size-4" />
-                      )}
+            <section className="border-t border-white/65 pt-3">
+              <div className="mb-2 flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[var(--color-deep-plum)]">
+                  <MapPin aria-hidden="true" className="size-4" />
+                </span>
 
-                      {createEventMutation.isPending ? 'Creating event...' : 'Create event'}
-                    </button>
-                  </div>
-                </form>
+                <div>
+                  <p className="text-sm font-black text-[var(--color-near-black)]">
+                    Schedule and scale
+                  </p>
 
-                <aside className="relative overflow-hidden bg-[linear-gradient(145deg,rgba(245,237,233,0.86),rgba(235,222,228,0.82))] p-6 sm:p-8">
-                  <div
-                    aria-hidden="true"
-                    className="absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+                  <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/50">
+                    Set when, where and how large the event will be.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-x-4 gap-y-2.5 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Date and time
+                  </span>
+
+                  <input
+                    className="form-field"
+                    type="datetime-local"
+                    min={getMinimumDateTime()}
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.eventDate)}
+                    aria-describedby={
+                      form.formState.errors.eventDate ? 'create-event-date-error' : undefined
+                    }
+                    {...form.register('eventDate')}
                   />
 
-                  <div
-                    aria-hidden="true"
-                    className="absolute -bottom-28 -left-24 size-80 rounded-full bg-[rgba(220,186,170,0.20)] blur-3xl"
+                  {form.formState.errors.eventDate ? (
+                    <span
+                      id="create-event-date-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
+                      {form.formState.errors.eventDate.message}
+                    </span>
+                  ) : null}
+                </label>
+
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Location
+                  </span>
+
+                  <input
+                    className="form-field"
+                    placeholder="Colombo"
+                    type="text"
+                    autoComplete="off"
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.location)}
+                    aria-describedby={
+                      form.formState.errors.location ? 'create-event-location-error' : undefined
+                    }
+                    {...form.register('location')}
                   />
 
-                  <div className="relative lg:sticky lg:top-8">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                          Live preview
-                        </p>
+                  {form.formState.errors.location ? (
+                    <span
+                      id="create-event-location-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
+                      {form.formState.errors.location.message}
+                    </span>
+                  ) : null}
+                </label>
 
-                        <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                          Your event is taking shape.
-                        </h3>
-                      </div>
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Estimated guests
+                  </span>
 
-                      <span className="rounded-full border border-white/58 bg-white/38 px-3 py-1.5 text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
-                        Draft
-                      </span>
-                    </div>
+                  <input
+                    className="form-field"
+                    placeholder="150"
+                    type="number"
+                    min="1"
+                    max="1000000"
+                    step="1"
+                    inputMode="numeric"
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.guestCount)}
+                    aria-describedby={
+                      form.formState.errors.guestCount
+                        ? 'create-event-guest-count-error'
+                        : undefined
+                    }
+                    {...form.register('guestCount')}
+                  />
 
-                    <div
-                      key={selectedPreviewType}
-                      className="event-preview-swap group relative mt-7 min-h-[24rem] origin-center overflow-hidden rounded-[2rem] border border-white/72 shadow-[0_26px_80px_rgba(31,27,29,0.16)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-[0_32px_90px_rgba(31,27,29,0.20)]"
+                  {form.formState.errors.guestCount ? (
+                    <span
+                      id="create-event-guest-count-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
+                      {form.formState.errors.guestCount.message}
+                    </span>
+                  ) : null}
+                </label>
+
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Planned budget
+                  </span>
+
+                  <input
+                    className="form-field"
+                    placeholder="1500000"
+                    type="number"
+                    min="0.01"
+                    max="9999999999.99"
+                    step="0.01"
+                    inputMode="decimal"
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.plannedBudget)}
+                    aria-describedby={
+                      form.formState.errors.plannedBudget
+                        ? 'create-event-budget-error'
+                        : undefined
+                    }
+                    {...form.register('plannedBudget')}
+                  />
+
+                  {form.formState.errors.plannedBudget ? (
+                    <span
+                      id="create-event-budget-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
+                      {form.formState.errors.plannedBudget.message}
+                    </span>
+                  ) : null}
+                </label>
+              </div>
+            </section>
+
+            <section className="border-t border-white/65 pt-3">
+              <div className="mb-2 flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-xl bg-[rgba(142,92,103,0.14)] text-[var(--color-rosewood)]">
+                  <Sparkles aria-hidden="true" className="size-4" />
+                </span>
+
+                <div>
+                  <p className="text-sm font-black text-[var(--color-near-black)]">
+                    Style and requirements
+                  </p>
+
+                  <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/50">
+                    Describe the atmosphere and important planning needs.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-2.5">
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Theme
+                  </span>
+
+                  <input
+                    className="form-field"
+                    placeholder="Modern ivory and plum"
+                    type="text"
+                    autoComplete="off"
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.theme)}
+                    aria-describedby={
+                      form.formState.errors.theme ? 'create-event-theme-error' : undefined
+                    }
+                    {...form.register('theme')}
+                  />
+
+                  {form.formState.errors.theme ? (
+                    <span
+                      id="create-event-theme-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
+                      {form.formState.errors.theme.message}
+                    </span>
+                  ) : null}
+                </label>
+
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-black text-[var(--color-charcoal)]/72">
+                    Planning requirements
+                  </span>
+
+                  <textarea
+                    className="form-field min-h-16 resize-y"
+                    placeholder="Describe the event style, services and important details..."
+                    disabled={createEventMutation.isPending}
+                    aria-invalid={Boolean(form.formState.errors.requirements)}
+                    aria-describedby={
+                      form.formState.errors.requirements
+                        ? 'create-event-requirements-error'
+                        : undefined
+                    }
+                    {...form.register('requirements')}
+                  />
+
+                  {form.formState.errors.requirements ? (
+                    <span
+                      id="create-event-requirements-error"
+                      className="mt-2 block text-sm font-bold text-[var(--color-muted-burgundy)]"
+                    >
+                      {form.formState.errors.requirements.message}
+                    </span>
+                  ) : null}
+                </label>
+              </div>
+            </section>
+
+            {createEventMutation.isError ? (
+              <div
+                role="alert"
+                className="rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+              >
+                {getApiErrorMessage(createEventMutation.error)}
+              </div>
+            ) : null}
+
+            <div className="flex flex-col-reverse gap-3 border-t border-white/65 pt-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                className="btn-secondary justify-center text-sm font-bold"
+                disabled={createEventMutation.isPending}
+                onClick={closeCreateForm}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="btn-primary justify-center text-sm font-bold"
+                disabled={createEventMutation.isPending}
+              >
+                {createEventMutation.isPending ? (
+                  <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                ) : (
+                  <Plus aria-hidden="true" className="size-4" />
+                )}
+
+                {createEventMutation.isPending ? 'Creating event...' : 'Create event'}
+              </button>
+            </div>
+          </form>
+
+          <aside className="relative overflow-hidden bg-[linear-gradient(145deg,rgba(245,237,233,0.86),rgba(235,222,228,0.82))] p-5">
+            <div
+              aria-hidden="true"
+              className="absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+            />
+
+            <div
+              aria-hidden="true"
+              className="absolute -bottom-28 -left-24 size-80 rounded-full bg-[rgba(220,186,170,0.20)] blur-3xl"
+            />
+
+            <div className="relative lg:sticky lg:top-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                    Live preview
+                  </p>
+
+                  <h3 className="mt-1 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    Your event is taking shape.
+                  </h3>
+                </div>
+
+                <span className="rounded-full border border-white/58 bg-white/38 px-3 py-1 text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
+                  Draft
+                </span>
+              </div>
+
+              <div
+                key={selectedPreviewType}
+                className="event-preview-swap group relative mt-3 min-h-[19rem] origin-center overflow-hidden rounded-[1.75rem] border border-white/72 shadow-[0_26px_80px_rgba(31,27,29,0.16)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-[0_32px_90px_rgba(31,27,29,0.20)]"
+                style={{
+                  background: selectedPreviewTheme.background,
+                  animation: 'eventPreviewSwap 420ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                }}
+              >
+                <img
+                  src={selectedPreviewTheme.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 size-full object-cover object-center transition duration-1000 group-hover:scale-[1.025]"
+                  style={{
+                    objectPosition: '72% center',
+                    filter: 'saturate(0.92) contrast(0.96)',
+                  }}
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,248,0.99)_0%,rgba(255,252,248,0.97)_22%,rgba(255,252,248,0.88)_42%,rgba(255,252,248,0.56)_61%,rgba(255,252,248,0.18)_79%,rgba(255,252,248,0.04)_100%)]"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,transparent_45%,rgba(31,27,29,0.08)_100%)]"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 left-0 w-[64%] bg-[radial-gradient(ellipse_at_left,rgba(255,252,248,0.38)_0%,rgba(255,252,248,0.14)_56%,transparent_82%)]"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 z-[3] h-1.5"
+                  style={{
+                    background: selectedPreviewTheme.accent,
+                  }}
+                />
+
+                <div className="relative z-10 flex min-h-[19rem] flex-col p-5">
+                  <div>
+                    <p
+                      className="text-xs font-black uppercase tracking-[0.22em]"
                       style={{
-                        background: selectedPreviewTheme.background,
-                        animation: 'eventPreviewSwap 420ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                        color: getEventCardStyle(selectedPreviewType).typeColor,
                       }}
                     >
-                      <img
-                        src={selectedPreviewTheme.image}
-                        alt=""
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 size-full object-cover object-center transition duration-1000 group-hover:scale-[1.025]"
-                        style={{
-                          objectPosition: '72% center',
-                          filter: 'saturate(0.92) contrast(0.96)',
-                        }}
-                      />
+                      {selectedPreviewType}
+                    </p>
 
-                      <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,248,0.99)_0%,rgba(255,252,248,0.97)_22%,rgba(255,252,248,0.88)_42%,rgba(255,252,248,0.56)_61%,rgba(255,252,248,0.18)_79%,rgba(255,252,248,0.04)_100%)]"
-                      />
+                    <h4 className="mt-2 max-w-[72%] text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                      {previewName.trim() || 'Your event name'}
+                    </h4>
 
-                      <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,transparent_45%,rgba(31,27,29,0.08)_100%)]"
-                      />
+                    <p className="mt-1.5 max-w-[66%] text-sm font-semibold leading-5 text-[var(--color-charcoal)]/66">
+                      {selectedPreviewTheme.eyebrow}
+                    </p>
+                  </div>
 
-                      <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-y-0 left-0 w-[64%] bg-[radial-gradient(ellipse_at_left,rgba(255,252,248,0.38)_0%,rgba(255,252,248,0.14)_56%,transparent_82%)]"
-                      />
+                  <div className="mt-3 flex max-w-[78%] flex-wrap gap-2">
+                    <span className="rounded-full border border-white/82 bg-white/72 px-3 py-1.5 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
+                      {previewFormattedDate}
+                    </span>
 
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-x-0 top-0 z-[3] h-1.5"
-                        style={{
-                          background: selectedPreviewTheme.accent,
-                        }}
-                      />
+                    <span className="max-w-40 truncate rounded-full border border-white/82 bg-white/72 px-3 py-1.5 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
+                      {previewLocation.trim() || 'Choose a location'}
+                    </span>
 
-                      <div className="relative z-10 flex min-h-[24rem] flex-col p-6 sm:p-7">
-                        <div>
-                          <p
-                            className="text-xs font-black uppercase tracking-[0.22em]"
-                            style={{
-                              color: getEventCardStyle(selectedPreviewType).typeColor,
-                            }}
-                          >
-                            {selectedPreviewType}
-                          </p>
+                    <span className="rounded-full border border-white/82 bg-white/72 px-3 py-1.5 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
+                      {previewGuestCount.trim() && Number.isFinite(Number(previewGuestCount))
+                        ? `${Number(previewGuestCount).toLocaleString('en-LK')} guests`
+                        : 'Guests not set'}
+                    </span>
+                  </div>
 
-                          <h4 className="mt-3 max-w-[72%] text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                            {previewName.trim() || 'Your event name'}
-                          </h4>
+                  <div className="mt-auto max-w-[82%] rounded-[1.15rem] border border-white/74 bg-white/64 p-3 shadow-[0_14px_32px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="min-w-0">
+                        <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
+                          Theme
+                        </p>
 
-                          <p className="mt-3 max-w-[66%] text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                            {selectedPreviewTheme.eyebrow}
-                          </p>
-                        </div>
+                        <p className="mt-1 truncate text-sm font-black text-[var(--color-deep-plum)]">
+                          {previewThemeName.trim() || 'Theme not set'}
+                        </p>
+                      </div>
 
-                        <div className="mt-6 flex max-w-[76%] flex-wrap gap-2">
-                          <span className="rounded-full border border-white/82 bg-white/72 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
-                            {previewFormattedDate}
-                          </span>
+                      <div className="min-w-0">
+                        <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
+                          Planned budget
+                        </p>
 
-                          <span className="max-w-40 truncate rounded-full border border-white/82 bg-white/72 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
-                            {previewLocation.trim() || 'Choose a location'}
-                          </span>
-
-                          <span className="rounded-full border border-white/82 bg-white/72 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/74 shadow-[0_8px_20px_rgba(31,27,29,0.06)] backdrop-blur-md">
-                            {previewGuestCount.trim() && Number.isFinite(Number(previewGuestCount))
-                              ? `${Number(previewGuestCount).toLocaleString('en-LK')} guests`
-                              : 'Guests not set'}
-                          </span>
-                        </div>
-
-                        <div className="mt-auto max-w-[78%] rounded-[1.25rem] border border-white/74 bg-white/64 p-4 shadow-[0_14px_32px_rgba(31,27,29,0.07)] backdrop-blur-xl">
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="min-w-0">
-                              <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                                Theme
-                              </p>
-
-                              <p className="mt-1 truncate text-sm font-black text-[var(--color-deep-plum)]">
-                                {previewThemeName.trim() || 'Theme not set'}
-                              </p>
-                            </div>
-
-                            <div className="min-w-0">
-                              <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/46">
-                                Planned budget
-                              </p>
-
-                              <p className="mt-1 truncate text-sm font-black text-[var(--color-near-black)]">
-                                {previewFormattedBudget}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        <p className="mt-1 truncate text-sm font-black text-[var(--color-near-black)]">
+                          {previewFormattedBudget}
+                        </p>
                       </div>
                     </div>
-                    <div className="mt-5 rounded-[1.4rem] border border-white/56 bg-white/32 p-4 backdrop-blur-xl">
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
-                        {selectedPreviewType} identity
-                      </p>
-
-                      <p className="mt-1 text-sm leading-6 text-[var(--color-charcoal)]/58">
-                        {selectedPreviewTheme.helper}
-                      </p>
-                    </div>
                   </div>
-                </aside>
+                </div>
+              </div>
+
+              <div className="mt-2.5 rounded-[1.2rem] border border-white/56 bg-white/32 p-3 backdrop-blur-xl">
+                <p className="text-sm font-black text-[var(--color-near-black)]">
+                  {selectedPreviewType} identity
+                </p>
+
+                <p className="mt-0.5 text-sm leading-5 text-[var(--color-charcoal)]/58">
+                  {selectedPreviewTheme.helper}
+                </p>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
-      ) : null}
+      </div>
+    </div>
+  </div>
+) : null}
     </div>
   );
 }

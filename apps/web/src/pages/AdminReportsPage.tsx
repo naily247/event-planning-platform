@@ -3,7 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Area,
   AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -17,11 +20,11 @@ import {
   CalendarDays,
   CircleDollarSign,
   CreditCard,
+  Download,
   LoaderCircle,
   MessageSquareWarning,
   RefreshCw,
   Store,
-  TrendingUp,
   Users,
 } from 'lucide-react';
 import {
@@ -35,6 +38,10 @@ import {
   type AdminReportGroupBy,
 } from '../features/admin/adminReports.api';
 import { AdminWorkspaceNav } from '../features/admin/components/AdminWorkspaceNav';
+import {
+  downloadAdminReportPdf,
+  type AdminReportPdfConfig,
+} from '../features/admin/reports/adminReportPdf';
 
 type ReportTab =
   | 'users'
@@ -163,17 +170,28 @@ function formatDecimal(value: number | null) {
   }).format(value);
 }
 
+function formatCountLabel(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function formatEnumLabel(value: string) {
+  return value
+    .replaceAll('_', ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 function MetricCard({ metric }: { metric: ReportMetric }) {
   return (
-    <article className="rounded-[1.6rem] border border-emerald-100/90 bg-gradient-to-br from-emerald-50/85 via-white to-teal-50/35 p-5 shadow-[0_18px_45px_rgba(5,150,105,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_22px_55px_rgba(5,150,105,0.11)]">
-      <p className="text-sm font-bold text-[var(--color-charcoal)]/56">{metric.label}</p>
+    <article className="rounded-[1.35rem] border border-[rgba(91,61,82,0.09)] bg-white/76 p-4 shadow-[0_14px_38px_rgba(64,42,51,0.06)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgba(91,61,82,0.15)] hover:shadow-[0_18px_42px_rgba(64,42,51,0.08)]">
+      <p className="text-xs font-bold text-[var(--color-charcoal)]/54">{metric.label}</p>
 
-      <p className="mt-3 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+      <p className="mt-2 text-[1.7rem] font-black tracking-[-0.045em] text-[var(--color-near-black)]">
         {metric.value}
       </p>
 
       {metric.helper ? (
-        <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/50">
+        <p className="mt-1.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
           {metric.helper}
         </p>
       ) : null}
@@ -185,129 +203,318 @@ function GrowthBars({
   title,
   points,
   valueKey = 'count',
-  valueFormatter,
+  valueFormatter = (value) => String(value),
 }: {
   title: string;
   points: Array<Record<string, string | number>>;
   valueKey?: string;
   valueFormatter?: (value: number) => string;
 }) {
-  const chartData = points.map((point) => ({
+  const normalizedPoints = points.map((point) => ({
     ...point,
-    period: String(point.period),
+    label: String(point.period),
     [valueKey]: Number(point[valueKey] ?? 0),
   }));
 
-  const formatValue = (value: number) =>
-    valueFormatter ? valueFormatter(value) : new Intl.NumberFormat('en-GB').format(value);
+  const values = normalizedPoints.map((point) => Number(point[valueKey] ?? 0));
+
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const latestValue = values.at(-1) ?? 0;
+  const previousValue = values.at(-2);
+
+  const difference = previousValue === undefined ? null : latestValue - previousValue;
+
+  const differenceLabel =
+    difference === null
+      ? null
+      : difference === 0
+        ? 'No change'
+        : `${difference > 0 ? '+' : ''}${valueFormatter(difference)}`;
+
+  const trendId = `reportTrendFill-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
   return (
-    <section className="relative overflow-hidden rounded-[1.6rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur">
-      <div className="pointer-events-none absolute -right-20 -top-20 size-52 rounded-full bg-emerald-200/28 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 left-1/4 size-48 rounded-full bg-teal-200/20 blur-3xl" />
+    <article className="rounded-[1.5rem] border border-[rgba(91,61,82,0.09)] bg-white/76 p-4 shadow-[0_14px_38px_rgba(64,42,51,0.06)] sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+            Trend
+          </p>
 
-      <div className="relative">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-          <div>
-            <p className="section-eyebrow">Trend</p>
-            <h2 className="section-title">{title}</h2>
-          </div>
-
-          {chartData.length > 0 ? (
-            <div className="w-fit rounded-full border border-emerald-100 bg-emerald-50/72 px-3 py-1.5 text-xs font-black text-emerald-700">
-              {chartData.length} {chartData.length === 1 ? 'period' : 'periods'}
-            </div>
-          ) : null}
+          <h3 className="mt-1.5 text-[1.65rem] font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+            {title}
+          </h3>
         </div>
 
-        {chartData.length > 0 ? (
-          <div className="mt-7 h-[290px] w-full sm:h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 12, right: 6, left: -12, bottom: 0 }}>
-                <defs>
-                  <linearGradient id={`trend-fill-${valueKey}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.34} />
-                    <stop offset="62%" stopColor="#14b8a6" stopOpacity={0.12} />
-                    <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+        <span className="shrink-0 rounded-full border border-[rgba(91,61,82,0.10)] bg-[rgba(183,167,200,0.12)] px-3 py-1.5 text-[0.66rem] font-black text-[var(--color-deep-plum)]">
+          {points.length} {points.length === 1 ? 'period' : 'periods'}
+        </span>
+      </div>
 
-                <CartesianGrid vertical={false} stroke="#d1fae5" strokeDasharray="4 7" />
+      {normalizedPoints.length === 0 ? (
+        <div className="mt-4 flex min-h-44 items-center justify-center rounded-[1.15rem] border border-dashed border-[rgba(91,61,82,0.14)] bg-[rgba(91,61,82,0.018)] px-4 text-center">
+          <div>
+            <p className="text-sm font-black text-[var(--color-near-black)]">No trend data</p>
+
+            <p className="mt-1 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
+              No activity was recorded for the selected reporting range.
+            </p>
+          </div>
+        </div>
+      ) : normalizedPoints.length === 1 ? (
+        <div className="mt-4">
+          <div className="rounded-[1.15rem] border border-[rgba(91,61,82,0.08)] bg-[linear-gradient(135deg,rgba(183,167,200,0.11),rgba(255,255,255,0.82))] px-5 py-5">
+            <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/44">
+              Recorded for this period
+            </p>
+
+            <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-[2.35rem] font-black leading-none tracking-[-0.055em] text-[var(--color-near-black)]">
+                  {valueFormatter(latestValue)}
+                </p>
+
+                <p className="mt-2 text-xs font-bold text-[var(--color-charcoal)]/52">
+                  {String(normalizedPoints[0].label)}
+                </p>
+              </div>
+
+              <div className="grid size-12 place-items-center rounded-2xl border border-[rgba(91,61,82,0.10)] bg-white/76 text-[var(--color-deep-plum)] shadow-sm">
+                <BarChart3 className="size-5" />
+              </div>
+            </div>
+
+            <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[rgba(91,61,82,0.07)]">
+              <div className="h-full w-full rounded-full bg-[var(--color-deep-plum)]" />
+            </div>
+          </div>
+
+          <p className="mt-3 text-[0.68rem] font-semibold leading-5 text-[var(--color-charcoal)]/48">
+            Only one reporting period is available, so a trend comparison would not yet be
+            meaningful.
+          </p>
+        </div>
+      ) : normalizedPoints.length === 2 ? (
+        <div className="mt-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {normalizedPoints.map((point, index) => (
+              <div
+                key={`${String(point.label)}-${index}`}
+                className="rounded-[1.05rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-4 py-4"
+              >
+                <p className="truncate text-[0.66rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/44">
+                  {String(point.label)}
+                </p>
+
+                <p className="mt-2 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                  {valueFormatter(Number(point[valueKey] ?? 0))}
+                </p>
+              </div>
+            ))}
+
+            <div className="rounded-[1.05rem] border border-[rgba(91,61,82,0.10)] bg-[rgba(183,167,200,0.12)] px-4 py-4">
+              <p className="text-[0.66rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/44">
+                Change
+              </p>
+
+              <p className="mt-2 text-xl font-black tracking-[-0.04em] text-[var(--color-deep-plum)]">
+                {differenceLabel}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 h-[150px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={normalizedPoints}
+                margin={{
+                  top: 8,
+                  right: 6,
+                  left: -16,
+                  bottom: 0,
+                }}
+              >
+                <CartesianGrid
+                  vertical={false}
+                  stroke="rgba(91,61,82,0.09)"
+                  strokeDasharray="4 6"
+                />
 
                 <XAxis
-                  dataKey="period"
+                  dataKey="label"
                   axisLine={false}
                   tickLine={false}
-                  minTickGap={24}
-                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
-                  tickMargin={14}
+                  tick={{
+                    fill: 'rgba(54,46,51,0.50)',
+                    fontSize: 10,
+                    fontWeight: 700,
+                  }}
+                  dy={6}
                 />
 
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  allowDecimals={valueKey === 'revenue'}
-                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
-                  tickFormatter={(value: number) =>
-                    valueKey === 'revenue'
-                      ? new Intl.NumberFormat('en-GB', {
-                          notation: 'compact',
-                          maximumFractionDigits: 1,
-                        }).format(value)
-                      : new Intl.NumberFormat('en-GB').format(value)
-                  }
-                  width={64}
+                  allowDecimals={valueKey !== 'count'}
+                  tick={{
+                    fill: 'rgba(54,46,51,0.46)',
+                    fontSize: 9,
+                    fontWeight: 700,
+                  }}
                 />
 
                 <Tooltip
-                  cursor={{ stroke: '#6ee7b7', strokeWidth: 1.5, strokeDasharray: '4 5' }}
+                  cursor={{
+                    fill: 'rgba(183,167,200,0.07)',
+                  }}
                   contentStyle={{
-                    border: '1px solid rgba(167, 243, 208, 0.95)',
-                    borderRadius: '16px',
-                    background: 'rgba(255, 255, 255, 0.96)',
-                    boxShadow: '0 18px 45px rgba(5, 150, 105, 0.14)',
-                    padding: '12px 14px',
-                  }}
-                  labelStyle={{
-                    color: '#334155',
+                    borderRadius: '14px',
+                    border: '1px solid rgba(91,61,82,0.10)',
+                    background: 'rgba(255,255,255,0.97)',
+                    boxShadow: '0 12px 32px rgba(64,42,51,0.10)',
                     fontSize: '12px',
-                    fontWeight: 800,
-                    marginBottom: '6px',
                   }}
-                  itemStyle={{
-                    color: '#064e3b',
-                    fontSize: '13px',
-                    fontWeight: 900,
+                  formatter={(value) => [valueFormatter(Number(value)), title]}
+                />
+
+                <Bar dataKey={valueKey} radius={[8, 8, 3, 3]} maxBarSize={72}>
+                  {normalizedPoints.map((point, index) => (
+                    <Cell
+                      key={`${String(point.label)}-${index}`}
+                      fill={
+                        index === normalizedPoints.length - 1
+                          ? 'rgb(91,61,82)'
+                          : 'rgba(183,167,200,0.72)'
+                      }
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+            <div className="rounded-xl border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-2.5">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
+                Total
+              </p>
+
+              <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
+                {valueFormatter(total)}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-2.5">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
+                Latest period
+              </p>
+
+              <p className="mt-1 text-sm font-black text-[var(--color-near-black)]">
+                {valueFormatter(latestValue)}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[rgba(91,61,82,0.08)] bg-[rgba(183,167,200,0.10)] px-3.5 py-2.5">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/42">
+                Latest change
+              </p>
+
+              <p className="mt-1 text-sm font-black text-[var(--color-deep-plum)]">
+                {differenceLabel}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 h-[220px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={normalizedPoints}
+                margin={{
+                  top: 10,
+                  right: 8,
+                  left: -16,
+                  bottom: 0,
+                }}
+              >
+                <defs>
+                  <linearGradient id={trendId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(91,61,82)" stopOpacity={0.18} />
+
+                    <stop offset="100%" stopColor="rgb(91,61,82)" stopOpacity={0.015} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid
+                  vertical={false}
+                  stroke="rgba(91,61,82,0.10)"
+                  strokeDasharray="4 6"
+                />
+
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: 'rgba(54,46,51,0.50)',
+                    fontSize: 10,
+                    fontWeight: 700,
                   }}
-                  formatter={(value) => [formatValue(Number(value)), title]}
+                  dy={8}
+                />
+
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={valueKey !== 'count'}
+                  tick={{
+                    fill: 'rgba(54,46,51,0.50)',
+                    fontSize: 10,
+                    fontWeight: 700,
+                  }}
+                />
+
+                <Tooltip
+                  cursor={{
+                    stroke: 'rgba(91,61,82,0.12)',
+                    strokeWidth: 1,
+                  }}
+                  contentStyle={{
+                    borderRadius: '14px',
+                    border: '1px solid rgba(91,61,82,0.10)',
+                    background: 'rgba(255,255,255,0.97)',
+                    boxShadow: '0 12px 32px rgba(64,42,51,0.10)',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value) => [valueFormatter(Number(value)), title]}
                 />
 
                 <Area
                   type="monotone"
                   dataKey={valueKey}
-                  stroke="#059669"
-                  strokeWidth={3}
-                  fill={`url(#trend-fill-${valueKey})`}
-                  activeDot={{ r: 6, fill: '#ffffff', stroke: '#059669', strokeWidth: 3 }}
-                  dot={{ r: 3.5, fill: '#ffffff', stroke: '#10b981', strokeWidth: 2 }}
-                  animationBegin={80}
-                  animationDuration={760}
-                  animationEasing="ease-out"
+                  stroke="rgb(91,61,82)"
+                  strokeWidth={2.5}
+                  fill={`url(#${trendId})`}
+                  activeDot={{
+                    r: 5,
+                    fill: 'white',
+                    stroke: 'rgb(91,61,82)',
+                    strokeWidth: 2.5,
+                  }}
+                  dot={{
+                    r: 3.5,
+                    fill: 'white',
+                    stroke: 'rgb(91,61,82)',
+                    strokeWidth: 2,
+                  }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        ) : (
-          <div className="empty-surface mt-7">
-            <TrendingUp className="mx-auto size-8 text-emerald-700/60" />
-
-            <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/54">
-              No growth data is available for this range.
-            </p>
-          </div>
-        )}
-      </div>
-    </section>
+        </>
+      )}
+    </article>
   );
 }
 
@@ -326,28 +533,34 @@ function RankedList({
   }>;
 }) {
   return (
-    <section className="rounded-[1.6rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur">
-      <p className="section-eyebrow">{eyebrow}</p>
+    <article className="rounded-[1.5rem] border border-[rgba(91,61,82,0.09)] bg-white/76 p-4 shadow-[0_14px_38px_rgba(64,42,51,0.06)] sm:p-5">
+      <p className="text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+        {eyebrow}
+      </p>
 
-      <h2 className="section-title">{title}</h2>
+      <h3 className="mt-1.5 text-[1.65rem] font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+        {title}
+      </h3>
 
       {items.length > 0 ? (
-        <div className="mt-6 space-y-3">
+        <div className="mt-4 space-y-2.5">
           {items.map((item, index) => (
-            <article
+            <div
               key={item.id}
-              className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-100/90 bg-gradient-to-r from-emerald-50/55 to-white p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]"
+              className="flex items-center justify-between gap-3 rounded-[1.05rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-3"
             >
-              <div className="flex min-w-0 items-center gap-4">
-                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-100 text-sm font-black text-emerald-700">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-xs font-black text-[var(--color-deep-plum)]">
                   {index + 1}
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate font-black text-[var(--color-near-black)]">{item.title}</p>
+                  <p className="truncate text-sm font-black text-[var(--color-near-black)]">
+                    {item.title}
+                  </p>
 
                   {item.subtitle ? (
-                    <p className="mt-1 truncate text-xs font-semibold text-[var(--color-charcoal)]/50">
+                    <p className="mt-0.5 truncate text-[0.68rem] font-semibold text-[var(--color-charcoal)]/46">
                       {item.subtitle}
                     </p>
                   ) : null}
@@ -357,19 +570,17 @@ function RankedList({
               <p className="shrink-0 text-sm font-black text-[var(--color-near-black)]">
                 {item.value}
               </p>
-            </article>
+            </div>
           ))}
         </div>
       ) : (
-        <div className="empty-surface mt-6">
-          <BarChart3 className="mx-auto size-8 text-emerald-700/60" />
-
-          <p className="mt-4 text-sm font-semibold text-[var(--color-charcoal)]/54">
-            No ranking data is available.
+        <div className="mt-4 flex min-h-28 items-center justify-center rounded-[1.05rem] border border-dashed border-[rgba(91,61,82,0.14)] bg-[rgba(91,61,82,0.018)] px-4 text-center">
+          <p className="text-xs font-semibold text-[var(--color-charcoal)]/52">
+            No data is available for the selected range.
           </p>
         </div>
       )}
-    </section>
+    </article>
   );
 }
 
@@ -458,52 +669,541 @@ export function AdminReportsPage() {
     setRecentLimit(10);
   }
 
+  function getGeneratedAt(data: object) {
+    return 'generatedAt' in data ? String(data.generatedAt) : undefined;
+  }
+
+  function toTrendPoints(points: Array<Record<string, string | number>>, valueKey = 'count') {
+    return points.map((point) => ({
+      label: String(point.period),
+      value: Number(point[valueKey] ?? 0),
+    }));
+  }
+
+  async function downloadActiveReport() {
+    let config: AdminReportPdfConfig | null = null;
+
+    if (activeTab === 'users' && usersQuery.data) {
+      const data = usersQuery.data;
+
+      config = {
+        kind: 'users',
+        reportTitle: 'User Activity Report',
+        reportDescription:
+          'Account registrations, user roles, account health, and recent platform users.',
+        generatedAt: getGeneratedAt(data),
+        from,
+        to,
+        groupBy,
+        metrics: [
+          {
+            label: 'Matching users',
+            value: data.totals.users,
+          },
+          {
+            label: 'Customers',
+            value: data.totals.byRole.customers,
+          },
+          {
+            label: 'Vendors',
+            value: data.totals.byRole.vendors,
+          },
+          {
+            label: 'Active accounts',
+            value: data.totals.byStatus.active,
+          },
+        ],
+        trend: {
+          title: 'User registrations',
+          valueLabel: 'Registrations',
+          points: toTrendPoints(data.growth),
+        },
+        rankedSections: [
+          {
+            eyebrow: 'Account health',
+            title: 'Users by status',
+            items: [
+              {
+                label: 'Active',
+                value: data.totals.byStatus.active,
+              },
+              {
+                label: 'Pending verification',
+                value: data.totals.byStatus.pendingVerification,
+              },
+              {
+                label: 'Suspended',
+                value: data.totals.byStatus.suspended,
+              },
+              {
+                label: 'Deactivated',
+                value: data.totals.byStatus.deactivated,
+              },
+            ],
+          },
+        ],
+        tables: [
+          {
+            title: 'Newest users',
+            columns: ['Name', 'Email', 'Role', 'Status', 'Joined'],
+            rows: data.recentUsers.map((user) => [
+              `${user.firstName} ${user.lastName}`,
+              user.email,
+              user.role,
+              user.status.replaceAll('_', ' '),
+              formatDate(user.createdAt),
+            ]),
+          },
+        ],
+      };
+    }
+
+    if (activeTab === 'vendors' && vendorsQuery.data) {
+      const data = vendorsQuery.data;
+
+      config = {
+        kind: 'vendors',
+        reportTitle: 'Vendor Marketplace Report',
+        reportDescription:
+          'Vendor registrations, verification health, marketplace supply, and recent vendor activity.',
+        generatedAt: getGeneratedAt(data),
+        from,
+        to,
+        groupBy,
+        metrics: [
+          {
+            label: 'Matching vendors',
+            value: data.totals.vendors,
+          },
+          {
+            label: 'Approved',
+            value: data.totals.byVerificationStatus.approved,
+          },
+          {
+            label: 'Pending review',
+            value: data.totals.byVerificationStatus.pending,
+          },
+          {
+            label: 'Active accounts',
+            value: data.totals.byAccountStatus.active,
+          },
+        ],
+        trend: {
+          title: 'Vendor registrations',
+          valueLabel: 'Registrations',
+          points: toTrendPoints(data.growth),
+        },
+        rankedSections: [
+          {
+            eyebrow: 'Marketplace supply',
+            title: 'Top service categories',
+            items: data.topCategories.map((entry) => ({
+              label: entry.category?.name ?? 'Unknown category',
+              value: formatCountLabel(entry.vendorCount, 'vendor'),
+            })),
+          },
+        ],
+        tables: [
+          {
+            title: 'Newest vendors',
+            columns: ['Business', 'Location', 'Verification', 'Bookings', 'Created'],
+            rows: data.recentVendors.map((vendor) => [
+              vendor.businessName,
+              vendor.baseLocation ?? 'Location not provided',
+              vendor.verificationStatus,
+              vendor._count.bookings,
+              formatDate(vendor.createdAt),
+            ]),
+          },
+        ],
+      };
+    }
+
+    if (activeTab === 'events' && eventsQuery.data) {
+      const data = eventsQuery.data;
+
+      config = {
+        kind: 'events',
+        reportTitle: 'Event Planning Report',
+        reportDescription:
+          'Event creation, active planning activity, planned budgets, guests, formats, and locations.',
+        generatedAt: getGeneratedAt(data),
+        from,
+        to,
+        groupBy,
+        metrics: [
+          {
+            label: 'Matching events',
+            value: data.totals.events,
+          },
+          {
+            label: 'Active events',
+            value: data.totals.byStatus.active,
+          },
+          {
+            label: 'Planned budget',
+            value: formatCurrency(data.planning.totalPlannedBudget),
+          },
+          {
+            label: 'Average guests',
+            value: formatDecimal(data.planning.averageGuestCount),
+            helper: `${data.planning.totalGuestCount} total planned guests`,
+          },
+        ],
+        trend: {
+          title: 'Event creation',
+          valueLabel: 'Events',
+          points: toTrendPoints(data.growth),
+        },
+        rankedSections: [
+          {
+            eyebrow: 'Popular formats',
+            title: 'Top event types',
+            items: data.topEventTypes.map((entry) => ({
+              label: formatEnumLabel(entry.eventType),
+              value: entry.eventCount,
+            })),
+          },
+          {
+            eyebrow: 'Geography',
+            title: 'Top locations',
+            items: data.topLocations.map((entry) => ({
+              label: entry.location ?? 'Location not provided',
+              value: entry.eventCount,
+            })),
+          },
+          {
+            eyebrow: 'Customer activity',
+            title: 'Top event creators',
+            items: data.topCustomers.map((entry) => ({
+              label: entry.customer
+                ? `${entry.customer.firstName} ${entry.customer.lastName}`
+                : 'Unknown customer',
+              secondary: formatCountLabel(entry.guestCount, 'planned guest'),
+              value: formatCountLabel(entry.eventCount, 'event'),
+            })),
+          },
+        ],
+      };
+    }
+
+    if (activeTab === 'bookings' && bookingsQuery.data) {
+      const data = bookingsQuery.data;
+
+      config = {
+        kind: 'bookings',
+        reportTitle: 'Booking Performance Report',
+        reportDescription:
+          'Booking creation, lifecycle health, agreed service value, verified payments, and vendor performance.',
+        generatedAt: getGeneratedAt(data),
+        from,
+        to,
+        groupBy,
+        metrics: [
+          {
+            label: 'Matching bookings',
+            value: data.totals.bookings,
+          },
+          {
+            label: 'Completed',
+            value: data.totals.byStatus.completed,
+          },
+          {
+            label: 'Total agreed cost',
+            value: formatCurrency(data.financials.totalAgreedCost),
+          },
+          {
+            label: 'Verified payments',
+            value: formatCurrency(data.financials.verifiedPaymentAmount),
+          },
+        ],
+        trend: {
+          title: 'Booking creation',
+          valueLabel: 'Bookings',
+          points: toTrendPoints(data.growth),
+        },
+        rankedSections: [
+          {
+            eyebrow: 'Vendor performance',
+            title: 'Top booked vendors',
+            items: data.topVendors.map((entry) => ({
+              label: entry.vendor?.businessName ?? 'Unknown vendor',
+              secondary: formatCurrency(entry.agreedCost),
+              value: formatCountLabel(entry.bookingCount, 'booking'),
+            })),
+          },
+          {
+            eyebrow: 'Lifecycle',
+            title: 'Bookings by status',
+            items: Object.entries(data.totals.byStatus).map(([status, count]) => ({
+              label: status
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, (letter) => letter.toUpperCase()),
+              value: count,
+            })),
+          },
+        ],
+      };
+    }
+
+    if (activeTab === 'payments' && paymentsQuery.data) {
+      const data = paymentsQuery.data;
+
+      config = {
+        kind: 'payments',
+        reportTitle: 'Payment Activity Report',
+        reportDescription:
+          'Payment submissions, verification health, payment value, vendor receipts, and customer payment activity.',
+        generatedAt: getGeneratedAt(data),
+        from,
+        to,
+        groupBy,
+        metrics: [
+          {
+            label: 'Matching payments',
+            value: data.totals.payments,
+          },
+          {
+            label: 'Verified',
+            value: data.totals.byStatus.verified,
+          },
+          {
+            label: 'Total amount',
+            value: formatCurrency(data.financials.totalAmount),
+          },
+          {
+            label: 'Verified amount',
+            value: formatCurrency(data.financials.verifiedAmount),
+          },
+        ],
+        trend: {
+          title: 'Payment submissions',
+          valueLabel: 'Payments',
+          points: toTrendPoints(data.growth),
+        },
+        rankedSections: [
+          {
+            eyebrow: 'Vendor value',
+            title: 'Top vendors by verified payments',
+            items: data.topVendors.map((entry) => ({
+              label: entry.vendor?.businessName ?? 'Unknown vendor',
+              secondary: formatCountLabel(entry.paymentCount, 'payment'),
+              value: formatCurrency(entry.verifiedAmount),
+            })),
+          },
+          {
+            eyebrow: 'Customer value',
+            title: 'Top paying customers',
+            items: data.topCustomers.map((entry) => ({
+              label: entry.customer
+                ? `${entry.customer.firstName} ${entry.customer.lastName}`
+                : 'Unknown customer',
+              secondary: formatCountLabel(entry.paymentCount, 'payment'),
+              value: formatCurrency(entry.totalAmount),
+            })),
+          },
+        ],
+      };
+    }
+
+    if (activeTab === 'revenue' && revenueQuery.data) {
+      const data = revenueQuery.data;
+
+      config = {
+        kind: 'revenue',
+        reportTitle: 'Revenue Performance Report',
+        reportDescription:
+          'Verified platform revenue, payment performance, payment methods, and marketplace revenue contribution.',
+        generatedAt: getGeneratedAt(data),
+        from,
+        to,
+        groupBy,
+        metrics: [
+          {
+            label: 'Verified revenue',
+            value: formatCurrency(data.revenue.totalVerifiedRevenue),
+          },
+          {
+            label: 'Verified payments',
+            value: data.totals.byStatus.verified,
+          },
+          {
+            label: 'Average payment',
+            value:
+              data.revenue.averageVerifiedPayment === null
+                ? '—'
+                : formatCurrency(data.revenue.averageVerifiedPayment),
+          },
+          {
+            label: 'Pending amount',
+            value: formatCurrency(data.revenue.pendingAmount),
+          },
+        ],
+        trend: {
+          title: 'Revenue growth',
+          valueLabel: 'Verified revenue',
+          points: toTrendPoints(data.growth, 'revenue'),
+          valueFormatter: (value) => formatCurrency(String(value)),
+        },
+        rankedSections: [
+          {
+            eyebrow: 'Payment methods',
+            title: 'Revenue by method',
+            items: data.byMethod.map((entry) => ({
+              label: entry.method.replaceAll('_', ' '),
+              secondary: `${entry.paymentCount} payments`,
+              value: formatCurrency(entry.revenue),
+            })),
+          },
+          {
+            eyebrow: 'Marketplace value',
+            title: 'Top revenue vendors',
+            items: data.topVendors.map((entry) => ({
+              label: entry.vendor?.businessName ?? 'Unknown vendor',
+              secondary: formatCountLabel(entry.paymentCount, 'verified payment'),
+              value: formatCurrency(entry.revenue),
+            })),
+          },
+        ],
+      };
+    }
+
+    if (activeTab === 'complaints' && complaintsQuery.data) {
+      const data = complaintsQuery.data;
+
+      config = {
+        kind: 'complaints',
+        reportTitle: 'Complaint Management Report',
+        reportDescription:
+          'Complaint submissions, resolution health, assignment status, case categories, severity, and conduct patterns.',
+        generatedAt: getGeneratedAt(data),
+        from,
+        to,
+        groupBy,
+        metrics: [
+          {
+            label: 'Matching complaints',
+            value: data.totals.complaints,
+          },
+          {
+            label: 'Open',
+            value: data.totals.byStatus.open,
+          },
+          {
+            label: 'Resolved',
+            value: data.totals.byStatus.resolved,
+          },
+          {
+            label: 'Unassigned',
+            value: data.totals.byAssignment.unassigned,
+          },
+        ],
+        trend: {
+          title: 'Complaint submissions',
+          valueLabel: 'Complaints',
+          points: toTrendPoints(data.growth),
+        },
+        rankedSections: [
+          {
+            eyebrow: 'Case categories',
+            title: 'Complaints by type',
+            items: data.byType.map((entry) => ({
+              label: entry.type.replaceAll('_', ' '),
+              value: entry.complaintCount,
+            })),
+          },
+          {
+            eyebrow: 'Case severity',
+            title: 'Complaints by priority',
+            items: data.byPriority.map((entry) => ({
+              label: entry.priority,
+              value: entry.complaintCount,
+            })),
+          },
+          {
+            eyebrow: 'Submission patterns',
+            title: 'Top complainants',
+            items: data.topComplainants.map((entry) => ({
+              label: entry.complainant
+                ? `${entry.complainant.firstName} ${entry.complainant.lastName}`
+                : 'Unknown complainant',
+              secondary: entry.complainant?.email,
+              value: entry.complaintCount,
+            })),
+          },
+          {
+            eyebrow: 'Conduct patterns',
+            title: 'Top respondents',
+            items: data.topRespondents.map((entry) => ({
+              label: entry.respondent
+                ? `${entry.respondent.firstName} ${entry.respondent.lastName}`
+                : 'No respondent',
+              secondary: entry.respondent?.email,
+              value: entry.complaintCount,
+            })),
+          },
+        ],
+      };
+    }
+
+    if (!config) {
+      return;
+    }
+
+    await downloadAdminReportPdf(config);
+  }
+
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(167,243,208,0.26),transparent_34%),radial-gradient(circle_at_top_right,rgba(153,246,228,0.20),transparent_30%),linear-gradient(180deg,#f7fffb_0%,#fbfffd_46%,#ffffff_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(183,167,200,0.12),transparent_32%),radial-gradient(circle_at_top_right,rgba(140,92,111,0.07),transparent_28%),linear-gradient(180deg,#fbf9fa_0%,#f7f3f6_48%,#f8f6f9_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
-        <main className="py-8">
-          <section className="relative overflow-hidden rounded-[2rem] border border-emerald-200/80 bg-gradient-to-br from-emerald-100 via-teal-50 to-white p-6 shadow-[0_24px_70px_rgba(5,150,105,0.10)] sm:p-8">
-            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-emerald-300/24 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-teal-300/18 blur-3xl" />
-            <div className="relative">
-              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-                <div>
-                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200/80 bg-white/76 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-emerald-700 shadow-sm">
-                    <BarChart3 className="size-4" />
-                    Platform intelligence
-                  </div>
+        <main className="py-4">
+          <section className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(91,61,82,0.10)] bg-[linear-gradient(135deg,rgba(255,255,255,0.88),rgba(246,241,247,0.92),rgba(239,233,244,0.78))] px-6 py-5 shadow-[0_18px_50px_rgba(64,42,51,0.07)] sm:px-7 sm:py-6">
+            <div className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full border border-[rgba(91,61,82,0.06)]" />
+            <div className="pointer-events-none absolute -right-5 -top-14 size-44 rounded-full border border-[rgba(91,61,82,0.05)]" />
 
-                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                    Understand how Eventure is growing and performing.
-                  </h1>
-
-                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                    Explore account growth, marketplace activity, event planning, financial
-                    performance, booking health, and complaint trends from one reporting workspace.
-                  </p>
+            <div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+              <div className="min-w-0">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(91,61,82,0.10)] bg-white/72 px-3 py-1.5 text-[0.64rem] font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)] shadow-sm">
+                  <BarChart3 className="size-3.5" />
+                  Platform intelligence
                 </div>
 
-                <div className="rounded-2xl border border-emerald-200/70 bg-white/74 px-5 py-4 shadow-[0_12px_30px_rgba(5,150,105,0.09)] backdrop-blur">
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                    Active report
-                  </p>
+                <h1 className="mt-3 max-w-3xl text-balance text-[2.25rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.7rem]">
+                  Understand how Eventure is growing and performing.
+                </h1>
 
-                  <p className="mt-2 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                    {reportTabs.find((tab) => tab.id === activeTab)?.label}
-                  </p>
-                </div>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-charcoal)]/62">
+                  Explore account growth, marketplace activity, event planning, financial
+                  performance, booking health, and complaint trends from one reporting workspace.
+                </p>
+              </div>
+
+              <div className="w-full shrink-0 rounded-2xl border border-[rgba(91,61,82,0.09)] bg-white/72 px-4 py-3 shadow-[0_10px_28px_rgba(64,42,51,0.06)] backdrop-blur sm:w-auto sm:min-w-[190px]">
+                <p className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                  Active report
+                </p>
+
+                <p className="mt-1 text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                  {reportTabs.find((tab) => tab.id === activeTab)?.label}
+                </p>
               </div>
             </div>
           </section>
 
-          <section className="mt-6 rounded-[2rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_24px_60px_rgba(5,150,105,0.08)] backdrop-blur sm:p-7">
-            <p className="section-eyebrow">Report navigation</p>
+          <section className="mt-4 rounded-[1.75rem] border border-[rgba(91,61,82,0.09)] bg-white/82 p-4 shadow-[0_18px_48px_rgba(64,42,51,0.06)] backdrop-blur sm:p-5">
+            <div>
+              <p className="text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                Report navigation
+              </p>
 
-            <h2 className="section-title">Choose a report</h2>
+              <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                Choose a report
+              </h2>
+            </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
               {reportTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = tab.id === activeTab;
@@ -514,24 +1214,26 @@ export function AdminReportsPage() {
                     type="button"
                     className={
                       isActive
-                        ? 'rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-100 to-teal-50 p-4 text-left shadow-[0_12px_30px_rgba(5,150,105,0.10)]'
-                        : 'rounded-2xl border border-emerald-100/80 bg-white/58 p-4 text-left transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50/55'
+                        ? 'rounded-[1.15rem] border border-[rgba(91,61,82,0.18)] bg-[rgba(183,167,200,0.16)] p-3.5 text-left shadow-[0_10px_26px_rgba(64,42,51,0.07)]'
+                        : 'rounded-[1.15rem] border border-[rgba(91,61,82,0.08)] bg-white/64 p-3.5 text-left transition hover:-translate-y-0.5 hover:border-[rgba(91,61,82,0.14)] hover:bg-[rgba(183,167,200,0.07)]'
                     }
                     onClick={() => setActiveTab(tab.id)}
                   >
-                    <Icon
+                    <div
                       className={
                         isActive
-                          ? 'size-5 text-emerald-700'
-                          : 'size-5 text-[var(--color-charcoal)]/50'
+                          ? 'grid size-8 place-items-center rounded-xl bg-white/72 text-[var(--color-deep-plum)]'
+                          : 'grid size-8 place-items-center rounded-xl bg-[rgba(91,61,82,0.045)] text-[var(--color-charcoal)]/52'
                       }
-                    />
+                    >
+                      <Icon className="size-4" />
+                    </div>
 
-                    <p className="mt-4 text-sm font-black text-[var(--color-near-black)]">
+                    <p className="mt-2.5 text-sm font-black text-[var(--color-near-black)]">
                       {tab.label}
                     </p>
 
-                    <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/50">
+                    <p className="mt-1 line-clamp-2 text-[0.68rem] font-semibold leading-[1.15rem] text-[var(--color-charcoal)]/48">
                       {tab.description}
                     </p>
                   </button>
@@ -540,34 +1242,63 @@ export function AdminReportsPage() {
             </div>
           </section>
 
-          <section className="mt-6 rounded-[2rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_24px_60px_rgba(5,150,105,0.08)] backdrop-blur sm:p-7">
-            <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+          <section className="mt-4 rounded-[1.75rem] border border-[rgba(91,61,82,0.09)] bg-white/82 p-4 shadow-[0_18px_48px_rgba(64,42,51,0.06)] backdrop-blur sm:p-5">
+            <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
               <div>
-                <p className="section-eyebrow">Report controls</p>
+                <p className="text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                  Report controls
+                </p>
 
-                <h2 className="section-title">Date range and grouping</h2>
+                <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                  Date range and grouping
+                </h2>
 
-                <p className="section-description">
-                  Date filters apply to when records were created. Leave both dates empty to include
-                  all available history.
+                <p className="mt-1 text-xs leading-5 text-[var(--color-charcoal)]/54">
+                  Filter the active report, control trend grouping, and export the exact report
+                  currently being viewed.
                 </p>
               </div>
 
-              <button type="button" className="btn-secondary text-sm" onClick={resetFilters}>
-                <RefreshCw className="size-4" />
-                Reset filters
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary min-h-9 shrink-0 px-3.5 text-xs"
+                  onClick={resetFilters}
+                >
+                  <RefreshCw className="size-3.5" />
+                  Reset filters
+                </button>
+
+                <button
+                  type="button"
+                  className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-[rgba(91,61,82,0.16)] bg-[var(--color-deep-plum)] px-4 text-xs font-black text-white shadow-[0_10px_24px_rgba(91,61,82,0.16)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(91,61,82,0.20)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
+                  disabled={
+                    activeQuery.isLoading ||
+                    activeQuery.isFetching ||
+                    activeQuery.isError ||
+                    !activeQuery.data
+                  }
+                  onClick={downloadActiveReport}
+                >
+                  {activeQuery.isFetching ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    <Download className="size-3.5" />
+                  )}
+                  Download PDF
+                </button>
+              </div>
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
               <label>
-                <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/68">
+                <span className="mb-1.5 block text-[0.68rem] font-black text-[var(--color-charcoal)]/62">
                   From
                 </span>
 
                 <input
                   type="date"
-                  className="form-field"
+                  className="form-field !h-10 !min-h-0 !rounded-xl !py-2 !text-sm"
                   value={from}
                   max={to || undefined}
                   onChange={(event) => setFrom(event.target.value)}
@@ -575,13 +1306,13 @@ export function AdminReportsPage() {
               </label>
 
               <label>
-                <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/68">
+                <span className="mb-1.5 block text-[0.68rem] font-black text-[var(--color-charcoal)]/62">
                   To
                 </span>
 
                 <input
                   type="date"
-                  className="form-field"
+                  className="form-field !h-10 !min-h-0 !rounded-xl !py-2 !text-sm"
                   value={to}
                   min={from || undefined}
                   onChange={(event) => setTo(event.target.value)}
@@ -589,12 +1320,12 @@ export function AdminReportsPage() {
               </label>
 
               <label>
-                <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/68">
+                <span className="mb-1.5 block text-[0.68rem] font-black text-[var(--color-charcoal)]/62">
                   Group growth by
                 </span>
 
                 <select
-                  className="form-field"
+                  className="form-field !h-10 !min-h-0 !rounded-xl !py-2 !text-sm"
                   value={groupBy}
                   onChange={(event) => setGroupBy(event.target.value as AdminReportGroupBy)}
                 >
@@ -604,12 +1335,12 @@ export function AdminReportsPage() {
               </label>
 
               <label>
-                <span className="mb-2 block text-sm font-black text-[var(--color-charcoal)]/68">
+                <span className="mb-1.5 block text-[0.68rem] font-black text-[var(--color-charcoal)]/62">
                   Recent records
                 </span>
 
                 <select
-                  className="form-field"
+                  className="form-field !h-10 !min-h-0 !rounded-xl !py-2 !text-sm"
                   value={recentLimit}
                   onChange={(event) => setRecentLimit(Number(event.target.value))}
                 >
@@ -623,39 +1354,42 @@ export function AdminReportsPage() {
           </section>
 
           {activeQuery.isLoading ? (
-            <section className="state-surface mt-6">
-              <div>
-                <LoaderCircle className="mx-auto size-10 animate-spin text-emerald-700" />
+            <section className="mt-5 flex min-h-52 items-center justify-center rounded-[1.75rem] border border-[rgba(91,61,82,0.09)] bg-white/78 px-6 py-8 shadow-[0_18px_48px_rgba(64,42,51,0.06)] backdrop-blur">
+              <div className="text-center">
+                <div className="mx-auto grid size-11 place-items-center rounded-2xl border border-[rgba(91,61,82,0.10)] bg-[rgba(183,167,200,0.12)]">
+                  <LoaderCircle className="size-5 animate-spin text-[var(--color-deep-plum)]" />
+                </div>
 
-                <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
+                <p className="mt-4 text-lg font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                   Generating report
                 </p>
 
-                <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
+                <p className="mt-1.5 text-xs leading-5 text-[var(--color-charcoal)]/54">
                   Calculating totals, trends, rankings, and recent activity.
                 </p>
               </div>
             </section>
           ) : activeQuery.isError ? (
-            <section className="state-surface mt-6">
-              <div className="max-w-lg">
-                <div className="icon-tile mx-auto">
-                  <AlertCircle className="size-6" />
+            <section className="mt-5 flex min-h-56 items-center justify-center rounded-[1.75rem] border border-[rgba(91,61,82,0.09)] bg-white/78 px-6 py-8 shadow-[0_18px_48px_rgba(64,42,51,0.06)] backdrop-blur">
+              <div className="max-w-md text-center">
+                <div className="mx-auto grid size-11 place-items-center rounded-2xl border border-red-200/60 bg-red-50/70 text-red-600">
+                  <AlertCircle className="size-5" />
                 </div>
 
-                <h2 className="mt-5 text-2xl font-black text-[var(--color-near-black)]">
+                <h2 className="mt-4 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                   Report could not be generated
                 </h2>
 
-                <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
+                <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
                   {getErrorMessage(activeQuery.error)}
                 </p>
 
                 <button
                   type="button"
-                  className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-600 bg-gradient-to-r from-emerald-500 to-teal-400 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(5,150,105,0.20)] transition hover:-translate-y-0.5"
+                  className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[rgba(91,61,82,0.16)] bg-[var(--color-deep-plum)] px-4 text-xs font-black text-white shadow-[0_10px_24px_rgba(91,61,82,0.16)] transition hover:-translate-y-0.5"
                   onClick={() => activeQuery.refetch()}
                 >
+                  <RefreshCw className="size-3.5" />
                   Try again
                 </button>
               </div>
@@ -718,32 +1452,43 @@ export function AdminReportsPage() {
                     />
                   </section>
 
-                  <section className="mt-6 rounded-[1.8rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur sm:p-7">
-                    <p className="section-eyebrow">Recent activity</p>
+                  <section className="mt-5 rounded-[1.5rem] border border-[rgba(91,61,82,0.09)] bg-white/78 p-4 shadow-[0_14px_38px_rgba(64,42,51,0.06)] backdrop-blur sm:p-5">
+                    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+                      <div>
+                        <p className="text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Recent activity
+                        </p>
 
-                    <h2 className="section-title">Newest users</h2>
+                        <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          Newest users
+                        </h2>
+                      </div>
 
-                    <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                      <p className="text-[0.68rem] font-bold text-[var(--color-charcoal)]/42">
+                        {usersQuery.data.recentUsers.length}{' '}
+                        {usersQuery.data.recentUsers.length === 1 ? 'record' : 'records'}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
                       {usersQuery.data.recentUsers.map((user) => (
                         <article
                           key={user.id}
-                          className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]"
+                          className="rounded-[1.05rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-3.5 transition duration-200 hover:border-[rgba(91,61,82,0.14)] hover:bg-[rgba(183,167,200,0.055)]"
                         >
-                          <p className="font-black text-[var(--color-near-black)]">
-                            {user.firstName} {user.lastName}
-                          </p>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-black text-[var(--color-near-black)]">
+                                {user.firstName} {user.lastName}
+                              </p>
 
-                          <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/54">
-                            {user.email}
-                          </p>
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <span className="status-chip" data-tone="blue">
-                              {user.role}
-                            </span>
+                              <p className="mt-0.5 truncate text-[0.7rem] font-semibold text-[var(--color-charcoal)]/48">
+                                {user.email}
+                              </p>
+                            </div>
 
                             <span
-                              className="status-chip"
+                              className="status-chip shrink-0"
                               data-tone={
                                 user.status === 'ACTIVE'
                                   ? 'success'
@@ -756,9 +1501,15 @@ export function AdminReportsPage() {
                             </span>
                           </div>
 
-                          <p className="mt-4 text-xs font-semibold text-[var(--color-charcoal)]/46">
-                            Joined {formatDate(user.createdAt)}
-                          </p>
+                          <div className="mt-3 flex items-center justify-between gap-3 border-t border-[rgba(91,61,82,0.07)] pt-2.5">
+                            <span className="rounded-full border border-[rgba(91,61,82,0.09)] bg-white/68 px-2.5 py-1 text-[0.62rem] font-black text-[var(--color-deep-plum)]">
+                              {user.role}
+                            </span>
+
+                            <p className="text-[0.64rem] font-semibold text-[var(--color-charcoal)]/42">
+                              Joined {formatDate(user.createdAt)}
+                            </p>
+                          </div>
                         </article>
                       ))}
                     </div>
@@ -800,33 +1551,48 @@ export function AdminReportsPage() {
                       items={vendorsQuery.data.topCategories.map((entry, index) => ({
                         id: entry.category?.id ?? `category-${index}`,
                         title: entry.category?.name ?? 'Unknown category',
-                        value: `${entry.vendorCount} vendors`,
+                        value: formatCountLabel(entry.vendorCount, 'vendor'),
                       }))}
                     />
                   </section>
 
-                  <section className="mt-6 rounded-[1.8rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur sm:p-7">
-                    <p className="section-eyebrow">Recent activity</p>
+                  <section className="mt-5 rounded-[1.5rem] border border-[rgba(91,61,82,0.09)] bg-white/78 p-4 shadow-[0_14px_38px_rgba(64,42,51,0.06)] backdrop-blur sm:p-5">
+                    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+                      <div>
+                        <p className="text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                          Recent activity
+                        </p>
 
-                    <h2 className="section-title">Newest vendors</h2>
+                        <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                          Newest vendors
+                        </h2>
+                      </div>
 
-                    <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                      <p className="text-[0.68rem] font-bold text-[var(--color-charcoal)]/42">
+                        {vendorsQuery.data.recentVendors.length}{' '}
+                        {vendorsQuery.data.recentVendors.length === 1 ? 'record' : 'records'}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
                       {vendorsQuery.data.recentVendors.map((vendor) => (
                         <article
                           key={vendor.id}
-                          className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]"
+                          className="rounded-[1.05rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-3.5 transition duration-200 hover:border-[rgba(91,61,82,0.14)] hover:bg-[rgba(183,167,200,0.055)]"
                         >
-                          <p className="font-black text-[var(--color-near-black)]">
-                            {vendor.businessName}
-                          </p>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-black text-[var(--color-near-black)]">
+                                {vendor.businessName}
+                              </p>
 
-                          <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/54">
-                            {vendor.baseLocation ?? 'Location not provided'}
-                          </p>
+                              <p className="mt-0.5 truncate text-[0.7rem] font-semibold text-[var(--color-charcoal)]/48">
+                                {vendor.baseLocation ?? 'Location not provided'}
+                              </p>
+                            </div>
 
-                          <div className="mt-4 flex flex-wrap gap-2">
                             <span
-                              className="status-chip"
+                              className="status-chip shrink-0"
                               data-tone={
                                 vendor.verificationStatus === 'APPROVED'
                                   ? 'success'
@@ -837,15 +1603,17 @@ export function AdminReportsPage() {
                             >
                               {vendor.verificationStatus}
                             </span>
-
-                            <span className="status-chip" data-tone="blue">
-                              {vendor._count.bookings} bookings
-                            </span>
                           </div>
 
-                          <p className="mt-4 text-xs font-semibold text-[var(--color-charcoal)]/46">
-                            Created {formatDate(vendor.createdAt)}
-                          </p>
+                          <div className="mt-3 flex items-center justify-between gap-3 border-t border-[rgba(91,61,82,0.07)] pt-2.5">
+                            <span className="rounded-full border border-[rgba(91,61,82,0.09)] bg-white/68 px-2.5 py-1 text-[0.62rem] font-black text-[var(--color-deep-plum)]">
+                              {formatCountLabel(vendor._count.bookings, 'booking')}
+                            </span>
+
+                            <p className="text-[0.64rem] font-semibold text-[var(--color-charcoal)]/42">
+                              Created {formatDate(vendor.createdAt)}
+                            </p>
+                          </div>
                         </article>
                       ))}
                     </div>
@@ -894,7 +1662,7 @@ export function AdminReportsPage() {
                       title="Top event types"
                       items={eventsQuery.data.topEventTypes.map((entry, index) => ({
                         id: `${entry.eventType}-${index}`,
-                        title: entry.eventType,
+                        title: formatEnumLabel(entry.eventType),
                         value: entry.eventCount,
                       }))}
                     />
@@ -918,8 +1686,8 @@ export function AdminReportsPage() {
                       title: entry.customer
                         ? `${entry.customer.firstName} ${entry.customer.lastName}`
                         : 'Unknown customer',
-                      subtitle: `${entry.guestCount} planned guests`,
-                      value: `${entry.eventCount} events`,
+                      subtitle: formatCountLabel(entry.guestCount, 'planned guest'),
+                      value: formatCountLabel(entry.eventCount, 'event'),
                     }))}
                   />
                 </>
@@ -967,7 +1735,7 @@ export function AdminReportsPage() {
                         id: entry.vendor?.id ?? `vendor-${index}`,
                         title: entry.vendor?.businessName ?? 'Unknown vendor',
                         subtitle: formatCurrency(entry.agreedCost),
-                        value: `${entry.bookingCount} bookings`,
+                        value: formatCountLabel(entry.bookingCount, 'booking'),
                       }))}
                     />
                   </section>
@@ -1029,7 +1797,7 @@ export function AdminReportsPage() {
                       items={paymentsQuery.data.topVendors.map((entry, index) => ({
                         id: entry.vendor?.id ?? `vendor-${index}`,
                         title: entry.vendor?.businessName ?? 'Unknown vendor',
-                        subtitle: `${entry.paymentCount} payments`,
+                        subtitle: formatCountLabel(entry.paymentCount, 'payment'),
                         value: formatCurrency(entry.verifiedAmount),
                       }))}
                     />
@@ -1042,7 +1810,7 @@ export function AdminReportsPage() {
                         title: entry.customer
                           ? `${entry.customer.firstName} ${entry.customer.lastName}`
                           : 'Unknown customer',
-                        subtitle: `${entry.paymentCount} payments`,
+                        subtitle: formatCountLabel(entry.paymentCount, 'payment'),
                         value: formatCurrency(entry.totalAmount),
                       }))}
                     />
@@ -1110,7 +1878,7 @@ export function AdminReportsPage() {
                       items={revenueQuery.data.topVendors.map((entry, index) => ({
                         id: entry.vendor?.id ?? `vendor-${index}`,
                         title: entry.vendor?.businessName ?? 'Unknown vendor',
-                        subtitle: `${entry.paymentCount} verified payments`,
+                        subtitle: formatCountLabel(entry.paymentCount, 'verified payment'),
                         value: formatCurrency(entry.revenue),
                       }))}
                     />
@@ -1207,36 +1975,44 @@ export function AdminReportsPage() {
                 </>
               ) : null}
 
-              <section className="mt-6 rounded-[1.8rem] border border-emerald-100/90 bg-white/84 p-6 shadow-[0_20px_50px_rgba(5,150,105,0.07)] backdrop-blur sm:p-7">
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <section className="mt-5 rounded-[1.5rem] border border-[rgba(91,61,82,0.09)] bg-white/78 p-4 shadow-[0_14px_38px_rgba(64,42,51,0.06)] backdrop-blur sm:p-5">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                   <div>
-                    <p className="section-eyebrow">Report metadata</p>
+                    <p className="text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Report metadata
+                    </p>
 
-                    <h2 className="section-title">Generation details</h2>
+                    <h2 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                      Generation details
+                    </h2>
+
+                    <p className="mt-1 text-xs leading-5 text-[var(--color-charcoal)]/50">
+                      Context used to generate the report currently displayed above.
+                    </p>
                   </div>
 
                   <button
                     type="button"
-                    className="btn-secondary text-sm"
+                    className="btn-secondary min-h-9 shrink-0 px-3.5 text-xs"
                     disabled={activeQuery.isFetching}
                     onClick={() => activeQuery.refetch()}
                   >
                     {activeQuery.isFetching ? (
-                      <LoaderCircle className="size-4 animate-spin" />
+                      <LoaderCircle className="size-3.5 animate-spin" />
                     ) : (
-                      <RefreshCw className="size-4" />
+                      <RefreshCw className="size-3.5" />
                     )}
                     Refresh report
                   </button>
                 </div>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+                  <div className="rounded-[1.05rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-3">
+                    <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                       Generated
                     </p>
 
-                    <p className="mt-2 text-sm font-bold text-[var(--color-near-black)]">
+                    <p className="mt-1.5 text-sm font-black text-[var(--color-near-black)]">
                       {activeQuery.data &&
                       typeof activeQuery.data === 'object' &&
                       'generatedAt' in activeQuery.data
@@ -1245,22 +2021,22 @@ export function AdminReportsPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                  <div className="rounded-[1.05rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-3">
+                    <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                       Grouped by
                     </p>
 
-                    <p className="mt-2 text-sm font-bold capitalize text-[var(--color-near-black)]">
+                    <p className="mt-1.5 text-sm font-black capitalize text-[var(--color-near-black)]">
                       {groupBy}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/45 via-white to-teal-50/20 p-4 shadow-[0_10px_28px_rgba(5,150,105,0.05)]">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                  <div className="rounded-[1.05rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(91,61,82,0.018)] px-3.5 py-3">
+                    <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                       Date range
                     </p>
 
-                    <p className="mt-2 text-sm font-bold text-[var(--color-near-black)]">
+                    <p className="mt-1.5 text-sm font-black text-[var(--color-near-black)]">
                       {from || to
                         ? `${from || 'Beginning'} – ${to || 'Today'}`
                         : 'All available history'}

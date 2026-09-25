@@ -830,25 +830,25 @@ export function GuestWorkspacePage() {
             </div>
           </section>
 
-          <section className="mt-7 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-            <article className="glass-card p-6 sm:p-7">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <section className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
+            <article className="glass-card p-5 sm:p-6">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
-                  <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                     Guest list
                   </p>
 
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                  <h2 className="mt-1.5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                     Everyone invited to the celebration.
                   </h2>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="soft-chip w-fit">{pagination.total} guests</span>
 
                   <button
                     type="button"
-                    className="btn-primary text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                    className="btn-primary justify-center text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
                     disabled={!isGuestsEditable}
                     onClick={openGuestForm}
                   >
@@ -859,17 +859,17 @@ export function GuestWorkspacePage() {
               </div>
 
               <form
-                className="mt-6 grid gap-3 lg:grid-cols-[1fr_auto_auto]"
+                className="mt-4 grid gap-2.5 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]"
                 onSubmit={(event) => {
                   event.preventDefault();
                   submitGuestSearch();
                 }}
               >
-                <div className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4 backdrop-blur-xl">
-                  <Search className="size-5 shrink-0 text-[var(--color-charcoal)]/42" />
+                <div className="flex min-h-11 items-center gap-3 rounded-2xl border border-white/55 bg-white/24 px-4 backdrop-blur-xl">
+                  <Search className="size-4 shrink-0 text-[var(--color-charcoal)]/42" />
 
                   <input
-                    className="min-h-12 w-full bg-transparent text-sm font-semibold outline-none placeholder:text-[var(--color-charcoal)]/42"
+                    className="w-full bg-transparent text-sm font-semibold outline-none placeholder:text-[var(--color-charcoal)]/42"
                     type="search"
                     placeholder="Search by name, email, phone or group"
                     value={searchInput}
@@ -880,7 +880,7 @@ export function GuestWorkspacePage() {
                 </div>
 
                 <select
-                  className="form-field min-h-12 lg:w-44"
+                  className="form-field min-h-11 lg:w-40"
                   aria-label="Filter guests by RSVP status"
                   value={statusFilter}
                   onChange={(event) => {
@@ -898,7 +898,7 @@ export function GuestWorkspacePage() {
                 </select>
 
                 <select
-                  className="form-field min-h-12 lg:w-52"
+                  className="form-field min-h-11 lg:w-44"
                   aria-label="Sort guests"
                   value={sort}
                   onChange={(event) => {
@@ -914,30 +914,33 @@ export function GuestWorkspacePage() {
                   <option value="party_size_lowest">Smallest party first</option>
                 </select>
 
-                <div className="flex flex-wrap gap-3 lg:col-span-3">
-                  <button type="submit" className="btn-primary text-sm font-bold">
-                    <Search className="size-4" />
-                    Search
-                  </button>
+                <button
+                  type="submit"
+                  className="btn-primary min-h-11 justify-center px-4 text-sm font-bold"
+                >
+                  <Search className="size-4" />
+                  Search
+                </button>
 
-                  {searchQuery || statusFilter || sort !== 'newest' ? (
+                {searchQuery || statusFilter || sort !== 'newest' ? (
+                  <div className="lg:col-span-4">
                     <button
                       type="button"
-                      className="btn-secondary text-sm font-bold"
+                      className="btn-secondary text-xs font-bold"
                       onClick={clearGuestFilters}
                     >
                       Clear filters
                     </button>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
               </form>
 
               {guests.length > 0 ? (
-                <div className="mt-8 grid gap-4">
+                <div className="mt-5 grid gap-3">
                   {guests.map((guest) => (
                     <article
                       key={guest.id}
-                      className="group/guest relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-5 shadow-[0_18px_45px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(235,225,241,0.54))] hover:shadow-[0_28px_68px_rgba(31,27,29,0.11)] sm:p-6"
+                      className="group/guest relative overflow-hidden rounded-[1.5rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.38),rgba(255,255,255,0.20))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/90 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(235,225,241,0.54))] hover:shadow-[0_22px_52px_rgba(31,27,29,0.10)] sm:p-5"
                     >
                       <div
                         aria-hidden="true"
@@ -945,35 +948,35 @@ export function GuestWorkspacePage() {
                       />
 
                       <div className="relative">
-                        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-                          <div className="flex min-w-0 items-start gap-4">
-                            <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(93,58,85,0.08)] transition duration-300 group-hover/guest:-translate-y-0.5 group-hover/guest:scale-105 group-hover/guest:bg-[rgba(183,167,200,0.34)] group-hover/guest:shadow-[0_16px_34px_rgba(93,58,85,0.14)]">
+                        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <span className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.22)] text-sm font-black text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(93,58,85,0.08)] transition duration-300 group-hover/guest:-translate-y-0.5 group-hover/guest:scale-105">
                               {guest.firstName.charAt(0)}
                               {guest.lastName.charAt(0)}
                             </span>
 
                             <div className="min-w-0">
-                              <p className="truncate text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/guest:translate-x-0.5 group-hover/guest:text-[var(--color-deep-plum)]">
+                              <p className="truncate text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/guest:text-[var(--color-deep-plum)]">
                                 {formatGuestName(guest)}
                               </p>
 
-                              <div className="mt-2 flex flex-wrap items-center gap-2">
-                                <span className="text-sm font-semibold text-[var(--color-charcoal)]/58 transition duration-300 group-hover/guest:text-[var(--color-charcoal)]/72">
+                              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-semibold text-[var(--color-charcoal)]/58">
                                   {guest.groupName ?? 'No guest group'}
                                 </span>
 
                                 <span className="size-1 rounded-full bg-[var(--color-charcoal)]/24" />
 
-                                <span className="text-sm font-semibold text-[var(--color-charcoal)]/52">
+                                <span className="text-xs font-semibold text-[var(--color-charcoal)]/52">
                                   Party of {guest.partySize}
                                 </span>
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap items-center justify-end gap-3">
+                          <div className="flex flex-wrap items-center justify-end gap-2">
                             <select
-                              className="min-h-10 rounded-2xl border border-white/60 bg-white/38 px-4 text-xs font-black tracking-[0.04em] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] outline-none backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.28)] hover:bg-white/54 hover:shadow-[0_14px_30px_rgba(31,27,29,0.08)] focus:border-[rgba(93,58,85,0.34)] focus:ring-2 focus:ring-[var(--color-deep-plum)]/15 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                              className="min-h-9 rounded-xl border border-white/60 bg-white/38 px-3 text-xs font-black tracking-[0.03em] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.04)] outline-none backdrop-blur-xl transition duration-300 hover:border-[rgba(93,58,85,0.28)] hover:bg-white/54 focus:border-[rgba(93,58,85,0.34)] focus:ring-2 focus:ring-[var(--color-deep-plum)]/15 disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label={`Update RSVP status for ${formatGuestName(guest)}`}
                               value={guest.status}
                               disabled={
@@ -1006,7 +1009,7 @@ export function GuestWorkspacePage() {
                             </select>
 
                             <span
-                              className="status-chip w-fit transition duration-300 group-hover/guest:-translate-y-0.5 group-hover/guest:scale-[1.02] group-hover/guest:shadow-[0_8px_20px_rgba(31,27,29,0.08)]"
+                              className="status-chip w-fit"
                               data-tone={getStatusTone(guest.status)}
                             >
                               {guestStatusLabels[guest.status]}
@@ -1014,130 +1017,118 @@ export function GuestWorkspacePage() {
 
                             <button
                               type="button"
-                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(93,58,85,0.30)] hover:bg-[rgba(93,58,85,0.16)] hover:shadow-[0_14px_30px_rgba(93,58,85,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
+                              className="grid size-9 place-items-center rounded-xl border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] text-[var(--color-deep-plum)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(93,58,85,0.16)] disabled:cursor-not-allowed disabled:opacity-35"
                               aria-label={`Edit ${formatGuestName(guest)}`}
                               disabled={!isGuestsEditable}
                               onClick={() => {
                                 openEditGuestForm(guest);
                               }}
                             >
-                              <Pencil
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/guest:rotate-[3deg]"
-                              />
+                              <Pencil aria-hidden="true" className="size-4" />
                             </button>
 
                             <button
                               type="button"
-                              className="grid size-10 place-items-center rounded-2xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] shadow-[0_10px_24px_rgba(31,27,29,0.04)] transition duration-300 hover:-translate-y-0.5 hover:scale-105 hover:border-[rgba(124,74,90,0.30)] hover:bg-[rgba(124,74,90,0.16)] hover:shadow-[0_14px_30px_rgba(124,74,90,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-muted-burgundy)]/30 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-none"
+                              className="grid size-9 place-items-center rounded-xl border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] text-[var(--color-muted-burgundy)] transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(124,74,90,0.16)] disabled:cursor-not-allowed disabled:opacity-35"
                               aria-label={`Delete ${formatGuestName(guest)}`}
                               disabled={!isGuestsEditable}
                               onClick={() => {
                                 openDeleteGuestDialog(guest);
                               }}
                             >
-                              <Trash2
-                                aria-hidden="true"
-                                className="size-4 transition duration-300 group-hover/guest:rotate-[4deg]"
-                              />
+                              <Trash2 aria-hidden="true" className="size-4" />
                             </button>
                           </div>
                         </div>
+
                         {updateGuestRsvpMutation.isError &&
                         updateGuestRsvpMutation.variables?.guestId === guest.id ? (
                           <div
                             role="alert"
-                            className="mt-4 rounded-2xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-4 py-3 text-sm font-bold leading-6 text-[var(--color-muted-burgundy)]"
+                            className="mt-3 rounded-xl border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] px-3 py-2.5 text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]"
                           >
                             {getApiErrorMessage(updateGuestRsvpMutation.error)}
                           </div>
                         ) : null}
 
-                        <div className="mt-6 grid gap-3 border-t border-[rgba(93,58,85,0.08)] pt-5 text-sm sm:grid-cols-3">
-                          <div className="rounded-2xl border border-white/45 bg-white/22 p-4 transition duration-300 group-hover/guest:border-white/72 group-hover/guest:bg-white/38">
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                        <div className="mt-4 grid gap-2.5 border-t border-[rgba(93,58,85,0.08)] pt-4 text-sm sm:grid-cols-3">
+                          <div className="rounded-xl border border-white/45 bg-white/22 p-3">
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                               Meal preference
                             </p>
 
-                            <p className="mt-2 font-black leading-6 text-[var(--color-near-black)] transition duration-300 group-hover/guest:text-[var(--color-deep-plum)]">
+                            <p className="mt-1.5 font-black leading-5 text-[var(--color-near-black)]">
                               {guest.mealPreference ?? 'Not specified'}
                             </p>
                           </div>
 
-                          <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          <div className="rounded-xl border border-white/45 bg-white/22 p-3">
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                               Email
                             </p>
 
-                            <p className="mt-2 break-words font-black leading-6 text-[var(--color-near-black)] transition duration-300 group-hover/guest:text-[var(--color-deep-plum)]">
+                            <p className="mt-1.5 break-words font-black leading-5 text-[var(--color-near-black)]">
                               {guest.email ?? 'Not provided'}
                             </p>
                           </div>
 
-                          <div className="rounded-2xl border border-white/45 bg-white/22 p-4">
-                            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
+                          <div className="rounded-xl border border-white/45 bg-white/22 p-3">
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
                               Phone
                             </p>
 
-                            <p className="mt-2 break-words font-black leading-6 text-[var(--color-near-black)] transition duration-300 group-hover/guest:text-[var(--color-deep-plum)]">
+                            <p className="mt-1.5 break-words font-black leading-5 text-[var(--color-near-black)]">
                               {guest.phone ?? 'Not provided'}
                             </p>
                           </div>
                         </div>
 
-                        <>
-                          {guest.dietaryRequirements ? (
-                            <div className="mt-5 rounded-2xl border border-[rgba(142,92,103,0.10)] bg-[rgba(255,255,255,0.28)] p-4 transition duration-300 group-hover/guest:border-[rgba(142,92,103,0.20)] group-hover/guest:bg-[rgba(248,230,234,0.34)]">
-                              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                                Dietary requirements
-                              </p>
+                        {guest.dietaryRequirements ? (
+                          <div className="mt-3 rounded-xl border border-[rgba(142,92,103,0.10)] bg-[rgba(255,255,255,0.28)] p-3">
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+                              Dietary requirements
+                            </p>
 
-                              <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
-                                {guest.dietaryRequirements}
-                              </p>
-                            </div>
-                          ) : null}
+                            <p className="mt-1.5 text-sm font-semibold leading-5 text-[var(--color-charcoal)]/68">
+                              {guest.dietaryRequirements}
+                            </p>
+                          </div>
+                        ) : null}
 
-                          {guest.notes ? (
-                            <div className="mt-4 rounded-2xl border border-[rgba(93,58,85,0.10)] bg-[rgba(255,255,255,0.28)] p-4 transition duration-300 group-hover/guest:border-[rgba(93,58,85,0.20)] group-hover/guest:bg-[rgba(235,225,241,0.34)]">
-                              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
-                                Notes
-                              </p>
+                        {guest.notes ? (
+                          <div className="mt-3 rounded-xl border border-[rgba(93,58,85,0.10)] bg-[rgba(255,255,255,0.28)] p-3">
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
+                              Notes
+                            </p>
 
-                              <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-[var(--color-charcoal)]/68">
-                                {guest.notes}
-                              </p>
-                            </div>
-                          ) : null}
-                        </>
+                            <p className="mt-1.5 whitespace-pre-wrap text-sm font-semibold leading-5 text-[var(--color-charcoal)]/68">
+                              {guest.notes}
+                            </p>
+                          </div>
+                        ) : null}
                       </div>
                     </article>
                   ))}
                 </div>
               ) : (
-                <div className="relative mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] p-8 text-center shadow-[0_16px_42px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-10">
+                <div className="relative mt-4 overflow-hidden rounded-[1.5rem] border border-dashed border-white/76 bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.24))] px-5 py-6 text-center shadow-[0_12px_32px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:px-6">
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
-                  />
-
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+                    className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
                   />
 
                   <div className="relative">
-                    <div className="mx-auto grid size-16 place-items-center rounded-3xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_14px_34px_rgba(31,27,29,0.06)]">
-                      <UsersRound aria-hidden="true" className="size-8" />
+                    <div className="mx-auto grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_26px_rgba(31,27,29,0.06)]">
+                      <UsersRound aria-hidden="true" className="size-5" />
                     </div>
 
-                    <p className="mt-6 text-2xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                    <p className="mt-3 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
                       {searchQuery || statusFilter
                         ? 'No guests match these filters'
                         : 'No guests added yet'}
                     </p>
 
-                    <p className="mx-auto mt-3 max-w-lg text-sm font-semibold leading-7 text-[var(--color-charcoal)]/60">
+                    <p className="mx-auto mt-1.5 max-w-lg text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
                       {searchQuery || statusFilter
                         ? 'Try changing the search term, RSVP status or sort order.'
                         : 'Add the first guest to begin tracking invitations, attendance, contact details and meal requirements.'}
@@ -1146,7 +1137,7 @@ export function GuestWorkspacePage() {
                     {searchQuery || statusFilter || sort !== 'newest' ? (
                       <button
                         type="button"
-                        className="btn-secondary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_14px_30px_rgba(31,27,29,0.09)]"
+                        className="btn-secondary mt-3 justify-center text-xs font-bold"
                         onClick={clearGuestFilters}
                       >
                         Clear filters
@@ -1154,14 +1145,11 @@ export function GuestWorkspacePage() {
                     ) : (
                       <button
                         type="button"
-                        className="group/first-guest btn-primary mt-6 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                        className="btn-primary mt-3 justify-center text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
                         disabled={!isGuestsEditable}
                         onClick={openGuestForm}
                       >
-                        <UserRoundPlus
-                          aria-hidden="true"
-                          className="size-4 transition duration-300 group-hover/first-guest:scale-105"
-                        />
+                        <UserRoundPlus aria-hidden="true" className="size-4" />
                         Add first guest
                       </button>
                     )}
@@ -1170,15 +1158,10 @@ export function GuestWorkspacePage() {
               )}
 
               {pagination.totalPages > 1 ? (
-                <div className="relative mt-8 overflow-hidden rounded-[1.5rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(228,238,243,0.32))] p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-xl sm:p-5">
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                  />
-
-                  <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative mt-4 overflow-hidden rounded-[1.3rem] border border-white/58 bg-[linear-gradient(145deg,rgba(255,255,255,0.54),rgba(228,238,243,0.32))] p-3 shadow-[0_12px_30px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                  <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[var(--color-deep-plum)]">
                         <UsersRound aria-hidden="true" className="size-4" />
                       </span>
 
@@ -1187,16 +1170,16 @@ export function GuestWorkspacePage() {
                           Page {pagination.page} of {pagination.totalPages}
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/50">
+                        <p className="mt-0.5 text-xs font-semibold text-[var(--color-charcoal)]/50">
                           {pagination.total} {pagination.total === 1 ? 'guest' : 'guests'} in total
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <button
                         type="button"
-                        className="btn-secondary min-w-28 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                        className="btn-secondary justify-center text-xs font-bold"
                         disabled={!pagination.hasPreviousPage || guestsQuery.isFetching}
                         onClick={() => {
                           setPage((currentPage) => Math.max(currentPage - 1, 1));
@@ -1207,7 +1190,7 @@ export function GuestWorkspacePage() {
 
                       <button
                         type="button"
-                        className="btn-secondary min-w-28 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/52 hover:shadow-[0_12px_28px_rgba(31,27,29,0.08)]"
+                        className="btn-secondary justify-center text-xs font-bold"
                         disabled={!pagination.hasNextPage || guestsQuery.isFetching}
                         onClick={() => {
                           setPage((currentPage) => currentPage + 1);
@@ -1221,55 +1204,55 @@ export function GuestWorkspacePage() {
               ) : null}
             </article>
 
-            <aside className="self-start space-y-5">
-              <article className="group/target relative overflow-hidden rounded-[2rem] border border-white/68 bg-[linear-gradient(145deg,rgba(255,255,255,0.76),rgba(242,234,246,0.82))] p-6 shadow-[0_24px_70px_rgba(31,27,29,0.08)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_30px_78px_rgba(31,27,29,0.11)] sm:p-7">
+            <aside className="self-start space-y-4">
+              <article className="group/target relative overflow-hidden rounded-[1.6rem] border border-white/68 bg-[linear-gradient(145deg,rgba(255,255,255,0.76),rgba(242,234,246,0.82))] p-5 shadow-[0_18px_52px_rgba(31,27,29,0.07)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/86 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)]">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl transition duration-500 group-hover/target:scale-125 group-hover/target:bg-[rgba(183,167,200,0.34)]"
+                  className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl transition duration-500 group-hover/target:scale-125"
                 />
 
                 <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
                         Attendance target
                       </p>
 
-                      <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
+                      <h2 className="mt-1.5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
                         Planned versus expected.
                       </h2>
                     </div>
 
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_12px_28px_rgba(31,27,29,0.08)] transition duration-300 group-hover/target:-translate-y-0.5 group-hover/target:scale-105">
-                      <UsersRound aria-hidden="true" className="size-5" />
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.07)]">
+                      <UsersRound aria-hidden="true" className="size-4" />
                     </span>
                   </div>
 
-                  <div className="mt-7 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.45rem] border border-white/62 bg-white/36 p-5 backdrop-blur-xl transition duration-300 group-hover/target:bg-white/48">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                  <div className="mt-4 grid grid-cols-2 gap-2.5">
+                    <div className="rounded-[1.2rem] border border-white/62 bg-white/36 p-4 backdrop-blur-xl">
+                      <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                         Planned
                       </p>
 
-                      <p className="mt-3 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                      <p className="mt-1.5 text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                         {guestSummary.event.plannedGuestCount ?? '—'}
                       </p>
 
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                      <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
                         Event guest target
                       </p>
                     </div>
 
-                    <div className="rounded-[1.45rem] border border-white/62 bg-white/36 p-5 backdrop-blur-xl transition duration-300 group-hover/target:bg-white/48">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+                    <div className="rounded-[1.2rem] border border-white/62 bg-white/36 p-4 backdrop-blur-xl">
+                      <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/42">
                         Expected
                       </p>
 
-                      <p className="mt-3 text-3xl font-black tracking-[-0.05em] text-[var(--color-deep-plum)]">
+                      <p className="mt-1.5 text-2xl font-black tracking-[-0.05em] text-[var(--color-deep-plum)]">
                         {guestSummary.summary.totalExpectedAttendees}
                       </p>
 
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
+                      <p className="mt-1 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
                         Based on guest responses
                       </p>
                     </div>
@@ -1277,8 +1260,8 @@ export function GuestWorkspacePage() {
 
                   {guestSummary.event.plannedGuestCount ? (
                     <>
-                      <div className="mt-6 flex items-center justify-between gap-4">
-                        <p className="text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/42">
+                      <div className="mt-4 flex items-center justify-between gap-4">
+                        <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
                           Target coverage
                         </p>
 
@@ -1295,9 +1278,9 @@ export function GuestWorkspacePage() {
                         </p>
                       </div>
 
-                      <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.08)]">
                         <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] shadow-[0_0_14px_rgba(142,92,103,0.20)] transition-[width] duration-700"
+                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),#d7b7c3)] transition-[width] duration-700"
                           style={{
                             width: `${Math.min(
                               Math.max(
@@ -1312,7 +1295,7 @@ export function GuestWorkspacePage() {
                         />
                       </div>
 
-                      <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/54">
+                      <p className="mt-2.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
                         {guestSummary.summary.totalExpectedAttendees >=
                         guestSummary.event.plannedGuestCount
                           ? 'Expected attendance has reached the planned guest target.'
@@ -1320,8 +1303,8 @@ export function GuestWorkspacePage() {
                       </p>
                     </>
                   ) : (
-                    <div className="mt-6 rounded-[1.35rem] border border-dashed border-white/68 bg-white/24 px-4 py-4">
-                      <p className="text-sm font-semibold leading-6 text-[var(--color-charcoal)]/54">
+                    <div className="mt-4 rounded-[1.15rem] border border-dashed border-white/68 bg-white/24 px-3.5 py-3">
+                      <p className="text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
                         Add a planned guest count in the event details to compare attendance against
                         a target.
                       </p>
@@ -1330,23 +1313,23 @@ export function GuestWorkspacePage() {
                 </div>
               </article>
 
-              <article className="group/date relative overflow-hidden rounded-[1.75rem] border border-white/64 bg-white/30 p-5 shadow-[0_18px_48px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-white/42 hover:shadow-[0_24px_58px_rgba(31,27,29,0.09)]">
+              <article className="group/date relative overflow-hidden rounded-[1.4rem] border border-white/64 bg-white/30 p-4 shadow-[0_14px_38px_rgba(31,27,29,0.05)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:bg-white/42">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl transition duration-500 group-hover/date:scale-125"
+                  className="pointer-events-none absolute -right-12 -top-14 size-32 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
                 />
 
-                <div className="relative flex items-center gap-4">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.26)] text-[#334954] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/date:-translate-y-0.5 group-hover/date:scale-105">
-                    <Clock3 aria-hidden="true" className="size-5" />
+                <div className="relative flex items-center gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.26)] text-[#334954] shadow-[0_8px_20px_rgba(31,27,29,0.06)]">
+                    <Clock3 aria-hidden="true" className="size-4" />
                   </span>
 
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    <p className="text-[0.65rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
                       Event date
                     </p>
 
-                    <p className="mt-2 text-lg font-black leading-6 tracking-[-0.025em] text-[var(--color-near-black)]">
+                    <p className="mt-1 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
                       {formatEventDate(guestSummary.event.eventDate)}
                     </p>
                   </div>
@@ -1356,641 +1339,463 @@ export function GuestWorkspacePage() {
           </section>
         </main>
       </div>
-      {isGuestFormOpen && isGuestsEditable ? (
+     {isGuestFormOpen && isGuestsEditable ? (
+  <div
+    className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-3 py-3 backdrop-blur-xl sm:px-4 sm:py-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="create-guest-title"
+    onClick={() => {
+      if (!isGuestMutationPending) {
+        closeGuestForm();
+      }
+    }}
+  >
+    <div className="grid min-h-full place-items-center">
+      <div
+        className="relative w-full max-w-3xl overflow-hidden rounded-[1.8rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(240,231,246,0.86))] shadow-[0_36px_100px_rgba(31,27,29,0.28)] backdrop-blur-3xl"
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(31,27,29,0.62)] px-4 py-6 backdrop-blur-xl sm:py-8"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="create-guest-title"
-          onClick={() => {
-            if (!isGuestMutationPending) {
-              closeGuestForm();
-            }
-          }}
-        >
-          <div className="grid min-h-full place-items-center">
-            <div
-              className="relative w-full max-w-3xl overflow-hidden rounded-[2.25rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(240,231,246,0.86))] shadow-[0_42px_120px_rgba(31,27,29,0.28)] backdrop-blur-3xl"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
+        />
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-[14%] top-[-8rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
+        />
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(255,228,210,0.14)] blur-3xl"
+        />
+
+        <div className="relative max-h-[calc(100vh-1.5rem)] overflow-y-auto p-4 sm:p-5">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4 border-b border-[rgba(93,58,85,0.10)] pb-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_20px_rgba(31,27,29,0.05)]">
+                  {guestToEdit ? (
+                    <Pencil aria-hidden="true" className="size-4" />
+                  ) : (
+                    <UserRoundPlus aria-hidden="true" className="size-4" />
+                  )}
+                </span>
+
+                <span className="rounded-full border border-[rgba(93,58,85,0.10)] bg-white/44 px-3 py-1.5 text-[0.6rem] font-black uppercase tracking-[0.17em] text-[var(--color-deep-plum)]">
+                  {guestToEdit ? 'Edit guest' : 'New guest'}
+                </span>
+
+                <span className="status-chip" data-tone="plum">
+                  Guest record
+                </span>
+
+                <span className="status-chip" data-tone="blue">
+                  RSVP tracking
+                </span>
+
+                <span className="hidden text-[0.68rem] font-black text-[var(--color-charcoal)]/62 sm:inline">
+                  <UsersRound aria-hidden="true" className="mr-1 inline size-3.5" />
+                  Party details
+                </span>
+              </div>
+
+              <h2
+                id="create-guest-title"
+                className="mt-2.5 text-[1.65rem] font-black leading-none tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[1.8rem]"
+              >
+                {guestToEdit ? 'Update guest details.' : 'Add someone to the guest list.'}
+              </h2>
+
+              <p className="mt-1.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/62 sm:text-sm">
+                {guestToEdit
+                  ? 'Keep contact, attendance and planning information accurate for this guest.'
+                  : 'Record the essential contact, attendance and meal details for this guest.'}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="grid size-9 shrink-0 place-items-center rounded-full border border-white/72 bg-white/50 text-[var(--color-charcoal)] shadow-[0_8px_20px_rgba(31,27,29,0.06)] transition hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-45"
+              aria-label="Close guest form"
+              disabled={isGuestMutationPending}
+              onClick={closeGuestForm}
             >
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(183,167,200,0.24)] blur-3xl"
-              />
+              <X aria-hidden="true" className="size-4" />
+            </button>
+          </div>
 
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute left-[14%] top-[-8rem] size-64 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
-              />
+          <form className="mt-3 grid gap-2.5" onSubmit={submitGuest}>
+            {/* Basic information */}
+            <section className="rounded-[1.3rem] border border-white/68 bg-white/40 p-3.5 shadow-[0_12px_30px_rgba(31,27,29,0.055)] backdrop-blur-xl">
+              <div className="mb-2.5 flex items-center gap-2.5">
+                <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
+                  <UsersRound aria-hidden="true" className="size-3.5" />
+                </span>
 
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-24 -left-16 size-56 rounded-full bg-[rgba(255,228,210,0.14)] blur-3xl"
-              />
+                <div>
+                  <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Basic information
+                  </p>
 
-              <div className="relative max-h-[calc(100vh-3rem)] overflow-y-auto p-6 sm:p-8">
-                <div className="flex flex-col gap-6 border-b border-[rgba(93,58,85,0.10)] pb-7 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)]">
-                        {guestToEdit ? (
-                          <Pencil aria-hidden="true" className="size-6" />
-                        ) : (
-                          <UserRoundPlus aria-hidden="true" className="size-6" />
-                        )}
-                      </span>
+                  <h3 className="mt-0.5 text-sm font-black text-[var(--color-near-black)]">
+                    Identify the guest
+                  </h3>
+                </div>
+              </div>
 
-                      <span className="rounded-full border border-[rgba(93,58,85,0.16)] bg-[rgba(93,58,85,0.08)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-deep-plum)]">
-                        {guestToEdit ? 'Edit guest' : 'New guest'}
-                      </span>
-                    </div>
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                    First name <span className="text-[var(--color-rosewood)]">*</span>
+                  </span>
 
-                    <h2
-                      id="create-guest-title"
-                      className="mt-6 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl"
-                    >
-                      {guestToEdit ? 'Refine this guest record.' : 'Add someone to the guest list.'}
-                    </h2>
+                  <input
+                    type="text"
+                    className="form-field min-h-10"
+                    placeholder="First name"
+                    {...guestForm.register('firstName')}
+                  />
 
-                    <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-[var(--color-charcoal)]/64 sm:text-base">
-                      {guestToEdit
-                        ? 'Update contact details, party information, RSVP progress, meal preferences or planning notes.'
-                        : 'Record contact details, party size, RSVP status and meal requirements in one organised guest profile.'}
+                  {guestForm.formState.errors.firstName ? (
+                    <p className="mt-1.5 flex items-center gap-1.5 rounded-xl border border-[rgba(130,72,77,0.14)] bg-[rgba(130,72,77,0.06)] px-2.5 py-1.5 text-[0.68rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                      <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+                      {guestForm.formState.errors.firstName.message}
+                    </p>
+                  ) : null}
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                    Last name <span className="text-[var(--color-rosewood)]">*</span>
+                  </span>
+
+                  <input
+                    type="text"
+                    className="form-field min-h-10"
+                    placeholder="Last name"
+                    {...guestForm.register('lastName')}
+                  />
+
+                  {guestForm.formState.errors.lastName ? (
+                    <p className="mt-1.5 flex items-center gap-1.5 rounded-xl border border-[rgba(130,72,77,0.14)] bg-[rgba(130,72,77,0.06)] px-2.5 py-1.5 text-[0.68rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                      <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+                      {guestForm.formState.errors.lastName.message}
+                    </p>
+                  ) : null}
+                </label>
+              </div>
+            </section>
+
+            {/* Contact + attendance */}
+            <div className="grid gap-2.5 lg:grid-cols-[0.95fr_1.05fr]">
+              <section className="rounded-[1.3rem] border border-white/68 bg-[rgba(240,247,250,0.40)] p-3.5 shadow-[0_12px_30px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                <div className="mb-2.5 flex items-center gap-2.5">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#334954]">
+                    <MailCheck aria-hidden="true" className="size-3.5" />
+                  </span>
+
+                  <div>
+                    <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Contact
                     </p>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <span className="status-chip" data-tone="plum">
-                        <UsersRound aria-hidden="true" className="size-3.5" />
-                        Guest record
-                      </span>
-
-                      <span className="status-chip" data-tone="blue">
-                        <MailCheck aria-hidden="true" className="size-3.5" />
-                        RSVP tracking
-                      </span>
-
-                      <span className="status-chip" data-tone="gray">
-                        <UserCheck aria-hidden="true" className="size-3.5" />
-                        Party details
-                      </span>
-                    </div>
+                    <h3 className="mt-0.5 text-sm font-black text-[var(--color-near-black)]">
+                      Invitation contact details
+                    </h3>
                   </div>
-
-                  <button
-                    type="button"
-                    className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/64 bg-white/36 text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.22)] hover:bg-white/56 hover:text-[var(--color-deep-plum)] hover:shadow-[0_16px_34px_rgba(31,27,29,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-label="Close guest form"
-                    disabled={isGuestMutationPending}
-                    onClick={closeGuestForm}
-                  >
-                    <X aria-hidden="true" className="size-5" />
-                  </button>
                 </div>
 
-                <form className="mt-7 grid gap-5" onSubmit={submitGuest}>
-                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl"
+                <div className="grid gap-2.5">
+                  <label className="block">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                      Email
+                    </span>
+
+                    <input
+                      type="email"
+                      className="form-field min-h-10"
+                      placeholder="sample@gmail.com"
+                      {...guestForm.register('email')}
                     />
 
-                    <div className="relative">
-                      <div className="flex items-start gap-4">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                          <UsersRound aria-hidden="true" className="size-5" />
-                        </span>
+                    {guestForm.formState.errors.email ? (
+                      <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                        {guestForm.formState.errors.email.message}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-[0.62rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
+                        Optional. Recommended for digital invitations.
+                      </p>
+                    )}
+                  </label>
 
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Basic information
-                          </p>
+                  <label className="block">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                      Phone
+                    </span>
 
-                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            Identify the guest
-                          </h3>
-
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                            Add the guest’s name exactly as you want it to appear across the event.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            First name
-                            <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
-                          </span>
-
-                          <input
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            type="text"
-                            placeholder="First name"
-                            disabled={isGuestMutationPending}
-                            {...guestForm.register('firstName')}
-                          />
-
-                          {guestForm.formState.errors.firstName ? (
-                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                              <CircleAlert
-                                aria-hidden="true"
-                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                              />
-
-                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                                {guestForm.formState.errors.firstName.message}
-                              </p>
-                            </div>
-                          ) : null}
-                        </label>
-
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            Last name
-                            <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
-                          </span>
-
-                          <input
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            type="text"
-                            placeholder="Last name"
-                            disabled={isGuestMutationPending}
-                            {...guestForm.register('lastName')}
-                          />
-
-                          {guestForm.formState.errors.lastName ? (
-                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                              <CircleAlert
-                                aria-hidden="true"
-                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                              />
-
-                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                                {guestForm.formState.errors.lastName.message}
-                              </p>
-                            </div>
-                          ) : null}
-                        </label>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(220,235,242,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
+                    <input
+                      type="tel"
+                      className="form-field min-h-10"
+                      placeholder="0771234567 or +94771234567"
+                      {...guestForm.register('phone')}
                     />
 
-                    <div className="relative">
-                      <div className="flex items-start gap-4">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(175,201,216,0.24)] text-[#334954]">
-                          <MailCheck aria-hidden="true" className="size-5" />
-                        </span>
+                    {guestForm.formState.errors.phone ? (
+                      <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                        {guestForm.formState.errors.phone.message}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-[0.62rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
+                        0771234567, 94771234567 or +94771234567.
+                      </p>
+                    )}
+                  </label>
+                </div>
+              </section>
 
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Contact information
-                          </p>
+              <section className="rounded-[1.3rem] border border-white/68 bg-[rgba(247,242,250,0.44)] p-3.5 shadow-[0_12px_30px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+                <div className="mb-2.5 flex items-center gap-2.5">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+                    <UserRoundPlus aria-hidden="true" className="size-3.5" />
+                  </span>
 
-                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            Add reliable contact details
-                          </h3>
+                  <div>
+                    <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      Attendance
+                    </p>
 
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                            Save the best email address and phone number for invitations and
-                            updates.
-                          </p>
-                        </div>
-                      </div>
+                    <h3 className="mt-0.5 text-sm font-black text-[var(--color-near-black)]">
+                      Party and RSVP details
+                    </h3>
+                  </div>
+                </div>
 
-                      <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            Email
-                          </span>
-
-                          <input
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            type="email"
-                            inputMode="email"
-                            autoComplete="email"
-                            placeholder="sample@gmail.com"
-                            disabled={isGuestMutationPending}
-                            aria-invalid={Boolean(guestForm.formState.errors.email)}
-                            {...guestForm.register('email')}
-                          />
-
-                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                            Optional, but recommended for digital invitations.
-                          </p>
-
-                          {guestForm.formState.errors.email ? (
-                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                              <CircleAlert
-                                aria-hidden="true"
-                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                              />
-
-                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                                {guestForm.formState.errors.email.message}
-                              </p>
-                            </div>
-                          ) : null}
-                        </label>
-
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            Phone
-                          </span>
-
-                          <input
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            type="tel"
-                            inputMode="tel"
-                            autoComplete="tel"
-                            placeholder="0771234567 or +94771234567"
-                            disabled={isGuestMutationPending}
-                            aria-invalid={Boolean(guestForm.formState.errors.phone)}
-                            {...guestForm.register('phone', {
-                              onChange: (event) => {
-                                const rawValue = event.target.value as string;
-                                const startsWithPlus = rawValue.startsWith('+');
-
-                                let nextValue = rawValue.replace(/[^\d+]/g, '');
-
-                                if (startsWithPlus) {
-                                  nextValue = `+${nextValue.replace(/\+/g, '')}`;
-                                } else {
-                                  nextValue = nextValue.replace(/\+/g, '');
-                                }
-
-                                if (nextValue.startsWith('+94')) {
-                                  nextValue = nextValue.slice(0, 12);
-                                } else if (nextValue.startsWith('94')) {
-                                  nextValue = nextValue.slice(0, 11);
-                                } else if (nextValue.startsWith('0')) {
-                                  nextValue = nextValue.slice(0, 10);
-                                } else {
-                                  nextValue = nextValue.slice(0, 11);
-                                }
-
-                                guestForm.setValue('phone', nextValue, {
-                                  shouldDirty: true,
-                                  shouldTouch: true,
-                                  shouldValidate: true,
-                                });
-                              },
-                            })}
-                          />
-
-                          <p className="mt-2 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                            Use 0771234567, 94771234567 or +94771234567.
-                          </p>
-
-                          {guestForm.formState.errors.phone ? (
-                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                              <CircleAlert
-                                aria-hidden="true"
-                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                              />
-
-                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                                {guestForm.formState.errors.phone.message}
-                              </p>
-                            </div>
-                          ) : null}
-                        </label>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(240,231,246,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
-                    />
-
-                    <div className="relative">
-                      <div className="flex items-start gap-4">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                          <UserCheck aria-hidden="true" className="size-5" />
-                        </span>
-
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Attendance details
-                          </p>
-
-                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            Organise the guest’s attendance
-                          </h3>
-
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                            Set their group, party size and current RSVP progress.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 grid gap-5 sm:grid-cols-3">
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            Guest group
-                          </span>
-
-                          <select
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            disabled={isGuestMutationPending}
-                            {...guestForm.register('groupName')}
-                          >
-                            <option value="">No group</option>
-                            <option value="Friends">Friends</option>
-                            <option value="Family">Family</option>
-                            <option value="Partners">Partners</option>
-                            <option value="Others">Others</option>
-                          </select>
-                        </label>
-
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            Party size
-                            <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
-                          </span>
-
-                          <input
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            type="number"
-                            min="1"
-                            max="100"
-                            step="1"
-                            disabled={isGuestMutationPending}
-                            {...guestForm.register('partySize')}
-                          />
-
-                          {guestForm.formState.errors.partySize ? (
-                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                              <CircleAlert
-                                aria-hidden="true"
-                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                              />
-
-                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                                {guestForm.formState.errors.partySize.message}
-                              </p>
-                            </div>
-                          ) : null}
-                        </label>
-
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            RSVP status
-                            <span className="ml-1 text-[var(--color-muted-burgundy)]">*</span>
-                          </span>
-
-                          <select
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            disabled={isGuestMutationPending}
-                            {...guestForm.register('status')}
-                          >
-                            {guestStatuses.map((status) => (
-                              <option key={status} value={status}>
-                                {guestStatusLabels[status]}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-[linear-gradient(145deg,rgba(255,255,255,0.66),rgba(248,235,223,0.38))] p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(255,228,210,0.18)] blur-3xl"
-                    />
-
-                    <div className="relative">
-                      <div className="flex items-start gap-4">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(233,221,207,0.72)] text-[var(--color-deep-plum)]">
-                          <Sparkles aria-hidden="true" className="size-5" />
-                        </span>
-
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Meal preferences
-                          </p>
-
-                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            Capture catering needs
-                          </h3>
-
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                            Record meal choices and any dietary requirements that affect planning.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 grid gap-5">
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            Meal preference
-                          </span>
-
-                          <input
-                            className="form-field mt-2 min-h-12 transition duration-300 focus:bg-white/52"
-                            type="text"
-                            placeholder="Vegetarian"
-                            disabled={isGuestMutationPending}
-                            {...guestForm.register('mealPreference')}
-                          />
-                        </label>
-
-                        <label className="block">
-                          <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                            Dietary requirements
-                          </span>
-
-                          <textarea
-                            className="form-field mt-2 min-h-28 resize-y transition duration-300 focus:bg-white/52"
-                            placeholder="Allergies, intolerances or special requirements"
-                            disabled={isGuestMutationPending}
-                            {...guestForm.register('dietaryRequirements')}
-                          />
-
-                          {guestForm.formState.errors.dietaryRequirements ? (
-                            <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                              <CircleAlert
-                                aria-hidden="true"
-                                className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                              />
-
-                              <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                                {guestForm.formState.errors.dietaryRequirements.message}
-                              </p>
-                            </div>
-                          ) : null}
-                        </label>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="relative overflow-hidden rounded-[1.65rem] border border-white/60 bg-white/32 p-5 shadow-[0_14px_36px_rgba(31,27,29,0.04)] backdrop-blur-xl sm:p-6">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.16)] blur-3xl"
-                    />
-
-                    <div className="relative">
-                      <div className="flex items-start gap-4">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)]">
-                          <Pencil aria-hidden="true" className="size-5" />
-                        </span>
-
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                            Additional notes
-                          </p>
-
-                          <h3 className="mt-2 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                            Preserve useful context
-                          </h3>
-
-                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
-                            Add any optional information that may help during event planning.
-                          </p>
-                        </div>
-                      </div>
-
-                      <label className="mt-6 block">
-                        <span className="text-sm font-black text-[var(--color-charcoal)]/74">
-                          Notes
-                        </span>
-
-                        <textarea
-                          className="form-field mt-2 min-h-32 resize-y transition duration-300 focus:bg-white/52"
-                          placeholder="Optional guest notes"
-                          disabled={isGuestMutationPending}
-                          {...guestForm.register('notes')}
-                        />
-
-                        {guestForm.formState.errors.notes ? (
-                          <div className="mt-3 flex items-start gap-2 rounded-[1.1rem] border border-[rgba(124,74,90,0.18)] bg-[rgba(124,74,90,0.08)] px-3 py-2.5">
-                            <CircleAlert
-                              aria-hidden="true"
-                              className="mt-0.5 size-4 shrink-0 text-[var(--color-muted-burgundy)]"
-                            />
-
-                            <p className="text-sm font-bold leading-5 text-[var(--color-muted-burgundy)]">
-                              {guestForm.formState.errors.notes.message}
-                            </p>
-                          </div>
-                        ) : null}
-                      </label>
-                    </div>
-                  </section>
-
-                  {guestForm.formState.errors.root?.message ? (
-                    <div
-                      role="alert"
-                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                          <CircleAlert aria-hidden="true" className="size-4" />
-                        </span>
-
-                        <div>
-                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
-                            No guest changes detected
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                            {guestForm.formState.errors.root.message}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {createGuestMutation.isError || updateGuestMutation.isError ? (
-                    <div
-                      role="alert"
-                      className="rounded-[1.35rem] border border-[rgba(124,74,90,0.22)] bg-[rgba(124,74,90,0.10)] p-4"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(124,74,90,0.14)] text-[var(--color-muted-burgundy)]">
-                          <CircleAlert aria-hidden="true" className="size-4" />
-                        </span>
-
-                        <div>
-                          <p className="text-sm font-black text-[var(--color-muted-burgundy)]">
-                            Guest record could not be saved
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/66">
-                            {getApiErrorMessage(
-                              guestToEdit ? updateGuestMutation.error : createGuestMutation.error,
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="flex flex-col gap-5 border-t border-white/55 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-3">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                        <UsersRound aria-hidden="true" className="size-4" />
+                <div className="grid gap-2.5">
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                        Guest group
                       </span>
 
-                      <p className="max-w-sm text-xs font-semibold leading-6 text-[var(--color-charcoal)]/52">
-                        {guestToEdit
-                          ? 'Saving updates this guest across the guest list and invitation workspace.'
-                          : 'You can update attendance, contact and meal details later as plans change.'}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col-reverse gap-3 sm:flex-row">
-                      <button
-                        type="button"
-                        className="btn-secondary justify-center text-sm font-bold"
-                        disabled={isGuestMutationPending}
-                        onClick={closeGuestForm}
+                      <select
+                        className="form-field min-h-10"
+                        {...guestForm.register('groupName')}
                       >
-                        Cancel
-                      </button>
+                        <option value="">No group</option>
+                        <option value="Friends">Friends</option>
+                        <option value="Family">Family</option>
+                        <option value="Partners">Partners</option>
+                        <option value="Others">Others</option>
+                      </select>
 
-                      <button
-                        type="submit"
-                        className="group/save-guest btn-primary min-w-40 justify-center text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(93,58,85,0.22)]"
-                        disabled={isGuestMutationPending}
-                      >
-                        {isGuestMutationPending ? (
-                          <LoaderCircle className="size-4 animate-spin" />
-                        ) : (
-                          <Save
-                            aria-hidden="true"
-                            className="size-4 transition duration-300 group-hover/save-guest:scale-105"
-                          />
-                        )}
+                      {guestForm.formState.errors.groupName ? (
+                        <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                          {guestForm.formState.errors.groupName.message}
+                        </p>
+                      ) : null}
+                    </label>
 
-                        {updateGuestMutation.isPending
-                          ? 'Saving guest...'
-                          : createGuestMutation.isPending
-                            ? 'Adding guest...'
-                            : guestToEdit
-                              ? 'Save changes'
-                              : 'Add guest'}
-                      </button>
-                    </div>
+                    <label className="block">
+                      <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                        Party size <span className="text-[var(--color-rosewood)]">*</span>
+                      </span>
+
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        step="1"
+                        className="form-field min-h-10"
+                        {...guestForm.register('partySize')}
+                      />
+
+                      {guestForm.formState.errors.partySize ? (
+                        <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                          {guestForm.formState.errors.partySize.message}
+                        </p>
+                      ) : null}
+                    </label>
                   </div>
-                </form>
+
+                  <label className="block">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                      RSVP status <span className="text-[var(--color-rosewood)]">*</span>
+                    </span>
+
+                    <select
+                      className="form-field min-h-10"
+                      {...guestForm.register('status')}
+                    >
+                      {guestStatuses.map((status) => (
+                        <option key={status} value={status}>
+                          {guestStatusLabels[status]}
+                        </option>
+                      ))}
+                    </select>
+
+                    {guestForm.formState.errors.status ? (
+                      <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                        {guestForm.formState.errors.status.message}
+                      </p>
+                    ) : null}
+                  </label>
+                </div>
+              </section>
+            </div>
+
+            {/* Meal + planning */}
+            <section className="rounded-[1.3rem] border border-white/68 bg-[rgba(255,248,243,0.42)] p-3.5 shadow-[0_12px_30px_rgba(31,27,29,0.05)] backdrop-blur-xl">
+              <div className="mb-2.5 flex items-center gap-2.5">
+                <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(255,228,210,0.30)] text-[var(--color-deep-plum)]">
+                  <Sparkles aria-hidden="true" className="size-3.5" />
+                </span>
+
+                <div>
+                  <p className="text-[0.58rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                    Meal & planning details
+                  </p>
+
+                  <h3 className="mt-0.5 text-sm font-black text-[var(--color-near-black)]">
+                    Capture useful event requirements
+                  </h3>
+                </div>
+              </div>
+
+              <div className="grid gap-2.5 lg:grid-cols-2">
+                <div className="grid gap-2.5">
+                  <label className="block">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                      Meal preference
+                    </span>
+
+                    <input
+                      type="text"
+                      className="form-field min-h-10"
+                      placeholder="Vegetarian"
+                      {...guestForm.register('mealPreference')}
+                    />
+
+                    {guestForm.formState.errors.mealPreference ? (
+                      <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                        {guestForm.formState.errors.mealPreference.message}
+                      </p>
+                    ) : null}
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                      Dietary requirements
+                    </span>
+
+                    <textarea
+                      className="form-field min-h-[4rem] resize-none py-2.5"
+                      placeholder="Allergies, intolerances or special requirements"
+                      {...guestForm.register('dietaryRequirements')}
+                    />
+
+                    {guestForm.formState.errors.dietaryRequirements ? (
+                      <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                        {guestForm.formState.errors.dietaryRequirements.message}
+                      </p>
+                    ) : null}
+                  </label>
+                </div>
+
+                <label className="block">
+                  <span className="mb-1 block text-[0.7rem] font-black text-[var(--color-charcoal)]/78">
+                    Additional notes
+                  </span>
+
+                  <textarea
+                    className="form-field min-h-[7.55rem] resize-none py-2.5"
+                    placeholder="Optional guest notes"
+                    {...guestForm.register('notes')}
+                  />
+
+                  {guestForm.formState.errors.notes ? (
+                    <p className="mt-1 text-[0.65rem] font-bold leading-4 text-[var(--color-rosewood)]">
+                      {guestForm.formState.errors.notes.message}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[0.62rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
+                      Add anything else that may help while planning.
+                    </p>
+                  )}
+                </label>
+              </div>
+            </section>
+
+            {guestForm.formState.errors.root ? (
+              <div className="flex items-center gap-2 rounded-xl border border-[rgba(130,72,77,0.14)] bg-[rgba(130,72,77,0.07)] px-3 py-2 text-xs font-bold text-[var(--color-rosewood)]">
+                <CircleAlert aria-hidden="true" className="size-4 shrink-0" />
+                {guestForm.formState.errors.root.message}
+              </div>
+            ) : null}
+
+            {createGuestMutation.isError || updateGuestMutation.isError ? (
+              <div className="flex items-center gap-2 rounded-xl border border-[rgba(130,72,77,0.14)] bg-[rgba(130,72,77,0.07)] px-3 py-2 text-xs font-bold text-[var(--color-rosewood)]">
+                <CircleAlert aria-hidden="true" className="size-4 shrink-0" />
+                {getApiErrorMessage(
+                  guestToEdit ? updateGuestMutation.error : createGuestMutation.error,
+                )}
+              </div>
+            ) : null}
+
+            {/* Footer */}
+            <div className="flex flex-col gap-2.5 border-t border-[rgba(93,58,85,0.10)] pt-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-[0.65rem] font-semibold leading-4 text-[var(--color-charcoal)]/50">
+                <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
+                  <UsersRound aria-hidden="true" className="size-3.5" />
+                </span>
+
+                Guest details and RSVP information can be updated later.
+              </div>
+
+              <div className="flex shrink-0 items-center justify-end gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary min-h-10 px-4 text-sm font-bold"
+                  disabled={isGuestMutationPending}
+                  onClick={closeGuestForm}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="btn-primary min-h-10 px-5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                  disabled={isGuestMutationPending}
+                >
+                  {isGuestMutationPending ? (
+                    <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                  ) : guestToEdit ? (
+                    <Save aria-hidden="true" className="size-4" />
+                  ) : (
+                    <UserRoundPlus aria-hidden="true" className="size-4" />
+                  )}
+
+                  {isGuestMutationPending
+                    ? guestToEdit
+                      ? 'Saving...'
+                      : 'Adding...'
+                    : guestToEdit
+                      ? 'Save changes'
+                      : 'Add guest'}
+                </button>
               </div>
             </div>
-          </div>
+          </form>
         </div>
-      ) : null}
+      </div>
+    </div>
+  </div>
+) : null}
 
       {isDeleteDialogOpen && guestToDelete && isGuestsEditable ? (
         <div

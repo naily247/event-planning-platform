@@ -33,7 +33,6 @@ import {
   type NotificationSort,
   type NotificationType,
 } from '../features/notifications/notification.api';
-import { PageBackButton } from '../components/navigation/PageBackButton';
 
 type ApiErrorResponse = {
   success?: false;
@@ -369,284 +368,157 @@ export function NotificationsPage() {
   return (
     <div className="app-shell min-h-screen px-4 py-6 text-[var(--color-charcoal)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="glass-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <PageBackButton fallback="/dashboard" label="Dashboard" className="shrink-0" />
-
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                Notification centre
-              </p>
-
-              <h1 className="mt-1 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                Your latest updates
-              </h1>
-            </div>
-          </div>
-
-          <span className="status-chip w-fit" data-tone={unreadCount > 0 ? 'plum' : 'green'}>
-            {unreadCount > 0 ? <BellDot className="size-4" /> : <CheckCheck className="size-4" />}
-            {unreadCount} unread
-          </span>
-        </header>
-
-        <main className="py-10">
-          <section className="relative overflow-hidden rounded-[2.75rem] border border-white/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.36),rgba(255,255,255,0.15))] px-7 py-10 shadow-[0_24px_80px_rgba(31,27,29,0.08)] backdrop-blur-3xl sm:px-10 lg:px-12">
+        <main className="py-6">
+          <section className="relative overflow-hidden rounded-[1.8rem] border border-white/52 bg-[linear-gradient(135deg,rgba(255,255,255,0.42),rgba(255,255,255,0.20))] px-5 py-5 shadow-[0_18px_55px_rgba(31,27,29,0.065)] backdrop-blur-3xl sm:px-6">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -left-16 top-0 size-80 rounded-full bg-[rgba(183,167,200,0.26)] blur-3xl"
+              className="pointer-events-none absolute -left-16 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.18)] blur-3xl"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute right-[-5%] top-[-12%] size-[28rem] rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl"
+              className="pointer-events-none absolute -right-14 -top-20 size-56 rounded-full bg-[rgba(175,201,216,0.16)] blur-3xl"
             />
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute bottom-[-24%] left-[34%] size-72 rounded-full bg-[rgba(255,228,210,0.18)] blur-3xl"
-            />
+            <div className="relative">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-2xl">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/36 px-3 py-1.5 text-[0.66rem] font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)] backdrop-blur-xl">
+                      <Sparkles aria-hidden="true" className="size-3.5" />
+                      Platform activity
+                    </span>
 
-            <div className="relative grid gap-10 lg:grid-cols-[1fr_360px] lg:items-center">
-              <div>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                  <Sparkles aria-hidden="true" className="size-4" />
-                  Platform activity
-                </div>
-
-                <h2 className="max-w-4xl text-balance text-5xl font-black leading-[0.95] tracking-[-0.06em] text-[var(--color-near-black)] sm:text-6xl">
-                  Every important update,
-                  <br />
-                  clearly in view.
-                </h2>
-
-                <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--color-charcoal)]/68">
-                  Follow booking progress, quotation activity, payments, complaints and account
-                  decisions from one organised notification centre.
-                </p>
-
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <div className="rounded-2xl border border-white/50 bg-white/30 px-5 py-4 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Unread updates
-                    </p>
-
-                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {unreadCount}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/50 bg-white/30 px-5 py-4 backdrop-blur-xl">
-                    <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/45">
-                      Reviewed
-                    </p>
-
-                    <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {readCount}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <aside className="group/notification-health relative overflow-hidden rounded-[2.2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-7 text-[#fffaf5] shadow-[0_28px_80px_rgba(93,58,85,0.30)] transition duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_92px_rgba(93,58,85,0.35)]">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-white/10 blur-3xl"
-                />
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/10 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur transition duration-300 group-hover/notification-health:-translate-y-0.5 group-hover/notification-health:scale-105">
+                    <span className="status-chip" data-tone={unreadCount > 0 ? 'plum' : 'green'}>
                       {unreadCount > 0 ? (
-                        <BellDot aria-hidden="true" className="size-6" />
+                        <BellDot aria-hidden="true" className="size-3.5" />
                       ) : (
-                        <CheckCheck aria-hidden="true" className="size-6" />
+                        <CheckCheck aria-hidden="true" className="size-3.5" />
                       )}
-                    </div>
 
-                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur">
-                      {unreadCount > 0 ? 'Needs review' : 'All reviewed'}
+                      {unreadCount > 0 ? `${unreadCount} unread` : 'All reviewed'}
                     </span>
                   </div>
 
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.20em] text-white/48">
-                    Notification status
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[1.8rem]">
+                    Keep track of every important update.
+                  </h2>
+
+                  <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-[var(--color-charcoal)]/62">
+                    Booking, quotation, payment, complaint and account activity stays together in
+                    one organised notification centre.
                   </p>
-
-                  <p className="mt-3 text-5xl font-black tracking-[-0.055em]">{unreadCount}</p>
-
-                  <p className="mt-2 text-sm font-semibold text-white/58">
-                    {unreadCount === 1 ? 'Unread notification' : 'Unread notifications'}
-                  </p>
-
-                  <div className="mt-7 h-2.5 overflow-hidden rounded-full bg-white/12">
-                    <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-powder-blue),#fff4ea)] shadow-[0_0_18px_rgba(255,244,234,0.24)] transition-[width] duration-700"
-                      style={{
-                        width: `${
-                          totalCount > 0
-                            ? Math.min(Math.max((readCount / totalCount) * 100, 0), 100)
-                            : 100
-                        }%`,
-                      }}
-                    />
-                  </div>
-
-                  <div className="mt-7 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.35rem] border border-white/12 bg-white/[0.08] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/[0.12]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Total
-                      </p>
-
-                      <p className="mt-2 text-2xl font-black">{totalCount}</p>
-                    </div>
-
-                    <div className="rounded-[1.35rem] border border-white/12 bg-[rgba(142,151,115,0.16)] p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-[rgba(142,151,115,0.22)]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/46">
-                        Reviewed
-                      </p>
-
-                      <p className="mt-2 text-2xl font-black">{readCount}</p>
-                    </div>
-                  </div>
-
-                  {unreadCount > 0 ? (
-                    <button
-                      type="button"
-                      className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/16 bg-white/12 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18 hover:shadow-[0_16px_34px_rgba(31,27,29,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
-                      disabled={markAllNotificationsAsReadMutation.isPending}
-                      onClick={() => {
-                        markAllNotificationsAsReadMutation.mutate();
-                      }}
-                    >
-                      {markAllNotificationsAsReadMutation.isPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                      ) : (
-                        <CheckCheck aria-hidden="true" className="size-4" />
-                      )}
-
-                      {markAllNotificationsAsReadMutation.isPending
-                        ? 'Marking all...'
-                        : 'Mark all as read'}
-                    </button>
-                  ) : null}
                 </div>
-              </aside>
+
+                <div className="flex flex-wrap items-stretch gap-2.5 lg:justify-end">
+                  {[
+                    {
+                      label: 'Total',
+                      value: totalCount,
+                      helper: 'All activity',
+                      icon: Bell,
+                    },
+                    {
+                      label: 'Unread',
+                      value: unreadCount,
+                      helper: 'Needs review',
+                      icon: BellDot,
+                    },
+                    {
+                      label: 'Reviewed',
+                      value: readCount,
+                      helper: 'Acknowledged',
+                      icon: CheckCheck,
+                    },
+                  ].map(({ label, value, helper, icon: Icon }) => (
+                    <div
+                      key={label}
+                      className="flex min-w-[132px] items-center gap-3 rounded-2xl border border-white/58 bg-white/34 px-3.5 py-3 backdrop-blur-xl"
+                    >
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                        <Icon aria-hidden="true" className="size-4" />
+                      </span>
+
+                      <div className="min-w-0">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                            {value}
+                          </span>
+
+                          <span className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/46">
+                            {label}
+                          </span>
+                        </div>
+
+                        <p className="mt-0.5 whitespace-nowrap text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
+                          {helper}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 border-t border-white/52 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-charcoal)]/54">
+                  <span
+                    className={`size-2 rounded-full ${
+                      unreadCount > 0 ? 'bg-[var(--color-rosewood)]' : 'bg-[#598571]'
+                    }`}
+                  />
+
+                  {unreadCount > 0
+                    ? `${unreadCount} notification${
+                        unreadCount === 1 ? '' : 's'
+                      } still need${unreadCount === 1 ? 's' : ''} your attention.`
+                    : 'You have reviewed every current notification.'}
+                </div>
+
+                {unreadCount > 0 ? (
+                  <button
+                    type="button"
+                    className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-deep-plum)] px-4 text-xs font-black text-white shadow-[0_8px_22px_rgba(93,58,85,0.16)] transition hover:-translate-y-px hover:shadow-[0_12px_28px_rgba(93,58,85,0.20)] disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={markAllNotificationsAsReadMutation.isPending}
+                    onClick={() => {
+                      markAllNotificationsAsReadMutation.mutate();
+                    }}
+                  >
+                    {markAllNotificationsAsReadMutation.isPending ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <CheckCheck aria-hidden="true" className="size-3.5" />
+                    )}
+
+                    {markAllNotificationsAsReadMutation.isPending
+                      ? 'Marking all...'
+                      : 'Mark all as read'}
+                  </button>
+                ) : null}
+              </div>
             </div>
           </section>
 
-          <section className="mt-8 grid gap-5 sm:grid-cols-3">
-            {[
-              {
-                label: 'Total notifications',
-                value: totalCount,
-                helper: 'All platform activity',
-                icon: Bell,
-              },
-              {
-                label: 'Unread',
-                value: unreadCount,
-                helper: 'Still needs your attention',
-                icon: BellDot,
-              },
-              {
-                label: 'Reviewed',
-                value: readCount,
-                helper: 'Already acknowledged',
-                icon: CheckCheck,
-              },
-            ].map(({ label, value, helper, icon: Icon }) => (
-              <article
-                key={label}
-                className={`group/notification-summary luxe-card relative overflow-hidden border-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/92 hover:shadow-[0_28px_70px_rgba(31,27,29,0.12)] ${
-                  label === 'Total notifications'
-                    ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(226,211,235,0.88))]'
-                    : label === 'Unread'
-                      ? 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(239,215,223,0.86))]'
-                      : 'bg-white/48 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(216,226,194,0.86))]'
-                }`}
-              >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -right-14 -top-14 size-40 rounded-full opacity-60 blur-3xl transition duration-500 group-hover/notification-summary:scale-125 group-hover/notification-summary:opacity-100 ${
-                    label === 'Total notifications'
-                      ? 'bg-[rgba(164,126,184,0.34)]'
-                      : label === 'Unread'
-                        ? 'bg-[rgba(170,100,117,0.30)]'
-                        : 'bg-[rgba(142,151,115,0.34)]'
-                  }`}
-                />
+          <section className="mt-5">
+            <article className="glass-card p-4 sm:p-5">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+                  Activity feed
+                </p>
 
-                <div className="relative">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.06)] transition duration-300 group-hover/notification-summary:-translate-y-0.5 group-hover/notification-summary:scale-110 group-hover/notification-summary:bg-[rgba(183,167,200,0.34)]">
-                    <Icon
-                      aria-hidden="true"
-                      className="size-5 transition duration-300 group-hover/notification-summary:rotate-[4deg]"
-                    />
-                  </div>
-
-                  <p className="mt-8 text-xs font-black uppercase tracking-[0.17em] text-[var(--color-charcoal)]/48 transition duration-300 group-hover/notification-summary:text-[var(--color-rosewood)]/76">
-                    {label}
-                  </p>
-
-                  <p className="mt-3 text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)] transition duration-300 group-hover/notification-summary:translate-x-0.5 group-hover/notification-summary:text-[var(--color-deep-plum)] sm:text-[2.15rem]">
-                    {value}
-                  </p>
-
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/55 transition duration-300 group-hover/notification-summary:text-[var(--color-charcoal)]/68">
-                    {helper}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </section>
-          <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_0.28fr]">
-            <article className="glass-card p-6 sm:p-7">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-                <div>
-                  <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                    Activity feed
-                  </p>
-
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                    Notifications for your account.
-                  </h2>
-                </div>
-
-                <button
-                  type="button"
-                  className="btn-primary shrink-0 text-sm font-bold"
-                  disabled={unreadCount === 0 || markAllNotificationsAsReadMutation.isPending}
-                  onClick={() => {
-                    markAllNotificationsAsReadMutation.mutate();
-                  }}
-                >
-                  {markAllNotificationsAsReadMutation.isPending ? (
-                    <LoaderCircle className="size-4 animate-spin" />
-                  ) : (
-                    <CheckCheck className="size-4" />
-                  )}
-
-                  {markAllNotificationsAsReadMutation.isPending
-                    ? 'Marking all...'
-                    : 'Mark all as read'}
-                </button>
+                <h2 className="mt-1.5 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+                  Recent notifications
+                </h2>
               </div>
 
-              <div className="mt-7 rounded-[1.6rem] border border-white/55 bg-white/22 p-5 backdrop-blur-xl">
-                <div className="grid gap-4 lg:grid-cols-3">
+              <div className="mt-4 rounded-[1.25rem] border border-white/55 bg-white/22 px-4 py-3.5 backdrop-blur-xl">
+                <div className="grid gap-3 lg:grid-cols-3">
                   <label className="space-y-2">
                     <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-charcoal)]/52">
                       Read status
                     </span>
 
                     <select
-                      className="form-field min-h-12"
+                      className="form-field min-h-10"
                       aria-label="Filter notifications by read status"
                       value={statusFilter}
                       onChange={(event) => {
@@ -666,7 +538,7 @@ export function NotificationsPage() {
                     </span>
 
                     <select
-                      className="form-field min-h-12"
+                      className="form-field min-h-10"
                       aria-label="Filter notifications by type"
                       value={typeFilter}
                       onChange={(event) => {
@@ -690,7 +562,7 @@ export function NotificationsPage() {
                     </span>
 
                     <select
-                      className="form-field min-h-12"
+                      className="form-field min-h-10"
                       aria-label="Sort notifications"
                       value={sort}
                       onChange={(event) => {
@@ -704,7 +576,7 @@ export function NotificationsPage() {
                   </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between gap-4">
+                <div className="mt-3 flex items-center justify-between gap-4">
                   <p className="text-sm font-bold text-[var(--color-charcoal)]/52">
                     {pagination.total} notification{pagination.total === 1 ? '' : 's'} in this view
                   </p>
@@ -976,207 +848,6 @@ export function NotificationsPage() {
                 </div>
               ) : null}
             </article>
-
-            <aside className="space-y-5">
-              <article className="group/notification-overview relative overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,var(--color-deep-plum),var(--color-muted-burgundy))] p-6 text-[#fffaf5] shadow-[0_24px_70px_rgba(93,58,85,0.28)] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_32px_86px_rgba(93,58,85,0.34)]">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-white/10 blur-3xl transition duration-500 group-hover/notification-overview:scale-125"
-                />
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-20 -left-16 size-52 rounded-full bg-[rgba(175,201,216,0.18)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl border border-white/14 bg-white/12 text-[var(--color-powder-blue)] shadow-[0_12px_28px_rgba(31,27,29,0.12)] backdrop-blur-xl transition duration-300 group-hover/notification-overview:-translate-y-0.5 group-hover/notification-overview:scale-105">
-                      <BellDot aria-hidden="true" className="size-6" />
-                    </div>
-
-                    <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-white/74 backdrop-blur-xl">
-                      {unreadCount} unread
-                    </span>
-                  </div>
-
-                  <p className="mt-7 text-xs font-black uppercase tracking-[0.20em] text-white/48">
-                    Activity status
-                  </p>
-
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.045em]">
-                    Notification overview
-                  </h2>
-
-                  <p className="mt-3 leading-7 text-white/68">
-                    Review account activity and clear updates after you have handled them.
-                  </p>
-
-                  <div className="mt-8 space-y-3">
-                    {[
-                      {
-                        label: 'All notifications',
-                        helper: 'Complete account activity',
-                        value: totalCount,
-                        icon: Bell,
-                      },
-                      {
-                        label: 'Unread',
-                        helper: 'Needs your attention',
-                        value: unreadCount,
-                        icon: BellDot,
-                      },
-                      {
-                        label: 'Reviewed',
-                        helper: 'Already acknowledged',
-                        value: readCount,
-                        icon: CheckCheck,
-                      },
-                    ].map(({ label, helper, value, icon: Icon }) => (
-                      <div
-                        key={label}
-                        className="group/overview-row flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.15]"
-                      >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[var(--color-powder-blue)] transition duration-300 group-hover/overview-row:scale-105">
-                            <Icon aria-hidden="true" className="size-4" />
-                          </span>
-
-                          <div className="min-w-0">
-                            <p className="text-sm font-black text-white/88">{label}</p>
-
-                            <p className="mt-1 text-xs font-semibold text-white/48">{helper}</p>
-                          </div>
-                        </div>
-
-                        <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/12 text-lg font-black shadow-[0_8px_20px_rgba(31,27,29,0.10)]">
-                          {value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {unreadCount > 0 ? (
-                    <button
-                      type="button"
-                      className="group/sidebar-mark-all mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/16 bg-white/12 px-5 py-3 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18 hover:shadow-[0_16px_34px_rgba(31,27,29,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
-                      disabled={markAllNotificationsAsReadMutation.isPending}
-                      onClick={() => {
-                        markAllNotificationsAsReadMutation.mutate();
-                      }}
-                    >
-                      {markAllNotificationsAsReadMutation.isPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                      ) : (
-                        <CheckCheck
-                          aria-hidden="true"
-                          className="size-4 transition duration-300 group-hover/sidebar-mark-all:scale-110"
-                        />
-                      )}
-
-                      {markAllNotificationsAsReadMutation.isPending
-                        ? 'Marking all...'
-                        : 'Mark all as read'}
-                    </button>
-                  ) : (
-                    <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[rgba(142,151,115,0.20)] bg-[rgba(142,151,115,0.14)] px-4 py-4">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[#dfe9c9]">
-                        <CheckCheck aria-hidden="true" className="size-4" />
-                      </span>
-
-                      <p className="text-sm font-bold text-white/76">
-                        You have reviewed every current notification.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </article>
-
-              <article className="group/account-updates glass-card relative overflow-hidden p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/82 hover:shadow-[0_24px_60px_rgba(31,27,29,0.10)]">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-16 -right-12 size-44 rounded-full bg-[rgba(175,201,216,0.20)] blur-3xl transition duration-500 group-hover/account-updates:scale-125 group-hover/account-updates:bg-[rgba(175,201,216,0.30)]"
-                />
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -left-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
-                />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(183,167,200,0.22)] text-[var(--color-deep-plum)] shadow-[0_10px_24px_rgba(31,27,29,0.05)] transition duration-300 group-hover/account-updates:-translate-y-0.5 group-hover/account-updates:scale-105">
-                      <CircleUserRound aria-hidden="true" className="size-6" />
-                    </div>
-
-                    <span className="rounded-full border border-white/54 bg-white/34 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/52 backdrop-blur-xl">
-                      Account
-                    </span>
-                  </div>
-
-                  <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                    Notification scope
-                  </p>
-
-                  <h2 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] transition duration-300 group-hover/account-updates:text-[var(--color-deep-plum)]">
-                    Account-wide updates
-                  </h2>
-
-                  <p className="mt-3 text-sm font-semibold leading-7 text-[var(--color-charcoal)]/62">
-                    Notifications are connected to your logged-in account rather than one event, so
-                    booking, vendor, payment and complaint activity appears together.
-                  </p>
-
-                  <div className="mt-6 space-y-3">
-                    {[
-                      {
-                        label: 'Booking and quotation progress',
-                        icon: PackageCheck,
-                      },
-                      {
-                        label: 'Payment verification decisions',
-                        icon: CircleDollarSign,
-                      },
-                      {
-                        label: 'Complaint and account updates',
-                        icon: FileWarning,
-                      },
-                    ].map(({ label, icon: Icon }) => (
-                      <div
-                        key={label}
-                        className="group/account-update-row flex items-center gap-3 rounded-2xl border border-white/46 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:border-white/72 hover:bg-white/42"
-                      >
-                        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)] transition duration-300 group-hover/account-update-row:scale-105">
-                          <Icon aria-hidden="true" className="size-4" />
-                        </span>
-
-                        <span className="text-sm font-bold leading-6 text-[var(--color-charcoal)]/68">
-                          {label}
-                        </span>
-
-                        <Check
-                          aria-hidden="true"
-                          className="ml-auto size-4 shrink-0 text-[var(--color-rosewood)] transition duration-300 group-hover/account-update-row:scale-110"
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 rounded-[1.35rem] border border-[rgba(175,201,216,0.22)] bg-[rgba(222,236,242,0.28)] p-4">
-                    <div className="flex items-start gap-3">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.24)] text-[#3b515b]">
-                        <Bell aria-hidden="true" className="size-4" />
-                      </span>
-
-                      <p className="text-xs font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                        Use the activity-type filter to focus on one workflow without losing the
-                        complete account history.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </aside>
           </section>
         </main>
       </div>

@@ -439,638 +439,634 @@ export function VendorDetailPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden py-14 lg:py-20">
-        <div className="pointer-events-none absolute left-[8%] top-16 h-72 w-72 rounded-full bg-[rgba(183,167,200,0.28)] blur-3xl" />
-        <div className="pointer-events-none absolute right-[8%] top-20 h-80 w-80 rounded-full bg-[rgba(175,201,216,0.24)] blur-3xl" />
+      <section className="relative overflow-hidden py-6 lg:py-8">
+  <div className="pointer-events-none absolute left-[8%] top-10 h-64 w-64 rounded-full bg-[rgba(183,167,200,0.25)] blur-3xl" />
+  <div className="pointer-events-none absolute right-[8%] top-12 h-72 w-72 rounded-full bg-[rgba(175,201,216,0.22)] blur-3xl" />
 
-        <div className="page-container">
-          <Link
-            to={vendorBackTo}
-            state={vendorBackState}
-            className="btn-secondary mb-6 w-fit text-sm font-bold"
-          >
-            <ArrowLeft className="size-4" />
-            {vendorBackLabel}
-          </Link>
+  <div className="page-container">
+    <Link
+      to={vendorBackTo}
+      state={vendorBackState}
+      className="btn-secondary mb-3 w-fit text-sm font-bold"
+    >
+      <ArrowLeft className="size-4" />
+      {vendorBackLabel}
+    </Link>
 
-          <div className="glass-card overflow-hidden p-4 sm:p-6 lg:p-7">
-            <div className="grid gap-7 lg:grid-cols-[0.88fr_1.12fr] lg:gap-9">
-              <div
-                className={`relative min-h-[460px] overflow-hidden rounded-[2rem] ${accentClass} shadow-[0_26px_74px_rgba(31,27,29,0.17)] sm:min-h-[500px] lg:min-h-[570px]`}
-                onMouseEnter={() => {
-                  setIsHeroSlideshowPaused(true);
-                }}
-                onMouseLeave={() => {
-                  setIsHeroSlideshowPaused(false);
-                }}
-                onFocusCapture={() => {
-                  setIsHeroSlideshowPaused(true);
-                }}
-                onBlurCapture={() => {
-                  setIsHeroSlideshowPaused(false);
-                }}
-              >
-                {heroPortfolioItems.map((portfolioItem, index) => {
-                  const isActive = index === heroPortfolioIndex;
+    <div className="glass-card overflow-hidden p-4 sm:p-5">
+      <div className="grid gap-5 lg:grid-cols-[0.86fr_1.14fr] lg:gap-6">
+        <div
+          className={`relative min-h-[400px] overflow-hidden rounded-[1.7rem] ${accentClass} shadow-[0_22px_58px_rgba(31,27,29,0.15)] sm:min-h-[420px] lg:min-h-[455px]`}
+          onMouseEnter={() => {
+            setIsHeroSlideshowPaused(true);
+          }}
+          onMouseLeave={() => {
+            setIsHeroSlideshowPaused(false);
+          }}
+          onFocusCapture={() => {
+            setIsHeroSlideshowPaused(true);
+          }}
+          onBlurCapture={() => {
+            setIsHeroSlideshowPaused(false);
+          }}
+        >
+          {heroPortfolioItems.map((portfolioItem, index) => {
+            const isActive = index === heroPortfolioIndex;
 
-                  return (
-                    <img
-                      key={portfolioItem.id}
-                      src={portfolioItem.imageUrl}
-                      alt={
-                        portfolioItem.title ?? `${vendor.businessName} portfolio image ${index + 1}`
-                      }
-                      className="pointer-events-none absolute inset-0 h-full w-full object-cover will-change-transform motion-reduce:transform-none motion-reduce:transition-none"
-                      style={{
-                        opacity: isActive ? 1 : 0,
-                        transform: isActive
-                          ? index % 2 === 0
-                            ? 'scale(1.065) translate3d(-0.7%, -0.45%, 0)'
-                            : 'scale(1.065) translate3d(0.7%, -0.35%, 0)'
-                          : 'scale(1.015) translate3d(0, 0, 0)',
-                        transition:
-                          'opacity 750ms ease-in-out, transform 3500ms cubic-bezier(0.2, 0.65, 0.3, 1)',
-                      }}
-                    />
-                  );
-                })}
-
-                {activeHeroPortfolioItem ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActivePortfolioIndex(heroPortfolioIndex);
-                    }}
-                    className="absolute inset-0 z-[1] h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
-                    aria-label={`Open ${
-                      activeHeroPortfolioItem.title ??
-                      `${vendor.businessName} portfolio image ${heroPortfolioIndex + 1}`
-                    }`}
-                  />
-                ) : null}
-
-                <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_25%_16%,rgba(255,255,255,0.46),transparent_31%),linear-gradient(180deg,rgba(31,27,29,0.02)_0%,rgba(31,27,29,0.05)_48%,rgba(31,27,29,0.24)_100%)]" />
-
-                {heroPortfolioItems.length > 1 ? (
-                  <div
-                    className="pointer-events-none absolute left-5 top-5 z-10 flex items-center gap-1.5 rounded-full border border-white/45 bg-black/15 px-3 py-2 backdrop-blur-xl"
-                    aria-hidden="true"
-                  >
-                    {heroPortfolioItems.map((portfolioItem, index) => (
-                      <span
-                        key={portfolioItem.id}
-                        className={
-                          index === heroPortfolioIndex
-                            ? 'h-1.5 w-5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-all duration-500'
-                            : 'size-1.5 rounded-full bg-white/52 transition-all duration-500'
-                        }
-                      />
-                    ))}
-                  </div>
-                ) : null}
-
-                <div className="pointer-events-none absolute bottom-4 left-4 right-4 z-10 rounded-[1.7rem] border border-white/60 bg-white/40 p-5 shadow-[0_22px_58px_rgba(31,27,29,0.18)] backdrop-blur-2xl sm:bottom-6 sm:left-6 sm:right-6 sm:p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="grid size-[4.5rem] place-items-center overflow-hidden rounded-[1.35rem] border border-white/65 bg-white/72 p-1.5 shadow-[0_12px_34px_rgba(31,27,29,0.15)] backdrop-blur-xl">
-                      {vendorLogoUrl ? (
-                        <img
-                          src={vendorLogoUrl}
-                          alt={`${vendor.businessName} logo`}
-                          className="h-full w-full object-contain"
-                        />
-                      ) : (
-                        <VendorIcon className="size-7 text-[var(--color-deep-plum)]" />
-                      )}
-                    </div>
-
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/55 bg-white/44 px-3 py-2 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[#3d452f]">
-                      <BadgeCheck className="size-3.5" />
-                      Verified
-                    </span>
-                  </div>
-
-                  <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-[var(--color-rosewood)]">
-                    Featured vendor
-                  </p>
-
-                  <p className="mt-2 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)]">
-                    {vendor.businessName}
-                  </p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/38 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/72">
-                      <Image className="size-3.5 text-[var(--color-deep-plum)]" />
-
-                      {vendor.portfolioItems.length > 0
-                        ? `${vendor.portfolioItems.length} portfolio ${
-                            vendor.portfolioItems.length === 1 ? 'image' : 'images'
-                          }`
-                        : 'Portfolio coming soon'}
-                    </span>
-
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/38 px-3 py-2 text-xs font-bold text-[var(--color-charcoal)]/72">
-                      <MessageSquareQuote className="size-3.5 text-[var(--color-deep-plum)]" />
-                      Quotations available
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col justify-between gap-9 p-1 sm:p-2 lg:px-4 lg:py-5">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="status-chip" data-tone="blue">
-                      {categoryLabel}
-                    </span>
-
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(142,151,115,0.18)] px-3 py-1 text-xs font-black text-[#3d452f]">
-                      <BadgeCheck className="size-3.5" />
-                      Verified
-                    </span>
-                  </div>
-
-                  <h1 className="mt-7 max-w-3xl text-balance text-5xl font-black leading-[0.96] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl">
-                    {vendor.businessName}
-                  </h1>
-
-                  <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-[var(--color-charcoal)]/70">
-                    {vendor.description ??
-                      'Explore this verified Eventure vendor and request a tailored quotation for your event.'}
-                  </p>
-
-                  <div className="mt-8 flex flex-wrap gap-3">
-                    <span className="soft-chip text-sm font-bold">
-                      <MapPin className="size-4 text-[var(--color-rosewood)]" />
-                      {locationLabel}
-                    </span>
-
-                    <span className="soft-chip text-sm font-bold">
-                      <Star
-                        className={
-                          vendor.ratingSummary.overallAverage === null
-                            ? 'size-4 text-[var(--color-charcoal)]/35'
-                            : 'size-4 fill-[var(--color-dusty-olive)] text-[var(--color-dusty-olive)]'
-                        }
-                      />
-                      {ratingLabel}
-                    </span>
-
-                    <span className="soft-chip text-sm font-bold">
-                      <Clock className="size-4 text-[var(--color-deep-plum)]" />
-                      Quotation response available
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="grid gap-3.5 sm:grid-cols-3">
-                    <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
-                      <div className="pointer-events-none absolute -right-8 -top-10 size-24 rounded-full bg-[rgba(183,167,200,0.18)] blur-2xl transition duration-500 group-hover:scale-125" />
-
-                      <div className="relative">
-                        <div className="flex items-start justify-between gap-3">
-                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                            Starting price
-                          </p>
-
-                          <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
-                            <MessageSquareQuote className="size-4" />
-                          </div>
-                        </div>
-
-                        <p className="mt-3 whitespace-nowrap text-[1.45rem] font-black leading-none tracking-[-0.045em] text-[var(--color-near-black)] sm:text-[1.55rem]">
-                          {startingPrice}
-                        </p>
-
-                        <p className="mt-4 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                          Final pricing is confirmed through a structured quotation.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
-                      <div className="pointer-events-none absolute -right-8 -top-10 size-24 rounded-full bg-[rgba(175,201,216,0.18)] blur-2xl transition duration-500 group-hover:scale-125" />
-
-                      <div className="relative flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                            Packages
-                          </p>
-
-                          <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                            {vendor.packages.length}
-                          </p>
-                        </div>
-
-                        <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
-                          <PackageCheck className="size-4" />
-                        </div>
-                      </div>
-
-                      <p className="relative mt-3 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                        Published service options ready for comparison.
-                      </p>
-                    </div>
-
-                    <div className="group relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-5 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/48 hover:shadow-[0_20px_44px_rgba(31,27,29,0.1)]">
-                      <div className="pointer-events-none absolute -right-8 -top-10 size-24 rounded-full bg-[rgba(214,190,177,0.18)] blur-2xl transition duration-500 group-hover:scale-125" />
-
-                      <div className="relative flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                            Service areas
-                          </p>
-
-                          <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                            {vendor.serviceAreas.length || 1}
-                          </p>
-                        </div>
-
-                        <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/60 bg-white/50 text-[var(--color-rosewood)] shadow-sm">
-                          <MapPin className="size-4" />
-                        </div>
-                      </div>
-
-                      <p className="relative mt-3 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/48">
-                        Locations currently covered by this vendor.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="relative overflow-hidden rounded-[1.55rem] border border-white/65 bg-white/36 p-4 shadow-[0_14px_34px_rgba(31,27,29,0.06)] backdrop-blur-2xl sm:p-5">
-                    <div className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full bg-[rgba(183,167,200,0.15)] blur-3xl" />
-
-                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      {isVendorSession ? (
-                        <>
-                          <div>
-                            <p className="text-sm font-black text-[var(--color-near-black)]">
-                              {isOwnVendorProfile
-                                ? 'You are viewing your public vendor profile.'
-                                : `Browsing ${vendor.businessName} as a vendor`}
-                            </p>
-
-                            <p className="mt-1 max-w-xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
-                              {isOwnVendorProfile
-                                ? 'This is how customers currently see your business, portfolio and published service information across Eventure.'
-                                : 'You are browsing the public marketplace with your vendor account. Customer quotation actions are not available from vendor accounts.'}
-                            </p>
-                          </div>
-
-                          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-                            {isOwnVendorProfile ? (
-                              <>
-                                <Link
-                                  to="/vendor/profile"
-                                  className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
-                                >
-                                  Manage business profile
-                                  <ArrowRight className="size-4" />
-                                </Link>
-
-                                <Link
-                                  to="/vendor/portfolio"
-                                  className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
-                                >
-                                  Manage portfolio
-                                </Link>
-                              </>
-                            ) : (
-                              <Link
-                                to="/vendors"
-                                state={vendorBackState}
-                                className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
-                              >
-                                Back to marketplace
-                              </Link>
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div>
-                            <p className="text-sm font-black text-[var(--color-near-black)]">
-                              Ready to plan with {vendor.businessName}?
-                            </p>
-
-                            <p className="mt-1 max-w-xl text-xs font-semibold leading-5 text-[var(--color-charcoal)]/52">
-                              {isCustomerSession
-                                ? 'Choose the event you are planning, then send your requirements through a structured quotation request.'
-                                : 'Sign in to send your event details and receive a structured quotation.'}
-                            </p>
-                          </div>
-
-                          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-                            {isCustomerSession ? (
-                              <Link
-                                to="/events"
-                                className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
-                              >
-                                Open my events
-                                <ArrowRight className="size-4" />
-                              </Link>
-                            ) : (
-                              <Link
-                                to="/login"
-                                className="btn-primary justify-center whitespace-nowrap text-sm font-bold"
-                              >
-                                Request quotation
-                                <ArrowRight className="size-4" />
-                              </Link>
-                            )}
-
-                            <Link
-                              to="/planning-guide"
-                              className="btn-secondary justify-center whitespace-nowrap text-sm font-bold"
-                            >
-                              View planning guide
-                            </Link>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="page-container pb-10">
-        <div className="glass-card relative mb-7 overflow-hidden p-6 sm:p-7">
-          <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
-
-          <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/42 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)] shadow-sm backdrop-blur-xl">
-                <Image className="size-4" />
-                Portfolio preview
-              </div>
-
-              <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-                Selected work from {vendor.businessName}
-              </h2>
-            </div>
-
-            <p className="max-w-md text-sm leading-7 text-[var(--color-charcoal)]/62 sm:text-base">
-              Explore portfolio items uploaded by this vendor and discover the style behind their
-              event services.
-            </p>
-          </div>
-        </div>
-
-        {vendor.portfolioItems.length > 0 ? (
-          <div className="grid auto-rows-[15rem] gap-4 sm:grid-cols-2 sm:auto-rows-[17rem] lg:grid-cols-3 lg:auto-rows-[15rem]">
-            {vendor.portfolioItems.map((portfolioItem, index) => (
-              <button
+            return (
+              <img
                 key={portfolioItem.id}
-                type="button"
-                onClick={() => setActivePortfolioIndex(index)}
-                className={`group relative min-h-0 cursor-zoom-in overflow-hidden rounded-[1.85rem] bg-[var(--color-light-champagne)] text-left shadow-[0_18px_48px_rgba(31,27,29,0.12)] transition duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_28px_68px_rgba(31,27,29,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)] focus-visible:ring-offset-4 ${getPortfolioCardClassName(
-                  index,
-                )}`}
-                aria-label={`Open ${
-                  portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`
-                }`}
-              >
-                <img
-                  src={portfolioItem.imageUrl}
-                  alt={portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`}
-                  className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.055]"
+                src={portfolioItem.imageUrl}
+                alt={
+                  portfolioItem.title ??
+                  `${vendor.businessName} portfolio image ${index + 1}`
+                }
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover will-change-transform motion-reduce:transform-none motion-reduce:transition-none"
+                style={{
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive
+                    ? index % 2 === 0
+                      ? 'scale(1.065) translate3d(-0.7%, -0.45%, 0)'
+                      : 'scale(1.065) translate3d(0.7%, -0.35%, 0)'
+                    : 'scale(1.015) translate3d(0, 0, 0)',
+                  transition:
+                    'opacity 750ms ease-in-out, transform 3500ms cubic-bezier(0.2, 0.65, 0.3, 1)',
+                }}
+              />
+            );
+          })}
+
+          {activeHeroPortfolioItem ? (
+            <button
+              type="button"
+              onClick={() => {
+                setActivePortfolioIndex(heroPortfolioIndex);
+              }}
+              className="absolute inset-0 z-[1] h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
+              aria-label={`Open ${
+                activeHeroPortfolioItem.title ??
+                `${vendor.businessName} portfolio image ${heroPortfolioIndex + 1}`
+              }`}
+            />
+          ) : null}
+
+          <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_25%_16%,rgba(255,255,255,0.46),transparent_31%),linear-gradient(180deg,rgba(31,27,29,0.02)_0%,rgba(31,27,29,0.05)_48%,rgba(31,27,29,0.24)_100%)]" />
+
+          {heroPortfolioItems.length > 1 ? (
+            <div
+              className="pointer-events-none absolute left-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-white/45 bg-black/15 px-2.5 py-1.5 backdrop-blur-xl"
+              aria-hidden="true"
+            >
+              {heroPortfolioItems.map((portfolioItem, index) => (
+                <span
+                  key={portfolioItem.id}
+                  className={
+                    index === heroPortfolioIndex
+                      ? 'h-1.5 w-5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-all duration-500'
+                      : 'size-1.5 rounded-full bg-white/52 transition-all duration-500'
+                  }
                 />
+              ))}
+            </div>
+          ) : null}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.82)] via-[rgba(31,27,29,0.08)] to-transparent transition duration-500 group-hover:from-[rgba(31,27,29,0.88)]" />
-
-                <div className="absolute right-4 top-4 translate-y-2 rounded-full border border-white/40 bg-black/28 px-3.5 py-2 text-xs font-black text-white opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-xl transition duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
-                  View image
-                </div>
-
-                <div className="absolute bottom-5 left-5 right-5 translate-y-1 transition duration-500 ease-out group-hover:translate-y-0 sm:bottom-6 sm:left-6 sm:right-6">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/26 px-3 py-2 text-xs font-black text-white shadow-[0_8px_22px_rgba(0,0,0,0.1)] backdrop-blur-xl">
-                    <Image className="size-4" />
-                    {portfolioItem.isFeatured ? 'Featured work' : `Portfolio ${index + 1}`}
-                  </div>
-
-                  {portfolioItem.title ? (
-                    <h3 className="mt-3 max-w-xl text-xl font-black tracking-[-0.035em] text-white sm:text-2xl">
-                      {portfolioItem.title}
-                    </h3>
-                  ) : null}
-
-                  {portfolioItem.description ? (
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/78">
-                      {portfolioItem.description}
-                    </p>
-                  ) : null}
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="glass-card relative grid min-h-72 place-items-center overflow-hidden p-10 text-center">
-            <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
-
-            <div className="relative max-w-md">
-              <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_14px_34px_rgba(91,61,82,0.2)]">
-                <Image className="size-6" />
+          <div className="pointer-events-none absolute bottom-4 left-4 right-4 z-10 rounded-[1.45rem] border border-white/60 bg-white/40 p-4 shadow-[0_18px_46px_rgba(31,27,29,0.17)] backdrop-blur-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="grid size-14 place-items-center overflow-hidden rounded-[1.1rem] border border-white/65 bg-white/72 p-1.5 shadow-[0_10px_26px_rgba(31,27,29,0.14)] backdrop-blur-xl">
+                {vendorLogoUrl ? (
+                  <img
+                    src={vendorLogoUrl}
+                    alt={`${vendor.businessName} logo`}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <VendorIcon className="size-6 text-[var(--color-deep-plum)]" />
+                )}
               </div>
 
-              <p className="mt-5 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                Portfolio coming soon
-              </p>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/55 bg-white/44 px-2.5 py-1.5 text-[0.64rem] font-black uppercase tracking-[0.14em] text-[#3d452f]">
+                <BadgeCheck className="size-3.5" />
+                Verified
+              </span>
+            </div>
 
-              <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/60">
-                This vendor has not published portfolio items yet. Their latest work will appear
-                here once uploaded.
-              </p>
+            <p className="mt-3 text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+              Featured vendor
+            </p>
+
+            <p className="mt-1.5 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+              {vendor.businessName}
+            </p>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/38 px-2.5 py-1.5 text-[0.7rem] font-bold text-[var(--color-charcoal)]/72">
+                <Image className="size-3.5 text-[var(--color-deep-plum)]" />
+
+                {vendor.portfolioItems.length > 0
+                  ? `${vendor.portfolioItems.length} portfolio ${
+                      vendor.portfolioItems.length === 1 ? 'image' : 'images'
+                    }`
+                  : 'Portfolio coming soon'}
+              </span>
+
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/38 px-2.5 py-1.5 text-[0.7rem] font-bold text-[var(--color-charcoal)]/72">
+                <MessageSquareQuote className="size-3.5 text-[var(--color-deep-plum)]" />
+                Quotations available
+              </span>
             </div>
           </div>
-        )}
-      </section>
+        </div>
 
-      <section className="page-container pb-24">
-        <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="flex flex-col justify-between gap-5 p-1 lg:px-3 lg:py-2">
           <div>
-            <div className="glass-card relative mb-7 overflow-hidden p-6 sm:p-7">
-              <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="status-chip" data-tone="blue">
+                {categoryLabel}
+              </span>
 
-              <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/42 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)] shadow-sm backdrop-blur-xl">
-                    <PackageCheck className="size-4" />
-                    Packages
+              <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(142,151,115,0.18)] px-3 py-1 text-xs font-black text-[#3d452f]">
+                <BadgeCheck className="size-3.5" />
+                Verified
+              </span>
+            </div>
+
+            <h1 className="mt-4 max-w-3xl text-balance text-4xl font-black leading-[0.96] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+              {vendor.businessName}
+            </h1>
+
+            <p className="mt-3 max-w-2xl text-pretty text-sm leading-6 text-[var(--color-charcoal)]/70 sm:text-base sm:leading-7">
+              {vendor.description ??
+                'Explore this verified Eventure vendor and request a tailored quotation for your event.'}
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="soft-chip text-xs font-bold">
+                <MapPin className="size-3.5 text-[var(--color-rosewood)]" />
+                {locationLabel}
+              </span>
+
+              <span className="soft-chip text-xs font-bold">
+                <Star
+                  className={
+                    vendor.ratingSummary.overallAverage === null
+                      ? 'size-3.5 text-[var(--color-charcoal)]/35'
+                      : 'size-3.5 fill-[var(--color-dusty-olive)] text-[var(--color-dusty-olive)]'
+                  }
+                />
+                {ratingLabel}
+              </span>
+
+              <span className="soft-chip text-xs font-bold">
+                <Clock className="size-3.5 text-[var(--color-deep-plum)]" />
+                Quotation response available
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="grid gap-2.5 sm:grid-cols-3">
+              <div className="group relative overflow-hidden rounded-[1.3rem] border border-white/65 bg-white/36 p-3.5 shadow-[0_12px_28px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/48 hover:shadow-[0_18px_38px_rgba(31,27,29,0.09)]">
+                <div className="pointer-events-none absolute -right-8 -top-10 size-20 rounded-full bg-[rgba(183,167,200,0.18)] blur-2xl" />
+
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                      Starting price
+                    </p>
+
+                    <div className="grid size-8 shrink-0 place-items-center rounded-lg border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
+                      <MessageSquareQuote className="size-3.5" />
+                    </div>
                   </div>
 
-                  <h2 className="mt-4 max-w-3xl text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-                    Clear service options before requesting a quotation
-                  </h2>
+                  <p className="mt-2 whitespace-nowrap text-xl font-black leading-none tracking-[-0.045em] text-[var(--color-near-black)]">
+                    {startingPrice}
+                  </p>
+
+                  <p className="mt-2.5 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
+                    Final pricing is confirmed through a structured quotation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="group relative overflow-hidden rounded-[1.3rem] border border-white/65 bg-white/36 p-3.5 shadow-[0_12px_28px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/48 hover:shadow-[0_18px_38px_rgba(31,27,29,0.09)]">
+                <div className="pointer-events-none absolute -right-8 -top-10 size-20 rounded-full bg-[rgba(175,201,216,0.18)] blur-2xl" />
+
+                <div className="relative flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                      Packages
+                    </p>
+
+                    <p className="mt-2 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {vendor.packages.length}
+                    </p>
+                  </div>
+
+                  <div className="grid size-8 shrink-0 place-items-center rounded-lg border border-white/60 bg-white/50 text-[var(--color-deep-plum)] shadow-sm">
+                    <PackageCheck className="size-3.5" />
+                  </div>
                 </div>
 
-                <p className="max-w-md text-sm leading-7 text-[var(--color-charcoal)]/62 sm:text-base">
-                  Compare published packages, starting prices, and included service categories
-                  before sending a structured quotation request.
+                <p className="relative mt-2 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
+                  Published service options ready for comparison.
+                </p>
+              </div>
+
+              <div className="group relative overflow-hidden rounded-[1.3rem] border border-white/65 bg-white/36 p-3.5 shadow-[0_12px_28px_rgba(31,27,29,0.06)] backdrop-blur-2xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/48 hover:shadow-[0_18px_38px_rgba(31,27,29,0.09)]">
+                <div className="pointer-events-none absolute -right-8 -top-10 size-20 rounded-full bg-[rgba(214,190,177,0.18)] blur-2xl" />
+
+                <div className="relative flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                      Service areas
+                    </p>
+
+                    <p className="mt-2 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {vendor.serviceAreas.length || 1}
+                    </p>
+                  </div>
+
+                  <div className="grid size-8 shrink-0 place-items-center rounded-lg border border-white/60 bg-white/50 text-[var(--color-rosewood)] shadow-sm">
+                    <MapPin className="size-3.5" />
+                  </div>
+                </div>
+
+                <p className="relative mt-2 text-[0.68rem] font-semibold leading-4 text-[var(--color-charcoal)]/48">
+                  Locations currently covered by this vendor.
                 </p>
               </div>
             </div>
 
-            {vendor.packages.length > 0 ? (
-              <div className="grid gap-5 lg:grid-cols-2 lg:items-stretch">
-                {vendor.packages.map((servicePackage) => (
-                  <article
-                    key={servicePackage.id}
-                    className="luxe-card group flex h-full flex-col overflow-hidden p-6 transition duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_28px_68px_rgba(31,27,29,0.14)] sm:p-7"
-                  >
-                    <div className="grid size-12 place-items-center rounded-2xl border border-white/55 bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_10px_28px_rgba(31,27,29,0.07)] transition duration-500 group-hover:scale-[1.04] group-hover:bg-[rgba(183,167,200,0.32)]">
-                      <PackageCheck className="size-6" />
-                    </div>
+            <div className="relative overflow-hidden rounded-[1.3rem] border border-white/65 bg-white/36 p-3.5 shadow-[0_12px_28px_rgba(31,27,29,0.06)] backdrop-blur-2xl">
+              <div className="pointer-events-none absolute -right-12 -top-14 size-32 rounded-full bg-[rgba(183,167,200,0.15)] blur-3xl" />
 
-                    <span className="status-chip mt-7 inline-flex w-fit" data-tone="blue">
-                      {servicePackage.category.name}
-                    </span>
-
-                    <h3 className="mt-4 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                      {servicePackage.title}
-                    </h3>
-
-                    <p className="mt-4 text-2xl font-black tracking-[-0.045em] text-[var(--color-rosewood)]">
-                      {servicePackage.basePrice
-                        ? `From ${formatCurrency(servicePackage.basePrice)}`
-                        : 'Tailored pricing'}
-                    </p>
-
-                    <p className="mt-5 flex-1 leading-7 text-[var(--color-charcoal)]/68">
-                      {servicePackage.description ??
-                        'Request a structured quotation for detailed inclusions, pricing and terms.'}
-                    </p>
-
-                    <div className="mt-8 flex items-center gap-2 border-t border-[rgba(46,42,44,0.08)] pt-5 text-sm font-bold text-[var(--color-charcoal)]/66">
-                      <CheckCircle2 className="size-4 text-[var(--color-dusty-olive)]" />
-                      Structured quotation available
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="glass-card relative grid min-h-64 place-items-center overflow-hidden p-10 text-center">
-                <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
-
-                <div className="relative max-w-md">
-                  <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[var(--color-deep-plum)] text-white shadow-[0_14px_34px_rgba(91,61,82,0.2)]">
-                    <PackageCheck className="size-6" />
-                  </div>
-
-                  <p className="mt-5 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
-                    Custom quotations available
-                  </p>
-
-                  <p className="mt-3 text-sm leading-7 text-[var(--color-charcoal)]/60">
-                    {isVendorSession
-                      ? isOwnVendorProfile
-                        ? 'You have not published fixed packages yet. Add packages to give customers clearer service and pricing options.'
-                        : 'This vendor has not published fixed packages yet.'
-                      : isCustomerSession
-                        ? 'This vendor has not published fixed packages yet. Choose one of your events and send your requirements through a tailored quotation request.'
-                        : 'This vendor has not published fixed packages yet, but you can still request a tailored quotation based on your event requirements.'}
-                  </p>
-
-                  {isVendorSession ? (
-                    isOwnVendorProfile ? (
-                      <Link to="/vendor/packages" className="btn-primary mt-6 text-sm font-bold">
-                        Manage packages
-                        <ArrowRight className="size-4" />
-                      </Link>
-                    ) : (
-                      <Link
-                        to="/vendors"
-                        state={vendorBackState}
-                        className="btn-secondary mt-6 text-sm font-bold"
-                      >
-                        Back to marketplace
-                      </Link>
-                    )
-                  ) : isCustomerSession ? (
-                    <Link to="/events" className="btn-primary mt-6 text-sm font-bold">
-                      Open my events
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  ) : (
-                    <Link to="/login" className="btn-primary mt-6 text-sm font-bold">
-                      Request quotation
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {!isVendorSession ? (
-            <StickyVendorCta
-              vendorName={vendor.businessName}
-              location={locationLabel}
-              startingPrice={startingPrice}
-              rating={vendor.ratingSummary.overallAverage}
-              reviewCount={vendor.ratingSummary.reviewCount}
-            />
-          ) : (
-            <aside className="glass-card sticky top-6 overflow-hidden p-6">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                Vendor view
-              </p>
-
-              <h3 className="mt-3 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
-                {isOwnVendorProfile ? 'Your marketplace presence' : 'Browsing as a vendor'}
-              </h3>
-
-              <p className="mt-3 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                {isOwnVendorProfile
-                  ? 'Review how your portfolio, packages and business information currently appear to customers.'
-                  : 'Quotation requests are customer actions, so they are unavailable while you are signed in with a vendor account.'}
-              </p>
-
-              <div className="mt-5 grid gap-2">
-                {isOwnVendorProfile ? (
+              <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                {isVendorSession ? (
                   <>
-                    <Link
-                      to="/vendor/profile"
-                      className="btn-primary justify-center text-sm font-bold"
-                    >
-                      Manage profile
-                    </Link>
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        {isOwnVendorProfile
+                          ? 'You are viewing your public vendor profile.'
+                          : `Browsing ${vendor.businessName} as a vendor`}
+                      </p>
 
-                    <Link
-                      to="/vendor/portfolio"
-                      className="btn-secondary justify-center text-sm font-bold"
-                    >
-                      Manage portfolio
-                    </Link>
+                      <p className="mt-0.5 max-w-xl text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/52">
+                        {isOwnVendorProfile
+                          ? 'This is how customers currently see your business, portfolio and published service information across Eventure.'
+                          : 'You are browsing the public marketplace with your vendor account. Customer quotation actions are not available from vendor accounts.'}
+                      </p>
+                    </div>
 
-                    <Link
-                      to="/vendor/packages"
-                      className="btn-secondary justify-center text-sm font-bold"
-                    >
-                      Manage packages
-                    </Link>
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                      {isOwnVendorProfile ? (
+                        <>
+                          <Link
+                            to="/vendor/profile"
+                            className="btn-primary justify-center whitespace-nowrap text-xs font-bold"
+                          >
+                            Manage business profile
+                            <ArrowRight className="size-3.5" />
+                          </Link>
+
+                          <Link
+                            to="/vendor/portfolio"
+                            className="btn-secondary justify-center whitespace-nowrap text-xs font-bold"
+                          >
+                            Manage portfolio
+                          </Link>
+                        </>
+                      ) : (
+                        <Link
+                          to="/vendors"
+                          state={vendorBackState}
+                          className="btn-secondary justify-center whitespace-nowrap text-xs font-bold"
+                        >
+                          Back to marketplace
+                        </Link>
+                      )}
+                    </div>
                   </>
                 ) : (
-                  <Link
-                    to="/vendors"
-                    state={vendorBackState}
-                    className="btn-secondary justify-center text-sm font-bold"
-                  >
-                    Back to marketplace
-                  </Link>
+                  <>
+                    <div>
+                      <p className="text-sm font-black text-[var(--color-near-black)]">
+                        Ready to plan with {vendor.businessName}?
+                      </p>
+
+                      <p className="mt-0.5 max-w-xl text-[0.7rem] font-semibold leading-4 text-[var(--color-charcoal)]/52">
+                        {isCustomerSession
+                          ? 'Choose the event you are planning, then send your requirements through a structured quotation request.'
+                          : 'Sign in to send your event details and receive a structured quotation.'}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                      {isCustomerSession ? (
+                        <Link
+                          to="/events"
+                          className="btn-primary justify-center whitespace-nowrap text-xs font-bold"
+                        >
+                          Open my events
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/login"
+                          className="btn-primary justify-center whitespace-nowrap text-xs font-bold"
+                        >
+                          Request quotation
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      )}
+
+                      <Link
+                        to="/planning-guide"
+                        className="btn-secondary justify-center whitespace-nowrap text-xs font-bold"
+                      >
+                        View planning guide
+                      </Link>
+                    </div>
+                  </>
                 )}
               </div>
-            </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      <section className="page-container pb-7">
+  <div className="glass-card relative mb-4 overflow-hidden px-5 py-4 sm:px-6 sm:py-5">
+    <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+    <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
+
+    <div className="relative flex flex-col justify-between gap-3 md:flex-row md:items-center">
+      <div>
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/42 px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)] shadow-sm backdrop-blur-xl">
+          <Image className="size-3.5" />
+          Portfolio preview
+        </div>
+
+        <h2 className="mt-2.5 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl">
+          Selected work from {vendor.businessName}
+        </h2>
+      </div>
+
+      <p className="max-w-md text-sm leading-6 text-[var(--color-charcoal)]/62">
+        Explore portfolio items uploaded by this vendor and discover the style behind their event
+        services.
+      </p>
+    </div>
+  </div>
+
+  {vendor.portfolioItems.length > 0 ? (
+    <div className="grid auto-rows-[13rem] gap-3.5 sm:grid-cols-2 sm:auto-rows-[14rem] lg:grid-cols-3 lg:auto-rows-[13rem]">
+      {vendor.portfolioItems.map((portfolioItem, index) => (
+        <button
+          key={portfolioItem.id}
+          type="button"
+          onClick={() => setActivePortfolioIndex(index)}
+          className={`group relative min-h-0 cursor-zoom-in overflow-hidden rounded-[1.65rem] bg-[var(--color-light-champagne)] text-left shadow-[0_16px_42px_rgba(31,27,29,0.11)] transition duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(31,27,29,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-deep-plum)] focus-visible:ring-offset-4 ${getPortfolioCardClassName(
+            index,
+          )}`}
+          aria-label={`Open ${
+            portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`
+          }`}
+        >
+          <img
+            src={portfolioItem.imageUrl}
+            alt={portfolioItem.title ?? `${vendor.businessName} portfolio item ${index + 1}`}
+            className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.055]"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,27,29,0.82)] via-[rgba(31,27,29,0.08)] to-transparent transition duration-500 group-hover:from-[rgba(31,27,29,0.88)]" />
+
+          <div className="absolute right-3.5 top-3.5 translate-y-2 rounded-full border border-white/40 bg-black/28 px-3 py-1.5 text-[0.68rem] font-black text-white opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-xl transition duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+            View image
+          </div>
+
+          <div className="absolute bottom-4 left-4 right-4 translate-y-1 transition duration-500 ease-out group-hover:translate-y-0 sm:bottom-5 sm:left-5 sm:right-5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-white/45 bg-white/26 px-2.5 py-1.5 text-[0.68rem] font-black text-white shadow-[0_8px_22px_rgba(0,0,0,0.1)] backdrop-blur-xl">
+              <Image className="size-3.5" />
+              {portfolioItem.isFeatured ? 'Featured work' : `Portfolio ${index + 1}`}
+            </div>
+
+            {portfolioItem.title ? (
+              <h3 className="mt-2 max-w-xl text-lg font-black tracking-[-0.035em] text-white sm:text-xl">
+                {portfolioItem.title}
+              </h3>
+            ) : null}
+
+            {portfolioItem.description ? (
+              <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/78 sm:text-sm">
+                {portfolioItem.description}
+              </p>
+            ) : null}
+          </div>
+        </button>
+      ))}
+    </div>
+  ) : (
+    <div className="glass-card relative grid min-h-56 place-items-center overflow-hidden p-7 text-center">
+      <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
+
+      <div className="relative max-w-md">
+        <div className="mx-auto grid size-12 place-items-center rounded-xl bg-[var(--color-deep-plum)] text-white shadow-[0_14px_34px_rgba(91,61,82,0.2)]">
+          <Image className="size-5" />
+        </div>
+
+        <p className="mt-4 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+          Portfolio coming soon
+        </p>
+
+        <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
+          This vendor has not published portfolio items yet. Their latest work will appear here once
+          uploaded.
+        </p>
+      </div>
+    </div>
+  )}
+</section>
+
+<section className="page-container pb-12">
+  <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+    <div>
+      <div className="glass-card relative mb-4 overflow-hidden px-5 py-4 sm:px-6 sm:py-5">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
+
+        <div className="relative grid gap-3 md:grid-cols-[minmax(0,0.9fr)_minmax(18rem,1.1fr)] md:items-center md:gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/42 px-3 py-1.5 text-[0.68rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)] shadow-sm backdrop-blur-xl">
+              <PackageCheck className="size-3.5" />
+              Packages
+            </div>
+
+            <h2 className="mt-2.5 max-w-xl text-2xl font-black leading-[1.02] tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl">
+              Clear service options before requesting a quotation
+            </h2>
+          </div>
+
+          <p className="max-w-xl text-sm leading-6 text-[var(--color-charcoal)]/62">
+            Compare published packages, starting prices, and included service categories before
+            sending a structured quotation request.
+          </p>
+        </div>
+      </div>
+
+      {vendor.packages.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+          {vendor.packages.map((servicePackage) => (
+            <article
+              key={servicePackage.id}
+              className="luxe-card group flex h-full flex-col overflow-hidden p-5 transition duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_24px_56px_rgba(31,27,29,0.13)]"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="status-chip inline-flex w-fit" data-tone="blue">
+                    {servicePackage.category.name}
+                  </span>
+
+                  <h3 className="mt-3 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    {servicePackage.title}
+                  </h3>
+                </div>
+
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/55 bg-[rgba(183,167,200,0.24)] text-[var(--color-deep-plum)] shadow-[0_8px_22px_rgba(31,27,29,0.06)] transition duration-500 group-hover:scale-[1.04] group-hover:bg-[rgba(183,167,200,0.32)]">
+                  <PackageCheck className="size-5" />
+                </div>
+              </div>
+
+              <p className="mt-3 text-xl font-black tracking-[-0.045em] text-[var(--color-rosewood)]">
+                {servicePackage.basePrice
+                  ? `From ${formatCurrency(servicePackage.basePrice)}`
+                  : 'Tailored pricing'}
+              </p>
+
+              <p className="mt-3 flex-1 text-sm leading-6 text-[var(--color-charcoal)]/68">
+                {servicePackage.description ??
+                  'Request a structured quotation for detailed inclusions, pricing and terms.'}
+              </p>
+
+              <div className="mt-4 flex items-center gap-2 border-t border-[rgba(46,42,44,0.08)] pt-3.5 text-xs font-bold text-[var(--color-charcoal)]/66">
+                <CheckCircle2 className="size-3.5 text-[var(--color-dusty-olive)]" />
+                Structured quotation available
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="glass-card relative grid min-h-52 place-items-center overflow-hidden p-7 text-center">
+          <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-1/3 size-40 rounded-full bg-[rgba(214,190,177,0.12)] blur-3xl" />
+
+          <div className="relative max-w-md">
+            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-[var(--color-deep-plum)] text-white shadow-[0_14px_34px_rgba(91,61,82,0.2)]">
+              <PackageCheck className="size-5" />
+            </div>
+
+            <p className="mt-4 text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+              Custom quotations available
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/60">
+              {isVendorSession
+                ? isOwnVendorProfile
+                  ? 'You have not published fixed packages yet. Add packages to give customers clearer service and pricing options.'
+                  : 'This vendor has not published fixed packages yet.'
+                : isCustomerSession
+                  ? 'This vendor has not published fixed packages yet. Choose one of your events and send your requirements through a tailored quotation request.'
+                  : 'This vendor has not published fixed packages yet, but you can still request a tailored quotation based on your event requirements.'}
+            </p>
+
+            {isVendorSession ? (
+              isOwnVendorProfile ? (
+                <Link to="/vendor/packages" className="btn-primary mt-4 text-sm font-bold">
+                  Manage packages
+                  <ArrowRight className="size-4" />
+                </Link>
+              ) : (
+                <Link
+                  to="/vendors"
+                  state={vendorBackState}
+                  className="btn-secondary mt-4 text-sm font-bold"
+                >
+                  Back to marketplace
+                </Link>
+              )
+            ) : isCustomerSession ? (
+              <Link to="/events" className="btn-primary mt-4 text-sm font-bold">
+                Open my events
+                <ArrowRight className="size-4" />
+              </Link>
+            ) : (
+              <Link to="/login" className="btn-primary mt-4 text-sm font-bold">
+                Request quotation
+                <ArrowRight className="size-4" />
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {!isVendorSession ? (
+      <StickyVendorCta
+        vendorName={vendor.businessName}
+        location={locationLabel}
+        startingPrice={startingPrice}
+        rating={vendor.ratingSummary.overallAverage}
+        reviewCount={vendor.ratingSummary.reviewCount}
+      />
+    ) : (
+      <aside className="glass-card sticky top-6 overflow-hidden p-5">
+        <p className="text-[0.68rem] font-black uppercase tracking-[0.17em] text-[var(--color-rosewood)]">
+          Vendor view
+        </p>
+
+        <h3 className="mt-2 text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)]">
+          {isOwnVendorProfile ? 'Your marketplace presence' : 'Browsing as a vendor'}
+        </h3>
+
+        <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
+          {isOwnVendorProfile
+            ? 'Review how your portfolio, packages and business information currently appear to customers.'
+            : 'Quotation requests are customer actions, so they are unavailable while you are signed in with a vendor account.'}
+        </p>
+
+        <div className="mt-4 grid gap-2">
+          {isOwnVendorProfile ? (
+            <>
+              <Link to="/vendor/profile" className="btn-primary justify-center text-sm font-bold">
+                Manage profile
+              </Link>
+
+              <Link to="/vendor/portfolio" className="btn-secondary justify-center text-sm font-bold">
+                Manage portfolio
+              </Link>
+
+              <Link to="/vendor/packages" className="btn-secondary justify-center text-sm font-bold">
+                Manage packages
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/vendors"
+              state={vendorBackState}
+              className="btn-secondary justify-center text-sm font-bold"
+            >
+              Back to marketplace
+            </Link>
           )}
         </div>
-      </section>
+      </aside>
+    )}
+  </div>
+</section>
 
       <PortfolioLightbox
         items={vendor.portfolioItems}

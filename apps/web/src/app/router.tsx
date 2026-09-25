@@ -82,10 +82,6 @@ export const router = createBrowserRouter([
             element: <PlanningGuidePage />,
           },
           {
-            path: '/invitations/respond/:token',
-            element: <PublicInvitationPage />,
-          },
-          {
             path: '*',
             element: <NotFoundPage />,
           },
@@ -106,6 +102,10 @@ export const router = createBrowserRouter([
             element: <TermsOfServicePage />,
           },
         ],
+      },
+      {
+        path: '/invitations/respond/:token',
+        element: <PublicInvitationPage />,
       },
       {
         element: <AuthLayout />,

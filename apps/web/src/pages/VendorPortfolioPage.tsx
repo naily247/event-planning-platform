@@ -425,163 +425,165 @@ const discardEditChanges = () => {
   return (
     <div className="workspace-shell relative">
       <div className="workspace-container max-w-7xl">
-        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
-          />
+        <header className="relative overflow-visible rounded-[1.6rem] border border-white/55 bg-white/34 px-4 py-3.5 shadow-[0_14px_40px_rgba(31,27,29,0.06)] backdrop-blur-2xl sm:px-5">
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
+  />
 
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
+  <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex min-w-0 items-center gap-3">
+      <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
 
-              <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                  Vendor workspace
-                </p>
+      <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-3.5">
+        <p className="text-[0.62rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+          Vendor workspace
+        </p>
 
-                <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
-                  Portfolio management
-                </h1>
-              </div>
+        <h1 className="mt-0.5 text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-xl">
+          Portfolio management
+        </h1>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      className="btn-primary w-fit text-sm font-bold"
+      onClick={openUploadDialog}
+    >
+      <ImagePlus className="size-4" />
+      Upload image
+    </button>
+  </div>
+</header>
+
+<main className="pb-6 pt-3">
+  <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_22px_60px_rgba(64,42,51,0.09)] backdrop-blur-2xl">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
+    />
+
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -bottom-36 left-[32%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
+    />
+
+    <div className="relative grid gap-5 p-5 sm:p-6 lg:grid-cols-[1.18fr_0.82fr] lg:items-center lg:gap-7 lg:px-7 lg:py-6">
+      <div>
+        <div className="soft-chip w-fit text-[0.65rem] font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)]">
+          <Images className="size-3.5" />
+          Service portfolio
+        </div>
+
+        <h2 className="mt-4 max-w-3xl text-balance text-[2rem] font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-[2.35rem] lg:text-[2.55rem]">
+          Show customers the work that represents you best.
+        </h2>
+
+        <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/66">
+          Curate real examples of your services, organise their display order, and highlight the
+          work customers should notice first.
+        </p>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="soft-chip text-[0.68rem] font-black">
+            <Images className="size-3.5" />
+            {sortedPortfolio.length} {sortedPortfolio.length === 1 ? 'item' : 'items'}
+          </span>
+
+          <span className="soft-chip text-[0.68rem] font-black">
+            <Star className="size-3.5" />
+            {featuredCount} featured
+          </span>
+
+          <span className="soft-chip text-[0.68rem] font-black">
+            <Sparkles className="size-3.5" />
+            {portfolioHealth.label}
+          </span>
+        </div>
+      </div>
+
+      <article className="relative overflow-hidden rounded-[1.55rem] border border-white/70 bg-white/52 p-4 shadow-[0_16px_44px_rgba(31,27,29,0.07)] backdrop-blur-2xl">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
+        />
+
+        <div className="relative">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[0.61rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                Portfolio health
+              </p>
+
+              <h3 className="mt-1 text-xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                {portfolioHealth.label}
+              </h3>
             </div>
 
-            <button
-              type="button"
-              className="btn-primary w-fit text-sm font-bold"
-              onClick={openUploadDialog}
-            >
-              <ImagePlus className="size-4" />
-              Upload image
-            </button>
+            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
+              <Sparkles className="size-4" />
+            </div>
           </div>
-        </header>
 
-        <main className="pb-10 pt-6">
-          <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
-            />
+          <p className="mt-2.5 text-xs font-semibold leading-5 text-[var(--color-charcoal)]/58">
+            {portfolioHealth.message}
+          </p>
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -bottom-36 left-[32%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
-            />
-
-            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10 lg:p-10">
+          <div className="mt-3 rounded-[1.15rem] border border-white/62 bg-white/34 px-3.5 py-3">
+            <div className="flex items-end justify-between gap-4">
               <div>
-                <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <Images className="size-4" />
-                  Service portfolio
-                </div>
-
-                <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
-                  Show customers the work that represents you best.
-                </h2>
-
-                <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
-                  Curate real examples of your services, organise their display order, and highlight
-                  the work customers should notice first.
+                <p className="text-[0.58rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
+                  Portfolio completion
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-2.5">
-                  <span className="soft-chip text-xs font-black">
-                    <Images className="size-4" />
-                    {sortedPortfolio.length} {sortedPortfolio.length === 1 ? 'item' : 'items'}
-                  </span>
-
-                  <span className="soft-chip text-xs font-black">
-                    <Star className="size-4" />
-                    {featuredCount} featured
-                  </span>
-
-                  <span className="soft-chip text-xs font-black">
-                    <Sparkles className="size-4" />
-                    {portfolioHealth.label}
-                  </span>
-                </div>
+                <p className="mt-1 text-3xl font-black tracking-[-0.06em] text-[var(--color-near-black)]">
+                  {portfolioCompletion}%
+                </p>
               </div>
 
-              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
-                />
+              <div className="text-right">
+                <p className="text-lg font-black text-[var(--color-deep-plum)]">
+                  {sortedPortfolio.length}
+                </p>
 
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-5">
-                    <div>
-                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                        Portfolio health
-                      </p>
-
-                      <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
-                        {portfolioHealth.label}
-                      </h3>
-                    </div>
-
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
-                      <Sparkles className="size-5" />
-                    </div>
-                  </div>
-
-                  <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                    {portfolioHealth.message}
-                  </p>
-
-                  <div className="mt-6 rounded-[1.35rem] border border-white/62 bg-white/34 p-4">
-                    <div className="flex items-end justify-between gap-5">
-                      <div>
-                        <p className="text-[0.67rem] font-black uppercase tracking-[0.15em] text-[var(--color-charcoal)]/44">
-                          Portfolio completion
-                        </p>
-
-                        <p className="mt-2 text-4xl font-black tracking-[-0.06em] text-[var(--color-near-black)]">
-                          {portfolioCompletion}%
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-xl font-black text-[var(--color-deep-plum)]">
-                          {sortedPortfolio.length}
-                        </p>
-
-                        <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/44">
-                          uploaded works
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),var(--color-valendor-lilac))] transition-[width] duration-700"
-                        style={{
-                          width: `${portfolioCompletion}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid gap-2">
-                    <div className="flex items-center gap-3 text-xs font-bold leading-5 text-[var(--color-charcoal)]/55">
-                      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
-                        <Star className="size-3.5" />
-                      </span>
-                      Feature the work that best represents your service quality.
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs font-bold leading-5 text-[var(--color-charcoal)]/55">
-                      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
-                        <Images className="size-3.5" />
-                      </span>
-                      Keep enough variety for customers to understand your style.
-                    </div>
-                  </div>
-                </div>
-              </article>
+                <p className="text-[0.65rem] font-bold text-[var(--color-charcoal)]/44">
+                  uploaded works
+                </p>
+              </div>
             </div>
-          </section>
+
+            <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-[rgba(93,58,85,0.09)]">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-deep-plum),var(--color-muted-burgundy),var(--color-valendor-lilac))] transition-[width] duration-700"
+                style={{
+                  width: `${portfolioCompletion}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-1.5">
+            <div className="flex items-center gap-2 text-[0.67rem] font-bold leading-4 text-[var(--color-charcoal)]/55">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
+                <Star className="size-3" />
+              </span>
+
+              <span>Feature the work that best represents your service quality.</span>
+            </div>
+
+            <div className="flex items-center gap-2 text-[0.67rem] font-bold leading-4 text-[var(--color-charcoal)]/55">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
+                <Images className="size-3" />
+              </span>
+
+              <span>Keep enough variety for customers to understand your style.</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
 
           {sortedPortfolio.length === 0 ? (
             <section className="mt-6 overflow-hidden rounded-[2rem] border border-white/60 bg-white/46 p-6 shadow-[0_20px_56px_rgba(31,27,29,0.07)] backdrop-blur-xl sm:p-8">

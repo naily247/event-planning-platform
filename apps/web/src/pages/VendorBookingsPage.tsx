@@ -25,7 +25,6 @@ import {
   type BookingStatus,
   type VendorBooking,
 } from '../features/bookings/booking.api';
-import { PageBackButton } from '../components/navigation/PageBackButton';
 
 const PAGE_LIMIT = 9;
 
@@ -83,7 +82,8 @@ function formatMoney(value: string) {
 }
 
 function getCustomerName(booking: VendorBooking) {
-  const name = `${booking.event.owner.firstName} ${booking.event.owner.lastName}`.trim();
+  const name =
+    `${booking.event.owner.firstName} ${booking.event.owner.lastName}`.trim();
 
   return name || booking.event.owner.email;
 }
@@ -118,155 +118,165 @@ function getErrorMessage(error: unknown) {
 
 function BookingCard({ booking }: { booking: VendorBooking }) {
   const packageTitle =
-    booking.acceptedQuotation.quotationRequest.package?.title ?? 'Custom service';
+    booking.acceptedQuotation.quotationRequest.package?.title ??
+    'Custom service';
 
   const categoryName =
-    booking.acceptedQuotation.quotationRequest.package?.category?.name ?? 'Event service';
+    booking.acceptedQuotation.quotationRequest.package?.category?.name ??
+    'Event service';
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[1.85rem] border border-white/60 bg-white/44 p-5 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_62px_rgba(35,24,30,0.11)]">
-      <div className="flex items-start justify-between gap-4">
-        <span
-          className={`inline-flex rounded-full border px-3 py-1.5 text-[0.68rem] font-black ${
-            bookingStatusStyles[booking.status]
-          }`}
-        >
-          {bookingStatusLabels[booking.status]}
-        </span>
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-[1.55rem] border border-white/60 bg-white/42 p-4 shadow-[0_14px_38px_rgba(35,24,30,0.06)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/80 hover:bg-white/52 hover:shadow-[0_20px_48px_rgba(35,24,30,0.09)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 size-36 rounded-full bg-[rgba(183,167,200,0.12)] opacity-70 blur-3xl transition duration-500 group-hover:scale-125"
+      />
 
-        <span className="shrink-0 text-[0.68rem] font-bold text-[var(--color-charcoal)]/38">
-          {formatDateTime(booking.createdAt)}
-        </span>
-      </div>
-
-      <div className="mt-5">
-        <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
-          {booking.event.eventType}
-        </p>
-
-        <h2 className="mt-2 line-clamp-2 text-xl font-black leading-tight tracking-[-0.04em] text-[var(--color-near-black)]">
-          {booking.event.name}
-        </h2>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          <span className="rounded-full bg-[rgba(183,167,200,0.16)] px-3 py-1 text-[0.64rem] font-black uppercase tracking-[0.12em] text-[var(--color-deep-plum)]">
-            {packageTitle}
+      <div className="relative flex h-full flex-col">
+        <div className="flex items-center justify-between gap-3">
+          <span
+            className={`inline-flex rounded-full border px-2.5 py-1 text-[0.62rem] font-black ${
+              bookingStatusStyles[booking.status]
+            }`}
+          >
+            {bookingStatusLabels[booking.status]}
           </span>
 
-          <span className="rounded-full bg-[rgba(175,201,216,0.20)] px-3 py-1 text-[0.64rem] font-black uppercase tracking-[0.12em] text-[#405d69]">
-            {categoryName}
+          <span className="shrink-0 text-[0.62rem] font-bold text-[var(--color-charcoal)]/38">
+            {formatDateTime(booking.createdAt)}
           </span>
         </div>
-      </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-[1.2rem] border border-white/58 bg-white/30 p-3.5">
-          <CalendarDays className="size-4 text-[var(--color-rosewood)]" />
-
-          <p className="mt-2 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
-            Service start
+        <div className="mt-3">
+          <p className="text-[0.61rem] font-black uppercase tracking-[0.15em] text-[var(--color-rosewood)]">
+            {booking.event.eventType}
           </p>
 
-          <p className="mt-1 text-xs font-black leading-5 text-[var(--color-near-black)]">
-            {formatDateTime(booking.serviceStart)}
-          </p>
-        </div>
+          <h2 className="mt-1.5 line-clamp-1 text-lg font-black leading-tight tracking-[-0.035em] text-[var(--color-near-black)]">
+            {booking.event.name}
+          </h2>
 
-        <div className="rounded-[1.2rem] border border-white/58 bg-white/30 p-3.5">
-          <CircleDollarSign className="size-4 text-[var(--color-rosewood)]" />
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            <span className="rounded-full bg-[rgba(183,167,200,0.16)] px-2.5 py-1 text-[0.58rem] font-black uppercase tracking-[0.1em] text-[var(--color-deep-plum)]">
+              {packageTitle}
+            </span>
 
-          <p className="mt-2 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
-            Agreed cost
-          </p>
-
-          <p className="mt-1 text-xs font-black leading-5 text-[var(--color-near-black)]">
-            {formatMoney(booking.agreedCost)}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-3 rounded-[1.3rem] border border-white/58 bg-white/28 p-4">
-        <div className="flex items-start gap-3">
-          <div className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.16)] text-[var(--color-deep-plum)]">
-            <MapPin className="size-4" />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
-              Location
-            </p>
-
-            <p className="mt-1 line-clamp-2 text-sm font-black text-[var(--color-near-black)]">
-              {booking.event.location || 'Location not provided'}
-            </p>
+            <span className="rounded-full bg-[rgba(175,201,216,0.20)] px-2.5 py-1 text-[0.58rem] font-black uppercase tracking-[0.1em] text-[#405d69]">
+              {categoryName}
+            </span>
           </div>
         </div>
 
-        <div className="my-3 h-px bg-[rgba(93,58,85,0.08)]" />
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="flex min-w-0 items-start gap-2.5 rounded-xl border border-white/55 bg-white/28 px-3 py-2.5">
+            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(142,92,103,0.09)] text-[var(--color-rosewood)]">
+              <CalendarDays className="size-3.5" />
+            </span>
 
-        <div className="flex items-start gap-3">
-          <div className="grid size-8 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[#405d69]">
-            <UserRound className="size-4" />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
-              Customer
-            </p>
-
-            <p className="mt-1 truncate text-sm font-black text-[var(--color-near-black)]">
-              {getCustomerName(booking)}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {booking.serviceEnd ? (
-        <div className="mt-3 rounded-[1.15rem] border border-white/58 bg-white/24 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Clock3 className="size-4 shrink-0 text-[var(--color-deep-plum)]" />
-
-            <div>
-              <p className="text-[0.61rem] font-black uppercase tracking-[0.12em] text-[var(--color-charcoal)]/38">
-                Service end
+            <div className="min-w-0">
+              <p className="text-[0.55rem] font-black uppercase tracking-[0.1em] text-[var(--color-charcoal)]/38">
+                Service start
               </p>
 
-              <p className="mt-1 text-xs font-black text-[var(--color-near-black)]">
-                {formatDateTime(booking.serviceEnd)}
+              <p className="mt-0.5 text-[0.7rem] font-black leading-4 text-[var(--color-near-black)]">
+                {formatDateTime(booking.serviceStart)}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 items-start gap-2.5 rounded-xl border border-white/55 bg-white/28 px-3 py-2.5">
+            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(142,92,103,0.09)] text-[var(--color-rosewood)]">
+              <CircleDollarSign className="size-3.5" />
+            </span>
+
+            <div className="min-w-0">
+              <p className="text-[0.55rem] font-black uppercase tracking-[0.1em] text-[var(--color-charcoal)]/38">
+                Agreed cost
+              </p>
+
+              <p className="mt-0.5 truncate text-[0.7rem] font-black leading-4 text-[var(--color-near-black)]">
+                {formatMoney(booking.agreedCost)}
               </p>
             </div>
           </div>
         </div>
-      ) : null}
 
-      {booking.status === 'AWAITING_VENDOR_CONFIRMATION' ? (
-        <div className="mt-3 flex items-start gap-2 rounded-[1.15rem] border border-amber-200/80 bg-amber-50/70 p-3.5">
-          <Clock3 className="mt-0.5 size-4 shrink-0 text-amber-700" />
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/55 bg-white/24 px-3 py-2.5">
+            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+              <MapPin className="size-3.5" />
+            </span>
 
-          <p className="text-xs font-semibold leading-5 text-amber-800">
-            This booking needs your confirmation or rejection.
-          </p>
+            <div className="min-w-0">
+              <p className="text-[0.54rem] font-black uppercase tracking-[0.1em] text-[var(--color-charcoal)]/38">
+                Location
+              </p>
+
+              <p className="mt-0.5 truncate text-xs font-black text-[var(--color-near-black)]">
+                {booking.event.location || 'Location not provided'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/55 bg-white/24 px-3 py-2.5">
+            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.18)] text-[#405d69]">
+              <UserRound className="size-3.5" />
+            </span>
+
+            <div className="min-w-0">
+              <p className="text-[0.54rem] font-black uppercase tracking-[0.1em] text-[var(--color-charcoal)]/38">
+                Customer
+              </p>
+
+              <p className="mt-0.5 truncate text-xs font-black text-[var(--color-near-black)]">
+                {getCustomerName(booking)}
+              </p>
+            </div>
+          </div>
         </div>
-      ) : null}
 
-      {booking.status === 'ACTIVE' ? (
-        <div className="mt-3 flex items-start gap-2 rounded-[1.15rem] border border-violet-200/80 bg-violet-50/70 p-3.5">
-          <Clock3 className="mt-0.5 size-4 shrink-0 text-violet-700" />
+        {booking.serviceEnd ? (
+          <div className="mt-2 flex items-center gap-2.5 rounded-xl border border-white/55 bg-white/20 px-3 py-2">
+            <Clock3 className="size-3.5 shrink-0 text-[var(--color-deep-plum)]" />
 
-          <p className="text-xs font-semibold leading-5 text-violet-800">
-            This booking is currently in progress.
-          </p>
+            <p className="min-w-0 text-[0.66rem] font-bold text-[var(--color-charcoal)]/55">
+              <span className="font-black text-[var(--color-near-black)]">
+                Service end:
+              </span>{' '}
+              {formatDateTime(booking.serviceEnd)}
+            </p>
+          </div>
+        ) : null}
+
+        {booking.status === 'AWAITING_VENDOR_CONFIRMATION' ? (
+          <div className="mt-2 flex items-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/70 px-3 py-2">
+            <Clock3 className="size-3.5 shrink-0 text-amber-700" />
+
+            <p className="text-[0.68rem] font-bold leading-4 text-amber-800">
+              Confirmation or rejection required.
+            </p>
+          </div>
+        ) : null}
+
+        {booking.status === 'ACTIVE' ? (
+          <div className="mt-2 flex items-center gap-2 rounded-xl border border-violet-200/80 bg-violet-50/70 px-3 py-2">
+            <Clock3 className="size-3.5 shrink-0 text-violet-700" />
+
+            <p className="text-[0.68rem] font-bold leading-4 text-violet-800">
+              Service currently in progress.
+            </p>
+          </div>
+        ) : null}
+
+        <div className="mt-auto pt-3">
+          <Link
+            to={`/vendor/bookings/${booking.id}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-deep-plum)] px-4 py-2.5 text-xs font-black !text-white shadow-[0_8px_20px_rgba(91,61,82,0.14)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white"
+          >
+            <span className="text-white">Manage booking</span>
+            <ArrowUpRight className="size-3.5 text-white" />
+          </Link>
         </div>
-      ) : null}
-
-      <div className="mt-auto pt-5">
-        <Link
-          to={`/vendor/bookings/${booking.id}`}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-deep-plum)] px-4 py-3 text-sm font-black !text-white shadow-[0_12px_28px_rgba(91,61,82,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-muted-burgundy)] hover:!text-white"
-        >
-          <span className="text-white">Manage booking</span>
-          <ArrowUpRight className="size-4 text-white" />
-        </Link>
       </div>
     </article>
   );
@@ -274,24 +284,26 @@ function BookingCard({ booking }: { booking: VendorBooking }) {
 
 function BookingSkeleton() {
   return (
-    <div className="glass-card animate-pulse p-6">
+    <div className="glass-card animate-pulse p-4">
       <div className="flex justify-between">
-        <div className="h-6 w-36 rounded-full bg-zinc-200" />
-        <div className="h-4 w-20 rounded bg-zinc-200" />
+        <div className="h-5 w-32 rounded-full bg-zinc-200" />
+        <div className="h-3 w-20 rounded bg-zinc-200" />
       </div>
 
-      <div className="mt-6 h-3 w-20 rounded bg-zinc-200" />
-      <div className="mt-3 h-7 w-3/4 rounded bg-zinc-200" />
-      <div className="mt-3 h-4 w-1/2 rounded bg-zinc-200" />
+      <div className="mt-4 h-3 w-20 rounded bg-zinc-200" />
+      <div className="mt-2 h-6 w-3/4 rounded bg-zinc-200" />
 
-      <div className="mt-6 space-y-4 rounded-2xl bg-zinc-100 p-4">
-        <div className="h-10 rounded bg-zinc-200" />
-        <div className="h-10 rounded bg-zinc-200" />
-        <div className="h-10 rounded bg-zinc-200" />
-        <div className="h-10 rounded bg-zinc-200" />
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="h-14 rounded-xl bg-zinc-200" />
+        <div className="h-14 rounded-xl bg-zinc-200" />
       </div>
 
-      <div className="mt-6 h-12 rounded-2xl bg-zinc-200" />
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="h-12 rounded-xl bg-zinc-200" />
+        <div className="h-12 rounded-xl bg-zinc-200" />
+      </div>
+
+      <div className="mt-3 h-10 rounded-xl bg-zinc-200" />
     </div>
   );
 }
@@ -322,7 +334,8 @@ export function VendorBookingsPage() {
     }
 
     return bookings.filter((booking) => {
-      const packageDetails = booking.acceptedQuotation.quotationRequest.package;
+      const packageDetails =
+        booking.acceptedQuotation.quotationRequest.package;
 
       const searchableValues = [
         booking.event.name,
@@ -338,7 +351,9 @@ export function VendorBookingsPage() {
         booking.vendorResponseNote,
       ];
 
-      return searchableValues.some((value) => value?.toLowerCase().includes(normalizedSearch));
+      return searchableValues.some((value) =>
+        value?.toLowerCase().includes(normalizedSearch),
+      );
     });
   }, [bookingsQuery.data?.bookings, searchTerm]);
 
@@ -358,139 +373,106 @@ export function VendorBookingsPage() {
   return (
     <main className="workspace-shell relative">
       <div className="workspace-container w-full max-w-7xl">
-        <header className="relative overflow-visible rounded-[1.75rem] border border-white/55 bg-white/34 p-4 shadow-[0_16px_46px_rgba(31,27,29,0.07)] backdrop-blur-2xl sm:p-5">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
-          />
-
-          <div className="relative flex items-center gap-4">
-            <PageBackButton fallback="/vendor/dashboard" label="Dashboard" className="shrink-0" />
-
-            <div className="min-w-0 border-l border-[rgba(93,58,85,0.12)] pl-4">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
-                Vendor workspace
-              </p>
-
-              <h1 className="mt-1 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)] sm:text-2xl">
-                Booking management
-              </h1>
-            </div>
-          </div>
-        </header>
-
-        <div className="pb-10 pt-6">
-          <section className="relative isolate overflow-hidden rounded-[2.25rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_24px_70px_rgba(64,42,51,0.10)] backdrop-blur-2xl">
+        <div className="pb-8 pt-3">
+          <section className="relative isolate overflow-hidden rounded-[1.9rem] border border-white/60 bg-[linear-gradient(132deg,rgba(255,255,255,0.76)_0%,rgba(246,239,241,0.66)_55%,rgba(232,225,238,0.56)_100%)] shadow-[0_20px_58px_rgba(64,42,51,0.09)] backdrop-blur-2xl">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-28 -top-32 size-80 rounded-full bg-[rgba(183,167,200,0.23)] blur-3xl"
+              className="pointer-events-none absolute -right-24 -top-28 size-64 rounded-full bg-[rgba(183,167,200,0.20)] blur-3xl"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -bottom-36 left-[32%] size-72 rounded-full bg-[rgba(142,92,103,0.10)] blur-3xl"
+              className="pointer-events-none absolute -bottom-32 left-[32%] size-64 rounded-full bg-[rgba(142,92,103,0.08)] blur-3xl"
             />
 
-            <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-10 lg:p-10">
+            <div className="relative grid gap-5 p-5 sm:p-6 lg:grid-cols-[1.35fr_0.65fr] lg:items-center lg:gap-6 lg:p-7">
               <div>
-                <div className="soft-chip w-fit text-xs font-black uppercase tracking-[0.22em] text-[var(--color-deep-plum)]">
-                  <BriefcaseBusiness className="size-4" />
+                <div className="soft-chip w-fit text-[0.65rem] font-black uppercase tracking-[0.18em] text-[var(--color-deep-plum)]">
+                  <BriefcaseBusiness className="size-3.5" />
                   Service bookings
                 </div>
 
-                <h2 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.01] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl">
+                <h1 className="mt-4 max-w-3xl text-balance text-3xl font-black leading-[1.02] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-4xl">
                   Manage every confirmed customer commitment in one place.
-                </h2>
+                </h1>
 
-                <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[var(--color-charcoal)]/66">
-                  Review new booking requests, prepare for upcoming services, and follow confirmed
-                  work from acceptance through completion.
+                <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/62">
+                  Review new booking requests, prepare for upcoming services,
+                  and follow confirmed work from acceptance through completion.
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-2.5">
-                  <span className="soft-chip text-xs font-black">
-                    <BriefcaseBusiness className="size-4" />
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="soft-chip text-[0.68rem] font-black">
+                    <BriefcaseBusiness className="size-3.5" />
                     {bookingsQuery.isLoading ? '—' : totalBookings} bookings
                   </span>
 
-                  <span className="soft-chip text-xs font-black">
-                    <FileText className="size-4" />
-                    {status === 'ALL' ? 'All statuses' : bookingStatusLabels[status]}
+                  <span className="soft-chip text-[0.68rem] font-black">
+                    <FileText className="size-3.5" />
+                    {status === 'ALL'
+                      ? 'All statuses'
+                      : bookingStatusLabels[status]}
                   </span>
 
-                  <span className="soft-chip text-xs font-black">
-                    <CalendarDays className="size-4" />
+                  <span className="soft-chip text-[0.68rem] font-black">
+                    <CalendarDays className="size-3.5" />
                     Service schedule
                   </span>
                 </div>
               </div>
 
-              <article className="relative overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/52 p-5 shadow-[0_18px_52px_rgba(31,27,29,0.08)] backdrop-blur-2xl sm:p-6">
+              <article className="relative overflow-hidden rounded-[1.45rem] border border-white/70 bg-white/46 p-4 shadow-[0_14px_36px_rgba(31,27,29,0.07)] backdrop-blur-2xl">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[rgba(183,167,200,0.17)] blur-3xl"
+                  className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full bg-[rgba(183,167,200,0.14)] blur-3xl"
                 />
 
                 <div className="relative">
-                  <div className="flex items-start justify-between gap-5">
+                  <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
+                      <p className="text-[0.61rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
                         Booking pipeline
                       </p>
 
-                      <h3 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      <h2 className="mt-1 text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                         Current commitments
-                      </h3>
+                      </h2>
                     </div>
 
-                    <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[rgba(183,167,200,0.20)] text-[var(--color-deep-plum)]">
-                      <BriefcaseBusiness className="size-5" />
+                    <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                      <BriefcaseBusiness className="size-4" />
                     </div>
                   </div>
 
-                  <p className="mt-4 text-sm font-semibold leading-6 text-[var(--color-charcoal)]/58">
-                    Use this workspace to stay on top of customer commitments, service dates, and
-                    booking statuses.
-                  </p>
-
-                  <div className="mt-6 grid grid-cols-2 gap-3">
-                    <div className="rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
-                      <p className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="rounded-xl border border-white/62 bg-white/30 px-3 py-2.5">
+                      <p className="text-[0.55rem] font-black uppercase tracking-[0.1em] text-[var(--color-charcoal)]/38">
                         Total bookings
                       </p>
 
-                      <p className="mt-3 text-4xl font-black tracking-[-0.06em] text-[var(--color-near-black)]">
+                      <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
                         {bookingsQuery.isLoading ? '—' : totalBookings}
-                      </p>
-
-                      <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/46">
-                        Across all statuses
                       </p>
                     </div>
 
-                    <div className="rounded-[1.25rem] border border-white/62 bg-white/34 p-4">
-                      <p className="text-[0.64rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/38">
+                    <div className="rounded-xl border border-white/62 bg-white/30 px-3 py-2.5">
+                      <p className="text-[0.55rem] font-black uppercase tracking-[0.1em] text-[var(--color-charcoal)]/38">
                         Visible now
                       </p>
 
-                      <p className="mt-3 text-4xl font-black tracking-[-0.06em] text-[var(--color-near-black)]">
-                        {bookingsQuery.isLoading ? '—' : filteredBookings.length}
-                      </p>
-
-                      <p className="mt-1 text-xs font-bold text-[var(--color-charcoal)]/46">
-                        Current page results
+                      <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
+                        {bookingsQuery.isLoading
+                          ? '—'
+                          : filteredBookings.length}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-start gap-3 rounded-[1.25rem] border border-white/58 bg-white/30 p-4">
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[rgba(91,61,82,0.10)] text-[var(--color-deep-plum)]">
-                      <Clock3 className="size-4" />
-                    </span>
+                  <div className="mt-2.5 flex items-center gap-2 rounded-xl border border-white/58 bg-white/26 px-3 py-2.5">
+                    <Clock3 className="size-3.5 shrink-0 text-[var(--color-deep-plum)]" />
 
-                    <p className="text-xs font-bold leading-5 text-[var(--color-charcoal)]/55">
-                      Booking status and service timing are shown directly on each card for faster
-                      planning.
+                    <p className="text-[0.65rem] font-bold leading-4 text-[var(--color-charcoal)]/52">
+                      Status and service timing stay visible on every booking.
                     </p>
                   </div>
                 </div>
@@ -498,44 +480,43 @@ export function VendorBookingsPage() {
             </div>
           </section>
 
-          <section className="mt-6">
-            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <section className="mt-5">
+            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="section-eyebrow">Customer commitments</p>
 
                 <h2 className="section-title">Your bookings</h2>
 
-                <p className="section-description max-w-2xl">
-                  Search and filter bookings by event, customer, package, location, or current
-                  status.
+                <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/56">
+                  Search by event, customer, package, location, or status.
                 </p>
               </div>
 
               <div className="flex shrink-0 flex-wrap gap-2">
-                <span className="soft-chip text-xs font-black">
-                  <BriefcaseBusiness className="size-4" />
+                <span className="soft-chip text-[0.68rem] font-black">
+                  <BriefcaseBusiness className="size-3.5" />
                   {totalBookings} total
                 </span>
 
                 {pagination ? (
-                  <span className="soft-chip text-xs font-black">
+                  <span className="soft-chip text-[0.68rem] font-black">
                     Page {pagination.page} of {pagination.totalPages}
                   </span>
                 ) : null}
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-[1.85rem] border border-white/58 bg-white/42 p-4 shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl sm:p-5">
+            <div className="relative overflow-hidden rounded-[1.4rem] border border-white/58 bg-white/40 p-3 shadow-[0_12px_34px_rgba(35,24,30,0.055)] backdrop-blur-xl">
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-16 -top-20 size-44 rounded-full bg-[rgba(183,167,200,0.12)] blur-3xl"
+                className="pointer-events-none absolute -right-16 -top-20 size-40 rounded-full bg-[rgba(183,167,200,0.10)] blur-3xl"
               />
 
-              <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+              <div className="relative grid gap-2.5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
                 <label className="relative block">
                   <span className="sr-only">Search bookings</span>
 
-                  <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+                  <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
 
                   <input
                     type="search"
@@ -545,7 +526,7 @@ export function VendorBookingsPage() {
                       setPage(1);
                     }}
                     placeholder="Search events, customers, packages or locations"
-                    className="form-field bg-white/38 pl-11"
+                    className="form-field min-h-0 bg-white/34 py-2.5 pl-10 text-sm"
                   />
                 </label>
 
@@ -553,9 +534,11 @@ export function VendorBookingsPage() {
                   <select
                     value={status}
                     onChange={(event) =>
-                      handleStatusChange(event.target.value as BookingStatus | 'ALL')
+                      handleStatusChange(
+                        event.target.value as BookingStatus | 'ALL',
+                      )
                     }
-                    className="rounded-full border border-white/60 bg-white/36 px-4 py-3 text-sm font-black text-[var(--color-charcoal)] outline-none transition focus:border-[rgba(91,61,82,0.28)] focus:bg-white/56 focus:ring-4 focus:ring-[rgba(183,167,200,0.16)]"
+                    className="rounded-xl border border-white/60 bg-white/34 px-3.5 py-2.5 text-xs font-black text-[var(--color-charcoal)] outline-none transition focus:border-[rgba(91,61,82,0.28)] focus:bg-white/56 focus:ring-4 focus:ring-[rgba(183,167,200,0.16)]"
                   >
                     <option value="ALL">All statuses</option>
 
@@ -568,8 +551,10 @@ export function VendorBookingsPage() {
 
                   <select
                     value={sort}
-                    onChange={(event) => handleSortChange(event.target.value as BookingSort)}
-                    className="rounded-full border border-white/60 bg-white/36 px-4 py-3 text-sm font-black text-[var(--color-charcoal)] outline-none transition focus:border-[rgba(91,61,82,0.28)] focus:bg-white/56 focus:ring-4 focus:ring-[rgba(183,167,200,0.16)]"
+                    onChange={(event) =>
+                      handleSortChange(event.target.value as BookingSort)
+                    }
+                    className="rounded-xl border border-white/60 bg-white/34 px-3.5 py-2.5 text-xs font-black text-[var(--color-charcoal)] outline-none transition focus:border-[rgba(91,61,82,0.28)] focus:bg-white/56 focus:ring-4 focus:ring-[rgba(183,167,200,0.16)]"
                   >
                     {bookingSortOptions.map((bookingSort) => (
                       <option key={bookingSort} value={bookingSort}>
@@ -582,49 +567,49 @@ export function VendorBookingsPage() {
             </div>
           </section>
 
-          <section className="mt-5">
+          <section className="mt-4">
             {bookingsQuery.isLoading ? (
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <BookingSkeleton key={index} />
                 ))}
               </div>
             ) : bookingsQuery.isError ? (
-              <div className="grid min-h-72 place-items-center rounded-[2rem] border border-red-200/70 bg-red-50/55 p-8 text-center shadow-[0_18px_48px_rgba(35,24,30,0.06)]">
+              <div className="grid min-h-60 place-items-center rounded-[1.6rem] border border-red-200/70 bg-red-50/55 p-6 text-center shadow-[0_14px_38px_rgba(35,24,30,0.05)]">
                 <div className="max-w-lg">
-                  <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-red-100 text-red-600">
-                    <AlertCircle className="size-6" />
+                  <div className="mx-auto grid size-11 place-items-center rounded-xl bg-red-100 text-red-600">
+                    <AlertCircle className="size-5" />
                   </div>
 
-                  <h2 className="mt-5 text-2xl font-black tracking-[-0.04em] text-red-900">
+                  <h2 className="mt-4 text-xl font-black tracking-[-0.035em] text-red-900">
                     Bookings could not be loaded
                   </h2>
 
-                  <p className="mt-3 text-sm leading-7 text-red-700">
+                  <p className="mt-2 text-sm leading-6 text-red-700">
                     {getErrorMessage(bookingsQuery.error)}
                   </p>
 
                   <button
                     type="button"
                     onClick={() => bookingsQuery.refetch()}
-                    className="mt-6 rounded-full bg-red-700 px-5 py-3 text-sm font-black !text-white"
+                    className="mt-4 rounded-full bg-red-700 px-4 py-2.5 text-sm font-black !text-white"
                   >
                     Try again
                   </button>
                 </div>
               </div>
             ) : filteredBookings.length === 0 ? (
-              <div className="grid min-h-72 place-items-center rounded-[2rem] border border-white/60 bg-white/44 p-8 text-center shadow-[0_18px_48px_rgba(35,24,30,0.07)] backdrop-blur-xl">
+              <div className="grid min-h-60 place-items-center rounded-[1.6rem] border border-white/60 bg-white/42 p-6 text-center shadow-[0_14px_38px_rgba(35,24,30,0.06)] backdrop-blur-xl">
                 <div className="max-w-lg">
-                  <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+                  <div className="mx-auto grid size-11 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
                     {searchTerm.trim() ? (
-                      <Search className="size-6" />
+                      <Search className="size-5" />
                     ) : (
-                      <Inbox className="size-6" />
+                      <Inbox className="size-5" />
                     )}
                   </div>
 
-                  <h2 className="mt-5 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                  <h2 className="mt-4 text-xl font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                     {searchTerm.trim()
                       ? 'No matching bookings'
                       : status === 'ALL'
@@ -632,7 +617,7 @@ export function VendorBookingsPage() {
                         : `No ${bookingStatusLabels[status].toLowerCase()} bookings`}
                   </h2>
 
-                  <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--color-charcoal)]/58">
+                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--color-charcoal)]/58">
                     {searchTerm.trim()
                       ? 'Try another event, customer, package, location, or requirement keyword.'
                       : status === 'ALL'
@@ -644,12 +629,12 @@ export function VendorBookingsPage() {
                     <button
                       type="button"
                       onClick={() => setSearchTerm('')}
-                      className="btn-secondary mt-6 text-sm font-bold"
+                      className="btn-secondary mt-4 text-sm font-bold"
                     >
                       Clear search
                     </button>
                   ) : (
-                    <div className="soft-chip mx-auto mt-6 w-fit text-xs font-black">
+                    <div className="soft-chip mx-auto mt-4 w-fit text-xs font-black">
                       <BriefcaseBusiness className="size-4" />
                       Bookings appear automatically
                     </div>
@@ -658,20 +643,21 @@ export function VendorBookingsPage() {
               </div>
             ) : (
               <>
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {filteredBookings.map((booking) => (
                     <BookingCard key={booking.id} booking={booking} />
                   ))}
                 </div>
 
                 {pagination && pagination.totalPages > 1 ? (
-                  <div className="mt-6 flex flex-col gap-4 rounded-[1.75rem] border border-white/58 bg-white/42 p-4 shadow-[0_16px_42px_rgba(35,24,30,0.06)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                  <div className="mt-4 flex flex-col gap-3 rounded-[1.4rem] border border-white/58 bg-white/40 p-3.5 shadow-[0_12px_34px_rgba(35,24,30,0.05)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-black text-[var(--color-near-black)]">
-                        Showing {filteredBookings.length} of {pagination.total} bookings
+                      <p className="text-xs font-black text-[var(--color-near-black)]">
+                        Showing {filteredBookings.length} of {pagination.total}{' '}
+                        bookings
                       </p>
 
-                      <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/46">
+                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/46">
                         Page {pagination.page} of {pagination.totalPages}
                       </p>
                     </div>
@@ -680,25 +666,31 @@ export function VendorBookingsPage() {
                       <button
                         type="button"
                         disabled={!pagination.hasPreviousPage}
-                        onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-white/60 bg-white/36 px-4 py-2.5 text-sm font-black text-[var(--color-charcoal)] transition hover:bg-white/56 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-35"
+                        onClick={() =>
+                          setPage((currentPage) =>
+                            Math.max(1, currentPage - 1),
+                          )
+                        }
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/60 bg-white/34 px-3 py-2 text-xs font-black text-[var(--color-charcoal)] transition hover:bg-white/56 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-35"
                       >
-                        <ChevronLeft className="size-4" />
+                        <ChevronLeft className="size-3.5" />
                         Previous
                       </button>
 
-                      <span className="grid min-w-10 place-items-center rounded-full bg-[var(--color-deep-plum)] px-3 py-2.5 text-sm font-black text-white">
+                      <span className="grid min-w-9 place-items-center rounded-xl bg-[var(--color-deep-plum)] px-3 py-2 text-xs font-black text-white">
                         {pagination.page}
                       </span>
 
                       <button
                         type="button"
                         disabled={!pagination.hasNextPage}
-                        onClick={() => setPage((currentPage) => currentPage + 1)}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-white/60 bg-white/36 px-4 py-2.5 text-sm font-black text-[var(--color-charcoal)] transition hover:bg-white/56 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-35"
+                        onClick={() =>
+                          setPage((currentPage) => currentPage + 1)
+                        }
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/60 bg-white/34 px-3 py-2 text-xs font-black text-[var(--color-charcoal)] transition hover:bg-white/56 hover:text-[var(--color-deep-plum)] disabled:cursor-not-allowed disabled:opacity-35"
                       >
                         Next
-                        <ChevronRight className="size-4" />
+                        <ChevronRight className="size-3.5" />
                       </button>
                     </div>
                   </div>

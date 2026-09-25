@@ -32,7 +32,7 @@ import {
   type PublicVendor,
   type VendorPagination,
 } from '../features/vendors/vendor.api';
-import { ScrollReveal } from '../components/home/ScrollReveal';
+
 
 type CategoryFilter = {
   label: string;
@@ -487,583 +487,527 @@ export function VendorsPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-white/35 pb-10 pt-14 sm:pb-12 sm:pt-16 lg:pb-14 lg:pt-20">
+      <section className="relative overflow-hidden border-b border-white/35 py-7 sm:py-8 lg:py-9">
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -left-28 top-0 size-80 rounded-full bg-[var(--color-lilac)]/20 blur-3xl"
+  />
+
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -right-24 top-8 size-96 rounded-full bg-[var(--color-powder-blue)]/18 blur-3xl"
+  />
+
+  <div className="page-container relative">
+    {isFromVendorWorkspace ? (
+      <div className="mb-4">
+        <Link
+          to={marketplaceReturnTo}
+          className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/55 px-3.5 py-2 text-xs font-black text-[var(--color-charcoal)] shadow-[0_10px_24px_rgba(31,27,29,0.07)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.20)] hover:bg-white/75 hover:text-[var(--color-deep-plum)]"
+        >
+          <span aria-hidden="true">←</span>
+          {marketplaceReturnLabel}
+        </Link>
+      </div>
+    ) : null}
+
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center lg:gap-8">
+      <div>
+        <div className="soft-chip mb-3 w-fit text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-deep-plum)]">
+          <Sparkles className="size-3.5" />
+          Discover trusted event vendors
+        </div>
+
+        <h1 className="max-w-4xl text-balance text-4xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-5xl lg:text-[3.65rem]">
+          Find the right vendors for every beautiful detail.
+        </h1>
+
+        <p className="mt-3 max-w-3xl text-pretty text-sm font-medium leading-6 text-[var(--color-charcoal)]/68 sm:text-[0.95rem]">
+          Browse verified service providers, compare styles and reviews, explore service options and
+          discover the right vendors for every part of your event.
+        </p>
+      </div>
+
+      <aside className="relative overflow-hidden rounded-[1.6rem] border border-white/60 bg-white/30 p-4 shadow-[0_18px_48px_rgba(31,27,29,0.08)] backdrop-blur-xl">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-28 top-6 size-96 rounded-full bg-[var(--color-lilac)]/24 blur-3xl"
+          className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full bg-[var(--color-lilac)]/18 blur-2xl"
         />
 
-        <div
+        <Camera
           aria-hidden="true"
-          className="pointer-events-none absolute -right-24 top-20 size-[28rem] rounded-full bg-[var(--color-powder-blue)]/22 blur-3xl"
+          className="pointer-events-none absolute -bottom-2 -right-2 size-14 rotate-[9deg] text-[var(--color-deep-plum)]/[0.045]"
         />
 
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-[42%] top-[52%] size-64 rounded-full bg-[var(--color-dusty-olive)]/8 blur-3xl"
-        />
+        <div className="relative">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-rosewood)]">
+              Vendor marketplace
+            </p>
 
-        <div className="page-container relative">
-          {isFromVendorWorkspace ? (
-            <div className="mb-8">
-              <Link
-                to={marketplaceReturnTo}
-                className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/55 px-4 py-2.5 text-sm font-black text-[var(--color-charcoal)] shadow-[0_12px_28px_rgba(31,27,29,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[rgba(93,58,85,0.20)] hover:bg-white/75 hover:text-[var(--color-deep-plum)]"
-              >
-                <span aria-hidden="true">←</span>
-                {marketplaceReturnLabel}
-              </Link>
-            </div>
-          ) : null}
+            <span className="grid size-8 place-items-center rounded-xl bg-[var(--color-deep-plum)]/8 text-[var(--color-deep-plum)]">
+              <BadgeCheck className="size-4" />
+            </span>
+          </div>
 
-          <div className="grid gap-10 lg:grid-cols-[1fr_0.42fr] lg:items-end lg:gap-16">
+          <div className="mt-3 flex items-end justify-between gap-3">
             <div>
-              <ScrollReveal delay={40} distance={18} duration={650}>
-                <div className="soft-chip mb-6 w-fit text-xs font-black uppercase tracking-[0.24em] text-[var(--color-deep-plum)]">
-                  <Sparkles className="size-4" />
-                  Discover trusted event vendors
-                </div>
-              </ScrollReveal>
+              <p className="text-3xl font-black tracking-[-0.055em] text-[var(--color-near-black)]">
+                {marketplaceCountLabel}
+              </p>
 
-              <ScrollReveal delay={110} distance={28} duration={760}>
-                <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[var(--color-near-black)] sm:text-6xl lg:text-[4.5rem]">
-                  Find the right vendors for every beautiful detail.
-                </h1>
-              </ScrollReveal>
-
-              <ScrollReveal delay={190} distance={22} duration={700}>
-                <p className="mt-6 max-w-2xl text-pretty text-lg font-medium leading-8 text-[var(--color-charcoal)]/70">
-                  Browse verified service providers, compare styles and reviews, explore service
-                  options and discover the right vendors for every part of your event.
-                </p>
-              </ScrollReveal>
+              <p className="mt-1.5 max-w-[13rem] text-xs font-semibold leading-5 text-[var(--color-charcoal)]/60">
+                Verified professionals across every part of your event.
+              </p>
             </div>
+          </div>
 
-            <ScrollReveal direction="left" delay={150} distance={28} duration={760}>
-              <aside className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/30 p-6 shadow-[0_24px_70px_rgba(31,27,29,0.09)] backdrop-blur-xl">
+          <div className="mt-3 flex items-center gap-1.5 border-t border-[var(--color-charcoal)]/8 pt-3 text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--color-deep-plum)]">
+            <Sparkles className="size-3.5" />
+            Trusted event professionals
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <form
+      className="relative mt-5 overflow-hidden rounded-[1.6rem] border border-white/60 bg-white/28 p-3.5 shadow-[0_18px_48px_rgba(31,27,29,0.07)] backdrop-blur-xl"
+      onSubmit={handleFilterSubmit}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-20 -right-16 size-48 rounded-full bg-[var(--color-powder-blue)]/14 blur-3xl"
+      />
+
+      <div className="relative">
+        <div className="grid gap-2.5 lg:grid-cols-[1fr_0.48fr_auto]">
+          <label className="relative block">
+            <span className="sr-only">Search vendors</span>
+
+            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
+            <input
+              className="form-field !min-h-10 !pl-10"
+              placeholder="Search vendors, categories, styles..."
+              type="search"
+              value={searchInput}
+              onChange={(event) => {
+                setSearchInput(event.target.value);
+              }}
+            />
+          </label>
+
+          <label className="relative block">
+            <span className="sr-only">Filter by location</span>
+
+            <MapPin className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
+
+            <input
+              className="form-field !min-h-10 !pl-10"
+              placeholder="Location"
+              type="text"
+              value={locationInput}
+              onChange={(event) => {
+                setLocationInput(event.target.value);
+              }}
+            />
+          </label>
+
+          <button
+            type="submit"
+            className="btn-primary min-h-10 min-w-[8rem] px-4 text-xs font-bold"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <LoaderCircle className="size-4 animate-spin" />
+            ) : (
+              <SlidersHorizontal className="size-4" />
+            )}
+            Apply filters
+          </button>
+        </div>
+
+        <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
+          {categoryFilters.map((category) => {
+            const isSelected = selectedCategory === category.slug;
+
+            return (
+              <button
+                key={category.label}
+                type="button"
+                aria-pressed={isSelected}
+                className={
+                  isSelected
+                    ? 'soft-chip shrink-0 border-[var(--color-deep-plum)]/30 bg-[rgba(93,58,85,0.94)] !px-3 !py-1.5 text-xs text-[#fffaf5] shadow-[0_8px_20px_rgba(93,58,85,0.16)]'
+                    : 'soft-chip shrink-0 !px-3 !py-1.5 text-xs transition duration-300 hover:bg-white/62'
+                }
+                onClick={() => {
+                  handleCategoryChange(category.slug);
+                }}
+              >
+                {category.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {activeFilterCount > 0 ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--color-charcoal)]/8 pt-3">
+            <span className="mr-1 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/48">
+              Active filters
+            </span>
+
+            {appliedSearch ? (
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/42 px-2.5 py-1 text-[0.68rem] font-bold text-[var(--color-charcoal)]/72">
+                Search: {appliedSearch}
+              </span>
+            ) : null}
+
+            {appliedLocation ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/55 bg-white/42 px-2.5 py-1 text-[0.68rem] font-bold text-[var(--color-charcoal)]/72">
+                <MapPin className="size-3 text-[var(--color-rosewood)]" />
+                {appliedLocation}
+              </span>
+            ) : null}
+
+            {selectedCategoryLabel && selectedCategory ? (
+              <span className="inline-flex items-center rounded-full border border-white/55 bg-white/42 px-2.5 py-1 text-[0.68rem] font-bold text-[var(--color-charcoal)]/72">
+                {selectedCategoryLabel}
+              </span>
+            ) : null}
+
+            <button
+              type="button"
+              className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.68rem] font-black text-[var(--color-rosewood)] transition hover:bg-[var(--color-rosewood)]/8"
+              onClick={handleClearFilters}
+            >
+              <X className="size-3" />
+              Clear all
+            </button>
+          </div>
+        ) : null}
+
+        <div className="mt-3 grid gap-2 border-t border-[var(--color-charcoal)]/8 pt-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="flex items-center gap-2.5 rounded-[1rem] border border-white/50 bg-white/28 px-3 py-2">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(142,151,115,0.16)] text-[#4f5a3f]">
+              <BadgeCheck className="size-3.5" />
+            </span>
+
+            <div>
+              <p className="text-[0.68rem] font-black text-[var(--color-near-black)]">
+                Verified vendors
+              </p>
+              <p className="text-[0.6rem] font-semibold text-[var(--color-charcoal)]/48">
+                Marketplace approved
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 rounded-[1rem] border border-white/50 bg-white/28 px-3 py-2">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(220,183,150,0.18)] text-[var(--color-rosewood)]">
+              <Star className="size-3.5" />
+            </span>
+
+            <div>
+              <p className="text-[0.68rem] font-black text-[var(--color-near-black)]">
+                Reviewed services
+              </p>
+              <p className="text-[0.6rem] font-semibold text-[var(--color-charcoal)]/48">
+                Real customer feedback
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 rounded-[1rem] border border-white/50 bg-white/28 px-3 py-2">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
+              <Sparkles className="size-3.5" />
+            </span>
+
+            <div>
+              <p className="text-[0.68rem] font-black text-[var(--color-near-black)]">
+                Structured quotations
+              </p>
+              <p className="text-[0.6rem] font-semibold text-[var(--color-charcoal)]/48">
+                Compare with clarity
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 rounded-[1rem] border border-white/50 bg-white/28 px-3 py-2">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(175,201,216,0.20)] text-[#3b515b]">
+              <SlidersHorizontal className="size-3.5" />
+            </span>
+
+            <div>
+              <p className="text-[0.68rem] font-black text-[var(--color-near-black)]">
+                10 service categories
+              </p>
+              <p className="text-[0.6rem] font-semibold text-[var(--color-charcoal)]/48">
+                Built for full events
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+      <section className="page-container py-7 sm:py-8 lg:py-9">
+  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[var(--color-rosewood)]">
+        Vendor marketplace
+      </p>
+
+      <h2 className="mt-1.5 text-2xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-3xl">
+        Find professionals that fit your event.
+      </h2>
+    </div>
+
+    <div className="max-w-xl sm:text-right">
+      <p className="text-xs font-medium leading-5 text-[var(--color-charcoal)]/62 sm:text-sm">
+        Compare service style, location and verified feedback, then explore the vendors that best
+        match your event.
+      </p>
+
+      {!isLoading && !errorMessage ? (
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/28 px-2.5 py-1 text-xs font-black text-[var(--color-deep-plum)] backdrop-blur-xl">
+          <BadgeCheck className="size-3.5" />
+          Showing {vendors.length} of {pagination?.total ?? vendors.length}{' '}
+          {(pagination?.total ?? vendors.length) === 1 ? 'vendor' : 'vendors'}
+        </div>
+      ) : null}
+    </div>
+  </div>
+
+  {isLoading ? (
+    <div className="grid gap-3 lg:grid-cols-2" aria-live="polite" aria-busy="true">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div
+          key={index}
+          className="overflow-hidden rounded-[1.5rem] border border-white/55 bg-white/26 p-3.5 shadow-[0_16px_44px_rgba(31,27,29,0.06)] backdrop-blur-xl"
+        >
+          <div className="grid animate-pulse gap-4 sm:grid-cols-[8.5rem_1fr]">
+            <div className="min-h-44 rounded-[1.2rem] bg-[var(--color-charcoal)]/8" />
+
+            <div className="py-1">
+              <div className="h-5 w-24 rounded-full bg-[var(--color-charcoal)]/8" />
+              <div className="mt-4 h-6 w-2/3 rounded-lg bg-[var(--color-charcoal)]/9" />
+              <div className="mt-3 h-3 w-3/4 rounded-lg bg-[var(--color-charcoal)]/7" />
+              <div className="mt-4 h-3 w-full rounded-lg bg-[var(--color-charcoal)]/7" />
+              <div className="mt-2 h-3 w-5/6 rounded-lg bg-[var(--color-charcoal)]/7" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : null}
+
+  {!isLoading && errorMessage ? (
+    <div className="grid min-h-60 place-items-center rounded-[1.7rem] border border-white/60 bg-white/28 p-7 text-center shadow-[0_18px_50px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+      <div className="max-w-lg">
+        <div className="mx-auto grid size-12 place-items-center rounded-xl bg-[rgba(130,72,77,0.12)] text-[var(--color-rosewood)]">
+          <CircleAlert className="size-6" />
+        </div>
+
+        <p className="mt-4 text-lg font-black text-[var(--color-near-black)]">
+          The marketplace is temporarily unavailable
+        </p>
+
+        <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/66">{errorMessage}</p>
+
+        <button
+          type="button"
+          className="btn-secondary mt-4 text-sm font-bold"
+          onClick={handleRetry}
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+  ) : null}
+
+  {!isLoading && !errorMessage && vendors.length === 0 ? (
+    <div className="grid min-h-60 place-items-center rounded-[1.7rem] border border-white/60 bg-white/28 p-7 text-center shadow-[0_18px_50px_rgba(31,27,29,0.07)] backdrop-blur-xl">
+      <div className="max-w-lg">
+        <div className="mx-auto grid size-12 place-items-center rounded-xl bg-[rgba(93,58,85,0.1)] text-[var(--color-deep-plum)]">
+          <Search className="size-6" />
+        </div>
+
+        <p className="mt-4 text-lg font-black text-[var(--color-near-black)]">
+          No matching vendors yet
+        </p>
+
+        <p className="mt-2 text-sm leading-6 text-[var(--color-charcoal)]/66">
+          Try a broader search, another location, or view every verified vendor in the marketplace.
+        </p>
+
+        <button
+          type="button"
+          className="btn-secondary mt-4 text-sm font-bold"
+          onClick={handleClearFilters}
+        >
+          Clear filters
+        </button>
+      </div>
+    </div>
+  ) : null}
+
+  {!isLoading && !errorMessage && vendors.length > 0 ? (
+    <div className="grid gap-3 lg:grid-cols-2">
+      {vendors.map((vendor) => {
+        const VendorIcon = getVendorIcon(vendor);
+        const vendorLogoUrl = vendorLogoMap[vendor.slug];
+        const categoryVisual = getVendorVisual(vendor);
+        const categoryLabel = getCategoryLabel(vendor);
+
+        const visualStyle: CSSProperties = {
+          backgroundColor: categoryVisual.backgroundColor,
+          backgroundImage: categoryVisual.backgroundImage,
+        };
+
+        return (
+          <article
+            key={vendor.id}
+            className="group relative overflow-hidden rounded-[1.55rem] border border-white/62 bg-[linear-gradient(145deg,rgba(255,255,255,0.48),rgba(255,255,255,0.26))] p-3 shadow-[0_16px_44px_rgba(31,27,29,0.065)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/88 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(248,243,250,0.46))] hover:shadow-[0_22px_56px_rgba(31,27,29,0.1)] sm:p-3.5"
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-full bg-[rgba(183,167,200,0.12)] opacity-0 blur-3xl transition duration-500 group-hover:opacity-100"
+            />
+
+            <div className="relative grid min-h-[13rem] gap-3.5 sm:grid-cols-[8.75rem_minmax(0,1fr)]">
+              <div
+                className="relative min-h-[11rem] overflow-hidden rounded-[1.25rem] border border-white/38 shadow-[0_14px_34px_rgba(31,27,29,0.11)] sm:min-h-full"
+                style={visualStyle}
+              >
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[var(--color-lilac)]/18 blur-2xl"
+                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.24)_0%,transparent_38%,rgba(31,27,29,0.08)_100%)]"
                 />
 
-                <Camera
+                <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-2 bottom-5 size-16 rotate-[9deg] text-[var(--color-deep-plum)]/[0.045]"
+                  className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/75 to-transparent"
                 />
 
-                <Music2
+                <VendorIcon
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-14 top-20 size-10 rotate-[-8deg] text-[var(--color-deep-plum)]/[0.04]"
+                  className={`pointer-events-none absolute -bottom-6 -right-6 size-28 rotate-[-10deg] opacity-55 ${categoryVisual.watermarkClassName}`}
                 />
 
-                <Flower2
-                  aria-hidden="true"
-                  className="pointer-events-none absolute bottom-7 left-7 size-12 rotate-[11deg] text-[var(--color-rosewood)]/[0.04]"
-                />
-
-                <div className="relative">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-rosewood)]">
-                      Vendor marketplace
-                    </p>
-
-                    <span className="grid size-10 place-items-center rounded-2xl bg-[var(--color-deep-plum)]/8 text-[var(--color-deep-plum)]">
-                      <BadgeCheck className="size-5" />
-                    </span>
-                  </div>
-
-                  <p className="mt-5 text-4xl font-black tracking-[-0.055em] text-[var(--color-near-black)]">
-                    {marketplaceCountLabel}
-                  </p>
-
-                  <p className="mt-3 max-w-xs text-sm font-semibold leading-6 text-[var(--color-charcoal)]/64">
-                    Verified professionals across photography, catering, décor, venues and more.
-                  </p>
-
-                  <div className="mt-6 flex items-center gap-2 border-t border-[var(--color-charcoal)]/8 pt-5 text-xs font-black uppercase tracking-[0.14em] text-[var(--color-deep-plum)]">
-                    <Sparkles className="size-4" />
-                    Trusted event professionals
-                  </div>
+                <div className="absolute left-2.5 top-2.5">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/42 bg-white/28 px-2 py-1 text-[0.5rem] font-black uppercase tracking-[0.12em] text-[var(--color-near-black)]/72 backdrop-blur-xl">
+                    <BadgeCheck className="size-2.5" />
+                    Eventure
+                  </span>
                 </div>
-              </aside>
-            </ScrollReveal>
-          </div>
 
-          <ScrollReveal delay={250} distance={24} duration={720}>
-            <form
-              className="relative mt-10 overflow-hidden rounded-[2rem] border border-white/60 bg-white/28 p-4 shadow-[0_24px_70px_rgba(31,27,29,0.08)] backdrop-blur-xl sm:p-5"
-              onSubmit={handleFilterSubmit}
-            >
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-20 -right-16 size-56 rounded-full bg-[var(--color-powder-blue)]/14 blur-3xl"
-              />
-
-              <div className="relative">
-                <div className="grid gap-3 lg:grid-cols-[1fr_0.58fr_auto]">
-                  <label className="relative block">
-                    <span className="sr-only">Search vendors</span>
-
-                    <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
-
-                    <input
-                      className="form-field !pl-12"
-                      placeholder="Search vendors, categories, styles..."
-                      type="search"
-                      value={searchInput}
-                      onChange={(event) => {
-                        setSearchInput(event.target.value);
-                      }}
-                    />
-                  </label>
-
-                  <label className="relative block">
-                    <span className="sr-only">Filter by location</span>
-
-                    <MapPin className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[var(--color-charcoal)]/42" />
-
-                    <input
-                      className="form-field !pl-12"
-                      placeholder="Location"
-                      type="text"
-                      value={locationInput}
-                      onChange={(event) => {
-                        setLocationInput(event.target.value);
-                      }}
-                    />
-                  </label>
-
-                  <button
-                    type="submit"
-                    className="btn-primary min-w-[8.5rem] text-sm font-bold"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <LoaderCircle className="size-4 animate-spin" />
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[52%]">
+                  <div className="relative grid size-[5.5rem] place-items-center overflow-hidden rounded-[1.35rem] border border-white/72 bg-white/78 p-2.5 shadow-[0_16px_38px_rgba(31,27,29,0.18)] backdrop-blur-xl transition duration-300 group-hover:scale-[1.025]">
+                    {vendorLogoUrl ? (
+                      <img
+                        src={vendorLogoUrl}
+                        alt={`${vendor.businessName} logo`}
+                        className="h-full w-full object-contain"
+                      />
                     ) : (
-                      <SlidersHorizontal className="size-4" />
+                      <VendorIcon className="size-8 text-[var(--color-deep-plum)]" />
                     )}
-                    Apply filters
-                  </button>
+                  </div>
                 </div>
 
-                <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
-                  {categoryFilters.map((category) => {
-                    const isSelected = selectedCategory === category.slug;
-
-                    return (
-                      <button
-                        key={category.label}
-                        type="button"
-                        aria-pressed={isSelected}
-                        className={
-                          isSelected
-                            ? 'soft-chip shrink-0 border-[var(--color-deep-plum)]/30 bg-[rgba(93,58,85,0.94)] text-[#fffaf5] shadow-[0_10px_26px_rgba(93,58,85,0.18)]'
-                            : 'soft-chip shrink-0 transition duration-300 hover:-translate-y-0.5 hover:bg-white/62'
-                        }
-                        onClick={() => {
-                          handleCategoryChange(category.slug);
-                        }}
-                      >
-                        {category.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {activeFilterCount > 0 ? (
-                  <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[var(--color-charcoal)]/8 pt-4">
-                    <span className="mr-1 text-xs font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/48">
-                      Active filters
-                    </span>
-
-                    {appliedSearch ? (
-                      <span className="inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/42 px-3 py-1.5 text-xs font-bold text-[var(--color-charcoal)]/72">
-                        Search: {appliedSearch}
-                      </span>
-                    ) : null}
-
-                    {appliedLocation ? (
-                      <span className="inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/42 px-3 py-1.5 text-xs font-bold text-[var(--color-charcoal)]/72">
-                        <MapPin className="size-3.5 text-[var(--color-rosewood)]" />
-                        {appliedLocation}
-                      </span>
-                    ) : null}
-
-                    {selectedCategoryLabel && selectedCategory ? (
-                      <span className="inline-flex items-center gap-2 rounded-full border border-white/55 bg-white/42 px-3 py-1.5 text-xs font-bold text-[var(--color-charcoal)]/72">
-                        {selectedCategoryLabel}
-                      </span>
-                    ) : null}
-
-                    <button
-                      type="button"
-                      className="ml-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black text-[var(--color-rosewood)] transition hover:bg-[var(--color-rosewood)]/8"
-                      onClick={handleClearFilters}
-                    >
-                      <X className="size-3.5" />
-                      Clear all
-                    </button>
-                  </div>
-                ) : null}
-
-                <div className="mt-5 grid gap-3 border-t border-[var(--color-charcoal)]/8 pt-5 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(142,151,115,0.16)] text-[#4f5a3f]">
-                      <BadgeCheck className="size-4" />
-                    </span>
-
-                    <div>
-                      <p className="text-xs font-black text-[var(--color-near-black)]">
-                        Verified vendors
-                      </p>
-
-                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
-                        Marketplace approved
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(220,183,150,0.18)] text-[var(--color-rosewood)]">
-                      <Star className="size-4" />
-                    </span>
-
-                    <div>
-                      <p className="text-xs font-black text-[var(--color-near-black)]">
-                        Reviewed services
-                      </p>
-
-                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
-                        Real customer feedback
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.18)] text-[var(--color-deep-plum)]">
-                      <Sparkles className="size-4" />
-                    </span>
-
-                    <div>
-                      <p className="text-xs font-black text-[var(--color-near-black)]">
-                        Structured quotations
-                      </p>
-
-                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
-                        Compare with clarity
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="group flex items-center gap-3 rounded-[1.25rem] border border-white/50 bg-white/28 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white/42">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(175,201,216,0.20)] text-[#3b515b]">
-                      <SlidersHorizontal className="size-4" />
-                    </span>
-
-                    <div>
-                      <p className="text-xs font-black text-[var(--color-near-black)]">
-                        10 service categories
-                      </p>
-
-                      <p className="mt-0.5 text-[0.68rem] font-semibold text-[var(--color-charcoal)]/48">
-                        Built for full events
-                      </p>
-                    </div>
-                  </div>
+                <div className="absolute bottom-2.5 left-2.5">
+                  <span className="grid size-7 place-items-center rounded-lg border border-white/52 bg-white/36 text-[var(--color-near-black)] backdrop-blur-xl">
+                    <VendorIcon className="size-3.5" />
+                  </span>
                 </div>
               </div>
-            </form>
-          </ScrollReveal>
-        </div>
-      </section>
 
-      <section className="page-container py-14 sm:py-16 lg:py-20">
-        <div className="mb-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:gap-16">
-          <ScrollReveal direction="right" distance={26}>
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--color-rosewood)]">
-                Vendor marketplace
-              </p>
+              <div className="flex min-w-0 flex-col py-0.5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="status-chip !px-2.5 !py-1 text-[0.65rem]" data-tone="blue">
+                    {categoryLabel}
+                  </span>
 
-              <h2 className="mt-3 max-w-xl text-3xl font-black tracking-[-0.045em] text-[var(--color-near-black)] sm:text-4xl">
-                Find professionals that fit your event.
-              </h2>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal direction="left" distance={26} delay={80} className="lg:justify-self-end">
-            <div className="max-w-xl lg:text-right">
-              <p className="leading-7 text-[var(--color-charcoal)]/68">
-                Compare service style, location and verified feedback, then explore the vendors that
-                best match the experience you are planning.
-              </p>
-
-              {!isLoading && !errorMessage ? (
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/28 px-3 py-1.5 text-sm font-black text-[var(--color-deep-plum)] backdrop-blur-xl">
-                  <BadgeCheck className="size-4" />
-                  Showing {vendors.length} of {pagination?.total ?? vendors.length}{' '}
-                  {(pagination?.total ?? vendors.length) === 1 ? 'vendor' : 'vendors'}
-                </div>
-              ) : null}
-            </div>
-          </ScrollReveal>
-        </div>
-
-        {isLoading ? (
-          <div className="grid gap-5 lg:grid-cols-2" aria-live="polite" aria-busy="true">
-            {Array.from({ length: 4 }, (_, index) => (
-              <div
-                key={index}
-                className="overflow-hidden rounded-[2rem] border border-white/55 bg-white/26 p-5 shadow-[0_22px_64px_rgba(31,27,29,0.07)] backdrop-blur-xl"
-              >
-                <div className="grid animate-pulse gap-5 sm:grid-cols-[12rem_1fr]">
-                  <div className="min-h-56 rounded-[1.5rem] bg-[var(--color-charcoal)]/8" />
-
-                  <div className="py-2">
-                    <div className="h-6 w-28 rounded-full bg-[var(--color-charcoal)]/8" />
-                    <div className="mt-6 h-8 w-2/3 rounded-xl bg-[var(--color-charcoal)]/9" />
-                    <div className="mt-4 h-4 w-3/4 rounded-lg bg-[var(--color-charcoal)]/7" />
-                    <div className="mt-5 h-4 w-full rounded-lg bg-[var(--color-charcoal)]/7" />
-                    <div className="mt-2 h-4 w-5/6 rounded-lg bg-[var(--color-charcoal)]/7" />
-                    <div className="mt-8 h-11 w-32 rounded-2xl bg-[var(--color-charcoal)]/8 sm:ml-auto" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        {!isLoading && errorMessage ? (
-          <ScrollReveal distance={24} duration={680}>
-            <div className="grid min-h-80 place-items-center rounded-[2.2rem] border border-white/60 bg-white/28 p-10 text-center shadow-[0_24px_70px_rgba(31,27,29,0.08)] backdrop-blur-xl">
-              <div className="max-w-lg">
-                <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(130,72,77,0.12)] text-[var(--color-rosewood)]">
-                  <CircleAlert className="size-7" />
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(142,151,115,0.16)] bg-[rgba(142,151,115,0.16)] px-2.5 py-1 text-[0.65rem] font-black text-[#3d452f]">
+                    <BadgeCheck className="size-3" />
+                    Verified
+                  </span>
                 </div>
 
-                <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
-                  The marketplace is temporarily unavailable
-                </p>
+                <h3 className="mt-2.5 text-xl font-black leading-tight tracking-[-0.04em] text-[var(--color-near-black)] transition duration-300 group-hover:text-[var(--color-deep-plum)]">
+                  {vendor.businessName}
+                </h3>
 
-                <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">{errorMessage}</p>
+                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-[var(--color-charcoal)]/62">
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="size-3.5 shrink-0 text-[var(--color-rosewood)]" />
+                    <span>{getLocationLabel(vendor)}</span>
+                  </span>
 
-                <button
-                  type="button"
-                  className="btn-secondary mt-6 text-sm font-bold"
-                  onClick={handleRetry}
-                >
-                  Try again
-                </button>
-              </div>
-            </div>
-          </ScrollReveal>
-        ) : null}
-
-        {!isLoading && !errorMessage && vendors.length === 0 ? (
-          <ScrollReveal distance={24} duration={680}>
-            <div className="grid min-h-80 place-items-center rounded-[2.2rem] border border-white/60 bg-white/28 p-10 text-center shadow-[0_24px_70px_rgba(31,27,29,0.08)] backdrop-blur-xl">
-              <div className="max-w-lg">
-                <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[rgba(93,58,85,0.1)] text-[var(--color-deep-plum)]">
-                  <Search className="size-7" />
-                </div>
-
-                <p className="mt-5 text-xl font-black text-[var(--color-near-black)]">
-                  No matching vendors yet
-                </p>
-
-                <p className="mt-3 leading-7 text-[var(--color-charcoal)]/66">
-                  Try a broader search, another location, or view every verified vendor in the
-                  marketplace.
-                </p>
-
-                <button
-                  type="button"
-                  className="btn-secondary mt-6 text-sm font-bold"
-                  onClick={handleClearFilters}
-                >
-                  Clear filters
-                </button>
-              </div>
-            </div>
-          </ScrollReveal>
-        ) : null}
-
-        {!isLoading && !errorMessage && vendors.length > 0 ? (
-          <div className="grid gap-5 lg:grid-cols-2">
-            {vendors.map((vendor, index) => {
-              const VendorIcon = getVendorIcon(vendor);
-              const vendorLogoUrl = vendorLogoMap[vendor.slug];
-              const categoryVisual = getVendorVisual(vendor);
-              const categoryLabel = getCategoryLabel(vendor);
-
-              const visualStyle: CSSProperties = {
-                backgroundColor: categoryVisual.backgroundColor,
-                backgroundImage: categoryVisual.backgroundImage,
-              };
-
-              return (
-                <ScrollReveal key={vendor.id} delay={(index % 4) * 70} distance={28} duration={700}>
-                  <article className="group relative h-full overflow-hidden rounded-[2rem] border border-white/62 bg-[linear-gradient(145deg,rgba(255,255,255,0.48),rgba(255,255,255,0.26))] p-4 shadow-[0_20px_58px_rgba(31,27,29,0.07)] backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1 hover:border-white/88 hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(248,243,250,0.46))] hover:shadow-[0_30px_76px_rgba(31,27,29,0.12)] sm:p-5">
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[rgba(183,167,200,0.12)] opacity-0 blur-3xl transition duration-500 group-hover:scale-125 group-hover:opacity-100"
+                  <span className="inline-flex items-center gap-1">
+                    <Star
+                      className={
+                        vendor.averageRating === null
+                          ? 'size-3.5 shrink-0 text-[var(--color-charcoal)]/35'
+                          : 'size-3.5 shrink-0 fill-[var(--color-dusty-olive)] text-[var(--color-dusty-olive)]'
+                      }
                     />
 
-                    <div className="relative grid h-full gap-5 sm:grid-cols-[11.5rem_minmax(0,1fr)]">
-                      <div
-                        className="relative min-h-[15rem] overflow-hidden rounded-[1.6rem] border border-white/38 shadow-[0_18px_42px_rgba(31,27,29,0.13)] sm:min-h-full"
-                        style={visualStyle}
-                      >
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.24)_0%,transparent_38%,rgba(31,27,29,0.08)_100%)]"
-                        />
+                    <span>{formatRating(vendor)}</span>
+                  </span>
+                </div>
 
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute -left-16 -top-16 size-44 rounded-full border border-white/20"
-                        />
+                <p className="mt-2.5 line-clamp-2 text-[0.82rem] font-medium leading-5 text-[var(--color-charcoal)]/66">
+                  {vendor.description ??
+                    'Explore this verified Eventure vendor and request a tailored quotation for your event.'}
+                </p>
 
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute -left-8 -top-8 size-28 rounded-full border border-white/14"
-                        />
+                <div className="mt-auto pt-3">
+                  <div className="flex items-center justify-between gap-3 rounded-[1rem] border border-white/52 bg-white/26 px-3 py-2.5 transition duration-300 group-hover:bg-white/38">
+                    <div className="min-w-0">
+                      <p className="text-[0.55rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+                        Pricing
+                      </p>
 
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/75 to-transparent"
-                        />
-
-                        <VendorIcon
-                          aria-hidden="true"
-                          className={`pointer-events-none absolute -bottom-8 -right-8 size-40 rotate-[-10deg] opacity-55 transition-all duration-700 group-hover:rotate-[-5deg] group-hover:scale-[1.06] ${categoryVisual.watermarkClassName}`}
-                        />
-
-                        <div className="absolute left-4 top-4">
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/42 bg-white/28 px-2.5 py-1.5 text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-near-black)]/72 shadow-[0_8px_20px_rgba(31,27,29,0.08)] backdrop-blur-xl">
-                            <BadgeCheck className="size-3" />
-                            Eventure
-                          </span>
-                        </div>
-
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[54%]">
-                          <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-[-0.8rem] rounded-[2.1rem] border border-white/18"
-                          />
-
-                          <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-[-1.45rem] rounded-[2.5rem] border border-white/10"
-                          />
-
-                          <div className="relative grid size-[7.35rem] place-items-center overflow-hidden rounded-[1.8rem] border border-white/72 bg-white/78 p-3.5 shadow-[0_22px_52px_rgba(31,27,29,0.20)] backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1 group-hover:scale-[1.045] group-hover:border-white/88 group-hover:bg-white/88 group-hover:shadow-[0_28px_62px_rgba(31,27,29,0.24)]">
-                            {vendorLogoUrl ? (
-                              <img
-                                src={vendorLogoUrl}
-                                alt={`${vendor.businessName} logo`}
-                                className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.025]"
-                              />
-                            ) : (
-                              <VendorIcon className="size-10 text-[var(--color-deep-plum)]" />
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="absolute bottom-4 left-4">
-                          <span className="grid size-9 place-items-center rounded-xl border border-white/52 bg-white/36 text-[var(--color-near-black)] shadow-[0_8px_20px_rgba(31,27,29,0.09)] backdrop-blur-xl transition duration-300 group-hover:-translate-y-0.5 group-hover:bg-white/50">
-                            <VendorIcon className="size-4" />
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex min-w-0 flex-col py-1 sm:py-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="status-chip" data-tone="blue">
-                            {categoryLabel}
-                          </span>
-
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(142,151,115,0.16)] bg-[rgba(142,151,115,0.16)] px-3 py-1 text-xs font-black text-[#3d452f]">
-                            <BadgeCheck className="size-3.5" />
-                            Verified
-                          </span>
-                        </div>
-
-                        <h3 className="mt-5 text-[1.65rem] font-black leading-tight tracking-[-0.045em] text-[var(--color-near-black)] transition duration-300 group-hover:text-[var(--color-deep-plum)]">
-                          {vendor.businessName}
-                        </h3>
-
-                        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold text-[var(--color-charcoal)]/62">
-                          <span className="inline-flex items-center gap-1.5">
-                            <MapPin className="size-4 shrink-0 text-[var(--color-rosewood)]" />
-                            <span>{getLocationLabel(vendor)}</span>
-                          </span>
-
-                          <span className="inline-flex items-center gap-1.5">
-                            <Star
-                              className={
-                                vendor.averageRating === null
-                                  ? 'size-4 shrink-0 text-[var(--color-charcoal)]/35'
-                                  : 'size-4 shrink-0 fill-[var(--color-dusty-olive)] text-[var(--color-dusty-olive)]'
-                              }
-                            />
-
-                            <span>{formatRating(vendor)}</span>
-                          </span>
-                        </div>
-
-                        <p className="mt-5 line-clamp-3 text-[0.95rem] font-medium leading-7 text-[var(--color-charcoal)]/66">
-                          {vendor.description ??
-                            'Explore this verified Eventure vendor and request a tailored quotation for your event.'}
-                        </p>
-
-                        <div className="mt-auto pt-6">
-                          <div className="rounded-[1.35rem] border border-white/52 bg-white/26 p-4 transition duration-300 group-hover:border-white/72 group-hover:bg-white/38">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                              <div>
-                                <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
-                                  Pricing
-                                </p>
-
-                                <p className="mt-1 text-sm font-black text-[var(--color-rosewood)]">
-                                  Tailored quotation available
-                                </p>
-                              </div>
-
-                              <Link
-                                to={`/vendors/${vendor.slug}`}
-                                state={
-                                  isFromVendorWorkspace
-                                    ? {
-                                        source: 'vendor-marketplace',
-                                        returnTo: '/vendors',
-                                        returnLabel: 'Back to marketplace',
-                                        marketplaceState: {
-                                          source: 'vendor-workspace',
-                                          returnTo: marketplaceReturnTo,
-                                          returnLabel: marketplaceReturnLabel,
-                                        },
-                                      }
-                                    : undefined
-                                }
-                                className="group/link btn-secondary text-sm font-bold"
-                              >
-                                View profile
-                                <ArrowRight className="size-4 transition duration-300 group-hover/link:translate-x-1" />
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <p className="mt-0.5 text-xs font-black text-[var(--color-rosewood)]">
+                        Tailored quotation available
+                      </p>
                     </div>
-                  </article>
-                </ScrollReveal>
-              );
-            })}
-          </div>
-        ) : null}
-      </section>
+
+                    <Link
+                      to={`/vendors/${vendor.slug}`}
+                      state={
+                        isFromVendorWorkspace
+                          ? {
+                              source: 'vendor-marketplace',
+                              returnTo: '/vendors',
+                              returnLabel: 'Back to marketplace',
+                              marketplaceState: {
+                                source: 'vendor-workspace',
+                                returnTo: marketplaceReturnTo,
+                                returnLabel: marketplaceReturnLabel,
+                              },
+                            }
+                          : undefined
+                      }
+                      className="group/link inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/70 bg-white/55 px-3 py-2 text-xs font-black text-[var(--color-near-black)] shadow-[0_8px_20px_rgba(31,27,29,0.06)] transition duration-300 hover:bg-white/80"
+                    >
+                      View profile
+                      <ArrowRight className="size-3.5 transition duration-300 group-hover/link:translate-x-0.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  ) : null}
+</section>
     </>
   );
 }

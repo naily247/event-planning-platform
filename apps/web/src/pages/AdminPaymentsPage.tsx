@@ -122,21 +122,22 @@ function ReadOnlyDetail({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-sky-100/90 bg-white/72 p-4 shadow-[0_10px_28px_rgba(14,165,233,0.05)]">
-      <div className="flex items-start gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-100 text-sky-700">
-          <Icon className="size-4" />
-        </div>
+    <div className="group flex min-w-0 items-center gap-2.5 rounded-xl bg-[rgba(91,61,82,0.025)] px-3 py-2.5">
+      <div className="grid size-7 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.12)] text-[var(--color-deep-plum)]">
+        <Icon className="size-3.5" aria-hidden="true" />
+      </div>
 
-        <div className="min-w-0">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-            {label}
-          </p>
+      <div className="min-w-0">
+        <p className="text-[0.56rem] font-extrabold uppercase tracking-[0.16em] text-[var(--color-charcoal)]/42">
+          {label}
+        </p>
 
-          <p className="mt-1 break-words text-sm font-bold leading-6 text-[var(--color-near-black)]">
-            {value}
-          </p>
-        </div>
+        <p
+          className="mt-0.5 truncate text-[0.72rem] font-bold leading-4 text-[var(--color-near-black)]"
+          title={value}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -150,68 +151,71 @@ function PaymentCard({
   onView: (paymentId: string) => void;
 }) {
   return (
-    <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-        <div className="flex min-w-0 items-start gap-4">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700 shadow-[0_8px_20px_rgba(14,165,233,0.10)]">
-            <CreditCard className="size-5" />
+    <article className="group rounded-[1.35rem] border border-[rgba(91,61,82,0.09)] bg-white/72 p-4 shadow-[0_14px_34px_rgba(64,42,51,0.06)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgba(91,61,82,0.16)] hover:shadow-[0_18px_40px_rgba(64,42,51,0.09)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+            <CreditCard className="size-4" />
           </div>
 
           <div className="min-w-0">
-            <p className="text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+            <p className="text-lg font-black tracking-[-0.03em] text-[var(--color-near-black)]">
               {formatCurrency(payment.amount)}
             </p>
 
-            <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+            <p className="mt-0.5 truncate text-xs font-bold text-[var(--color-charcoal)]/62">
               {payment.booking.event.name}
             </p>
 
-            <p className="mt-1 text-xs font-semibold text-[var(--color-charcoal)]/46">
+            <p className="mt-0.5 truncate text-[0.68rem] font-semibold text-[var(--color-charcoal)]/44">
               {payment.booking.vendor.businessName}
             </p>
           </div>
         </div>
 
-        <span className="status-chip w-fit" data-tone="warning">
+        <span className="status-chip w-fit shrink-0" data-tone="warning">
           Pending
         </span>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-white/48 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="rounded-xl bg-[rgba(183,167,200,0.055)] px-3 py-2.5">
+          <p className="text-[0.56rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
             Method
           </p>
 
-          <p className="mt-2 text-sm font-bold text-[var(--color-near-black)]">
+          <p className="mt-1 truncate text-xs font-bold text-[var(--color-near-black)]">
             {payment.method.replaceAll('_', ' ')}
           </p>
         </div>
 
-        <div className="rounded-2xl bg-white/48 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+        <div className="rounded-xl bg-[rgba(183,167,200,0.055)] px-3 py-2.5">
+          <p className="text-[0.56rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
             Submitted
           </p>
 
-          <p className="mt-2 text-sm font-bold text-[var(--color-near-black)]">
+          <p className="mt-1 text-xs font-bold text-[var(--color-near-black)]">
             {formatDate(payment.createdAt)}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl bg-white/48 p-4">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/42">
+      <div className="mt-2 rounded-xl bg-[rgba(183,167,200,0.055)] px-3 py-2.5">
+        <p className="text-[0.56rem] font-black uppercase tracking-[0.13em] text-[var(--color-charcoal)]/42">
           Reference
         </p>
 
-        <p className="mt-2 break-all text-sm font-bold text-[var(--color-near-black)]">
+        <p
+          className="mt-1 truncate text-xs font-bold text-[var(--color-near-black)]"
+          title={payment.referenceNumber}
+        >
           {payment.referenceNumber}
         </p>
       </div>
 
       <button
         type="button"
-        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-5 text-sm font-black text-sky-800 transition hover:border-sky-300 hover:bg-sky-100"
+        className="mt-3 inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-[rgba(91,61,82,0.12)] bg-white/74 px-4 text-xs font-black text-[var(--color-deep-plum)] transition hover:border-[rgba(91,61,82,0.20)] hover:bg-[rgba(183,167,200,0.10)]"
         onClick={() => onView(payment.id)}
       >
         Review payment
@@ -343,40 +347,47 @@ export function AdminPaymentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(186,230,253,0.24),transparent_32%),radial-gradient(circle_at_top_right,rgba(165,243,252,0.18),transparent_28%),linear-gradient(180deg,#f9fdff_0%,#f7fcff_48%,#fbfeff_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(183,167,200,0.10),transparent_30%),radial-gradient(circle_at_top_right,rgba(91,61,82,0.045),transparent_28%),linear-gradient(180deg,#fbf9fa_0%,#f8f5f7_48%,#fbfafb_100%)]">
       <div className="workspace-container">
         <AdminWorkspaceNav />
 
-        <main className="py-8">
-          <section className="relative overflow-hidden rounded-[2rem] border border-sky-200/80 bg-gradient-to-br from-sky-100 via-cyan-50 to-white p-6 shadow-[0_24px_70px_rgba(14,165,233,0.10)] sm:p-8">
-            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-sky-300/24 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-cyan-300/18 blur-3xl" />
-            <div className="relative">
-              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-                <div>
-                  <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-sky-200/80 bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-sky-700 shadow-sm">
-                    <ReceiptText className="size-4" />
-                    Payment verification
-                  </div>
+        <main className="py-4">
+          <section className="relative overflow-hidden rounded-[1.75rem] border border-[rgba(91,61,82,0.10)] bg-[linear-gradient(135deg,rgba(255,255,255,0.86),rgba(247,242,247,0.92),rgba(241,236,245,0.88))] px-6 py-5 shadow-[0_18px_50px_rgba(64,42,51,0.07)] sm:px-7 sm:py-6">
+            <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full border border-[rgba(91,61,82,0.06)]" />
+            <div className="pointer-events-none absolute -right-6 -top-16 size-48 rounded-full border border-[rgba(91,61,82,0.05)]" />
 
-                  <h1 className="max-w-4xl text-balance text-4xl font-black leading-[1] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-5xl">
-                    Review pending deposit payments carefully.
-                  </h1>
-
-                  <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-[var(--color-charcoal)]/68">
-                    Confirm submitted references, inspect proof files, validate booking details, and
-                    approve or reject pending deposits.
-                  </p>
+            <div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+              <div>
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(91,61,82,0.10)] bg-white/72 px-3 py-1.5 text-[0.62rem] font-black uppercase tracking-[0.19em] text-[var(--color-deep-plum)]">
+                  <ReceiptText className="size-3.5" />
+                  Payment verification
                 </div>
 
-                <div className="rounded-2xl border border-sky-200/70 bg-white/72 px-5 py-4 shadow-[0_12px_30px_rgba(14,165,233,0.09)] backdrop-blur">
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
-                    Pending payments
-                  </p>
+                <h1 className="mt-3 max-w-4xl text-balance text-[2.25rem] font-black leading-[0.98] tracking-[-0.05em] text-[var(--color-near-black)] sm:text-[2.7rem]">
+                  Review pending deposit payments carefully.
+                </h1>
 
-                  <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[var(--color-near-black)]">
-                    {paymentsQuery.isLoading ? '—' : summary.total}
-                  </p>
+                <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[var(--color-charcoal)]/62">
+                  Confirm submitted references, inspect proof files, validate booking details, and
+                  approve or reject pending deposits.
+                </p>
+              </div>
+
+              <div className="w-full rounded-[1.15rem] border border-[rgba(91,61,82,0.09)] bg-white/70 px-4 py-3 shadow-[0_10px_28px_rgba(64,42,51,0.05)] backdrop-blur lg:w-[190px]">
+                <div className="flex items-center justify-between gap-3 lg:block">
+                  <div>
+                    <p className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[var(--color-charcoal)]/44">
+                      Pending payments
+                    </p>
+
+                    <p className="mt-1 text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {paymentsQuery.isLoading ? '—' : summary.total}
+                    </p>
+                  </div>
+
+                  <div className="grid size-9 place-items-center rounded-xl bg-amber-50 text-amber-700 lg:mt-2">
+                    <ReceiptText className="size-4" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -422,115 +433,133 @@ export function AdminPaymentsPage() {
             </section>
           ) : (
             <>
-              <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-sky-100 text-sky-700">
-                    <CreditCard className="size-5" />
+              <section className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <article className="rounded-[1.35rem] border border-[rgba(91,61,82,0.09)] bg-white/76 px-4 py-3.5 shadow-[0_14px_34px_rgba(64,42,51,0.055)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid size-9 place-items-center rounded-xl bg-amber-50 text-amber-700">
+                      <CreditCard className="size-4" />
+                    </div>
+
+                    <span className="rounded-full bg-amber-50 px-2 py-1 text-[0.55rem] font-black uppercase tracking-[0.12em] text-amber-700">
+                      Pending
+                    </span>
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Total pending
-                  </p>
+                  <div className="mt-3 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/52">
+                      Total pending
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {summary.total}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {summary.total}
+                    </p>
+                  </div>
                 </article>
 
-                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-teal-100 text-teal-700">
-                    <Banknote className="size-5" />
+                <article className="rounded-[1.35rem] border border-[rgba(91,61,82,0.09)] bg-white/76 px-4 py-3.5 shadow-[0_14px_34px_rgba(64,42,51,0.055)]">
+                  <div className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                    <Banknote className="size-4" />
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Bank transfers on this page
-                  </p>
+                  <div className="mt-3 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/52">
+                      Bank transfers on this page
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {summary.bankTransfers}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {summary.bankTransfers}
+                    </p>
+                  </div>
                 </article>
 
-                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-cyan-100 text-cyan-700">
-                    <CreditCard className="size-5" />
+                <article className="rounded-[1.35rem] border border-[rgba(91,61,82,0.09)] bg-white/76 px-4 py-3.5 shadow-[0_14px_34px_rgba(64,42,51,0.055)]">
+                  <div className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                    <CreditCard className="size-4" />
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Stripe records on this page
-                  </p>
+                  <div className="mt-3 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/52">
+                      Stripe records on this page
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {summary.stripePayments}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {summary.stripePayments}
+                    </p>
+                  </div>
                 </article>
 
-                <article className="rounded-[1.6rem] border border-sky-100/90 bg-gradient-to-br from-sky-50/85 via-white to-cyan-50/45 p-5 shadow-[0_18px_45px_rgba(14,165,233,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_22px_55px_rgba(14,165,233,0.11)]">
-                  <div className="grid size-11 place-items-center rounded-2xl bg-indigo-100 text-indigo-700">
-                    <FileCheck2 className="size-5" />
+                <article className="rounded-[1.35rem] border border-[rgba(91,61,82,0.09)] bg-white/76 px-4 py-3.5 shadow-[0_14px_34px_rgba(64,42,51,0.055)]">
+                  <div className="grid size-9 place-items-center rounded-xl bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                    <FileCheck2 className="size-4" />
                   </div>
 
-                  <p className="mt-5 text-sm font-bold text-[var(--color-charcoal)]/56">
-                    Proof files on this page
-                  </p>
+                  <div className="mt-3 flex items-end justify-between gap-3">
+                    <p className="text-xs font-bold text-[var(--color-charcoal)]/52">
+                      Proof files on this page
+                    </p>
 
-                  <p className="mt-2 text-3xl font-black text-[var(--color-near-black)]">
-                    {summary.withProof}
-                  </p>
+                    <p className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                      {summary.withProof}
+                    </p>
+                  </div>
                 </article>
               </section>
 
-              <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <section className="mt-4 rounded-[1.75rem] border border-[rgba(91,61,82,0.09)] bg-white/80 p-4 shadow-[0_18px_48px_rgba(64,42,51,0.06)] backdrop-blur sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="section-eyebrow">Verification queue</p>
 
-                    <h2 className="section-title">Pending payment records</h2>
+                    <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[var(--color-near-black)]">
+                      Pending payment records
+                    </h2>
 
-                    <p className="section-description">
+                    <p className="mt-1 text-xs font-medium leading-5 text-[var(--color-charcoal)]/54">
                       Review pending deposits before the related booking becomes active.
                     </p>
                   </div>
 
-                  <select
-                    className="form-field w-full sm:w-56"
-                    value={sort}
-                    onChange={(event) => {
-                      setSort(event.target.value as AdminPaymentSort);
-                      setPage(1);
-                    }}
-                  >
-                    {adminPaymentSortOptions.map((sortOption) => (
-                      <option key={sortOption} value={sortOption}>
-                        {paymentSortLabels[sortOption]}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="shrink-0">
+                    <select
+                      className="form-field min-h-9 w-full py-2 text-sm sm:w-44"
+                      value={sort}
+                      onChange={(event) => {
+                        setSort(event.target.value as AdminPaymentSort);
+                        setPage(1);
+                      }}
+                    >
+                      {adminPaymentSortOptions.map((sortOption) => (
+                        <option key={sortOption} value={sortOption}>
+                          {paymentSortLabels[sortOption]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {payments.length > 0 ? (
-                  <div className="mt-7 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+                  <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {payments.map((payment) => (
                       <PaymentCard key={payment.id} payment={payment} onView={openPayment} />
                     ))}
                   </div>
                 ) : (
-                  <div className="empty-surface mt-7">
-                    <BadgeCheck className="mx-auto size-9 text-sky-700/64" />
+                  <div className="empty-surface mt-4">
+                    <BadgeCheck className="mx-auto size-8 text-[var(--color-deep-plum)]/60" />
 
-                    <h3 className="mt-4 text-xl font-black text-[var(--color-near-black)]">
+                    <h3 className="mt-3 text-lg font-black text-[var(--color-near-black)]">
                       The payment queue is clear
                     </h3>
 
-                    <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-[var(--color-charcoal)]/56">
+                    <p className="mx-auto mt-1.5 max-w-lg text-xs font-semibold leading-5 text-[var(--color-charcoal)]/54">
                       New pending deposit payments will appear here.
                     </p>
                   </div>
                 )}
 
                 {pagination && pagination.totalPages > 1 ? (
-                  <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-2xl border border-sky-100 bg-gradient-to-r from-sky-50/70 to-cyan-50/60 px-5 py-4 sm:flex-row">
-                    <p className="text-sm font-semibold text-[var(--color-charcoal)]/58">
+                  <div className="mt-4 flex flex-col items-center justify-between gap-3 rounded-xl border border-[rgba(91,61,82,0.09)] bg-[rgba(183,167,200,0.055)] px-4 py-3 sm:flex-row">
+                    <p className="text-xs font-semibold text-[var(--color-charcoal)]/58">
                       Page{' '}
                       <span className="font-black text-[var(--color-near-black)]">
                         {pagination.page}
@@ -544,22 +573,22 @@ export function AdminPaymentsPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="btn-secondary min-h-0 px-4 py-2.5 text-sm"
+                        className="btn-secondary min-h-0 px-3 py-2 text-xs"
                         disabled={!pagination.hasPreviousPage || paymentsQuery.isFetching}
                         onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
                       >
-                        <ChevronLeft className="size-4" />
+                        <ChevronLeft className="size-3.5" />
                         Previous
                       </button>
 
                       <button
                         type="button"
-                        className="btn-secondary min-h-0 px-4 py-2.5 text-sm"
+                        className="btn-secondary min-h-0 px-3 py-2 text-xs"
                         disabled={!pagination.hasNextPage || paymentsQuery.isFetching}
                         onClick={() => setPage((currentPage) => currentPage + 1)}
                       >
                         Next
-                        <ChevronRight className="size-4" />
+                        <ChevronRight className="size-3.5" />
                       </button>
                     </div>
                   </div>
@@ -572,7 +601,7 @@ export function AdminPaymentsPage() {
 
       {selectedPaymentId ? (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8 backdrop-blur-md"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-4 backdrop-blur-md"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
@@ -584,31 +613,34 @@ export function AdminPaymentsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-payment-detail-title"
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-sky-100 bg-[#f9fdff] p-6 shadow-[0_28px_90px_rgba(12,74,110,0.18)] sm:p-7"
+            className="max-h-[calc(100vh-2rem)] w-full max-w-[1280px] overflow-y-auto rounded-[1.75rem] border border-[rgba(91,61,82,0.10)] bg-[#fbf9fa] p-4 shadow-[0_28px_90px_rgba(64,42,51,0.20)] xl:overflow-hidden"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="section-eyebrow">Payment record</p>
 
-                <h2 id="admin-payment-detail-title" className="section-title">
+                <h2
+                  id="admin-payment-detail-title"
+                  className="mt-0.5 text-[1.55rem] font-black tracking-[-0.04em] text-[var(--color-near-black)]"
+                >
                   Payment verification
                 </h2>
               </div>
 
               <button
                 type="button"
-                className="grid size-10 place-items-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50"
+                className="grid size-8 place-items-center rounded-xl border border-[rgba(91,61,82,0.10)] bg-white/80 text-[var(--color-charcoal)]/64 transition hover:border-[rgba(91,61,82,0.18)] hover:bg-[rgba(183,167,200,0.08)] hover:text-[var(--color-deep-plum)]"
                 onClick={closePayment}
                 aria-label="Close payment details"
               >
-                <X className="size-5" />
+                <X className="size-4" />
               </button>
             </div>
 
             {paymentDetailQuery.isLoading ? (
-              <div className="state-surface mt-6 min-h-72">
+              <div className="state-surface mt-3 min-h-56">
                 <div>
-                  <LoaderCircle className="mx-auto size-9 animate-spin text-sky-700" />
+                  <LoaderCircle className="mx-auto size-8 animate-spin text-[var(--color-deep-plum)]" />
 
                   <p className="mt-4 font-black text-[var(--color-near-black)]">
                     Loading payment details
@@ -616,7 +648,7 @@ export function AdminPaymentsPage() {
                 </div>
               </div>
             ) : paymentDetailQuery.isError ? (
-              <div className="feedback-surface mt-6" data-tone="danger">
+              <div className="feedback-surface mt-3" data-tone="danger">
                 {getErrorMessage(
                   paymentDetailQuery.error,
                   'We could not load this payment record.',
@@ -624,159 +656,178 @@ export function AdminPaymentsPage() {
               </div>
             ) : selectedPayment ? (
               <>
-                <div className="mt-6 flex flex-col justify-between gap-5 rounded-2xl border border-white/80 bg-white/72 p-5 sm:flex-row sm:items-start">
-                  <div className="flex items-start gap-4">
-                    <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700 shadow-[0_10px_24px_rgba(14,165,233,0.10)]">
-                      <CreditCard className="size-6" />
+                <div className="mt-3 flex flex-col justify-between gap-3 rounded-[1rem] border border-[rgba(91,61,82,0.08)] bg-white/68 px-3.5 py-2 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.12)] text-[var(--color-deep-plum)]">
+                      <CreditCard className="size-3.5" />
                     </div>
 
-                    <div>
-                      <h3 className="text-2xl font-black tracking-[-0.04em] text-[var(--color-near-black)]">
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-black tracking-[-0.035em] text-[var(--color-near-black)]">
                         {formatCurrency(selectedPayment.amount)}
                       </h3>
 
-                      <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                      <p className="mt-0.5 truncate text-[0.7rem] font-semibold text-[var(--color-charcoal)]/54">
                         {selectedPayment.booking.event.name}
                       </p>
                     </div>
                   </div>
 
-                  <span className="status-chip w-fit" data-tone="warning">
+                  <span className="status-chip w-fit shrink-0" data-tone="warning">
                     {selectedPayment.status}
                   </span>
                 </div>
 
-                <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
-                  <p className="section-eyebrow">Payment information</p>
+                <div className="mt-3 grid gap-3 xl:grid-cols-[0.82fr_1.18fr]">
+                  <section className="rounded-[1.25rem] border border-[rgba(91,61,82,0.08)] bg-white/68 p-3.5">
+                    <div>
+                      <p className="section-eyebrow">Payment information</p>
 
-                  <h3 className="section-title">Submission details</h3>
+                      <h3 className="mt-0.5 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        Submission details
+                      </h3>
+                    </div>
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <ReadOnlyDetail
-                      icon={CreditCard}
-                      label="Amount"
-                      value={formatCurrency(selectedPayment.amount)}
-                    />
+                    <div className="mt-2.5 grid gap-1.5 sm:grid-cols-2">
+                      <ReadOnlyDetail
+                        icon={CreditCard}
+                        label="Amount"
+                        value={formatCurrency(selectedPayment.amount)}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={Banknote}
-                      label="Method"
-                      value={selectedPayment.method.replaceAll('_', ' ')}
-                    />
+                      <ReadOnlyDetail
+                        icon={Banknote}
+                        label="Method"
+                        value={selectedPayment.method.replaceAll('_', ' ')}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={ReceiptText}
-                      label="Reference"
-                      value={selectedPayment.referenceNumber}
-                    />
+                      <ReadOnlyDetail
+                        icon={ReceiptText}
+                        label="Reference"
+                        value={selectedPayment.referenceNumber}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={CalendarDays}
-                      label="Submitted"
-                      value={formatDateTime(selectedPayment.createdAt)}
-                    />
+                      <ReadOnlyDetail
+                        icon={CalendarDays}
+                        label="Submitted"
+                        value={formatDateTime(selectedPayment.createdAt)}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={UserRound}
-                      label="Submitted by"
-                      value={`${selectedPayment.submittedBy.firstName} ${selectedPayment.submittedBy.lastName}`}
-                    />
+                      <ReadOnlyDetail
+                        icon={UserRound}
+                        label="Submitted by"
+                        value={`${selectedPayment.submittedBy.firstName} ${selectedPayment.submittedBy.lastName}`}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={CreditCard}
-                      label="Status"
-                      value={selectedPayment.status}
-                    />
-                  </div>
-                </section>
+                      <ReadOnlyDetail
+                        icon={CreditCard}
+                        label="Status"
+                        value={selectedPayment.status}
+                      />
+                    </div>
+                  </section>
 
-                <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
-                  <p className="section-eyebrow">Booking context</p>
+                  <section className="rounded-[1.25rem] border border-[rgba(91,61,82,0.08)] bg-white/68 p-3.5">
+                    <div>
+                      <p className="section-eyebrow">Booking context</p>
 
-                  <h3 className="section-title">Related booking</h3>
+                      <h3 className="mt-0.5 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        Related booking
+                      </h3>
+                    </div>
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <ReadOnlyDetail
-                      icon={CalendarDays}
-                      label="Event"
-                      value={selectedPayment.booking.event.name}
-                    />
+                    <div className="mt-2.5 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                      <ReadOnlyDetail
+                        icon={CalendarDays}
+                        label="Event"
+                        value={selectedPayment.booking.event.name}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={Store}
-                      label="Vendor"
-                      value={selectedPayment.booking.vendor.businessName}
-                    />
+                      <ReadOnlyDetail
+                        icon={Store}
+                        label="Vendor"
+                        value={selectedPayment.booking.vendor.businessName}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={MapPin}
-                      label="Location"
-                      value={selectedPayment.booking.event.location ?? 'Not provided'}
-                    />
+                      <ReadOnlyDetail
+                        icon={MapPin}
+                        label="Location"
+                        value={selectedPayment.booking.event.location ?? 'Not provided'}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={CreditCard}
-                      label="Booking cost"
-                      value={formatCurrency(selectedPayment.booking.agreedCost)}
-                    />
+                      <ReadOnlyDetail
+                        icon={CreditCard}
+                        label="Booking cost"
+                        value={formatCurrency(selectedPayment.booking.agreedCost)}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={CreditCard}
-                      label="Quotation price"
-                      value={formatCurrency(
-                        selectedPayment.booking.acceptedQuotation.proposedPrice,
-                      )}
-                    />
+                      <ReadOnlyDetail
+                        icon={CreditCard}
+                        label="Quotation price"
+                        value={formatCurrency(
+                          selectedPayment.booking.acceptedQuotation.proposedPrice,
+                        )}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={CreditCard}
-                      label="Required deposit"
-                      value={
-                        selectedPayment.booking.acceptedQuotation.depositAmount
-                          ? formatCurrency(selectedPayment.booking.acceptedQuotation.depositAmount)
-                          : 'No deposit recorded'
-                      }
-                    />
+                      <ReadOnlyDetail
+                        icon={CreditCard}
+                        label="Required deposit"
+                        value={
+                          selectedPayment.booking.acceptedQuotation.depositAmount
+                            ? formatCurrency(
+                                selectedPayment.booking.acceptedQuotation.depositAmount,
+                              )
+                            : 'No deposit recorded'
+                        }
+                      />
 
-                    <ReadOnlyDetail
-                      icon={CalendarDays}
-                      label="Service start"
-                      value={formatDateTime(selectedPayment.booking.serviceStart)}
-                    />
+                      <ReadOnlyDetail
+                        icon={CalendarDays}
+                        label="Service start"
+                        value={formatDateTime(selectedPayment.booking.serviceStart)}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={CalendarDays}
-                      label="Service end"
-                      value={formatDateTime(selectedPayment.booking.serviceEnd)}
-                    />
+                      <ReadOnlyDetail
+                        icon={CalendarDays}
+                        label="Service end"
+                        value={formatDateTime(selectedPayment.booking.serviceEnd)}
+                      />
 
-                    <ReadOnlyDetail
-                      icon={UserRound}
-                      label="Customer"
-                      value={`${selectedPayment.booking.event.owner.firstName} ${selectedPayment.booking.event.owner.lastName}`}
-                    />
-                  </div>
-                </section>
+                      <ReadOnlyDetail
+                        icon={UserRound}
+                        label="Customer"
+                        value={`${selectedPayment.booking.event.owner.firstName} ${selectedPayment.booking.event.owner.lastName}`}
+                      />
+                    </div>
+                  </section>
+                </div>
 
-                <section className="mt-6 rounded-[2rem] border border-sky-100/90 bg-white/82 p-6 shadow-[0_24px_60px_rgba(14,165,233,0.08)] backdrop-blur sm:p-7">
-                  <p className="section-eyebrow">Proof file</p>
+                <section className="mt-3 rounded-[1.2rem] border border-[rgba(91,61,82,0.09)] bg-white/72 px-3.5 py-3">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                    <div className="shrink-0 lg:w-[155px]">
+                      <p className="section-eyebrow">Proof file</p>
 
-                  <h3 className="section-title">Payment evidence</h3>
+                      <h3 className="mt-0.5 text-base font-black tracking-[-0.025em] text-[var(--color-near-black)]">
+                        Payment evidence
+                      </h3>
+                    </div>
 
-                  {selectedPayment.proofFileUrl ? (
-                    <div className="mt-6 rounded-2xl border border-cyan-100 bg-gradient-to-br from-cyan-50/70 via-white to-white p-5 shadow-[0_14px_34px_rgba(6,182,212,0.07)]">
-                      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-                        <div className="flex items-start gap-4">
-                          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-100 text-sky-700">
-                            <FileText className="size-5" />
+                    {selectedPayment.proofFileUrl ? (
+                      <>
+                        <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[0.95rem] border border-[rgba(91,61,82,0.08)] bg-[rgba(183,167,200,0.045)] px-3 py-2">
+                          <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-[rgba(183,167,200,0.14)] text-[var(--color-deep-plum)]">
+                            <FileText className="size-3.5" />
                           </div>
 
-                          <div>
-                            <p className="font-black text-[var(--color-near-black)]">
+                          <div className="min-w-0">
+                            <p
+                              className="truncate text-xs font-black text-[var(--color-near-black)]"
+                              title={selectedPayment.proofFileOriginalName ?? 'Payment proof'}
+                            >
                               {selectedPayment.proofFileOriginalName ?? 'Payment proof'}
                             </p>
 
-                            <p className="mt-1 text-sm font-semibold text-[var(--color-charcoal)]/56">
+                            <p className="mt-0.5 text-[0.66rem] font-semibold text-[var(--color-charcoal)]/50">
                               {selectedPayment.proofFileMimeType ?? 'Unknown file type'} ·{' '}
                               {formatFileSize(selectedPayment.proofFileSize)}
                             </p>
@@ -787,23 +838,23 @@ export function AdminPaymentsPage() {
                           href={selectedPayment.proofFileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-5 text-sm font-black text-sky-800 transition hover:border-sky-300 hover:bg-sky-100"
+                          className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-[rgba(91,61,82,0.12)] bg-white/80 px-4 text-xs font-black text-[var(--color-deep-plum)] transition hover:border-[rgba(91,61,82,0.20)] hover:bg-[rgba(183,167,200,0.10)]"
                         >
-                          <ExternalLink className="size-4" />
+                          <ExternalLink className="size-3.5" />
                           Open proof
                         </a>
+                      </>
+                    ) : (
+                      <div className="feedback-surface flex-1" data-tone="info">
+                        No uploaded proof file is attached to this payment. Review the payment
+                        method and reference number carefully.
                       </div>
-                    </div>
-                  ) : (
-                    <div className="feedback-surface mt-6" data-tone="info">
-                      No uploaded proof file is attached to this payment. Review the payment method
-                      and reference number carefully.
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </section>
 
                 {verifyMutation.isError || rejectMutation.isError ? (
-                  <div className="feedback-surface mt-6" data-tone="danger" role="alert">
+                  <div className="feedback-surface mt-3" data-tone="danger" role="alert">
                     {getErrorMessage(
                       verifyMutation.error ?? rejectMutation.error,
                       'We could not complete this payment decision.',
@@ -811,20 +862,22 @@ export function AdminPaymentsPage() {
                   </div>
                 ) : null}
 
-                <div className="mt-6 flex flex-col justify-between gap-4 border-t border-zinc-200 pt-6 sm:flex-row sm:items-center">
-                  <div>
-                    <p className="font-black text-[var(--color-near-black)]">Payment decision</p>
+                <div className="mt-3 flex flex-col justify-between gap-3 border-t border-[rgba(91,61,82,0.10)] pt-3 sm:flex-row sm:items-center">
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-[var(--color-near-black)]">
+                      Payment decision
+                    </p>
 
-                    <p className="mt-1 max-w-xl text-sm leading-6 text-[var(--color-charcoal)]/56">
+                    <p className="mt-0.5 max-w-2xl text-[0.7rem] font-medium leading-4 text-[var(--color-charcoal)]/54">
                       Verifying activates the related booking. Rejecting keeps the booking in
                       deposit-pending status so the customer can submit a corrected payment.
                     </p>
                   </div>
 
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                  <div className="flex shrink-0 flex-col-reverse gap-2 sm:flex-row">
                     <button
                       type="button"
-                      className="btn-danger text-sm"
+                      className="btn-danger min-h-9 px-4 text-xs"
                       disabled={isDecisionPending}
                       onClick={() => {
                         rejectMutation.reset();
@@ -832,20 +885,20 @@ export function AdminPaymentsPage() {
                         setShowRejectDialog(true);
                       }}
                     >
-                      <XCircle className="size-4" />
+                      <XCircle className="size-3.5" />
                       Reject payment
                     </button>
 
                     <button
                       type="button"
-                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-sky-600 bg-gradient-to-r from-sky-500 to-cyan-500 px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(14,165,233,0.22)] transition hover:from-sky-600 hover:to-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-[var(--color-deep-plum)] bg-[var(--color-deep-plum)] px-5 text-xs font-black text-white shadow-[0_10px_24px_rgba(91,61,82,0.18)] transition hover:-translate-y-0.5 hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-60"
                       disabled={isDecisionPending}
                       onClick={handleVerify}
                     >
                       {verifyMutation.isPending ? (
-                        <LoaderCircle className="size-4 animate-spin" />
+                        <LoaderCircle className="size-3.5 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="size-4" />
+                        <CheckCircle2 className="size-3.5" />
                       )}
 
                       {verifyMutation.isPending ? 'Verifying...' : 'Verify payment'}
